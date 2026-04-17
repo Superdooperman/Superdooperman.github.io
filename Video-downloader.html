@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Downloader + Link Retriever</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; padding: 20px; max-width: 720px; margin: 0 auto; background: #f8f9fa; }
+    .container { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 20px; }
+    h1, h2 { color: #1a1a1a; }
+    input, textarea { width: 100%; padding: 14px; font-size: 16px; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+    button { width: 100%; padding: 14px; margin: 10px 0; font-size: 16px; border: none; border-radius: 10px; cursor: pointer; }
+    .btn-primary { background: #0066ff; color: white; }
+    .btn-secondary { background: #555; color: white; }
+    button:disabled { background: #999; cursor: not-allowed; }
+    .progress-container { height: 12px; background: #e0e0e0; border-radius: 999px; overflow: hidden; margin: 20px 0; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, #0066ff, #00aaff); width: 0%; transition: width 0.15s ease-out; border-radius: 999px; }
+    #status, #retrieverStatus { margin: 15px 0; padding: 14px; border-radius: 10px; min-height: 48px; font-size: 15px; }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+    .info { background: #fff3cd; color: #856404; }
+    pre { background: #f4f4f4; padding: 15px; border-radius: 10px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; max-height: 300px; }
+    .copy-btn { background: #28a745; color: white; width: auto; padding: 8px 16px; display: inline-block; margin-top: 8px; }
+    .note { font-size: 14px; color: #666; margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎥 Video Downloader</h1>
+    <p style="text-align:center; color:#555;">Direct MP4 download (works best with public .mp4 links)</p>
+
+    <input type="text" id="urlInput" placeholder="https://example.com/video.mp4" />
+    <button onclick="pasteClipboard()" class="btn-secondary">📋 Paste from Clipboard</button>
+    <button onclick="downloadVideo()" id="downloadBtn" class="btn-primary">⬇️ Start Download</button>
+
+    <div class="progress-container">
+      <div id="progressBar" class="progress-bar"></div>
+    </div>
+    <div id="status">Ready.</div>
+  </div>
+
+  <!-- New Link Retriever Section -->
+  <div class="container">
+    <h2>🔗 Link Retriever (for JW Player, HLS, etc.)</h2>
+    <p>Paste the full video **page URL** (the webpage containing the JW Player). This tool will scan the source for potential .m3u8 links.</p>
+
+    <input type="text" id="pageUrlInput" placeholder="https://example.com/video-page" />
+    <button onclick="retrieveLinks()" id="retrieveBtn" class="btn-primary">🔍 Retrieve Stream Links</button>
+
+    <div id="retrieverStatus">Enter a page URL and tap Retrieve.</div>
+
+    <div id="resultsSection" style="display:none;">
+      <h3>Found Potential Stream Links:</h3>
+      <pre id="linksOutput"></pre>
+      <button onclick="copyLinks()" class="copy-btn">📋 Copy All Links</button>
+      <div class="note">
+        <strong>How to use:</strong> Copy a .m3u8 link → open VLC → Media → Open Network Stream → paste → Play or Convert/Save.<br>
+        JW Player 8.26 usually loads HLS (.m3u8). If nothing appears, try the manual method: open the page in Brave, press F12 → Network tab → filter "m3u8" while playing.
+      </div>
+    </div>
+  </div>
+
+  <div class="note" style="text-align:center;">
+    Best when hosted online. Local files often hit CORS blocks. For JW Player, the retriever helps but is not 100% reliable due to dynamic loading.
+  </div>
+
+  <script>
+    // === Direct Video Downloader (unchanged from before) ===
+    const urlInput = document.getElementById('urlInput');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const progressBar = document.getElementById('progressBar');
+    const statusEl = document.getElementById('status');
+
+    function showStatus(message, type = 'info') {
+      statusEl.textContent = message;
+      statusEl.className = type;
+    }
+
+    async function pasteClipboard() {
+      try {
+        const text = await navigator.clipboard.readText();
+        urlInput.value = text.trim();
+        showStatus('URL pasted!', 'info');
+      } catch (e) {
+        showStatus('Clipboard failed. Paste manually.', 'error');
+      }
+    }
+
+    async function downloadVideo() {
+      const url = urlInput.value.trim();
+      if (!url) { showStatus('Please paste a video URL.', 'error'); return; }
+
+      downloadBtn.disabled = true;
+      showStatus('Fetching video...', 'info');
+      progressBar.style.width = '0%';
+
+      try {
+        const response = await fetch(url, { mode: 'cors' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const contentLength = response.headers.get('content-length');
+        const total = contentLength ? parseInt(contentLength, 10) : 0;
+        let loaded = 0;
+        const reader = response.body.getReader();
+        const chunks = [];
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          loaded += value.length;
+          if (total > 0) progressBar.style.width = Math.round((loaded / total) * 100) + '%';
+        }
+
+        const blob = new Blob(chunks, { type: response.headers.get('content-type') || 'video/mp4' });
+        let filename = 'downloaded-video.mp4';
+        const urlName = url.split('/').pop().split('?')[0];
+        if (urlName && /\.(mp4|mov|webm)$/i.test(urlName)) filename = urlName;
+
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl; a.download = filename;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+
+        showStatus(`✅ Download started: ${filename}`, 'success');
+      } catch (err) {
+        showStatus(`❌ Failed: ${err.message}\nTry a direct .mp4 or host this tool online.`, 'error');
+      } finally {
+        downloadBtn.disabled = false;
+        setTimeout(() => progressBar.style.width = '0%', 1500);
+      }
+    }
+
+    urlInput.addEventListener('keypress', e => { if (e.key === 'Enter') downloadVideo(); });
+
+    // === Link Retriever for JW Player / HLS ===
+    const pageUrlInput = document.getElementById('pageUrlInput');
+    const retrieveBtn = document.getElementById('retrieveBtn');
+    const retrieverStatus = document.getElementById('retrieverStatus');
+    const resultsSection = document.getElementById('resultsSection');
+    const linksOutput = document.getElementById('linksOutput');
+
+    function showRetrieverStatus(msg, type = 'info') {
+      retrieverStatus.textContent = msg;
+      retrieverStatus.className = type;
+    }
+
+    async function retrieveLinks() {
+      const pageUrl = pageUrlInput.value.trim();
+      if (!pageUrl) {
+        showRetrieverStatus('Please enter a video page URL.', 'error');
+        return;
+      }
+
+      retrieveBtn.disabled = true;
+      showRetrieverStatus('Fetching page source and scanning for streams...', 'info');
+      resultsSection.style.display = 'none';
+      linksOutput.textContent = '';
+
+      try {
+        const response = await fetch(pageUrl, { mode: 'cors' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const html = await response.text();
+
+        // Regex patterns for common m3u8 / HLS links (including in JS objects)
+        const m3u8Regex = /https?:\/\/[^\s"']+\.m3u8[^\s"']*/gi;
+        const matches = html.match(m3u8Regex) || [];
+
+        // Also look for JW Player sources or file: patterns
+        const jwRegex = /file["']\s*:\s*["']([^"']+\.m3u8[^"']*)["']/gi;
+        let match;
+        while ((match = jwRegex.exec(html)) !== null) {
+          if (match[1]) matches.push(match[1]);
+        }
+
+        const uniqueLinks = [...new Set(matches)]; // remove duplicates
+
+        if (uniqueLinks.length === 0) {
+          showRetrieverStatus('No .m3u8 links found in the page source. Try playing the video and checking Network tab (F12) for "m3u8".', 'error');
+        } else {
+          linksOutput.textContent = uniqueLinks.join('\n\n');
+          resultsSection.style.display = 'block';
+          showRetrieverStatus(`✅ Found ${uniqueLinks.length} potential stream link(s). Copy and try in VLC.`, 'success');
+        }
+      } catch (err) {
+        console.error(err);
+        let msg = `❌ Failed to fetch page: ${err.message}`;
+        if (err.message.includes('CORS')) {
+          msg += '\n\nMost sites block cross-origin fetch. Open the page in Brave, press F12 → Network → filter "m3u8" while playing, then right-click → Copy URL.';
+        }
+        showRetrieverStatus(msg, 'error');
+      } finally {
+        retrieveBtn.disabled = false;
+      }
+    }
+
+    function copyLinks() {
+      const text = linksOutput.textContent.trim();
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => {
+        const origText = retrieveBtn.textContent;
+        retrieveBtn.textContent = '✅ Copied!';
+        setTimeout(() => retrieveBtn.textContent = origText, 2000); // reuse button temporarily for feedback
+      }).catch(() => {
+        alert('Copy failed. Select and copy manually from the box.');
+      });
+    }
+
+    pageUrlInput.addEventListener('keypress', e => { if (e.key === 'Enter') retrieveLinks(); });
+  </script>
+</body>
+</html>
