@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My PWA Apps</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f5f7;
+            color: #1d1d1f;
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.2em;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        .app-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .app-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+        }
+        .app-icon {
+            width: 64px;
+            height: 64px;
+            background: #0071e3;
+            color: white;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+        .app-name {
+            font-size: 1.4em;
+            font-weight: 600;
+            margin: 8px 0 12px 0;
+        }
+        .app-desc {
+            color: #555;
+            font-size: 1.05em;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            color: #888;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>My PWA Apps</h1>
+        
+        <div class="app-grid">
+            
+            <!-- Time Tracker App -->
+            <a href="TimeTracker.html" class="app-card">
+                <div class="app-icon">⏱️</div>
+                <div class="app-name">Time Tracker</div>
+                <div class="app-desc">Track your work sessions, tasks, and total time. Simple, clean, and works offline.</div>
+            </a>
+            
+               <!-- Video Downloader App -->
+            <a href="Video-downloader.html" class="app-card">
+                <div class="app-icon">📼</div>
+                <div class="app-name">Video Downloader</div>
+                <div class="app-desc">Paste in a video link to download.</div>
+            </a>
+            
+            <!-- Add future apps here by copying the block above -->
+            
+        </div>
+        
+        <div class="footer">
+            Hosted on my 2012 MacBook Pro • Powered by simple HTML
+        </div>
+    </div>
+</body>
+</html>
