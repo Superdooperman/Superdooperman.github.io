@@ -5,20 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TimeTrack</title>
   
-  <link rel="manifest" href="data:application/manifest+json,{
-    &quot;name&quot;: &quot;TimeTrack&quot;,
-    &quot;short_name&quot;: &quot;TimeTrack&quot;,
-    &quot;description&quot;: &quot;Offline time tracker with sessions&quot;,
-    &quot;start_url&quot;: &quot;.&quot;,
-    &quot;display&quot;: &quot;standalone&quot;,
-    &quot;background_color&quot;: &quot;#f8f9fa&quot;,
-    &quot;theme_color&quot;: &quot;#007bff&quot;,
-    &quot;icons&quot;: [
-      { &quot;src&quot;: &quot;https://via.placeholder.com/192/007bff/ffffff?text=⏱️&quot;, &quot;sizes&quot;: &quot;192x192&quot;, &quot;type&quot;: &quot;image/png&quot; },
-      { &quot;src&quot;: &quot;https://via.placeholder.com/512/007bff/ffffff?text=⏱️&quot;, &quot;sizes&quot;: &quot;512x512&quot;, &quot;type&quot;: &quot;image/png&quot;, &quot;purpose&quot;: &quot;maskable&quot; }
-    ]
-  }">
-  
+  <!-- Fixed manifest link for subfolder -->
+  <link rel="manifest" href="manifest.json">
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
     :root { --bg: #f8f9fa; --card: white; --text: #222; --primary: #007bff; }
@@ -128,7 +117,7 @@
 
   <script>
     let tasks = JSON.parse(localStorage.getItem('timeTasks')) || [];
-    let sessions = JSON.parse(localStorage.getItem('timeSessions')) || []; // new: individual sessions
+    let sessions = JSON.parse(localStorage.getItem('timeSessions')) || [];
     let currentSession = null;
     let timerInterval = null;
     let startTime = null;
@@ -136,7 +125,7 @@
     let editingTaskId = null;
     let isDark = localStorage.getItem('darkMode') === 'true';
 
-    // DOM
+    // DOM elements
     const taskGrid = document.getElementById('taskGrid');
     const timerArea = document.getElementById('timerArea');
     const currentTaskNameEl = document.getElementById('currentTaskName');
@@ -195,224 +184,4 @@
         btn.className = `task-btn ${isRunning ? 'running' : ''} ${isEditMode ? 'edit-mode' : ''}`;
         btn.innerHTML = `
           <div class="task-name-small">${task.name}</div>
-          <div class="task-time">${formatDuration(task.totalSeconds || 0)}</div>
-          <button class="delete-btn" onclick="deleteTask(${task.id}); event.stopImmediatePropagation();">×</button>
-        `;
-        btn.onclick = (e) => {
-          if (isEditMode) editTaskName(task.id);
-          else toggleTask(task.id);
-        };
-        taskGrid.appendChild(btn);
-      });
-    }
-
-    function toggleTask(taskId) {
-      if (isEditMode) return;
-      const task = tasks.find(t => t.id === taskId);
-      if (!task) return;
-
-      if (currentSession && currentSession.taskId === taskId) {
-        stopCurrentTimer();
-      } else {
-        if (currentSession) stopCurrentTimer();
-        currentSession = { taskId: task.id, startTime: Date.now() };
-        startTime = Date.now();
-        timerArea.style.display = 'block';
-        currentTaskNameEl.textContent = task.name;
-        startLiveTimer();
-        renderTasks();
-      }
-    }
-
-    function startLiveTimer() {
-      if (timerInterval) clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        liveTimerEl.textContent = formatLiveTimer(Date.now() - startTime);
-      }, 1000);
-    }
-
-    function stopCurrentTimer() {
-      if (!currentSession) return;
-      const elapsed = Math.floor((Date.now() - currentSession.startTime) / 1000);
-      const task = tasks.find(t => t.id === currentSession.taskId);
-      if (task) task.totalSeconds = (task.totalSeconds || 0) + elapsed;
-
-      // Log session
-      sessions.unshift({
-        taskId: currentSession.taskId,
-        taskName: task ? task.name : 'Unknown',
-        start: currentSession.startTime,
-        duration: elapsed
-      });
-
-      clearInterval(timerInterval);
-      currentSession = null;
-      timerArea.style.display = 'none';
-      saveData();
-      renderTasks();
-      calculateTotalTime();
-    }
-
-    function createAndStartTask() {
-      const name = taskInput.value.trim();
-      if (!name) return;
-      const newTask = { id: Date.now(), name, totalSeconds: 0 };
-      tasks.unshift(newTask);
-      hideNewModal();
-      currentSession = { taskId: newTask.id, startTime: Date.now() };
-      startTime = Date.now();
-      timerArea.style.display = 'block';
-      currentTaskNameEl.textContent = newTask.name;
-      startLiveTimer();
-      saveData();
-      renderTasks();
-      calculateTotalTime();
-    }
-
-    function deleteTask(taskId) {
-      if (!confirm("Delete task and all time?")) return;
-      tasks = tasks.filter(t => t.id !== taskId);
-      sessions = sessions.filter(s => s.taskId !== taskId);
-      if (currentSession && currentSession.taskId === taskId) stopCurrentTimer();
-      saveData();
-      renderTasks();
-      calculateTotalTime();
-    }
-
-    function editTaskName(taskId) {
-      const task = tasks.find(t => t.id === taskId);
-      if (!task) return;
-      editingTaskId = taskId;
-      editInput.value = task.name;
-      editModal.style.display = 'flex';
-      setTimeout(() => editInput.focus(), 100);
-    }
-
-    function saveEditedName() {
-      const newName = editInput.value.trim();
-      if (newName && editingTaskId) {
-        const task = tasks.find(t => t.id === editingTaskId);
-        if (task) task.name = newName;
-        // Update sessions too
-        sessions.forEach(s => { if (s.taskId === editingTaskId) s.taskName = newName; });
-        saveData();
-        renderTasks();
-      }
-      hideEditModal();
-    }
-
-    function hideEditModal() { editModal.style.display = 'none'; editingTaskId = null; }
-    function hideNewModal() { newModal.style.display = 'none'; }
-
-    function toggleEditMode() {
-      isEditMode = !isEditMode;
-      editBtn.textContent = isEditMode ? 'Done' : '✏️';
-      renderTasks();
-    }
-
-    function toggleDarkMode() {
-      isDark = !isDark;
-      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-      themeBtn.textContent = isDark ? '☀️' : '🌙';
-      localStorage.setItem('darkMode', isDark);
-    }
-
-    function drawBarChart() {
-      const canvas = document.getElementById('barChart');
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      const maxTime = Math.max(...tasks.map(t => t.totalSeconds || 0), 1);
-      const barHeight = 35;
-      const spacing = 50;
-      const startY = 40;
-
-      tasks.forEach((task, i) => {
-        const time = task.totalSeconds || 0;
-        const width = (time / maxTime) * (canvas.width - 120);
-        const y = startY + i * spacing;
-
-        // Bar
-        ctx.fillStyle = '#007bff';
-        ctx.fillRect(100, y, width, barHeight - 10);
-
-        // Label
-        ctx.fillStyle = isDark ? '#eee' : '#222';
-        ctx.font = '14px Inter';
-        ctx.textAlign = 'right';
-        ctx.fillText(task.name, 90, y + 20);
-
-        // Time label
-        ctx.textAlign = 'left';
-        ctx.fillText(formatDuration(time), 110 + width + 10, y + 20);
-      });
-    }
-
-    function showHistory() {
-      historyList.innerHTML = '';
-      drawBarChart();
-
-      // Session history
-      sessions.forEach(s => {
-        const item = document.createElement('div');
-        item.style = 'background:var(--card);padding:14px;margin-bottom:12px;border-radius:12px;border:1px solid #eee;';
-        const date = new Date(s.start).toLocaleString();
-        item.innerHTML = `
-          <div style="display:flex;justify-content:space-between;">
-            <strong>${s.taskName}</strong>
-            <span style="color:#007bff;">${formatDuration(s.duration)}</span>
-          </div>
-          <small style="color:#888;">${date}</small>
-        `;
-        historyList.appendChild(item);
-      });
-
-      if (sessions.length === 0) {
-        historyList.innerHTML = '<p style="text-align:center;color:#999;padding:40px;">No sessions recorded yet.</p>';
-      }
-
-      historyScreen.style.display = 'block';
-    }
-
-    function closeHistory() {
-      historyScreen.style.display = 'none';
-    }
-
-    function exportData() {
-      const data = {
-        tasks: tasks,
-        sessions: sessions,
-        exportDate: new Date().toISOString()
-      };
-      const text = JSON.stringify(data, null, 2);
-      navigator.clipboard.writeText(text).then(() => {
-        alert("Data copied to clipboard! Paste it somewhere safe.");
-      });
-    }
-
-    // Event listeners
-    newTaskBtn.onclick = () => { newModal.style.display = 'flex'; taskInput.focus(); };
-    stopBtn.onclick = stopCurrentTimer;
-    historyBtn.onclick = showHistory;
-    editBtn.onclick = toggleEditMode;
-    themeBtn.onclick = toggleDarkMode;
-
-    taskInput.addEventListener('keypress', e => { if (e.key === 'Enter') createAndStartTask(); });
-    editInput.addEventListener('keypress', e => { if (e.key === 'Enter') saveEditedName(); });
-
-    function init() {
-      renderTasks();
-      calculateTotalTime();
-
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('data:application/javascript,' +
-          'self.addEventListener("install",()=>self.skipWaiting());' +
-          'self.addEventListener("fetch",e=>{e.respondWith(fetch(e.request).catch(()=>new Response("Offline")));});'
-        );
-      }
-    }
-
-    window.onload = init;
-  </script>
-</body>
-</html>
+          <div class="task-time
