@@ -1,0 +1,25 @@
+{
+  "name": "TimeTrack",
+  "short_name": "TimeTrack",
+  "description": "Offline time tracker with sessions and history",
+  "start_url": "/pwas/TimeTracker.html",
+  "scope": "/pwas/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#007bff",
+  "background_color": "#f8f9fa",
+  "categories": ["productivity"],
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192/007bff/ffffff?text=⏱️",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512/007bff/ffffff?text=⏱️",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
