@@ -1,0 +1,25 @@
+{
+  "name": "Video Downloader",
+  "short_name": "Video DL",
+  "description": "Download videos from links",
+  "start_url": "/pwas/Video-downloader.html",
+  "scope": "/pwas/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#ff3b30",
+  "background_color": "#f8f9fa",
+  "categories": ["utilities"],
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192/ff3b30/ffffff?text=📼",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512/ff3b30/ffffff?text=📼",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
