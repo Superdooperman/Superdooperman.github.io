@@ -21,7 +21,6 @@
 </head>
 <body class="bg-zinc-950 text-white min-h-screen pb-12 dark">
 
-  <!-- BACKGROUND -->
   <div id="bgLayer"></div>
 
   <!-- HEADER -->
@@ -53,7 +52,7 @@
           <button onclick="hideSettings()" class="text-3xl leading-none">×</button>
         </div>
 
-        <!-- Auto Refresh Section -->
+        <!-- Auto Refresh -->
         <div class="mb-8 border border-zinc-700 rounded-3xl p-5">
           <h3 class="font-semibold mb-4">🔄 Auto Refresh</h3>
           <div class="flex items-center justify-between mb-4">
@@ -70,7 +69,7 @@
           </div>
         </div>
 
-        <!-- Background Section (unchanged) -->
+        <!-- Background -->
         <div class="mb-8 border border-zinc-700 rounded-3xl p-5">
           <h3 class="font-semibold mb-4 flex items-center gap-2">📸 Custom Background</h3>
           <button onclick="pickBackground()" class="w-full py-4 bg-blue-600 hover:bg-blue-500 rounded-3xl font-medium">Choose Image or Video from Gallery</button>
@@ -89,10 +88,16 @@
             <input type="range" id="opacitySlider" min="0" max="100" value="35" class="w-full accent-blue-500" oninput="updateOpacity(this.value)">
           </div>
           <div id="videoControls" class="hidden grid grid-cols-2 gap-4 mt-6">
-            <div><label class="text-sm block mb-1">Mute Video</label>
-              <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="muteToggle" checked onchange="toggleMute()" class="sr-only peer"><div class="w-11 h-6 bg-zinc-700 rounded-full peer peer-checked:bg-emerald-500"></div><div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div></label>
+            <div>
+              <label class="text-sm block mb-1">Mute Video</label>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="muteToggle" checked onchange="toggleMute()" class="sr-only peer">
+                <div class="w-11 h-6 bg-zinc-700 rounded-full peer peer-checked:bg-emerald-500"></div>
+                <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
+              </label>
             </div>
-            <div><label class="text-sm block mb-1">Volume</label>
+            <div>
+              <label class="text-sm block mb-1">Volume</label>
               <input type="range" id="volumeSlider" min="0" max="100" value="30" class="w-full accent-blue-500" oninput="updateVolume(this.value)">
             </div>
           </div>
@@ -127,14 +132,34 @@
   </div>
 
   <script>
-    // ==================== DATA & STATE ====================
-    const allPosts = { /* same 10 demo posts as before */ };
-    let categories = [ /* same default categories as before */ ];
+    // ==================== DATA ====================
+    const allPosts = {
+      0: { id: "2046262395048202458", handle: "legaleaze123", headline: "Kouri Richins wants new sentencing date — latest court update" },
+      1: { id: "2046262395039838673", handle: "SPJournals", headline: "New study: Enhancing Alzheimer’s projections and policy in China" },
+      2: { id: "2046262394750455997", handle: "runariasokuu", headline: "The only agenda: protecting criminals — latest political update" },
+      3: { id: "2046262398420648245", handle: "dokudokupapa01", headline: "AI is being used for the weirdest things lately…" },
+      4: { id: "2046262401234567890", handle: "BBCNews", headline: "EU passes landmark climate bill — what it means for the world" },
+      5: { id: "2046262409876543210", handle: "WSJ", headline: "Middle East tensions rise after surprise diplomatic talks" },
+      6: { id: "2046262412345678901", handle: "TechCrunch", headline: "OpenAI releases new multimodal model — here’s what changed" },
+      7: { id: "2046262419876543212", handle: "elonmusk", headline: "xAI’s next breakthrough teased — live updates" },
+      8: { id: "2046262423456789013", handle: "NBA", headline: "Lakers vs Warriors: playoff implications tonight" },
+      9: { id: "2046262434567890124", handle: "CNBC", headline: "Stock market surges on strong earnings reports" }
+    };
+
+    let categories = [
+      { id: "breaking", title: "Breaking on X", emoji: "🔴", enabled: true, posts: [0,1,2,3] },
+      { id: "world", title: "World News", emoji: "🌍", enabled: true, posts: [4,5,1,2] },
+      { id: "tech", title: "Tech & AI", emoji: "💻", enabled: true, posts: [3,6,7,9] },
+      { id: "politics", title: "Politics", emoji: "🗳️", enabled: true, posts: [2,5,0,4] },
+      { id: "sports", title: "Sports", emoji: "🏀", enabled: true, posts: [8,3,7,1] },
+      { id: "business", title: "Business", emoji: "📈", enabled: false, posts: [9,6,4,5] }
+    ];
+
     let density = 6;
     let currentBackground = null;
     let bgVideoElement = null;
 
-    // === NEW: Auto Refresh ===
+    // Auto Refresh
     let autoRefreshEnabled = false;
     let autoRefreshInterval = 5; // minutes
     let refreshTimer = null;
@@ -142,9 +167,7 @@
     function startAutoRefresh() {
       if (refreshTimer) clearInterval(refreshTimer);
       if (!autoRefreshEnabled) return;
-      refreshTimer = setInterval(() => {
-        refreshFeed(true); // true = silent (no animation)
-      }, autoRefreshInterval * 60000);
+      refreshTimer = setInterval(() => refreshFeed(true), autoRefreshInterval * 60000);
     }
 
     function stopAutoRefresh() {
@@ -155,13 +178,9 @@
     function toggleAutoRefresh() {
       autoRefreshEnabled = document.getElementById('autoRefreshToggle').checked;
       const controls = document.getElementById('autoRefreshControls');
-      if (autoRefreshEnabled) {
-        controls.classList.remove('hidden');
-        startAutoRefresh();
-      } else {
-        controls.classList.add('hidden');
-        stopAutoRefresh();
-      }
+      controls.classList.toggle('hidden', !autoRefreshEnabled);
+      if (autoRefreshEnabled) startAutoRefresh();
+      else stopAutoRefresh();
       saveSettings();
     }
 
@@ -172,38 +191,172 @@
       saveSettings();
     }
 
-    // ==================== BACKGROUND (unchanged) ====================
-    async function pickBackground() { /* same as last version */ }
-    function removeBackground() { /* same */ }
-    function applyBackground() { /* same */ }
-    function updateOpacity(val) { /* same */ }
-    function toggleMute() { /* same */ }
-    function updateVolume(val) { /* same */ }
-    function saveBackground() { /* same */ }
-    function loadBackground() { /* same */ }
+    // Background functions
+    function pickBackground() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*,video/*';
+      input.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 15*1024*1024) { alert("File too large (max ~15 MB recommended for iOS)."); return; }
+        const reader = new FileReader();
+        reader.onload = ev => {
+          currentBackground = { type: file.type.startsWith('video/') ? 'video' : 'image', dataUrl: ev.target.result, name: file.name || 'custom' };
+          saveBackground();
+          applyBackground();
+          hideSettings();
+          showSettings();
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
+    }
 
-    // ==================== FEED RENDERING (unchanged) ====================
-    function renderFeed() { /* same as last version */ }
+    function removeBackground() {
+      currentBackground = null;
+      saveBackground();
+      applyBackground();
+      hideSettings();
+      showSettings();
+    }
 
-    function openPost(index) { /* same */ }
-    function hidePostModal() { /* same */ }
+    function applyBackground() {
+      const layer = document.getElementById('bgLayer');
+      layer.innerHTML = '';
+      if (!currentBackground) { layer.style.opacity = '0'; return; }
+      layer.style.opacity = (document.getElementById('opacitySlider')?.value || 35) / 100;
+      if (currentBackground.type === 'image') {
+        const img = document.createElement('img');
+        img.src = currentBackground.dataUrl;
+        layer.appendChild(img);
+      } else {
+        const video = document.createElement('video');
+        video.src = currentBackground.dataUrl;
+        video.loop = true;
+        video.muted = true;
+        video.autoplay = true;
+        video.playsInline = true;
+        video.style.objectFit = 'cover';
+        layer.appendChild(video);
+        bgVideoElement = video;
+        video.play().catch(() => {});
+      }
+    }
 
-    // ==================== SETTINGS (updated with auto refresh) ====================
+    function updateOpacity(val) {
+      document.getElementById('opacityValue').textContent = val + '%';
+      document.getElementById('bgLayer').style.opacity = val / 100;
+    }
+
+    function toggleMute() {
+      if (bgVideoElement) bgVideoElement.muted = document.getElementById('muteToggle').checked;
+    }
+
+    function updateVolume(val) {
+      if (bgVideoElement) bgVideoElement.volume = val / 100;
+    }
+
+    function saveBackground() {
+      if (currentBackground) localStorage.setItem('xPulseBackground', JSON.stringify(currentBackground));
+      else localStorage.removeItem('xPulseBackground');
+    }
+
+    function loadBackground() {
+      const saved = localStorage.getItem('xPulseBackground');
+      if (saved) {
+        currentBackground = JSON.parse(saved);
+        applyBackground();
+      }
+    }
+
+    // Render feed
+    function renderFeed() {
+      const container = document.getElementById('mainContent');
+      container.innerHTML = '';
+      const enabledCats = categories.filter(c => c.enabled);
+      enabledCats.forEach(cat => {
+        const catPosts = cat.posts.slice(0, density).map(i => allPosts[i]).filter(Boolean);
+        if (catPosts.length === 0) return;
+        let itemsHTML = '';
+        catPosts.forEach((p, idx) => {
+          const originalIndex = cat.posts[catPosts.indexOf(p)];
+          itemsHTML += `<span onclick="openPost(${originalIndex})" class="ticker-item">${p.headline} • </span>`;
+        });
+        const fullTicker = itemsHTML + itemsHTML;
+        const sectionHTML = `
+          <div>
+            <h2 class="text-xl font-semibold mb-3 flex items-center gap-2"><span>${cat.emoji}</span> ${cat.title}</h2>
+            <div class="ticker-container border-b border-zinc-800 dark:border-zinc-700">
+              <div class="ticker text-base">${fullTicker}</div>
+            </div>
+          </div>`;
+        container.innerHTML += sectionHTML;
+      });
+      if (enabledCats.length === 0) {
+        container.innerHTML = `<div class="text-center py-12 text-zinc-400">No categories enabled.<br>Tap ⚙️ to customize.</div>`;
+      }
+    }
+
+    function openPost(index) {
+      const post = allPosts[index];
+      if (!post) return;
+      const url = `https://x.com/${post.handle}/status/${post.id}`;
+      const html = `<div class="text-center"><p class="text-2xl mb-6">${post.headline}</p><a href="${url}" target="_blank" class="inline-flex items-center gap-3 bg-blue-600 hover:bg-blue-500 px-8 py-4 rounded-3xl text-lg font-semibold">Open full post on 𝕏</a><p class="text-xs text-zinc-400 mt-8 break-all">${url}</p></div>`;
+      document.getElementById('modalContent').innerHTML = html;
+      document.getElementById('postModal').classList.remove('hidden');
+    }
+
+    function hidePostModal() {
+      document.getElementById('postModal').classList.add('hidden');
+    }
+
+    // Settings
     function showSettings() {
-      // ... existing code for categories, density, background preview ...
+      const list = document.getElementById('categoryList');
+      list.innerHTML = '';
+      categories.forEach((cat, i) => {
+        const div = document.createElement('div');
+        div.className = "flex items-center justify-between py-3";
+        div.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">${cat.emoji}</span>
+            <span class="font-medium">${cat.title}</span>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" ${cat.enabled ? 'checked' : ''} onchange="toggleCategory(${i})" class="sr-only peer">
+            <div class="w-11 h-6 bg-zinc-700 rounded-full peer peer-checked:bg-blue-500"></div>
+            <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
+          </label>`;
+        list.appendChild(div);
+      });
 
-      // Auto Refresh toggle
+      // Density
+      const dSlider = document.getElementById('densitySlider');
+      const dValue = document.getElementById('densityValue');
+      dSlider.value = density;
+      dValue.textContent = density;
+      dSlider.oninput = () => dValue.textContent = dSlider.value;
+
+      // Auto Refresh
       document.getElementById('autoRefreshToggle').checked = autoRefreshEnabled;
-      const controls = document.getElementById('autoRefreshControls');
+      const arControls = document.getElementById('autoRefreshControls');
+      arControls.classList.toggle('hidden', !autoRefreshEnabled);
       if (autoRefreshEnabled) {
-        controls.classList.remove('hidden');
         document.getElementById('intervalSlider').value = autoRefreshInterval;
         document.getElementById('intervalValue').textContent = autoRefreshInterval + ' min';
-      } else {
-        controls.classList.add('hidden');
       }
 
-      // ... rest of showSettings (density, categories, etc.) ...
+      // Background preview
+      const preview = document.getElementById('bgPreview');
+      if (currentBackground) {
+        preview.classList.remove('hidden');
+        document.getElementById('bgName').textContent = currentBackground.name;
+        document.getElementById('bgType').textContent = currentBackground.type;
+        document.getElementById('bgThumb').innerHTML = currentBackground.type === 'image' ? `<img src="${currentBackground.dataUrl}" class="w-full h-full object-cover">` : `<div class="w-full h-full bg-black flex items-center justify-center text-2xl">▶️</div>`;
+      } else preview.classList.add('hidden');
+
+      document.getElementById('settingsModal').classList.remove('hidden');
     }
 
     function hideSettings() {
@@ -216,16 +369,49 @@
     function toggleCategory(i) { categories[i].enabled = !categories[i].enabled; }
 
     function resetSettings() {
-      // ... reset categories and density ...
+      categories = [
+        { id: "breaking", title: "Breaking on X", emoji: "🔴", enabled: true, posts: [0,1,2,3] },
+        { id: "world", title: "World News", emoji: "🌍", enabled: true, posts: [4,5,1,2] },
+        { id: "tech", title: "Tech & AI", emoji: "💻", enabled: true, posts: [3,6,7,9] },
+        { id: "politics", title: "Politics", emoji: "🗳️", enabled: true, posts: [2,5,0,4] },
+        { id: "sports", title: "Sports", emoji: "🏀", enabled: true, posts: [8,3,7,1] },
+        { id: "business", title: "Business", emoji: "📈", enabled: false, posts: [9,6,4,5] }
+      ];
+      density = 6;
       autoRefreshEnabled = false;
       autoRefreshInterval = 5;
       hideSettings();
     }
 
-    // ==================== THEME & PERSISTENCE ====================
-    function toggleTheme() { /* same */ }
-    function loadTheme() { /* same */ }
+    // Theme
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.classList.contains('dark');
+      if (isDark) {
+        html.classList.remove('dark');
+        document.getElementById('themeToggle').innerHTML = '☀️';
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.classList.add('dark');
+        document.getElementById('themeToggle').innerHTML = '🌙';
+        localStorage.setItem('theme', 'dark');
+      }
+    }
 
+    function loadTheme() {
+      const saved = localStorage.getItem('theme');
+      const html = document.documentElement;
+      const toggle = document.getElementById('themeToggle');
+      if (saved === 'light') {
+        html.classList.remove('dark');
+        toggle.innerHTML = '☀️';
+      } else {
+        html.classList.add('dark');
+        toggle.innerHTML = '🌙';
+      }
+    }
+
+    // Persistence
     function saveSettings() {
       localStorage.setItem('xPulseCategories', JSON.stringify(categories));
       localStorage.setItem('xPulseDensity', density);
@@ -234,7 +420,10 @@
     }
 
     function loadSettings() {
-      // ... existing load for categories and density ...
+      const savedCats = localStorage.getItem('xPulseCategories');
+      if (savedCats) categories = JSON.parse(savedCats);
+      const savedDensity = localStorage.getItem('xPulseDensity');
+      if (savedDensity) density = parseInt(savedDensity);
       const savedEnabled = localStorage.getItem('xPulseAutoRefreshEnabled');
       if (savedEnabled !== null) autoRefreshEnabled = JSON.parse(savedEnabled);
       const savedInterval = localStorage.getItem('xPulseAutoRefreshInterval');
@@ -243,21 +432,21 @@
 
     function refreshFeed(silent = false) {
       if (!silent) {
-        const icon = event.currentTarget ? event.currentTarget.querySelector('svg') : null;
+        const icon = event && event.currentTarget ? event.currentTarget.querySelector('svg') : null;
         if (icon) icon.style.transform = 'rotate(360deg)';
         setTimeout(() => { if (icon) icon.style.transform = ''; }, 700);
       }
       renderFeed();
     }
 
-    // ==================== INIT ====================
+    // Init
     window.onload = () => {
       loadSettings();
       loadTheme();
       loadBackground();
       renderFeed();
       if (autoRefreshEnabled) startAutoRefresh();
-      console.log('%c🚀 X Pulse with Auto Refresh ready!', 'color:#1da1f2;font-weight:600');
+      console.log('%c🚀 X Pulse fully loaded with Auto Refresh!', 'color:#1da1f2;font-weight:600');
     };
 
     if ('serviceWorker' in navigator) {
