@@ -59,9 +59,20 @@
     </div>
   </div>
 
+  <!-- Overlay -->
+  <div id="overlay" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+    <div class="text-center max-w-md px-8">
+      <div class="text-5xl font-bold text-yellow-400 mb-4">CHOPLIFT</div>
+      <div class="text-xl text-yellow-300 mb-8">1982 Apple IIe Classic</div>
+      <div class="text-2xl mb-12">TAP TO START</div>
+      <div class="text-sm text-yellow-300/70">← → Move  ↑ Hover  SHOOT</div>
+    </div>
+  </div>
+
   <script>
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
+
     let audioContext, soundEnabled = true;
 
     function initAudio() {
@@ -102,23 +113,69 @@
     }
 
     function drawBackground() {
-      ctx.fillStyle = '#1e40af'; ctx.fillRect(0, 0, 800, GROUND_Y);
-      ctx.fillStyle = '#0f5c2e'; ctx.fillRect(0, GROUND_Y, 800, 60);
-      ctx.fillStyle = '#854d0e'; ctx.fillRect(40, GROUND_Y-80, 80, 80);
-      ctx.fillStyle = '#eab308'; ctx.fillRect(60, GROUND_Y-100, 40, 30);
+      // Sky
+      ctx.fillStyle = '#1e40af';
+      ctx.fillRect(0, 0, 800, GROUND_Y);
+      // Ground
+      ctx.fillStyle = '#0f5c2e';
+      ctx.fillRect(0, GROUND_Y, 800, 60);
+      // Base
+      ctx.fillStyle = '#854d0e';
+      ctx.fillRect(40, GROUND_Y-80, 80, 80);
+      ctx.fillStyle = '#eab308';
+      ctx.fillRect(60, GROUND_Y-100, 40, 30);
     }
 
     function drawHeli() {
       ctx.save();
       ctx.translate(heli.x, heli.y);
       ctx.rotate(heli.vx * 0.03);
-      ctx.fillStyle = '#64748b'; ctx.fillRect(-25, -12, 50, 24);
+      // Body
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(-25, -12, 50, 24);
+      // Tail
       ctx.fillRect(-42, -6, 22, 10);
-      ctx.fillStyle = '#1e2937'; ctx.fillRect(-18, -20, 32, 16);
-      ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 5;
-      ctx.beginPath(); ctx.moveTo(-32, -22); ctx.lineTo(32, -22); ctx.stroke();
-      ctx.save(); ctx.rotate(heli.rotor); ctx.fillStyle = '#e2e8f0'; ctx.fillRect(-30, -25, 60, 6); ctx.restore();
+      // Cockpit
+      ctx.fillStyle = '#1e2937';
+      ctx.fillRect(-18, -20, 32, 16);
+      // Rotor bar
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(-32, -22);
+      ctx.lineTo(32, -22);
+      ctx.stroke();
+      // Spinning rotor
+      ctx.save();
+      ctx.rotate(heli.rotor);
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(-30, -25, 60, 6);
       ctx.restore();
+      ctx.restore();
+    }
+
+    function drawBullets() {
+      ctx.fillStyle = '#f59e0b';
+      bullets.forEach(b => ctx.fillRect(b.x, b.y, 12, 4));
+    }
+
+    function drawEnemies() {
+      ctx.fillStyle = '#b91c1c';
+      enemies.forEach(e => {
+        if (e.alive) {
+          ctx.fillRect(e.x, e.y, 40, 20);
+          ctx.fillStyle = '#1e2937';
+          ctx.fillRect(e.x + 8, e.y - 8, 24, 8);
+          ctx.fillStyle = '#b91c1c';
+        }
+      });
+    }
+
+    function drawHostages() {
+      ctx.fillStyle = '#eab308';
+      hostages.forEach(h => {
+        if (!h.rescued) ctx.fillRect(h.x, h.y, 12, 22);
+      });
     }
 
     function update() {
@@ -142,7 +199,7 @@
         if (e.alive && Math.random() < 0.008) bullets.push({x: e.x + 20, y: e.y + 5, friendly: false});
       });
 
-      // Collisions and rescue logic
+      // Simple collision for bullets on enemies
       bullets.forEach((b, bi) => {
         enemies.forEach((e, ei) => {
           if (e.alive && b.x > e.x && b.x < e.x + 40 && b.y > e.y - 10 && b.y < e.y + 20) {
@@ -154,6 +211,7 @@
         });
       });
 
+      // Rescue hostages
       hostages.forEach(h => {
         if (!h.rescued && Math.abs(heli.x - h.x) < 40 && Math.abs(heli.y - h.y) < 50) {
           h.rescued = true;
@@ -169,28 +227,18 @@
         document.getElementById('overlay').classList.remove('hidden');
       }
 
-      updateScoreUI();
+      document.getElementById('score').textContent = String(score).padStart(5, '0');
+      document.getElementById('rescued').textContent = `${rescued}/12`;
+      document.getElementById('lives').textContent = lives;
     }
 
     function draw() {
       ctx.clearRect(0, 0, 800, 400);
       drawBackground();
+      drawEnemies();
+      drawHostages();
       drawHeli();
-      // Bullets
-      ctx.fillStyle = '#f59e0b';
-      bullets.forEach(b => ctx.fillRect(b.x, b.y, 12, 4));
-      // Enemies
-      ctx.fillStyle = '#b91c1c';
-      enemies.forEach(e => { if (e.alive) ctx.fillRect(e.x, e.y, 40, 20); });
-      // Hostages
-      ctx.fillStyle = '#eab308';
-      hostages.forEach(h => { if (!h.rescued) ctx.fillRect(h.x, h.y, 12, 22); });
-    }
-
-    function updateScoreUI() {
-      document.getElementById('score').textContent = String(score).padStart(5, '0');
-      document.getElementById('rescued').textContent = `${rescued}/12`;
-      document.getElementById('lives').textContent = lives;
+      drawBullets();
     }
 
     function gameLoop() {
@@ -227,7 +275,6 @@
 
     function togglePause() { paused = !paused; }
 
-    // Controls
     window.addEventListener('keydown', e => keys[e.key] = true);
     window.addEventListener('keyup', e => keys[e.key] = false);
 
