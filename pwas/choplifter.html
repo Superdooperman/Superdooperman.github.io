@@ -59,20 +59,19 @@
     </div>
   </div>
 
-  <!-- Overlay -->
+  <!-- Start Screen -->
   <div id="overlay" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
     <div class="text-center max-w-md px-8">
       <div class="text-5xl font-bold text-yellow-400 mb-4">CHOPLIFT</div>
       <div class="text-xl text-yellow-300 mb-8">1982 Apple IIe Classic</div>
-      <div class="text-2xl mb-12">TAP TO START</div>
-      <div class="text-sm text-yellow-300/70">← → Move  ↑ Hover  SHOOT</div>
+      <div onclick="startGame()" class="text-2xl text-white bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-12 py-6 rounded-3xl cursor-pointer inline-block">TAP TO START</div>
+      <div class="text-sm text-yellow-300/70 mt-12">← → Move  ↑ Hover  SHOOT</div>
     </div>
   </div>
 
   <script>
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
-
     let audioContext, soundEnabled = true;
 
     function initAudio() {
@@ -92,12 +91,8 @@
       osc.stop(audioContext.currentTime + duration + 0.1);
     }
 
-    function playShoot() { playBeep(1800, 0.04, 0.6); }
-    function playExplosion() { playBeep(80, 0.3, 0.7); setTimeout(() => playBeep(40, 0.5, 0.5), 40); }
-    function playRescue() { playBeep(900, 0.08); setTimeout(() => playBeep(1200, 0.15), 60); }
-
     let heli = { x: 120, y: 180, vx: 0, vy: 0, rotor: 0 };
-    let bullets = [], enemies = [], hostages = [], particles = [];
+    let bullets = [], enemies = [], hostages = [];
     let score = 0, rescued = 0, lives = 3, gameOver = true, paused = false;
     let keys = {}, touchLeft = false, touchRight = false, touchUp = false;
 
@@ -105,7 +100,7 @@
 
     function resetGame() {
       heli = { x: 120, y: 180, vx: 0, vy: 0, rotor: 0 };
-      bullets = []; enemies = []; hostages = []; particles = [];
+      bullets = []; enemies = []; hostages = [];
       score = 0; rescued = 0; lives = 3; gameOver = false;
 
       for (let i = 0; i < 5; i++) enemies.push({x: 450 + i*110, y: GROUND_Y-25, alive: true});
@@ -113,69 +108,23 @@
     }
 
     function drawBackground() {
-      // Sky
-      ctx.fillStyle = '#1e40af';
-      ctx.fillRect(0, 0, 800, GROUND_Y);
-      // Ground
-      ctx.fillStyle = '#0f5c2e';
-      ctx.fillRect(0, GROUND_Y, 800, 60);
-      // Base
-      ctx.fillStyle = '#854d0e';
-      ctx.fillRect(40, GROUND_Y-80, 80, 80);
-      ctx.fillStyle = '#eab308';
-      ctx.fillRect(60, GROUND_Y-100, 40, 30);
+      ctx.fillStyle = '#1e40af'; ctx.fillRect(0, 0, 800, GROUND_Y);
+      ctx.fillStyle = '#0f5c2e'; ctx.fillRect(0, GROUND_Y, 800, 60);
+      ctx.fillStyle = '#854d0e'; ctx.fillRect(40, GROUND_Y-80, 80, 80);
+      ctx.fillStyle = '#eab308'; ctx.fillRect(60, GROUND_Y-100, 40, 30);
     }
 
     function drawHeli() {
       ctx.save();
       ctx.translate(heli.x, heli.y);
       ctx.rotate(heli.vx * 0.03);
-      // Body
-      ctx.fillStyle = '#64748b';
-      ctx.fillRect(-25, -12, 50, 24);
-      // Tail
+      ctx.fillStyle = '#64748b'; ctx.fillRect(-25, -12, 50, 24);
       ctx.fillRect(-42, -6, 22, 10);
-      // Cockpit
-      ctx.fillStyle = '#1e2937';
-      ctx.fillRect(-18, -20, 32, 16);
-      // Rotor bar
-      ctx.strokeStyle = '#e2e8f0';
-      ctx.lineWidth = 5;
-      ctx.beginPath();
-      ctx.moveTo(-32, -22);
-      ctx.lineTo(32, -22);
-      ctx.stroke();
-      // Spinning rotor
-      ctx.save();
-      ctx.rotate(heli.rotor);
-      ctx.fillStyle = '#e2e8f0';
-      ctx.fillRect(-30, -25, 60, 6);
+      ctx.fillStyle = '#1e2937'; ctx.fillRect(-18, -20, 32, 16);
+      ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.moveTo(-32, -22); ctx.lineTo(32, -22); ctx.stroke();
+      ctx.save(); ctx.rotate(heli.rotor); ctx.fillStyle = '#e2e8f0'; ctx.fillRect(-30, -25, 60, 6); ctx.restore();
       ctx.restore();
-      ctx.restore();
-    }
-
-    function drawBullets() {
-      ctx.fillStyle = '#f59e0b';
-      bullets.forEach(b => ctx.fillRect(b.x, b.y, 12, 4));
-    }
-
-    function drawEnemies() {
-      ctx.fillStyle = '#b91c1c';
-      enemies.forEach(e => {
-        if (e.alive) {
-          ctx.fillRect(e.x, e.y, 40, 20);
-          ctx.fillStyle = '#1e2937';
-          ctx.fillRect(e.x + 8, e.y - 8, 24, 8);
-          ctx.fillStyle = '#b91c1c';
-        }
-      });
-    }
-
-    function drawHostages() {
-      ctx.fillStyle = '#eab308';
-      hostages.forEach(h => {
-        if (!h.rescued) ctx.fillRect(h.x, h.y, 12, 22);
-      });
     }
 
     function update() {
@@ -193,39 +142,38 @@
 
       heli.rotor += 0.45;
 
+      // Shoot (keyboard or touch)
+      if (keys[' '] && (!keys.lastShot || Date.now() - keys.lastShot > 180)) {
+        bullets.push({x: heli.x + 35, y: heli.y - 8, friendly: true});
+        playBeep(1800, 0.04, 0.6);
+        keys.lastShot = Date.now();
+      }
+
       bullets.forEach((b, i) => { b.x += 12; if (b.x > 820) bullets.splice(i, 1); });
 
+      // Simple enemy bullets
       enemies.forEach(e => {
         if (e.alive && Math.random() < 0.008) bullets.push({x: e.x + 20, y: e.y + 5, friendly: false});
       });
 
-      // Simple collision for bullets on enemies
+      // Collisions
       bullets.forEach((b, bi) => {
         enemies.forEach((e, ei) => {
           if (e.alive && b.x > e.x && b.x < e.x + 40 && b.y > e.y - 10 && b.y < e.y + 20) {
             e.alive = false;
             bullets.splice(bi, 1);
             score += 100;
-            playExplosion();
           }
         });
       });
 
-      // Rescue hostages
       hostages.forEach(h => {
         if (!h.rescued && Math.abs(heli.x - h.x) < 40 && Math.abs(heli.y - h.y) < 50) {
           h.rescued = true;
           rescued++;
           score += 500;
-          playRescue();
         }
       });
-
-      if (rescued >= 12 && heli.x < 150) {
-        score += 2000;
-        gameOver = true;
-        document.getElementById('overlay').classList.remove('hidden');
-      }
 
       document.getElementById('score').textContent = String(score).padStart(5, '0');
       document.getElementById('rescued').textContent = `${rescued}/12`;
@@ -235,10 +183,13 @@
     function draw() {
       ctx.clearRect(0, 0, 800, 400);
       drawBackground();
-      drawEnemies();
-      drawHostages();
       drawHeli();
-      drawBullets();
+      ctx.fillStyle = '#f59e0b';
+      bullets.forEach(b => ctx.fillRect(b.x, b.y, 12, 4));
+      ctx.fillStyle = '#b91c1c';
+      enemies.forEach(e => { if (e.alive) ctx.fillRect(e.x, e.y, 40, 20); });
+      ctx.fillStyle = '#eab308';
+      hostages.forEach(h => { if (!h.rescued) ctx.fillRect(h.x, h.y, 12, 22); });
     }
 
     function gameLoop() {
@@ -275,6 +226,7 @@
 
     function togglePause() { paused = !paused; }
 
+    // Controls
     window.addEventListener('keydown', e => keys[e.key] = true);
     window.addEventListener('keyup', e => keys[e.key] = false);
 
@@ -284,7 +236,7 @@
     function controlShoot() {
       if (!gameOver && !paused) {
         bullets.push({x: heli.x + 35, y: heli.y - 8, friendly: true});
-        playShoot();
+        playBeep(1800, 0.04, 0.6);
       }
     }
 
