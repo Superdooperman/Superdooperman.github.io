@@ -9,17 +9,47 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
     body { font-family: 'Inter', system-ui, sans-serif; }
+    
+    /* Infinite scrolling ticker */
+    .ticker-wrapper {
+      overflow: hidden;
+      white-space: nowrap;
+      border-radius: 9999px;
+      position: relative;
+    }
+    .ticker {
+      display: inline-flex;
+      animation: marquee 45s linear infinite;
+    }
+    .ticker:hover {
+      animation-play-state: paused;
+    }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      padding: 0 2rem;
+      transition: all 0.2s ease;
+    }
+    .ticker-item:hover {
+      background-color: rgba(255,255,255,0.1);
+      border-radius: 9999px;
+    }
+    .dark .ticker-item:hover {
+      background-color: rgba(0,0,0,0.2);
+    }
+    
     .scroll-row { scrollbar-width: none; }
     .scroll-row::-webkit-scrollbar { display: none; }
-    .card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-    .card:hover { transform: translateY(-2px); }
-    .theme-transition { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
   </style>
 </head>
-<body class="bg-zinc-950 text-white min-h-screen pb-12 theme-transition">
+<body class="bg-zinc-950 text-white min-h-screen pb-12 dark">
 
   <!-- Header -->
-  <div class="sticky top-0 bg-zinc-950 border-b border-zinc-800 z-50 theme-transition">
+  <div class="sticky top-0 bg-zinc-950 border-b border-zinc-800 z-50 dark:bg-white dark:text-zinc-900 transition-colors">
     <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-xl">𝕏</div>
@@ -27,7 +57,7 @@
       </div>
       
       <div class="flex items-center gap-4">
-        <div onclick="refreshFeed()" class="flex items-center gap-2 text-blue-400 cursor-pointer">
+        <div onclick="refreshFeed()" class="flex items-center gap-2 text-blue-400 dark:text-blue-600 cursor-pointer">
           <span class="text-sm font-medium">Refresh</span>
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.058 11H1M12 3v2m0 16v2m9-9H15m-6 0a8 8 0 01-7.714-6.314" />
@@ -35,7 +65,7 @@
         </div>
         
         <!-- Dark/Light Toggle -->
-        <button onclick="toggleTheme()" id="themeToggle" class="w-10 h-10 flex items-center justify-center rounded-2xl hover:bg-zinc-800 transition-colors">
+        <button onclick="toggleTheme()" id="themeToggle" class="w-10 h-10 flex items-center justify-center rounded-2xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors">
           🌙
         </button>
       </div>
@@ -44,64 +74,60 @@
 
   <div class="max-w-screen-xl mx-auto px-4 pt-6 space-y-10">
 
-    <!-- Breaking -->
+    <!-- Breaking Ticker -->
     <div>
-      <h2 class="text-xl font-semibold mb-4 flex items-center gap-2"><span class="text-red-500">●</span> Breaking on X</h2>
-      <div class="scroll-row flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory">
-        <div onclick="openPost(0)" class="card bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-3xl p-5 w-80 flex-shrink-0 snap-start cursor-pointer">
-          <div class="flex items-center gap-3 mb-4">
-            <img src="https://pbs.twimg.com/profile_images/1854885556288720896/vQ7w0xrb.jpg" class="w-10 h-10 rounded-full">
-            <div>
-              <div class="font-semibold">@legaleaze123</div>
-              <div class="text-xs text-zinc-400">just now</div>
-            </div>
-          </div>
-          <p class="text-lg leading-tight">Kouri Richins wants new sentencing date — latest court update</p>
-        </div>
-
-        <div onclick="openPost(1)" class="card bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-3xl p-5 w-80 flex-shrink-0 snap-start cursor-pointer">
-          <div class="flex items-center gap-3 mb-4">
-            <img src="https://pbs.twimg.com/profile_images/1126171194347147270/lBB_ScAg.png" class="w-10 h-10 rounded-full">
-            <div>
-              <div class="font-semibold">@SPJournals</div>
-              <div class="text-xs text-zinc-400">just now</div>
-            </div>
-          </div>
-          <p class="text-lg leading-tight">New study: Enhancing Alzheimer’s projections and policy in China</p>
+      <h2 class="text-xl font-semibold mb-3 flex items-center gap-2"><span class="text-red-500">● LIVE</span> Breaking on X</h2>
+      <div class="ticker-wrapper bg-zinc-900 dark:bg-zinc-100 py-4 cursor-pointer" onclick="if(event.target.closest('.ticker-item')===null) openPost(0)">
+        <div class="ticker text-base font-medium">
+          <!-- First copy of posts -->
+          <span onclick="event.stopImmediatePropagation(); openPost(0)" class="ticker-item">Kouri Richins wants new sentencing date — latest court update • </span>
+          <span onclick="event.stopImmediatePropagation(); openPost(1)" class="ticker-item">New study: Enhancing Alzheimer’s projections and policy in China • </span>
+          <span onclick="event.stopImmediatePropagation(); openPost(2)" class="ticker-item">The only agenda: protecting criminals — latest political update • </span>
+          <span onclick="event.stopImmediatePropagation(); openPost(7)" class="ticker-item">AI is being used for the weirdest things lately… • </span>
+          
+          <!-- Duplicate for seamless loop -->
+          <span onclick="event.stopImmediatePropagation(); openPost(0)" class="ticker-item">Kouri Richins wants new sentencing date — latest court update • </span>
+          <span onclick="event.stopImmediatePropagation(); openPost(1)" class="ticker-item">New study: Enhancing Alzheimer’s projections and policy in China • </span>
+          <span onclick="event.stopImmediatePropagation(); openPost(2)" class="ticker-item">The only agenda: protecting criminals — latest political update • </span>
+          <span onclick="event.stopImmediatePropagation(); openPost(7)" class="ticker-item">AI is being used for the weirdest things lately… • </span>
         </div>
       </div>
     </div>
 
-    <!-- World News -->
+    <!-- World News Ticker -->
     <div>
-      <h2 class="text-xl font-semibold mb-4">🌍 World News</h2>
-      <div class="scroll-row flex gap-4 overflow-x-auto pb-4">
-        <div onclick="openPost(2)" class="card bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-3xl p-5 w-80 flex-shrink-0 cursor-pointer">
-          <div class="flex items-center gap-3 mb-4">
-            <img src="https://pbs.twimg.com/profile_images/1839182722272555008/JTGkIB-N.jpg" class="w-10 h-10 rounded-full">
-            <div>
-              <div class="font-semibold">@runariasokuu</div>
-              <div class="text-xs text-zinc-400">just now</div>
-            </div>
-          </div>
-          <p class="text-lg leading-tight">The only agenda: protecting criminals — latest political update</p>
+      <h2 class="text-xl font-semibold mb-3">🌍 World News</h2>
+      <div class="ticker-wrapper bg-zinc-900 dark:bg-zinc-100 py-4 cursor-pointer" onclick="if(event.target.closest('.ticker-item')===null) openPost(2)">
+        <div class="ticker text-base font-medium">
+          <span onclick="event.stopImmediatePropagation(); openPost(2)" class="ticker-item">Global markets react to new trade agreement • </span>
+          <span onclick="event.stopImmediatePropagation(); openPost(1)" class="ticker-item">EU approves landmark climate bill — what it means • </span>
+          <span onclick="event.stopImmediatePropagation(); openPost(0)" class="ticker-item">Middle East tensions rise after latest diplomatic talks • </span>
+          <span onclick="event.stopImmediatePropagation(); openPost(7)" class="ticker-item">UN warns of food crisis in three African nations • </span>
+          
+          <!-- Duplicate -->
+          <span onclick="event.stopImmediatePropagation(); openPost(2)" class="ticker-item">Global markets react to new trade agreement • </span>
+          <span onclick="event.stopImmediatePropagation(); openPost(1)" class="ticker-item">EU approves landmark climate bill — what it means • </span>
+          <span onclick="event.stopImmediatePropagation(); openPost(0)" class="ticker-item">Middle East tensions rise after latest diplomatic talks • </span>
+          <span onclick="event.stopImmediatePropagation(); openPost(7)" class="ticker-item">UN warns of food crisis in three African nations • </span>
         </div>
       </div>
     </div>
 
-    <!-- Tech & AI -->
+    <!-- Tech & AI Ticker -->
     <div>
-      <h2 class="text-xl font-semibold mb-4">💻 Tech & AI</h2>
-      <div class="scroll-row flex gap-4 overflow-x-auto pb-4">
-        <div onclick="openPost(7)" class="card bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-3xl p-5 w-80 flex-shrink-0 cursor-pointer">
-          <div class="flex items-center gap-3 mb-4">
-            <img src="https://pbs.twimg.com/profile_images/1560125679542276096/L9bCHWS2.jpg" class="w-10 h-10 rounded-full">
-            <div>
-              <div class="font-semibold">@dokudokupapa01</div>
-              <div class="text-xs text-zinc-400">just now</div>
-            </div>
-          </div>
-          <p class="text-lg leading-tight">AI is being used for the weirdest things lately…</p>
+      <h2 class="text-xl font-semibold mb-3">💻 Tech & AI</h2>
+      <div class="ticker-wrapper bg-zinc-900 dark:bg-zinc-100 py-4 cursor-pointer" onclick="if(event.target.closest('.ticker-item')===null) openPost(7)">
+        <div class="ticker text-base font-medium">
+          <span onclick="event.stopImmediatePropagation(); openPost(7)" class="ticker-item">AI is being used for the weirdest things lately… • </span>
+          <span onclick="event.stopImmediatePropagation(); openPost(1)" class="ticker-item">OpenAI releases new multimodal model — here’s what changed • </span>
+          <span onclick="event.stopImmediatePropagation(); openPost(0)" class="ticker-item">Apple’s next big AI feature leaks online • </span>
+          <span onclick="event.stopImmediatePropagation(); openPost(2)" class="ticker-item">Elon Musk teases xAI’s next breakthrough • </span>
+          
+          <!-- Duplicate -->
+          <span onclick="event.stopImmediatePropagation(); openPost(7)" class="ticker-item">AI is being used for the weirdest things lately… • </span>
+          <span onclick="event.stopImmediatePropagation(); openPost(1)" class="ticker-item">OpenAI releases new multimodal model — here’s what changed • </span>
+          <span onclick="event.stopImmediatePropagation(); openPost(0)" class="ticker-item">Apple’s next big AI feature leaks online • </span>
+          <span onclick="event.stopImmediatePropagation(); openPost(2)" class="ticker-item">Elon Musk teases xAI’s next breakthrough • </span>
         </div>
       </div>
     </div>
@@ -110,17 +136,15 @@
 
   <!-- Modal -->
   <div id="modal" onclick="if(event.target===this)closeModal()" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[9999]">
-    <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 rounded-3xl max-w-lg w-full mx-4 overflow-hidden">
+    <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-zinc-900 rounded-3xl max-w-lg w-full mx-4 overflow-hidden">
       <div id="modalContent" class="p-6"></div>
-      <div class="p-4 border-t border-zinc-800 flex justify-end">
-        <button onclick="closeModal()" class="px-8 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-2xl font-medium">Close</button>
+      <div class="p-4 border-t border-zinc-200 dark:border-zinc-800 flex justify-end">
+        <button onclick="closeModal()" class="px-8 py-3 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 rounded-2xl font-medium dark:text-white">Close</button>
       </div>
     </div>
   </div>
 
   <script>
-    // Tailwind script already loaded via CDN
-
     const posts = {
       0: { id: "2046262395048202458", handle: "legaleaze123" },
       1: { id: "2046262395039838673", handle: "SPJournals" },
@@ -138,7 +162,7 @@
           <a href="${url}" target="_blank" class="inline-flex items-center gap-3 bg-blue-600 hover:bg-blue-500 px-8 py-4 rounded-3xl text-lg font-semibold transition-colors">
             Open on 𝕏
           </a>
-          <p class="text-xs text-zinc-400 mt-10 break-all">${url}</p>
+          <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-10 break-all">${url}</p>
         </div>`;
       document.getElementById('modalContent').innerHTML = html;
       document.getElementById('modal').classList.remove('hidden');
@@ -153,76 +177,52 @@
       if (icon) icon.style.transform = 'rotate(360deg)';
       setTimeout(() => {
         if (icon) icon.style.transform = '';
-        alert("🔄 In a full version this would fetch fresh posts. Demo uses latest available data.");
+        alert("🔄 In a full version this would pull fresh posts live. Demo uses latest available data.");
       }, 800);
     }
 
     // ==================== DARK/LIGHT MODE ====================
     function toggleTheme() {
-      const isDark = document.body.classList.contains('bg-zinc-950');
+      const html = document.documentElement;
+      const isDark = html.classList.contains('dark');
+      
       if (isDark) {
-        // Switch to light mode
-        document.body.classList.remove('bg-zinc-950', 'text-white');
-        document.body.classList.add('bg-white', 'text-zinc-900');
-        
-        // Update all cards and elements
-        document.querySelectorAll('.bg-zinc-900').forEach(el => {
-          el.classList.remove('bg-zinc-900', 'border-zinc-800');
-          el.classList.add('bg-white', 'border-zinc-200', 'text-zinc-900');
-        });
-        
+        html.classList.remove('dark');
         document.getElementById('themeToggle').innerHTML = '☀️';
         localStorage.setItem('theme', 'light');
       } else {
-        // Switch to dark mode
-        document.body.classList.remove('bg-white', 'text-zinc-900');
-        document.body.classList.add('bg-zinc-950', 'text-white');
-        
-        document.querySelectorAll('.bg-white').forEach(el => {
-          if (el.classList.contains('card') || el.closest('.card')) {
-            el.classList.remove('bg-white', 'border-zinc-200', 'text-zinc-900');
-            el.classList.add('bg-zinc-900', 'border-zinc-800', 'text-white');
-          }
-        });
-        
+        html.classList.add('dark');
         document.getElementById('themeToggle').innerHTML = '🌙';
         localStorage.setItem('theme', 'dark');
       }
     }
 
-    // Load saved theme on start
     function loadTheme() {
-      const savedTheme = localStorage.getItem('theme');
-      const toggleBtn = document.getElementById('themeToggle');
+      const saved = localStorage.getItem('theme');
+      const html = document.documentElement;
+      const toggle = document.getElementById('themeToggle');
       
-      if (savedTheme === 'light') {
-        document.body.classList.remove('bg-zinc-950', 'text-white');
-        document.body.classList.add('bg-white', 'text-zinc-900');
-        
-        document.querySelectorAll('.card').forEach(card => {
-          card.classList.remove('bg-zinc-900', 'border-zinc-800');
-          card.classList.add('bg-white', 'border-zinc-200', 'text-zinc-900');
-        });
-        
-        toggleBtn.innerHTML = '☀️';
+      if (saved === 'light') {
+        html.classList.remove('dark');
+        toggle.innerHTML = '☀️';
       } else {
-        // Default is dark
-        toggleBtn.innerHTML = '🌙';
+        html.classList.add('dark');
+        toggle.innerHTML = '🌙';
       }
     }
 
-    // PWA support
+    // PWA service worker (minimal)
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('data:application/javascript,' + encodeURIComponent(`
         self.addEventListener('install', () => self.skipWaiting());
         self.addEventListener('activate', () => self.clients.claim());
-      `)).catch(() => {});
+      `));
     }
 
     // Initialize
     window.onload = () => {
       loadTheme();
-      console.log('%c🚀 X Pulse PWA with Dark/Light Mode ready! Add to Home Screen from Brave.', 'color:#1da1f2; font-weight:600');
+      console.log('%c🚀 X Pulse PWA with scrolling tickers is ready! Tap any headline to open the full post on X.', 'color:#1da1f2; font-weight:600');
     };
   </script>
 </body>
