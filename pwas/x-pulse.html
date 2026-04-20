@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>X Pulse • Latest News</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22X%20Pulse%22,%22short_name%22:%22X%20Pulse%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23000000%22,%22theme_color%22:%22%231f2937%22,%22icons%22:[{%22src%22:%22https://abs.twimg.com/responsive-web/web/icon-default.png%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22}]}">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    .scroll-row { scrollbar-width: none; }
+    .scroll-row::-webkit-scrollbar { display: none; }
+    .card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+    .card:hover { transform: translateY(-2px); }
+    .theme-transition { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-white min-h-screen pb-12 theme-transition">
+
+  <!-- Header -->
+  <div class="sticky top-0 bg-zinc-950 border-b border-zinc-800 z-50 theme-transition">
+    <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-xl">𝕏</div>
+        <h1 class="text-2xl font-bold">X Pulse</h1>
+      </div>
+      
+      <div class="flex items-center gap-4">
+        <div onclick="refreshFeed()" class="flex items-center gap-2 text-blue-400 cursor-pointer">
+          <span class="text-sm font-medium">Refresh</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.058 11H1M12 3v2m0 16v2m9-9H15m-6 0a8 8 0 01-7.714-6.314" />
+          </svg>
+        </div>
+        
+        <!-- Dark/Light Toggle -->
+        <button onclick="toggleTheme()" id="themeToggle" class="w-10 h-10 flex items-center justify-center rounded-2xl hover:bg-zinc-800 transition-colors">
+          🌙
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-screen-xl mx-auto px-4 pt-6 space-y-10">
+
+    <!-- Breaking -->
+    <div>
+      <h2 class="text-xl font-semibold mb-4 flex items-center gap-2"><span class="text-red-500">●</span> Breaking on X</h2>
+      <div class="scroll-row flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory">
+        <div onclick="openPost(0)" class="card bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-3xl p-5 w-80 flex-shrink-0 snap-start cursor-pointer">
+          <div class="flex items-center gap-3 mb-4">
+            <img src="https://pbs.twimg.com/profile_images/1854885556288720896/vQ7w0xrb.jpg" class="w-10 h-10 rounded-full">
+            <div>
+              <div class="font-semibold">@legaleaze123</div>
+              <div class="text-xs text-zinc-400">just now</div>
+            </div>
+          </div>
+          <p class="text-lg leading-tight">Kouri Richins wants new sentencing date — latest court update</p>
+        </div>
+
+        <div onclick="openPost(1)" class="card bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-3xl p-5 w-80 flex-shrink-0 snap-start cursor-pointer">
+          <div class="flex items-center gap-3 mb-4">
+            <img src="https://pbs.twimg.com/profile_images/1126171194347147270/lBB_ScAg.png" class="w-10 h-10 rounded-full">
+            <div>
+              <div class="font-semibold">@SPJournals</div>
+              <div class="text-xs text-zinc-400">just now</div>
+            </div>
+          </div>
+          <p class="text-lg leading-tight">New study: Enhancing Alzheimer’s projections and policy in China</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- World News -->
+    <div>
+      <h2 class="text-xl font-semibold mb-4">🌍 World News</h2>
+      <div class="scroll-row flex gap-4 overflow-x-auto pb-4">
+        <div onclick="openPost(2)" class="card bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-3xl p-5 w-80 flex-shrink-0 cursor-pointer">
+          <div class="flex items-center gap-3 mb-4">
+            <img src="https://pbs.twimg.com/profile_images/1839182722272555008/JTGkIB-N.jpg" class="w-10 h-10 rounded-full">
+            <div>
+              <div class="font-semibold">@runariasokuu</div>
+              <div class="text-xs text-zinc-400">just now</div>
+            </div>
+          </div>
+          <p class="text-lg leading-tight">The only agenda: protecting criminals — latest political update</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tech & AI -->
+    <div>
+      <h2 class="text-xl font-semibold mb-4">💻 Tech & AI</h2>
+      <div class="scroll-row flex gap-4 overflow-x-auto pb-4">
+        <div onclick="openPost(7)" class="card bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-3xl p-5 w-80 flex-shrink-0 cursor-pointer">
+          <div class="flex items-center gap-3 mb-4">
+            <img src="https://pbs.twimg.com/profile_images/1560125679542276096/L9bCHWS2.jpg" class="w-10 h-10 rounded-full">
+            <div>
+              <div class="font-semibold">@dokudokupapa01</div>
+              <div class="text-xs text-zinc-400">just now</div>
+            </div>
+          </div>
+          <p class="text-lg leading-tight">AI is being used for the weirdest things lately…</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" onclick="if(event.target===this)closeModal()" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[9999]">
+    <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 rounded-3xl max-w-lg w-full mx-4 overflow-hidden">
+      <div id="modalContent" class="p-6"></div>
+      <div class="p-4 border-t border-zinc-800 flex justify-end">
+        <button onclick="closeModal()" class="px-8 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-2xl font-medium">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tailwind script already loaded via CDN
+
+    const posts = {
+      0: { id: "2046262395048202458", handle: "legaleaze123" },
+      1: { id: "2046262395039838673", handle: "SPJournals" },
+      2: { id: "2046262394750455997", handle: "runariasokuu" },
+      7: { id: "2046262398420648245", handle: "dokudokupapa01" }
+    };
+
+    function openPost(key) {
+      const p = posts[key];
+      if (!p) return;
+      const url = `https://x.com/${p.handle}/status/${p.id}`;
+      const html = `
+        <div class="text-center py-8">
+          <p class="text-2xl mb-8 leading-tight">View the full post on X</p>
+          <a href="${url}" target="_blank" class="inline-flex items-center gap-3 bg-blue-600 hover:bg-blue-500 px-8 py-4 rounded-3xl text-lg font-semibold transition-colors">
+            Open on 𝕏
+          </a>
+          <p class="text-xs text-zinc-400 mt-10 break-all">${url}</p>
+        </div>`;
+      document.getElementById('modalContent').innerHTML = html;
+      document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+    }
+
+    function refreshFeed() {
+      const icon = event.currentTarget.querySelector('svg');
+      if (icon) icon.style.transform = 'rotate(360deg)';
+      setTimeout(() => {
+        if (icon) icon.style.transform = '';
+        alert("🔄 In a full version this would fetch fresh posts. Demo uses latest available data.");
+      }, 800);
+    }
+
+    // ==================== DARK/LIGHT MODE ====================
+    function toggleTheme() {
+      const isDark = document.body.classList.contains('bg-zinc-950');
+      if (isDark) {
+        // Switch to light mode
+        document.body.classList.remove('bg-zinc-950', 'text-white');
+        document.body.classList.add('bg-white', 'text-zinc-900');
+        
+        // Update all cards and elements
+        document.querySelectorAll('.bg-zinc-900').forEach(el => {
+          el.classList.remove('bg-zinc-900', 'border-zinc-800');
+          el.classList.add('bg-white', 'border-zinc-200', 'text-zinc-900');
+        });
+        
+        document.getElementById('themeToggle').innerHTML = '☀️';
+        localStorage.setItem('theme', 'light');
+      } else {
+        // Switch to dark mode
+        document.body.classList.remove('bg-white', 'text-zinc-900');
+        document.body.classList.add('bg-zinc-950', 'text-white');
+        
+        document.querySelectorAll('.bg-white').forEach(el => {
+          if (el.classList.contains('card') || el.closest('.card')) {
+            el.classList.remove('bg-white', 'border-zinc-200', 'text-zinc-900');
+            el.classList.add('bg-zinc-900', 'border-zinc-800', 'text-white');
+          }
+        });
+        
+        document.getElementById('themeToggle').innerHTML = '🌙';
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    // Load saved theme on start
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      const toggleBtn = document.getElementById('themeToggle');
+      
+      if (savedTheme === 'light') {
+        document.body.classList.remove('bg-zinc-950', 'text-white');
+        document.body.classList.add('bg-white', 'text-zinc-900');
+        
+        document.querySelectorAll('.card').forEach(card => {
+          card.classList.remove('bg-zinc-900', 'border-zinc-800');
+          card.classList.add('bg-white', 'border-zinc-200', 'text-zinc-900');
+        });
+        
+        toggleBtn.innerHTML = '☀️';
+      } else {
+        // Default is dark
+        toggleBtn.innerHTML = '🌙';
+      }
+    }
+
+    // PWA support
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('data:application/javascript,' + encodeURIComponent(`
+        self.addEventListener('install', () => self.skipWaiting());
+        self.addEventListener('activate', () => self.clients.claim());
+      `)).catch(() => {});
+    }
+
+    // Initialize
+    window.onload = () => {
+      loadTheme();
+      console.log('%c🚀 X Pulse PWA with Dark/Light Mode ready! Add to Home Screen from Brave.', 'color:#1da1f2; font-weight:600');
+    };
+  </script>
+</body>
+</html>
