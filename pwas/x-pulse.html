@@ -1,29 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>X Pulse • Latest News</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22X%20Pulse%22,%22short_name%22:%22X%20Pulse%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23000000%22,%22theme_color%22:%22%231f2937%22,%22icons%22:[{%22src%22:%22https://abs.twimg.com/responsive-web/web/icon-default.png%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22}]}">
+  <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22X%20Pulse%22,%22short_name%22:%22X%20Pulse%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23111%22,%22theme_color%22:%22%23111%22,%22icons%22:[{%22src%22:%22https://abs.twimg.com/responsive-web/web/icon-default.png%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22}]}">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
     body { font-family: 'Inter', system-ui, sans-serif; }
     
-    /* Infinite scrolling ticker */
-    .ticker-wrapper {
+    /* Clean marquee – no background bubbles */
+    .ticker-container {
       overflow: hidden;
-      white-space: nowrap;
-      border-radius: 9999px;
       position: relative;
+      padding: 12px 0;
     }
     .ticker {
       display: inline-flex;
-      animation: marquee 45s linear infinite;
+      white-space: nowrap;
+      animation: marquee 35s linear infinite;
     }
-    .ticker:hover {
-      animation-play-state: paused;
-    }
+    .ticker:hover { animation-play-state: paused; }
     @keyframes marquee {
       from { transform: translateX(0); }
       to { transform: translateX(-50%); }
@@ -31,161 +29,239 @@
     .ticker-item {
       display: inline-flex;
       align-items: center;
-      padding: 0 2rem;
-      transition: all 0.2s ease;
+      padding: 0 24px;
+      font-size: 15px;
+      font-weight: 500;
+      color: inherit;
+      transition: color 0.2s;
     }
-    .ticker-item:hover {
-      background-color: rgba(255,255,255,0.1);
-      border-radius: 9999px;
-    }
-    .dark .ticker-item:hover {
-      background-color: rgba(0,0,0,0.2);
-    }
+    .ticker-item:hover { color: #60a5fa; }
     
-    .scroll-row { scrollbar-width: none; }
-    .scroll-row::-webkit-scrollbar { display: none; }
+    /* Settings modal */
+    .modal {
+      animation: fadeIn 0.2s ease;
+    }
   </style>
 </head>
 <body class="bg-zinc-950 text-white min-h-screen pb-12 dark">
 
-  <!-- Header -->
-  <div class="sticky top-0 bg-zinc-950 border-b border-zinc-800 z-50 dark:bg-white dark:text-zinc-900 transition-colors">
-    <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center justify-between">
+  <!-- HEADER -->
+  <div class="sticky top-0 bg-zinc-950 border-b border-zinc-800 z-50">
+    <div class="max-w-screen-xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-xl">𝕏</div>
-        <h1 class="text-2xl font-bold">X Pulse</h1>
+        <div class="w-9 h-9 bg-blue-500 rounded-2xl flex items-center justify-center text-2xl">𝕏</div>
+        <h1 class="text-3xl font-bold tracking-tighter">X Pulse</h1>
       </div>
       
-      <div class="flex items-center gap-4">
-        <div onclick="refreshFeed()" class="flex items-center gap-2 text-blue-400 dark:text-blue-600 cursor-pointer">
-          <span class="text-sm font-medium">Refresh</span>
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.058 11H1M12 3v2m0 16v2m9-9H15m-6 0a8 8 0 01-7.714-6.314" />
+      <div class="flex items-center gap-5">
+        <!-- Refresh -->
+        <div onclick="refreshFeed()" class="flex items-center gap-2 text-blue-400 cursor-pointer active:scale-95">
+          <span class="text-sm font-semibold">Refresh</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.058 11H1M12 3v2m0 16v2m9-9H15" />
           </svg>
         </div>
-        
-        <!-- Dark/Light Toggle -->
-        <button onclick="toggleTheme()" id="themeToggle" class="w-10 h-10 flex items-center justify-center rounded-2xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors">
+
+        <!-- Settings Gear -->
+        <button onclick="showSettings()" class="w-9 h-9 flex items-center justify-center rounded-2xl hover:bg-zinc-800">
+          ⚙️
+        </button>
+
+        <!-- Theme Toggle -->
+        <button onclick="toggleTheme()" id="themeToggle" class="w-9 h-9 flex items-center justify-center rounded-2xl hover:bg-zinc-800 text-xl">
           🌙
         </button>
       </div>
     </div>
   </div>
 
-  <div class="max-w-screen-xl mx-auto px-4 pt-6 space-y-10">
-
-    <!-- Breaking Ticker -->
-    <div>
-      <h2 class="text-xl font-semibold mb-3 flex items-center gap-2"><span class="text-red-500">● LIVE</span> Breaking on X</h2>
-      <div class="ticker-wrapper bg-zinc-900 dark:bg-zinc-100 py-4 cursor-pointer" onclick="if(event.target.closest('.ticker-item')===null) openPost(0)">
-        <div class="ticker text-base font-medium">
-          <!-- First copy of posts -->
-          <span onclick="event.stopImmediatePropagation(); openPost(0)" class="ticker-item">Kouri Richins wants new sentencing date — latest court update • </span>
-          <span onclick="event.stopImmediatePropagation(); openPost(1)" class="ticker-item">New study: Enhancing Alzheimer’s projections and policy in China • </span>
-          <span onclick="event.stopImmediatePropagation(); openPost(2)" class="ticker-item">The only agenda: protecting criminals — latest political update • </span>
-          <span onclick="event.stopImmediatePropagation(); openPost(7)" class="ticker-item">AI is being used for the weirdest things lately… • </span>
-          
-          <!-- Duplicate for seamless loop -->
-          <span onclick="event.stopImmediatePropagation(); openPost(0)" class="ticker-item">Kouri Richins wants new sentencing date — latest court update • </span>
-          <span onclick="event.stopImmediatePropagation(); openPost(1)" class="ticker-item">New study: Enhancing Alzheimer’s projections and policy in China • </span>
-          <span onclick="event.stopImmediatePropagation(); openPost(2)" class="ticker-item">The only agenda: protecting criminals — latest political update • </span>
-          <span onclick="event.stopImmediatePropagation(); openPost(7)" class="ticker-item">AI is being used for the weirdest things lately… • </span>
-        </div>
-      </div>
-    </div>
-
-    <!-- World News Ticker -->
-    <div>
-      <h2 class="text-xl font-semibold mb-3">🌍 World News</h2>
-      <div class="ticker-wrapper bg-zinc-900 dark:bg-zinc-100 py-4 cursor-pointer" onclick="if(event.target.closest('.ticker-item')===null) openPost(2)">
-        <div class="ticker text-base font-medium">
-          <span onclick="event.stopImmediatePropagation(); openPost(2)" class="ticker-item">Global markets react to new trade agreement • </span>
-          <span onclick="event.stopImmediatePropagation(); openPost(1)" class="ticker-item">EU approves landmark climate bill — what it means • </span>
-          <span onclick="event.stopImmediatePropagation(); openPost(0)" class="ticker-item">Middle East tensions rise after latest diplomatic talks • </span>
-          <span onclick="event.stopImmediatePropagation(); openPost(7)" class="ticker-item">UN warns of food crisis in three African nations • </span>
-          
-          <!-- Duplicate -->
-          <span onclick="event.stopImmediatePropagation(); openPost(2)" class="ticker-item">Global markets react to new trade agreement • </span>
-          <span onclick="event.stopImmediatePropagation(); openPost(1)" class="ticker-item">EU approves landmark climate bill — what it means • </span>
-          <span onclick="event.stopImmediatePropagation(); openPost(0)" class="ticker-item">Middle East tensions rise after latest diplomatic talks • </span>
-          <span onclick="event.stopImmediatePropagation(); openPost(7)" class="ticker-item">UN warns of food crisis in three African nations • </span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tech & AI Ticker -->
-    <div>
-      <h2 class="text-xl font-semibold mb-3">💻 Tech & AI</h2>
-      <div class="ticker-wrapper bg-zinc-900 dark:bg-zinc-100 py-4 cursor-pointer" onclick="if(event.target.closest('.ticker-item')===null) openPost(7)">
-        <div class="ticker text-base font-medium">
-          <span onclick="event.stopImmediatePropagation(); openPost(7)" class="ticker-item">AI is being used for the weirdest things lately… • </span>
-          <span onclick="event.stopImmediatePropagation(); openPost(1)" class="ticker-item">OpenAI releases new multimodal model — here’s what changed • </span>
-          <span onclick="event.stopImmediatePropagation(); openPost(0)" class="ticker-item">Apple’s next big AI feature leaks online • </span>
-          <span onclick="event.stopImmediatePropagation(); openPost(2)" class="ticker-item">Elon Musk teases xAI’s next breakthrough • </span>
-          
-          <!-- Duplicate -->
-          <span onclick="event.stopImmediatePropagation(); openPost(7)" class="ticker-item">AI is being used for the weirdest things lately… • </span>
-          <span onclick="event.stopImmediatePropagation(); openPost(1)" class="ticker-item">OpenAI releases new multimodal model — here’s what changed • </span>
-          <span onclick="event.stopImmediatePropagation(); openPost(0)" class="ticker-item">Apple’s next big AI feature leaks online • </span>
-          <span onclick="event.stopImmediatePropagation(); openPost(2)" class="ticker-item">Elon Musk teases xAI’s next breakthrough • </span>
-        </div>
-      </div>
-    </div>
-
+  <div id="mainContent" class="max-w-screen-xl mx-auto px-4 pt-6 space-y-8">
+    <!-- Dynamically populated by JS -->
   </div>
 
-  <!-- Modal -->
-  <div id="modal" onclick="if(event.target===this)closeModal()" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[9999]">
-    <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-zinc-900 rounded-3xl max-w-lg w-full mx-4 overflow-hidden">
-      <div id="modalContent" class="p-6"></div>
-      <div class="p-4 border-t border-zinc-200 dark:border-zinc-800 flex justify-end">
-        <button onclick="closeModal()" class="px-8 py-3 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 rounded-2xl font-medium dark:text-white">Close</button>
+  <!-- SETTINGS MODAL -->
+  <div id="settingsModal" onclick="if(event.target.id==='settingsModal')hideSettings()" class="hidden fixed inset-0 bg-black/70 flex items-end lg:items-center justify-center z-[9999]">
+    <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 rounded-t-3xl lg:rounded-3xl w-full max-w-lg mx-0 lg:mx-4 overflow-hidden">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-semibold">Settings</h2>
+          <button onclick="hideSettings()" class="text-3xl leading-none">×</button>
+        </div>
+
+        <!-- Density -->
+        <div class="mb-8">
+          <label class="block text-sm font-medium mb-3">Posts per ticker (density)</label>
+          <div class="flex items-center gap-4">
+            <input type="range" id="densitySlider" min="3" max="12" value="6" step="1" class="flex-1 accent-blue-500">
+            <span id="densityValue" class="tabular-nums font-mono w-8 text-right">6</span>
+          </div>
+          <p class="text-xs text-zinc-400 mt-1">Higher = more headlines scrolling at once</p>
+        </div>
+
+        <!-- Category toggles -->
+        <div id="categoryList" class="space-y-4">
+          <!-- Populated by JS -->
+        </div>
       </div>
+
+      <div class="p-4 border-t border-zinc-800 flex justify-between text-sm">
+        <button onclick="resetSettings()" class="px-6 py-3 text-zinc-400 hover:text-white">Reset to defaults</button>
+        <button onclick="hideSettings()" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-2xl font-semibold">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST MODAL -->
+  <div id="postModal" onclick="if(event.target.id==='postModal')hidePostModal()" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[10000]">
+    <div onclick="event.stopImmediatePropagation()" class="bg-white dark:bg-zinc-900 rounded-3xl max-w-md w-full mx-4 p-6 text-center">
+      <div id="modalContent" class="py-6"></div>
+      <button onclick="hidePostModal()" class="mt-4 px-10 py-3.5 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 rounded-3xl font-medium">Close</button>
     </div>
   </div>
 
   <script>
-    const posts = {
-      0: { id: "2046262395048202458", handle: "legaleaze123" },
-      1: { id: "2046262395039838673", handle: "SPJournals" },
-      2: { id: "2046262394750455997", handle: "runariasokuu" },
-      7: { id: "2046262398420648245", handle: "dokudokupapa01" }
+    // ====================== DATA ======================
+    const allPosts = {
+      0: { id: "2046262395048202458", handle: "legaleaze123", headline: "Kouri Richins wants new sentencing date — latest court update" },
+      1: { id: "2046262395039838673", handle: "SPJournals", headline: "New study: Enhancing Alzheimer’s projections and policy in China" },
+      2: { id: "2046262394750455997", handle: "runariasokuu", headline: "The only agenda: protecting criminals — latest political update" },
+      3: { id: "2046262398420648245", handle: "dokudokupapa01", headline: "AI is being used for the weirdest things lately…" },
+      4: { id: "2046262401234567890", handle: "BBCNews", headline: "EU passes landmark climate bill — what it means for the world" },
+      5: { id: "2046262409876543210", handle: "WSJ", headline: "Middle East tensions rise after surprise diplomatic talks" },
+      6: { id: "2046262412345678901", handle: "TechCrunch", headline: "OpenAI releases new multimodal model — here’s what changed" },
+      7: { id: "2046262419876543212", handle: "elonmusk", headline: "xAI’s next breakthrough teased — live updates" },
+      8: { id: "2046262423456789013", handle: "NBA", headline: "Lakers vs Warriors: playoff implications tonight" },
+      9: { id: "2046262434567890124", handle: "CNBC", headline: "Stock market surges on strong earnings reports" }
     };
 
-    function openPost(key) {
-      const p = posts[key];
-      if (!p) return;
-      const url = `https://x.com/${p.handle}/status/${p.id}`;
+    // Categories
+    let categories = [
+      { id: "breaking", title: "Breaking on X", emoji: "🔴", enabled: true, posts: [0,1,2,3] },
+      { id: "world", title: "World News", emoji: "🌍", enabled: true, posts: [4,5,1,2] },
+      { id: "tech", title: "Tech & AI", emoji: "💻", enabled: true, posts: [3,6,7,9] },
+      { id: "politics", title: "Politics", emoji: "🗳️", enabled: true, posts: [2,5,0,4] },
+      { id: "sports", title: "Sports", emoji: "🏀", enabled: true, posts: [8,3,7,1] },
+      { id: "business", title: "Business", emoji: "📈", enabled: false, posts: [9,6,4,5] }
+    ];
+
+    let density = 6; // default posts per ticker
+
+    // ====================== RENDER ======================
+    function renderFeed() {
+      const container = document.getElementById('mainContent');
+      container.innerHTML = '';
+
+      const enabledCats = categories.filter(c => c.enabled);
+
+      enabledCats.forEach(cat => {
+        const catPosts = cat.posts.slice(0, density).map(i => allPosts[i]).filter(Boolean);
+        if (catPosts.length === 0) return;
+
+        // Build ticker HTML (duplicated for seamless loop)
+        let itemsHTML = '';
+        catPosts.forEach(p => {
+          itemsHTML += `<span onclick="openPost(${cat.posts[catPosts.indexOf(p)]})" class="ticker-item">${p.headline} • </span>`;
+        });
+        const fullTicker = itemsHTML + itemsHTML; // duplicate
+
+        const sectionHTML = `
+          <div>
+            <h2 class="text-xl font-semibold mb-3 flex items-center gap-2">
+              <span>${cat.emoji}</span> ${cat.title}
+            </h2>
+            <div class="ticker-container border-b border-zinc-800 dark:border-zinc-700">
+              <div class="ticker text-base">
+                ${fullTicker}
+              </div>
+            </div>
+          </div>`;
+        container.innerHTML += sectionHTML;
+      });
+
+      if (enabledCats.length === 0) {
+        container.innerHTML = `<div class="text-center py-12 text-zinc-400">No categories enabled.<br>Tap the gear icon to customize.</div>`;
+      }
+    }
+
+    // ====================== MODALS ======================
+    function openPost(index) {
+      const post = allPosts[index];
+      if (!post) return;
+      const url = `https://x.com/${post.handle}/status/${post.id}`;
       const html = `
-        <div class="text-center py-8">
-          <p class="text-2xl mb-8 leading-tight">View the full post on X</p>
-          <a href="${url}" target="_blank" class="inline-flex items-center gap-3 bg-blue-600 hover:bg-blue-500 px-8 py-4 rounded-3xl text-lg font-semibold transition-colors">
-            Open on 𝕏
+        <div class="text-center">
+          <p class="text-2xl mb-6">${post.headline}</p>
+          <a href="${url}" target="_blank" class="inline-flex items-center gap-3 bg-blue-600 hover:bg-blue-500 px-8 py-4 rounded-3xl text-lg font-semibold">
+            Open full post on 𝕏
           </a>
-          <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-10 break-all">${url}</p>
+          <p class="text-xs text-zinc-400 mt-8 break-all">${url}</p>
         </div>`;
       document.getElementById('modalContent').innerHTML = html;
-      document.getElementById('modal').classList.remove('hidden');
+      document.getElementById('postModal').classList.remove('hidden');
     }
 
-    function closeModal() {
-      document.getElementById('modal').classList.add('hidden');
+    function hidePostModal() {
+      document.getElementById('postModal').classList.add('hidden');
     }
 
-    function refreshFeed() {
-      const icon = event.currentTarget.querySelector('svg');
-      if (icon) icon.style.transform = 'rotate(360deg)';
-      setTimeout(() => {
-        if (icon) icon.style.transform = '';
-        alert("🔄 In a full version this would pull fresh posts live. Demo uses latest available data.");
-      }, 800);
+    function showSettings() {
+      const list = document.getElementById('categoryList');
+      list.innerHTML = '';
+
+      categories.forEach((cat, i) => {
+        const div = document.createElement('div');
+        div.className = "flex items-center justify-between py-3";
+        div.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">${cat.emoji}</span>
+            <span class="font-medium">${cat.title}</span>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" ${cat.enabled ? 'checked' : ''} onchange="toggleCategory(${i})" class="sr-only peer">
+            <div class="w-11 h-6 bg-zinc-700 rounded-full peer peer-checked:bg-blue-500"></div>
+            <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
+          </label>`;
+        list.appendChild(div);
+      });
+
+      // Density slider
+      const slider = document.getElementById('densitySlider');
+      const valueEl = document.getElementById('densityValue');
+      slider.value = density;
+      valueEl.textContent = density;
+      slider.oninput = () => { valueEl.textContent = slider.value; };
+
+      document.getElementById('settingsModal').classList.remove('hidden');
     }
 
-    // ==================== DARK/LIGHT MODE ====================
+    function hideSettings() {
+      density = parseInt(document.getElementById('densitySlider').value);
+      document.getElementById('settingsModal').classList.add('hidden');
+      saveSettings();
+      renderFeed();
+    }
+
+    function toggleCategory(index) {
+      categories[index].enabled = !categories[index].enabled;
+    }
+
+    function resetSettings() {
+      categories = [
+        { id: "breaking", title: "Breaking on X", emoji: "🔴", enabled: true, posts: [0,1,2,3] },
+        { id: "world", title: "World News", emoji: "🌍", enabled: true, posts: [4,5,1,2] },
+        { id: "tech", title: "Tech & AI", emoji: "💻", enabled: true, posts: [3,6,7,9] },
+        { id: "politics", title: "Politics", emoji: "🗳️", enabled: true, posts: [2,5,0,4] },
+        { id: "sports", title: "Sports", emoji: "🏀", enabled: true, posts: [8,3,7,1] },
+        { id: "business", title: "Business", emoji: "📈", enabled: false, posts: [9,6,4,5] }
+      ];
+      density = 6;
+      hideSettings();
+    }
+
+    // ====================== THEME ======================
     function toggleTheme() {
       const html = document.documentElement;
       const isDark = html.classList.contains('dark');
-      
       if (isDark) {
         html.classList.remove('dark');
         document.getElementById('themeToggle').innerHTML = '☀️';
@@ -201,7 +277,6 @@
       const saved = localStorage.getItem('theme');
       const html = document.documentElement;
       const toggle = document.getElementById('themeToggle');
-      
       if (saved === 'light') {
         html.classList.remove('dark');
         toggle.innerHTML = '☀️';
@@ -211,19 +286,44 @@
       }
     }
 
-    // PWA service worker (minimal)
+    // ====================== SETTINGS PERSISTENCE ======================
+    function saveSettings() {
+      localStorage.setItem('xPulseCategories', JSON.stringify(categories));
+      localStorage.setItem('xPulseDensity', density);
+    }
+
+    function loadSettings() {
+      const savedCats = localStorage.getItem('xPulseCategories');
+      if (savedCats) categories = JSON.parse(savedCats);
+      const savedDensity = localStorage.getItem('xPulseDensity');
+      if (savedDensity) density = parseInt(savedDensity);
+    }
+
+    // ====================== REFRESH ======================
+    function refreshFeed() {
+      const icon = event.currentTarget.querySelector('svg');
+      if (icon) icon.style.transform = 'rotate(360deg)';
+      setTimeout(() => {
+        if (icon) icon.style.transform = '';
+        renderFeed(); // in a real app this would fetch fresh data
+      }, 700);
+    }
+
+    // ====================== INIT ======================
+    window.onload = () => {
+      loadSettings();
+      loadTheme();
+      renderFeed();
+      console.log('%c🚀 X Pulse PWA ready – clean scrolling tickers + full settings!', 'color:#1da1f2;font-weight:600');
+    };
+
+    // Minimal PWA service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('data:application/javascript,' + encodeURIComponent(`
         self.addEventListener('install', () => self.skipWaiting());
         self.addEventListener('activate', () => self.clients.claim());
       `));
     }
-
-    // Initialize
-    window.onload = () => {
-      loadTheme();
-      console.log('%c🚀 X Pulse PWA with scrolling tickers is ready! Tap any headline to open the full post on X.', 'color:#1da1f2; font-weight:600');
-    };
   </script>
 </body>
 </html>
