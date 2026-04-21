@@ -1,6 +1,303 @@
 <!DOCTYPE html>
 <html lang="en">
+<<!DOCTYPE html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ChopLift • Apple IIe</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+    body { font-family: 'Press Start 2P', system-ui; }
+    canvas { image-rendering: pixelated; display: block; margin: 0 auto; background: #000; }
+  </style>
+</head>
+<body class="bg-black text-white overflow-hidden">
+
+  <!-- Header -->
+  <div class="flex justify-between items-center px-4 py-2 bg-zinc-900 border-b border-yellow-400">
+    <div class="flex items-center gap-3">
+      <div class="text-3xl">🚁</div>
+      <div>
+        <h1 class="text-xl font-bold tracking-widest text-yellow-400">CHOPLIFT</h1>
+        <div class="text-[10px] text-yellow-300 -mt-1">1982 APPLE IIe</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-6 text-xs">
+      <div>SCORE <span id="score" class="font-mono text-yellow-400">00000</span></div>
+      <div>HOSTAGES <span id="rescued" class="font-mono text-yellow-400">0/12</span></div>
+      <div>LIVES <span id="lives" class="font-mono text-yellow-400">3</span></div>
+    </div>
+    <button onclick="showMenu()" class="px-4 py-1 bg-yellow-400 text-black text-xs font-bold rounded">MENU</button>
+  </div>
+
+  <canvas id="game" width="800" height="400"></canvas>
+
+  <!-- Touch controls -->
+  <div class="fixed bottom-4 left-4 right-4 grid grid-cols-3 gap-2 md:hidden">
+    <div onclick="controlLeft(true)" onpointerup="controlLeft(false)" onpointerleave="controlLeft(false)" class="control-btn bg-white/10 backdrop-blur-md rounded-2xl h-12 flex items-center justify-center text-3xl active:bg-white/30">←</div>
+    <div class="col-span-1 flex flex-col gap-2">
+      <div onclick="controlUp(true)" onpointerup="controlUp(false)" onpointerleave="controlUp(false)" class="control-btn bg-white/10 backdrop-blur-md rounded-2xl h-12 flex items-center justify-center text-3xl active:bg-white/30">↑</div>
+      <div onclick="controlShoot()" class="control-btn bg-red-500/80 backdrop-blur-md rounded-2xl h-12 flex items-center justify-center text-xl font-bold active:scale-95">SHOOT</div>
+    </div>
+    <div onclick="controlRight(true)" onpointerup="controlRight(false)" onpointerleave="controlRight(false)" class="control-btn bg-white/10 backdrop-blur-md rounded-2xl h-12 flex items-center justify-center text-3xl active:bg-white/30">→</div>
+  </div>
+
+  <!-- Menu -->
+  <div id="menuModal" onclick="if(event.target.id==='menuModal')hideMenu()" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+    <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 rounded-3xl max-w-md w-full mx-4 p-8">
+      <h2 class="text-4xl font-bold text-yellow-400 mb-8 text-center">CHOPLIFT</h2>
+      <div class="flex justify-between items-center px-6 py-4 bg-zinc-800 rounded-2xl mb-8">
+        <div class="flex items-center gap-4"><span class="text-3xl">🔊</span><span class="text-lg">Sound Effects</span></div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="soundToggle" checked onchange="toggleSound()" class="sr-only peer">
+          <div class="w-12 h-7 bg-zinc-700 rounded-full peer peer-checked:bg-emerald-500"></div>
+          <div class="dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition"></div>
+        </label>
+      </div>
+      <button onclick="hideMenu(); togglePause()" class="w-full py-4 bg-yellow-400 text-black font-bold text-xl rounded-3xl mb-3">RESUME</button>
+      <button onclick="hideMenu(); restartGame()" class="w-full py-4 bg-zinc-700 text-white font-bold text-xl rounded-3xl">RESTART</button>
+    </div>
+  </div>
+
+  <!-- Start Screen -->
+  <div id="overlay" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+    <div class="text-center max-w-md px-8">
+      <div class="text-5xl font-bold text-yellow-400 mb-4">CHOPLIFT</div>
+      <div class="text-xl text-yellow-300 mb-8">1982 Apple IIe Classic</div>
+      <div onclick="startGame()" class="text-2xl text-white bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-12 py-6 rounded-3xl cursor-pointer inline-block">TAP TO START</div>
+      <div class="text-sm text-yellow-300/70 mt-12">← → Move  ↑ Hover  SHOOT</div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    let audioContext, soundEnabled = true;
+
+    function initAudio() {
+      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    function playBeep(freq, duration, vol = 0.4) {
+      if (!soundEnabled || !audioContext) return;
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+      gain.gain.value = vol;
+      osc.connect(gain).connect(audioContext.destination);
+      osc.start();
+      gain.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration);
+      osc.stop(audioContext.currentTime + duration + 0.1);
+    }
+
+    function playShoot() { playBeep(1800, 0.04, 0.6); }
+    function playExplosion() { playBeep(80, 0.3, 0.7); setTimeout(() => playBeep(40, 0.5, 0.5), 40); }
+    function playRescue() { playBeep(900, 0.08); setTimeout(() => playBeep(1200, 0.15), 60); }
+
+    let heli = { x: 180, y: 220, vx: 0, vy: 0, rotor: 0 };
+    let bullets = [], enemies = [], hostages = [];
+    let score = 0, rescued = 0, lives = 3, gameOver = true, paused = false;
+    let keys = {}, touchLeft = false, touchRight = false, touchUp = false;
+    let scrollX = 0; // NEW: horizontal scrolling
+
+    const GRAVITY = 0.18, THRUST = -1.05, GROUND_Y = 340, TOP_LIMIT = 40;
+
+    function resetGame() {
+      heli = { x: 180, y: 220, vx: 0, vy: -1, rotor: 0 };
+      bullets = []; enemies = []; hostages = [];
+      score = 0; rescued = 0; lives = 3; gameOver = false; scrollX = 0;
+
+      for (let i = 0; i < 5; i++) enemies.push({worldX: 450 + i*110, y: GROUND_Y-25, alive: true});
+      for (let i = 0; i < 12; i++) hostages.push({worldX: 520 + i*55, y: GROUND_Y-38, rescued: false});
+    }
+
+    function drawBackground() {
+      ctx.fillStyle = '#1e40af'; ctx.fillRect(0, 0, 800, GROUND_Y);
+      ctx.fillStyle = '#0f5c2e'; ctx.fillRect(0, GROUND_Y, 800, 60);
+
+      // Base (fixed on left)
+      ctx.fillStyle = '#854d0e'; ctx.fillRect(40 - scrollX, GROUND_Y-80, 80, 80);
+      ctx.fillStyle = '#eab308'; ctx.fillRect(60 - scrollX, GROUND_Y-100, 40, 30);
+    }
+
+    function drawHeli() {
+      ctx.save();
+      ctx.translate(heli.x, heli.y);
+      ctx.rotate(heli.vx * 0.03);
+      ctx.fillStyle = '#64748b'; ctx.fillRect(-25, -12, 50, 24);
+      ctx.fillRect(-42, -6, 22, 10);
+      ctx.fillStyle = '#1e2937'; ctx.fillRect(-18, -20, 32, 16);
+      ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.moveTo(-32, -22); ctx.lineTo(32, -22); ctx.stroke();
+      ctx.save(); ctx.rotate(heli.rotor); ctx.fillStyle = '#e2e8f0'; ctx.fillRect(-30, -25, 60, 6); ctx.restore();
+      ctx.restore();
+    }
+
+    function update() {
+      if (gameOver || paused) return;
+
+      heli.vy += GRAVITY;
+      if (touchUp || keys['ArrowUp'] || keys['w']) heli.vy += THRUST;
+      if (touchLeft || keys['ArrowLeft'] || keys['a']) heli.vx -= 0.45;
+      if (touchRight || keys['ArrowRight'] || keys['d']) heli.vx += 0.45;
+
+      heli.x += heli.vx;
+      heli.y += heli.vy;
+      heli.vx *= 0.94;
+      heli.vy *= 0.94;
+
+      heli.rotor += 0.45;
+
+      // Horizontal scrolling
+      if (heli.x > 400) {
+        scrollX = Math.min(scrollX + (heli.vx * 0.8), 1200);
+        heli.x = 400; // keep heli in the center-right
+      }
+      if (heli.x < 180) heli.x = 180;
+
+      // Boundaries
+      if (heli.y < TOP_LIMIT) { heli.y = TOP_LIMIT; heli.vy = 0; }
+      if (heli.y > GROUND_Y - 30) {
+        if (heli.vy > 4) { lives--; playExplosion(); heli.y = 180; heli.vy = -3; }
+        else { heli.y = GROUND_Y - 30; heli.vy = 0; }
+      }
+
+      // Shooting
+      if (keys[' '] && (!keys.lastShot || Date.now() - keys.lastShot > 180)) {
+        bullets.push({x: heli.x + 35, y: heli.y - 8, friendly: true});
+        playShoot();
+        keys.lastShot = Date.now();
+      }
+
+      bullets.forEach((b, i) => { b.x += 12; if (b.x > 820) bullets.splice(i, 1); });
+
+      // Collisions and rescue (using worldX)
+      bullets.forEach((b, bi) => {
+        enemies.forEach((e, ei) => {
+          const screenX = e.worldX - scrollX;
+          if (e.alive && b.x > screenX && b.x < screenX + 40 && b.y > e.y - 10 && b.y < e.y + 20) {
+            e.alive = false;
+            bullets.splice(bi, 1);
+            score += 100;
+            playExplosion();
+          }
+        });
+      });
+
+      hostages.forEach(h => {
+        const screenX = h.worldX - scrollX;
+        if (!h.rescued && Math.abs(heli.x - screenX) < 40 && Math.abs(heli.y - h.y) < 50) {
+          h.rescued = true;
+          rescued++;
+          score += 500;
+          playRescue();
+        }
+      });
+
+      if (rescued >= 12 && heli.x < 150) {
+        score += 2000;
+        gameOver = true;
+        document.getElementById('overlay').classList.remove('hidden');
+      }
+
+      document.getElementById('score').textContent = String(score).padStart(5, '0');
+      document.getElementById('rescued').textContent = `${rescued}/12`;
+      document.getElementById('lives').textContent = lives;
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, 800, 400);
+      drawBackground();
+
+      // Draw enemies
+      ctx.fillStyle = '#b91c1c';
+      enemies.forEach(e => {
+        if (e.alive) {
+          const sx = e.worldX - scrollX;
+          ctx.fillRect(sx, e.y, 40, 20);
+          ctx.fillStyle = '#1e2937';
+          ctx.fillRect(sx + 8, e.y - 8, 24, 8);
+          ctx.fillStyle = '#b91c1c';
+        }
+      });
+
+      // Draw hostages
+      ctx.fillStyle = '#eab308';
+      hostages.forEach(h => {
+        if (!h.rescued) {
+          const sx = h.worldX - scrollX;
+          ctx.fillRect(sx, h.y, 12, 22);
+        }
+      });
+
+      drawHeli();
+
+      // Bullets
+      ctx.fillStyle = '#f59e0b';
+      bullets.forEach(b => ctx.fillRect(b.x, b.y, 12, 4));
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function startGame() {
+      document.getElementById('overlay').classList.add('hidden');
+      resetGame();
+      initAudio();
+    }
+
+    function showMenu() {
+      paused = true;
+      document.getElementById('menuModal').classList.remove('hidden');
+      document.getElementById('soundToggle').checked = soundEnabled;
+    }
+
+    function hideMenu() {
+      document.getElementById('menuModal').classList.add('hidden');
+      paused = false;
+    }
+
+    function toggleSound() {
+      soundEnabled = document.getElementById('soundToggle').checked;
+    }
+
+    function restartGame() {
+      hideMenu();
+      resetGame();
+    }
+
+    function togglePause() { paused = !paused; }
+
+    // Controls
+    window.addEventListener('keydown', e => keys[e.key] = true);
+    window.addEventListener('keyup', e => keys[e.key] = false);
+
+    function controlLeft(d) { touchLeft = d; }
+    function controlRight(d) { touchRight = d; }
+    function controlUp(d) { touchUp = d; }
+    function controlShoot() {
+      if (!gameOver && !paused) {
+        bullets.push({x: heli.x + 35, y: heli.y - 8, friendly: true});
+        playShoot();
+      }
+    }
+
+    window.onload = () => {
+      document.getElementById('overlay').classList.remove('hidden');
+      gameLoop();
+      console.log('%c🚁 ChopLift with horizontal scrolling ready!', 'color:#eab308;font-weight:700');
+    };
+
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('data:application/javascript,' + encodeURIComponent('self.addEventListener("install",()=>self.skipWaiting());self.addEventListener("activate",()=>self.clients.claim());'));
+  </script>
+</body>
+</html>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ChopLift • Apple IIe</title>
