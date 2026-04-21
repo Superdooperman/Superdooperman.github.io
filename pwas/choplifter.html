@@ -59,7 +59,7 @@
     </div>
   </div>
 
-  <!-- Start Screen – entire area tappable -->
+  <!-- Start Screen -->
   <div id="overlay" onclick="startGame()" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
     <div class="text-center max-w-md px-8 pointer-events-none">
       <div class="text-5xl font-bold text-yellow-400 mb-4">CHOPLIFT</div>
@@ -147,18 +147,21 @@
 
       heli.rotor += 0.45;
 
+      // Horizontal scrolling
       if (heli.x > 400) {
         scrollX = Math.min(scrollX + (heli.vx * 0.8), 1200);
         heli.x = 400;
       }
       if (heli.x < 180) heli.x = 180;
 
+      // Vertical bounds
       if (heli.y < 40) { heli.y = 40; heli.vy = 0; }
       if (heli.y > GROUND_Y - 30) {
         if (heli.vy > 4) { lives--; playExplosion(); heli.y = 180; heli.vy = -3; }
         else { heli.y = GROUND_Y - 30; heli.vy = 0; }
       }
 
+      // Shooting
       if (keys[' '] && (!keys.lastShot || Date.now() - keys.lastShot > 180)) {
         bullets.push({x: heli.x + 35, y: heli.y - 8, friendly: true});
         playShoot();
@@ -270,7 +273,7 @@
     window.onload = () => {
       document.getElementById('overlay').classList.remove('hidden');
       gameLoop();
-      console.log('%c🚁 Full ChopLift Apple IIe PWA ready!', 'color:#eab308;font-weight:700');
+      console.log('%c🚁 Full ChopLift Apple IIe PWA – complete version', 'color:#eab308;font-weight:700');
     };
 
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('data:application/javascript,' + encodeURIComponent('self.addEventListener("install",()=>self.skipWaiting());self.addEventListener("activate",()=>self.clients.claim());'));
