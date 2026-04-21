@@ -91,15 +91,22 @@
       osc.stop(audioContext.currentTime + duration + 0.1);
     }
 
-    let heli = { x: 120, y: 180, vx: 0, vy: 0, rotor: 0 };
+    function playShoot() { playBeep(1800, 0.04, 0.6); }
+    function playExplosion() { playBeep(80, 0.3, 0.7); setTimeout(() => playBeep(40, 0.5, 0.5), 40); }
+    function playRescue() { playBeep(900, 0.08); setTimeout(() => playBeep(1200, 0.15), 60); }
+
+    let heli = { x: 180, y: 220, vx: 0, vy: 0, rotor: 0 };
     let bullets = [], enemies = [], hostages = [];
     let score = 0, rescued = 0, lives = 3, gameOver = true, paused = false;
     let keys = {}, touchLeft = false, touchRight = false, touchUp = false;
 
-    const GRAVITY = 0.28, THRUST = -0.75, GROUND_Y = 340;
+    const GRAVITY = 0.18;      // Tuned for better hover
+    const THRUST = -1.05;      // Stronger lift
+    const GROUND_Y = 340;
+    const TOP_LIMIT = 40;
 
     function resetGame() {
-      heli = { x: 120, y: 180, vx: 0, vy: 0, rotor: 0 };
+      heli = { x: 180, y: 220, vx: 0, vy: -2, rotor: 0 }; // slight upward start
       bullets = []; enemies = []; hostages = [];
       score = 0; rescued = 0; lives = 3; gameOver = false;
 
@@ -142,27 +149,45 @@
 
       heli.rotor += 0.45;
 
-      // Shoot (keyboard or touch)
+      // Boundary clamping + crash
+      if (heli.y < TOP_LIMIT) { heli.y = TOP_LIMIT; heli.vy = 0; }
+      if (heli.y > GROUND_Y - 30) {
+        if (heli.vy > 4) { // hard landing = crash
+          lives--;
+          playExplosion();
+          heli.y = 180;
+          heli.vy = -3;
+          heli.vx = 0;
+          if (lives <= 0) {
+            gameOver = true;
+            document.getElementById('overlay').classList.remove('hidden');
+          }
+        } else {
+          heli.y = GROUND_Y - 30;
+          heli.vy = 0;
+        }
+      }
+
+      // Shooting
       if (keys[' '] && (!keys.lastShot || Date.now() - keys.lastShot > 180)) {
         bullets.push({x: heli.x + 35, y: heli.y - 8, friendly: true});
-        playBeep(1800, 0.04, 0.6);
+        playShoot();
         keys.lastShot = Date.now();
       }
 
       bullets.forEach((b, i) => { b.x += 12; if (b.x > 820) bullets.splice(i, 1); });
 
-      // Simple enemy bullets
       enemies.forEach(e => {
         if (e.alive && Math.random() < 0.008) bullets.push({x: e.x + 20, y: e.y + 5, friendly: false});
       });
 
-      // Collisions
       bullets.forEach((b, bi) => {
         enemies.forEach((e, ei) => {
           if (e.alive && b.x > e.x && b.x < e.x + 40 && b.y > e.y - 10 && b.y < e.y + 20) {
             e.alive = false;
             bullets.splice(bi, 1);
             score += 100;
+            playExplosion();
           }
         });
       });
@@ -172,8 +197,15 @@
           h.rescued = true;
           rescued++;
           score += 500;
+          playRescue();
         }
       });
+
+      if (rescued >= 12 && heli.x < 150) {
+        score += 2000;
+        gameOver = true;
+        document.getElementById('overlay').classList.remove('hidden');
+      }
 
       document.getElementById('score').textContent = String(score).padStart(5, '0');
       document.getElementById('rescued').textContent = `${rescued}/12`;
@@ -226,7 +258,6 @@
 
     function togglePause() { paused = !paused; }
 
-    // Controls
     window.addEventListener('keydown', e => keys[e.key] = true);
     window.addEventListener('keyup', e => keys[e.key] = false);
 
@@ -236,14 +267,14 @@
     function controlShoot() {
       if (!gameOver && !paused) {
         bullets.push({x: heli.x + 35, y: heli.y - 8, friendly: true});
-        playBeep(1800, 0.04, 0.6);
+        playShoot();
       }
     }
 
     window.onload = () => {
       document.getElementById('overlay').classList.remove('hidden');
       gameLoop();
-      console.log('%c🚁 ChopLift Apple IIe PWA ready!', 'color:#eab308;font-weight:700');
+      console.log('%c🚁 ChopLift Apple IIe PWA – tuned physics ready!', 'color:#eab308;font-weight:700');
     };
 
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('data:application/javascript,' + encodeURIComponent('self.addEventListener("install",()=>self.skipWaiting());self.addEventListener("activate",()=>self.clients.claim());'));
