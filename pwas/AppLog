@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AppLog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', system_ui, sans-serif; }
+        .app-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .app-card:hover { transform: translateY(-3px); }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200">
+    <!-- Header -->
+    <div class="border-b border-zinc-800 bg-zinc-900 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-semibold tracking-tighter">My App Catalog</h1>
+                <p class="text-xs text-zinc-400">280+ apps • Your personal App Store</p>
+            </div>
+            <button onclick="showAddModal()" class="px-5 py-2.5 bg-white text-zinc-900 rounded-2xl text-sm font-semibold flex items-center gap-x-2 hover:bg-zinc-100">
+                <i class="fa-solid fa-plus"></i> Add App
+            </button>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="max-w-6xl mx-auto px-6 pt-6">
+        <input type="text" id="searchInput" onkeyup="filterApps()" placeholder="Search apps..." class="w-full bg-zinc-900 border border-zinc-700 px-5 py-3.5 rounded-3xl text-sm focus:outline-none">
+    </div>
+
+    <div class="max-w-6xl mx-auto px-6 py-8" id="appsContainer"></div>
+
+    <!-- Preview Modal -->
+    <div id="previewModal" onclick="if (event.target.id === 'previewModal') hidePreviewModal()" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[70]">
+        <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-md mx-4 overflow-hidden">
+            <div id="previewContent" class="p-6"></div>
+            <div class="border-t border-zinc-800 p-4 flex gap-x-3">
+                <button onclick="hidePreviewModal()" class="flex-1 py-3 rounded-2xl border border-zinc-700 text-sm">Close</button>
+                <button id="openStoreBtn" onclick="openInAppStore()" class="flex-1 py-3 bg-white text-zinc-900 rounded-2xl text-sm font-semibold flex items-center justify-center gap-x-2">
+                    <i class="fa-solid fa-external-link-alt"></i>
+                    <span>Open in App Store</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let apps = [
+            // A
+            {id:1, name:"Acorns", icon:"🌱", description:"Investment & micro-investing app", category:"Finance", notes:"", appStoreUrl:"https://apps.apple.com/us/app/acorns-invest-earn-save/id883324671"},
+            {id:2, name:"AdBlock Pro", icon:"🛡️", description:"Ad blocker for Safari", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:3, name:"Affirm", icon:"💳", description:"Buy now, pay later", category:"Finance", notes:"", appStoreUrl:"https://apps.apple.com/us/app/affirm-buy-now-pay-later/id853375068"},
+            {id:4, name:"Akinator", icon:"🧞", description:"AI guessing game", category:"Games", notes:"", appStoreUrl:""},
+            {id:5, name:"AlteredStates", icon:"🌀", description:"Altered states app", category:"Other", notes:"", appStoreUrl:""},
+            {id:6, name:"Amazon", icon:"📦", description:"Shopping & Prime Video", category:"Shopping", notes:"", appStoreUrl:"https://apps.apple.com/us/app/amazon-shopping/id297606951"},
+            {id:7, name:"Amazon Alexa", icon:"🔊", description:"Voice assistant", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:8, name:"Apollo", icon:"🚀", description:"Reddit client", category:"Social", notes:"", appStoreUrl:""},
+            {id:9, name:"App Store", icon:"🛍️", description:"Apple's official marketplace", category:"System", notes:"", appStoreUrl:"https://apps.apple.com/us/app/app-store/id375380948"},
+            {id:10, name:"Apple Store", icon:"🍎", description:"Apple retail & support", category:"Shopping", notes:"", appStoreUrl:""},
+            {id:11, name:"AsianCrush", icon:"🎥", description:"Asian movies & dramas", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:12, name:"Audible", icon:"🎧", description:"Audiobooks from Amazon", category:"Entertainment", notes:"", appStoreUrl:"https://apps.apple.com/us/app/audible-audiobooks-podcasts/id379693831"},
+            {id:13, name:"Audio Converter", icon:"🎵", description:"Audio file converter", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:14, name:"Authenticator", icon:"🔐", description:"2FA code generator", category:"Security", notes:"", appStoreUrl:""},
+            {id:15, name:"Avast One", icon:"🛡️", description:"Antivirus & security", category:"Security", notes:"", appStoreUrl:""},
+            {id:16, name:"BAND", icon:"👥", description:"Group communication", category:"Social", notes:"", appStoreUrl:""},
+            {id:17, name:"Banger", icon:"🎵", description:"Music app", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:18, name:"Binaural Beat Gen", icon:"🧠", description:"Binaural beats generator", category:"Health", notes:"", appStoreUrl:""},
+            {id:19, name:"BlockChat", icon:"💬", description:"Chat app", category:"Social", notes:"", appStoreUrl:""},
+            {id:20, name:"Books", icon:"📚", description:"Apple Books", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:21, name:"BrainWave", icon:"🧠", description:"Brainwave app", category:"Health", notes:"", appStoreUrl:""},
+            {id:22, name:"Brave", icon:"🦁", description:"Privacy browser", category:"Utilities", notes:"", appStoreUrl:"https://apps.apple.com/us/app/brave-private-web-browser/id1052879175"},
+            {id:23, name:"Burger King", icon:"🍔", description:"Fast food ordering", category:"Food", notes:"", appStoreUrl:""},
+            {id:24, name:"Burner", icon:"📱", description:"Temporary phone number", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:25, name:"Buy'r", icon:"🛒", description:"Shopping app", category:"Shopping", notes:"", appStoreUrl:""},
+            // C
+            {id:26, name:"C.ARP", icon:"🐟", description:"Carp app", category:"Other", notes:"", appStoreUrl:""},
+            {id:27, name:"Calculator", icon:"🧮", description:"Basic calculator", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:28, name:"Calendar", icon:"📅", description:"Apple Calendar", category:"Productivity", notes:"", appStoreUrl:""},
+            {id:29, name:"Cameo", icon:"🎥", description:"Celebrity video messages", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:30, name:"CapCut", icon:"🎬", description:"Video editor", category:"Creativity", notes:"", appStoreUrl:"https://apps.apple.com/us/app/capcut-video-editor/id1500855883"},
+            {id:31, name:"Captions", icon:"💬", description:"Auto captions app", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:32, name:"CARROT", icon:"🥕", description:"Weather app with personality", category:"Weather", notes:"", appStoreUrl:""},
+            {id:33, name:"Cash App", icon:"💵", description:"Peer-to-peer payments", category:"Finance", notes:"", appStoreUrl:"https://apps.apple.com/us/app/cash-app/id711923939"},
+            {id:34, name:"ChatGPT", icon:"🤖", description:"OpenAI's conversational AI", category:"AI", notes:"", appStoreUrl:"https://apps.apple.com/us/app/chatgpt/id6448311069"},
+            {id:35, name:"Chess", icon:"♟️", description:"Classic chess game", category:"Games", notes:"", appStoreUrl:""},
+            {id:36, name:"Chewy", icon:"🐶", description:"Pet supplies", category:"Shopping", notes:"", appStoreUrl:""},
+            {id:37, name:"Chick-fil-A", icon:"🐔", description:"Fast food ordering", category:"Food", notes:"", appStoreUrl:""},
+            {id:38, name:"Classical", icon:"🎻", description:"Classical music app", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:39, name:"ClassLink", icon:"🔗", description:"Education platform", category:"Education", notes:"", appStoreUrl:""},
+            {id:40, name:"Claude", icon:"🧠", description:"Anthropic's AI assistant", category:"AI", notes:"My favorite AI", appStoreUrl:"https://apps.apple.com/us/app/claude-by-anthropic/id6473751103"},
+            {id:41, name:"Cleaner Kit", icon:"🧹", description:"Storage cleaning tool", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:42, name:"Clock", icon:"⏰", description:"Apple Clock", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:43, name:"Coinbase", icon:"🪙", description:"Cryptocurrency exchange", category:"Finance", notes:"", appStoreUrl:"https://apps.apple.com/us/app/coinbase-buy-bitcoin-ether/id886427730"},
+            {id:44, name:"ComiGlass", icon:"📖", description:"Comic reader", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:45, name:"Compass", icon:"🧭", description:"Apple Compass", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:46, name:"Compres", icon:"📦", description:"Compression tool", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:47, name:"Contacts", icon:"👥", description:"Apple Contacts", category:"System", notes:"", appStoreUrl:""},
+            {id:48, name:"Crunchyroll", icon:"🎥", description:"Anime streaming", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:49, name:"Cultivate", icon:"🌱", description:"Habit tracker", category:"Productivity", notes:"", appStoreUrl:""},
+            // D
+            {id:50, name:"DecaPrint", icon:"🖨️", description:"Printing app", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:51, name:"Deliveries", icon:"📦", description:"Package tracking", category:"Shopping", notes:"", appStoreUrl:""},
+            {id:52, name:"Delta", icon:"✈️", description:"Airline app", category:"Travel", notes:"", appStoreUrl:""},
+            {id:53, name:"Discogs", icon:"💿", description:"Music database", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:54, name:"Discord", icon:"💬", description:"Voice & text chat", category:"Social", notes:"", appStoreUrl:"https://apps.apple.com/us/app/discord-chat-talk-hangout/id985746746"},
+            {id:55, name:"dodo", icon:"🐦", description:"Social app", category:"Social", notes:"", appStoreUrl:""},
+            {id:56, name:"Domino's", icon:"🍕", description:"Pizza ordering", category:"Food", notes:"", appStoreUrl:""},
+            {id:57, name:"Drive", icon:"🚗", description:"Google Drive", category:"Productivity", notes:"", appStoreUrl:""},
+            {id:58, name:"DuckDuckGo", icon:"🦆", description:"Privacy search engine", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:59, name:"Duel Links", icon:"🃏", description:"Yu-Gi-Oh game", category:"Games", notes:"", appStoreUrl:""},
+            {id:60, name:"Duolingo", icon:"🦉", description:"Language learning", category:"Education", notes:"", appStoreUrl:"https://apps.apple.com/us/app/duolingo-language-lessons/id570060128"},
+            {id:61, name:"Dutch Bros", icon:"☕", description:"Coffee ordering", category:"Food", notes:"", appStoreUrl:""},
+            // E
+            {id:62, name:"eBay", icon:"🛒", description:"Online marketplace", category:"Shopping", notes:"", appStoreUrl:""},
+            {id:63, name:"ecobee", icon:"🌡️", description:"Smart thermostat", category:"Home", notes:"", appStoreUrl:""},
+            {id:64, name:"Edge", icon:"🌐", description:"Microsoft Edge browser", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:65, name:"Epson iPrint", icon:"🖨️", description:"Epson printing", category:"Utilities", notes:"", appStoreUrl:""},
+            // F
+            {id:66, name:"FaceTime", icon:"📹", description:"Apple video calling", category:"Communication", notes:"", appStoreUrl:""},
+            {id:67, name:"Fandango", icon:"🎟️", description:"Movie tickets", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:68, name:"FANS", icon:"👥", description:"Fan app", category:"Social", notes:"", appStoreUrl:""},
+            {id:69, name:"FedEx", icon:"📦", description:"Shipping & tracking", category:"Shopping", notes:"", appStoreUrl:""},
+            {id:70, name:"File Manager", icon:"📁", description:"File manager", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:71, name:"Files", icon:"📁", description:"Apple Files", category:"System", notes:"", appStoreUrl:""},
+            {id:72, name:"Find My", icon:"📍", description:"Apple device tracking", category:"System", notes:"", appStoreUrl:""},
+            {id:73, name:"Fitness", icon:"🏋️", description:"Apple Fitness", category:"Health", notes:"", appStoreUrl:""},
+            {id:74, name:"Flipboard", icon:"📰", description:"News aggregator", category:"News", notes:"", appStoreUrl:""},
+            {id:75, name:"Flipper", icon:"🐬", description:"Flipper app", category:"Other", notes:"", appStoreUrl:""},
+            {id:76, name:"Focus Friend", icon:"🎯", description:"Focus app", category:"Productivity", notes:"", appStoreUrl:""},
+            {id:77, name:"Focus Video", icon:"🎥", description:"Focus video app", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:78, name:"Freedom", icon:"🕊️", description:"Distraction blocker", category:"Productivity", notes:"", appStoreUrl:""},
+            {id:79, name:"Freeform", icon:"✍️", description:"Apple Freeform", category:"Creativity", notes:"", appStoreUrl:""},
+            {id:80, name:"Frequency Sound Generator", icon:"🔊", description:"Sound generator", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:81, name:"Fun Print", icon:"🖨️", description:"Printing app", category:"Utilities", notes:"", appStoreUrl:""},
+            // G
+            {id:82, name:"Gacha Life 2", icon:"🎮", description:"Gacha game", category:"Games", notes:"", appStoreUrl:""},
+            {id:83, name:"Games", icon:"🎮", description:"Apple Games", category:"Games", notes:"", appStoreUrl:""},
+            {id:84, name:"GarageBand", icon:"🎹", description:"Music creation", category:"Creativity", notes:"", appStoreUrl:"https://apps.apple.com/us/app/garageband/id408709785"},
+            {id:85, name:"GEICO Mobile", icon:"🦎", description:"Insurance app", category:"Finance", notes:"", appStoreUrl:""},
+            {id:86, name:"Genius", icon:"💡", description:"Genius app", category:"Other", notes:"", appStoreUrl:""},
+            {id:87, name:"Gifiber", icon:"🌐", description:"Internet app", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:88, name:"Ghost", icon:"👻", description:"Ghost app", category:"Other", notes:"", appStoreUrl:""},
+            {id:89, name:"GitHub", icon:"🐙", description:"Code hosting", category:"Developer", notes:"", appStoreUrl:"https://apps.apple.com/us/app/github/id1477376905"},
+            {id:90, name:"Going Cha DMV", icon:"🚗", description:"DMV app", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:91, name:"Gong Mind", icon:"🧠", description:"Mindfulness app", category:"Health", notes:"", appStoreUrl:""},
+            {id:92, name:"Goove Home", icon:"🏠", description:"Smart home app", category:"Home", notes:"", appStoreUrl:""},
+            {id:93, name:"Grok", icon:"🚀", description:"xAI's helpful AI", category:"AI", notes:"You're talking to me right now!", appStoreUrl:"https://apps.apple.com/us/app/grok-by-xai/id6670323248"},
+            {id:94, name:"Gumroad", icon:"💰", description:"Creator platform", category:"Shopping", notes:"", appStoreUrl:""},
+            // H
+            {id:95, name:"Habitica", icon:"🐉", description:"Habit building RPG", category:"Productivity", notes:"", appStoreUrl:""},
+            {id:96, name:"Hangouts", icon:"💬", description:"Google Hangouts", category:"Communication", notes:"", appStoreUrl:""},
+            {id:97, name:"HangoutTree", icon:"🌳", description:"Social app", category:"Social", notes:"", appStoreUrl:""},
+            {id:98, name:"HBO Max", icon:"🎥", description:"Streaming service", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:99, name:"Health", icon:"❤️", description:"Apple Health", category:"Health", notes:"", appStoreUrl:""},
+            {id:100, name:"Higher", icon:"📈", description:"Higher app", category:"Other", notes:"", appStoreUrl:""},
+            {id:101, name:"Honey", icon:"🍯", description:"Coupon app", category:"Shopping", notes:"", appStoreUrl:""},
+            {id:102, name:"HTML Viewer", icon:"🌐", description:"HTML viewer", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:103, name:"Hulu", icon:"📺", description:"Streaming service", category:"Entertainment", notes:"", appStoreUrl:""},
+            // I
+            {id:104, name:"iDoser", icon:"🧠", description:"Binaural beats", category:"Health", notes:"", appStoreUrl:""},
+            {id:105, name:"IMDb", icon:"🎥", description:"Movie database", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:106, name:"InReach", icon:"🛰️", description:"Satellite communication", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:107, name:"Instagram", icon:"📷", description:"Photo & video sharing", category:"Social", notes:"", appStoreUrl:"https://apps.apple.com/us/app/instagram/id389801252"},
+            {id:108, name:"iTunes Store", icon:"🎵", description:"Apple music store", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:109, name:"iXpand Drive", icon:"💾", description:"Storage app", category:"Utilities", notes:"", appStoreUrl:""},
+            // J
+            {id:110, name:"Jellyfin", icon:"📺", description:"Media server", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:111, name:"Journal", icon:"📓", description:"Apple Journal", category:"Productivity", notes:"", appStoreUrl:""},
+            {id:112, name:"Jump", icon:"🦘", description:"Jump app", category:"Other", notes:"", appStoreUrl:""},
+            {id:113, name:"Just Press Record", icon:"🎙️", description:"Voice recorder", category:"Utilities", notes:"", appStoreUrl:""},
+            // K
+            {id:114, name:"Kickstarter", icon:"🚀", description:"Crowdfunding", category:"Shopping", notes:"", appStoreUrl:""},
+            {id:115, name:"kik", icon:"💬", description:"Messaging app", category:"Social", notes:"", appStoreUrl:""},
+            {id:116, name:"Kik", icon:"💬", description:"Messaging app", category:"Social", notes:"", appStoreUrl:""},
+            {id:117, name:"Ky", icon:"🔑", description:"Ky app", category:"Other", notes:"", appStoreUrl:""},
+            // L
+            {id:118, name:"LastPass", icon:"🔑", description:"Password manager", category:"Security", notes:"", appStoreUrl:"https://apps.apple.com/us/app/lastpass-password-manager/id324613447"},
+            {id:119, name:"Locket", icon:"🔒", description:"Locket app", category:"Other", notes:"", appStoreUrl:""},
+            {id:120, name:"LumaFusion", icon:"🎬", description:"Video editor", category:"Creativity", notes:"", appStoreUrl:""},
+            {id:121, name:"Lumo", icon:"💡", description:"Lumo app", category:"Other", notes:"", appStoreUrl:""},
+            {id:122, name:"Lunar SSST", icon:"🌙", description:"Lunar app", category:"Other", notes:"", appStoreUrl:""},
+            // M
+            {id:123, name:"Magnifier", icon:"🔍", description:"Apple Magnifier", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:124, name:"Mail", icon:"✉️", description:"Apple Mail", category:"Communication", notes:"", appStoreUrl:""},
+            {id:125, name:"Maps", icon:"🗺️", description:"Apple Maps", category:"Travel", notes:"", appStoreUrl:""},
+            {id:126, name:"Master Duel", icon:"🃏", description:"Yu-Gi-Oh Master Duel", category:"Games", notes:"", appStoreUrl:""},
+            {id:127, name:"McDonald's", icon:"🍔", description:"Fast food ordering", category:"Food", notes:"", appStoreUrl:""},
+            {id:128, name:"Measure", icon:"📏", description:"Apple Measure", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:129, name:"MEGA", icon:"☁️", description:"Cloud storage", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:130, name:"Mercari", icon:"🛍️", description:"Marketplace", category:"Shopping", notes:"", appStoreUrl:""},
+            {id:131, name:"Meshtastic", icon:"📡", description:"Mesh network app", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:132, name:"Messages", icon:"💬", description:"iMessage & SMS", category:"Communication", notes:"", appStoreUrl:""},
+            {id:133, name:"MLCChat", icon:"💬", description:"Chat app", category:"Social", notes:"", appStoreUrl:""},
+            {id:134, name:"Mnet Plus", icon:"🎵", description:"Music app", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:135, name:"Movies", icon:"🎥", description:"Apple Movies", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:136, name:"Mullvad VPN", icon:"🔒", description:"VPN service", category:"Security", notes:"", appStoreUrl:""},
+            {id:137, name:"Museum", icon:"🏛️", description:"Museum app", category:"Other", notes:"", appStoreUrl:""},
+            {id:138, name:"Music", icon:"🎵", description:"Apple Music", category:"Entertainment", notes:"", appStoreUrl:"https://apps.apple.com/us/app/apple-music/id1108187390"},
+            {id:139, name:"Music Memos", icon:"🎤", description:"Voice memos", category:"Utilities", notes:"", appStoreUrl:""},
+            // N
+            {id:140, name:"Neophon", icon:"📞", description:"Phone app", category:"Communication", notes:"", appStoreUrl:""},
+            {id:141, name:"Neuron", icon:"🧠", description:"Neuron app", category:"Other", notes:"", appStoreUrl:""},
+            {id:142, name:"NeuroPulse", icon:"⚡", description:"Neuro app", category:"Health", notes:"", appStoreUrl:""},
+            {id:143, name:"News", icon:"📰", description:"Apple News", category:"News", notes:"", appStoreUrl:""},
+            {id:144, name:"Nextdoor", icon:"🏘️", description:"Neighborhood app", category:"Social", notes:"", appStoreUrl:""},
+            {id:145, name:"Nintendo Music", icon:"🎮", description:"Nintendo music", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:146, name:"Noir", icon:"🌑", description:"Noir app", category:"Other", notes:"", appStoreUrl:""},
+            {id:147, name:"NordVPN", icon:"🔒", description:"VPN service", category:"Security", notes:"", appStoreUrl:""},
+            {id:148, name:"Notes", icon:"📝", description:"Apple Notes", category:"Productivity", notes:"", appStoreUrl:""},
+            {id:149, name:"Notion", icon:"📓", description:"All-in-one workspace", category:"Productivity", notes:"", appStoreUrl:""},
+            {id:150, name:"OneNote", icon:"📝", description:"Microsoft OneNote", category:"Productivity", notes:"", appStoreUrl:""},
+            {id:151, name:"Oscilloscope", icon:"📊", description:"Oscilloscope app", category:"Utilities", notes:"", appStoreUrl:""},
+            // P
+            {id:152, name:"P.Terrys", icon:"🍔", description:"Restaurant app", category:"Food", notes:"", appStoreUrl:""},
+            {id:153, name:"Pages", icon:"📄", description:"Apple Pages", category:"Productivity", notes:"", appStoreUrl:""},
+            {id:154, name:"Panda Express", icon:"🥡", description:"Fast food ordering", category:"Food", notes:"", appStoreUrl:""},
+            {id:155, name:"Panels", icon:"📱", description:"Panels app", category:"Other", notes:"", appStoreUrl:""},
+            {id:156, name:"Paramount+", icon:"📺", description:"Streaming service", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:157, name:"Passwords", icon:"🔑", description:"Apple Passwords", category:"Security", notes:"", appStoreUrl:""},
+            {id:158, name:"PayPal", icon:"💰", description:"Digital payments", category:"Finance", notes:"", appStoreUrl:"https://apps.apple.com/us/app/paypal/id283646709"},
+            {id:159, name:"Perplexity", icon:"🔍", description:"AI search engine", category:"AI", notes:"", appStoreUrl:""},
+            {id:160, name:"Phomemo", icon:"🖨️", description:"Label printer", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:161, name:"Phone", icon:"📞", description:"Apple Phone", category:"Communication", notes:"", appStoreUrl:""},
+            {id:162, name:"Phoner", icon:"📱", description:"Phoner app", category:"Other", notes:"", appStoreUrl:""},
+            {id:163, name:"Photos", icon:"🖼️", description:"Apple Photos", category:"Creativity", notes:"", appStoreUrl:""},
+            {id:164, name:"Picsew", icon:"📸", description:"Screenshot tool", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:165, name:"Pikmin Bloom", icon:"🌱", description:"Nintendo game", category:"Games", notes:"", appStoreUrl:""},
+            {id:166, name:"PizzaHut", icon:"🍕", description:"Pizza ordering", category:"Food", notes:"", appStoreUrl:""},
+            {id:167, name:"plex", icon:"📺", description:"Media server", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:168, name:"POCAALBUM", icon:"📀", description:"Music app", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:169, name:"Pocket", icon:"📚", description:"Read-it-later", category:"Productivity", notes:"", appStoreUrl:""},
+            {id:170, name:"Podcasts", icon:"🎙️", description:"Apple Podcasts", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:171, name:"Popeyes", icon:"🍗", description:"Fast food ordering", category:"Food", notes:"", appStoreUrl:""},
+            {id:172, name:"Preview", icon:"👁️", description:"Apple Preview", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:173, name:"Primal", icon:"⚡", description:"Primal app", category:"Other", notes:"", appStoreUrl:""},
+            {id:174, name:"Prime Video", icon:"📺", description:"Amazon Prime Video", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:175, name:"Proton Mail", icon:"✉️", description:"Secure email", category:"Communication", notes:"", appStoreUrl:""},
+            {id:176, name:"ProTube", icon:"▶️", description:"YouTube client", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:177, name:"Public Storage", icon:"📦", description:"Storage app", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:178, name:"QooCam", icon:"📷", description:"Camera app", category:"Creativity", notes:"", appStoreUrl:""},
+            {id:179, name:"Quest", icon:"🎮", description:"Meta Quest", category:"Games", notes:"", appStoreUrl:""},
+            // R
+            {id:180, name:"Recycle ATX", icon:"♻️", description:"Recycling app", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:181, name:"Reddit", icon:"👽", description:"Social news", category:"Social", notes:"", appStoreUrl:"https://apps.apple.com/us/app/reddit/id1064216828"},
+            {id:182, name:"Regal", icon:"🎟️", description:"Movie tickets", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:183, name:"Reminders", icon:"✅", description:"Apple Reminders", category:"Productivity", notes:"", appStoreUrl:""},
+            {id:184, name:"Research", icon:"🔬", description:"Research app", category:"Other", notes:"", appStoreUrl:""},
+            {id:185, name:"Rocket Money", icon:"💰", description:"Budgeting app", category:"Finance", notes:"", appStoreUrl:""},
+            {id:186, name:"Ruler", icon:"📏", description:"Ruler app", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:187, name:"Rumble", icon:"▶️", description:"Video platform", category:"Entertainment", notes:"", appStoreUrl:""},
+            // S
+            {id:188, name:"Safari", icon:"🧭", description:"Apple Safari", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:189, name:"SeatGeek", icon:"🎟️", description:"Event tickets", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:190, name:"Sezzle", icon:"💳", description:"Buy now, pay later", category:"Finance", notes:"", appStoreUrl:""},
+            {id:191, name:"Shazam", icon:"🎵", description:"Music identification", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:192, name:"Shop", icon:"🛍️", description:"Apple Shop", category:"Shopping", notes:"", appStoreUrl:""},
+            {id:193, name:"Shortcuts", icon:"⚡", description:"Apple Shortcuts", category:"Productivity", notes:"", appStoreUrl:""},
+            {id:194, name:"Signal", icon:"🔒", description:"Secure messaging", category:"Communication", notes:"", appStoreUrl:"https://apps.apple.com/us/app/signal-private-messenger/id874139669"},
+            {id:195, name:"Simple Server", icon:"🖥️", description:"Server app", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:196, name:"Slim Chickens", icon:"🍗", description:"Restaurant app", category:"Food", notes:"", appStoreUrl:""},
+            {id:197, name:"Snakes.io", icon:"🐍", description:"Snake game", category:"Games", notes:"", appStoreUrl:""},
+            {id:198, name:"SnapEdit", icon:"✂️", description:"Photo editor", category:"Creativity", notes:"", appStoreUrl:""},
+            {id:199, name:"Snarf's Sandwiches", icon:"🥪", description:"Restaurant app", category:"Food", notes:"", appStoreUrl:""},
+            {id:200, name:"SongShift", icon:"🎵", description:"Music transfer", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:201, name:"Sonic", icon:"🦔", description:"Sonic app", category:"Games", notes:"", appStoreUrl:""},
+            {id:202, name:"SoundCloud", icon:"🎵", description:"Music streaming", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:203, name:"Speedtest", icon:"📶", description:"Internet speed test", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:204, name:"Spotify", icon:"🎧", description:"Music streaming", category:"Entertainment", notes:"", appStoreUrl:"https://apps.apple.com/us/app/spotify-music-and-podcasts/id324684580"},
+            {id:205, name:"Starbucks", icon:"☕", description:"Coffee ordering", category:"Food", notes:"", appStoreUrl:""},
+            {id:206, name:"Steam", icon:"🎮", description:"Gaming platform", category:"Games", notes:"", appStoreUrl:""},
+            {id:207, name:"Steps", icon:"👟", description:"Step counter", category:"Health", notes:"", appStoreUrl:""},
+            {id:208, name:"Stocks", icon:"📈", description:"Apple Stocks", category:"Finance", notes:"", appStoreUrl:""},
+            {id:209, name:"Strum", icon:"🎸", description:"Music app", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:210, name:"Substack", icon:"📰", description:"Newsletter platform", category:"News", notes:"", appStoreUrl:""},
+            {id:211, name:"Subtext", icon:"📝", description:"Subtext app", category:"Other", notes:"", appStoreUrl:""},
+            {id:212, name:"Subway", icon:"🥪", description:"Sandwich ordering", category:"Food", notes:"", appStoreUrl:""},
+            {id:213, name:"Suno", icon:"🎵", description:"AI music generator", category:"Entertainment", notes:"", appStoreUrl:""},
+            // T
+            {id:214, name:"Tabs & Chords", icon:"🎸", description:"Music tabs", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:215, name:"Taco Bell", icon:"🌮", description:"Fast food ordering", category:"Food", notes:"", appStoreUrl:""},
+            {id:216, name:"TacoPalque", icon:"🌮", description:"Restaurant app", category:"Food", notes:"", appStoreUrl:""},
+            {id:217, name:"Taliscale", icon:"📏", description:"Measurement app", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:218, name:"Tapo", icon:"💡", description:"Smart home", category:"Home", notes:"", appStoreUrl:""},
+            {id:219, name:"Target", icon:"🎯", description:"Shopping app", category:"Shopping", notes:"", appStoreUrl:""},
+            {id:220, name:"Tarka Indian Kitchen", icon:"🍛", description:"Restaurant app", category:"Food", notes:"", appStoreUrl:""},
+            {id:221, name:"Teams", icon:"👥", description:"Microsoft Teams", category:"Communication", notes:"", appStoreUrl:""},
+            {id:222, name:"Tequila Lounge", icon:"🍹", description:"Restaurant app", category:"Food", notes:"", appStoreUrl:""},
+            {id:223, name:"Telegram", icon:"✈️", description:"Messaging app", category:"Communication", notes:"", appStoreUrl:"https://apps.apple.com/us/app/telegram-messenger/id686449807"},
+            {id:224, name:"TeraBox", icon:"☁️", description:"Cloud storage", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:225, name:"TestFlight", icon:"🛫", description:"Apple TestFlight", category:"Developer", notes:"", appStoreUrl:""},
+            {id:226, name:"Threema", icon:"🔒", description:"Secure messaging", category:"Communication", notes:"", appStoreUrl:""},
+            {id:227, name:"Threads", icon:"🧵", description:"Meta Threads", category:"Social", notes:"", appStoreUrl:""},
+            {id:228, name:"Ticketmaster", icon:"🎟️", description:"Event tickets", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:229, name:"Timo", icon:"⏰", description:"Timer app", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:230, name:"TikTok", icon:"🎵", description:"Short video platform", category:"Social", notes:"", appStoreUrl:"https://apps.apple.com/us/app/tiktok/id835599320"},
+            {id:231, name:"Tile", icon:"📍", description:"Item tracker", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:232, name:"Tips", icon:"💡", description:"Apple Tips", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:233, name:"Toggla Track", icon:"⏱️", description:"Time tracking", category:"Productivity", notes:"", appStoreUrl:""},
+            {id:234, name:"TorVPN", icon:"🔒", description:"VPN app", category:"Security", notes:"", appStoreUrl:""},
+            {id:235, name:"Torchy's Tacos", icon:"🌮", description:"Restaurant app", category:"Food", notes:"", appStoreUrl:""},
+            {id:236, name:"Translate", icon:"🌐", description:"Apple Translate", category:"Utilities", notes:"", appStoreUrl:""},
+            {id:237, name:"TREASURE CRUISE", icon:"🚢", description:"Game", category:"Games", notes:"", appStoreUrl:""},
+            {id:238, name:"Tubi", icon:"📺", description:"Free streaming", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:239, name:"Tuner", icon:"🎸", description:"Guitar tuner", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:240, name:"TurboTax", icon:"💰", description:"Tax preparation", category:"Finance", notes:"", appStoreUrl:""},
+            {id:241, name:"TV", icon:"📺", description:"Apple TV", category:"Entertainment", notes:"", appStoreUrl:""},
+            // U
+            {id:242, name:"UHCU Mobile", icon:"🏦", description:"Banking app", category:"Finance", notes:"", appStoreUrl:""},
+            // V
+            {id:243, name:"Venmo", icon:"💸", description:"Peer-to-peer payments", category:"Finance", notes:"", appStoreUrl:"https://apps.apple.com/us/app/venmo/id351727428"},
+            {id:244, name:"VLC", icon:"▶️", description:"Media player", category:"Entertainment", notes:"", appStoreUrl:""},
+            {id:245, name:"Voice Memos", icon:"🎤", description:"Apple Voice Memos", category:"Utilities", notes:"", appStoreUrl:""},
+            // W
+            {id:246, name:"Wallet", icon:"👛", description:"Apple Wallet", category:"Finance", notes:"", appStoreUrl:""},
+            {id:247, name:"Walmart", icon:"🛒", description:"Shopping app", category:"Shopping", notes:"", appStoreUrl:""},
+            {id:248, name:"Wavesr", icon:"🌊", description:"Waves app", category:"Other", notes:"", appStoreUrl:""},
+            {id:249, name:"Weather", icon:"☀️", description:"Apple Weather", category:"Weather", notes:"", appStoreUrl:""},
+            {id:250, name:"Weebat", icon:"🦇", description:"Weebat app", category:"Other", notes:"", appStoreUrl:""},
+            {id:251, name:"Weight Gurus", icon:"⚖️", description:"Weight tracking", category:"Health", notes:"", appStoreUrl:""},
+            {id:252, name:"Wendy's", icon:"🍔", description:"Fast food ordering", category:"Food", notes:"", appStoreUrl:""},
+            {id:253, name:"Werard", icon:"📱", description:"Werard app", category:"Other", notes:"", appStoreUrl:""},
+            {id:254, name:"WhatsApp", icon:"💚", description:"Messaging & calls", category:"Communication", notes:"", appStoreUrl:"https://apps.apple.com/us/app/whatsapp-messenger/id310633997"},
+            {id:255, name:"Wingstop", icon:"🍗", description:"Fast food ordering", category:"Food", notes:"", appStoreUrl:""},
+            {id:256, name:"Workbench", icon:"🔧", description:"Workbench app", category:"Other", notes:"", appStoreUrl:""},
+            {id:257, name:"X", icon:"𝕏", description:"X (formerly Twitter)", category:"Social", notes:"", appStoreUrl:""},
+            // Y
+            {id:258, name:"Yelp", icon:"🍽️", description:"Reviews & recommendations", category:"Shopping", notes:"", appStoreUrl:""},
+            {id:259, name:"Yogo", icon:"🧘", description:"Yogo app", category:"Other", notes:"", appStoreUrl:""},
+            {id:260, name:"YouTube", icon:"▶️", description:"Video streaming", category:"Entertainment", notes:"", appStoreUrl:"https://apps.apple.com/us/app/youtube/id544007664"},
+            {id:261, name:"YsTube", icon:"▶️", description:"YouTube client", category:"Entertainment", notes:"", appStoreUrl:""},
+            // Z
+            {id:262, name:"Z", icon:"🇿", description:"Z app", category:"Other", notes:"", appStoreUrl:""},
+            {id:263, name:"Zoho", icon:"📊", description:"Business suite", category:"Productivity", notes:"", appStoreUrl:""},
+            {id:264, name:"Zoho Radio", icon:"📻", description:"Radio app", category:"Entertainment", notes:"", appStoreUrl:""},
+            // Hidden / System
+            {id:265, name:"Hidden Apps", icon:"👁️", description:"Hidden system apps", category:"System", notes:"", appStoreUrl:""},
+        ];
+
+        let editingId = null;
+        let currentPreviewApp = null;
+
+        function renderApps(filteredApps = apps) {
+            const container = document.getElementById('appsContainer');
+            container.innerHTML = '';
+            
+            const grouped = {};
+            filteredApps.forEach(app => {
+                const letter = app.name[0].toUpperCase();
+                if (!grouped[letter]) grouped[letter] = [];
+                grouped[letter].push(app);
+            });
+            
+            Object.keys(grouped).sort().forEach(letter => {
+                let html = `<div class="mb-8">
+                    <div class="px-4 py-2 mb-3 flex items-center gap-x-2 bg-zinc-900 rounded-t-3xl">
+                        <span class="font-bold text-lg">${letter}</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">`;
+                
+                grouped[letter].forEach(app => {
+                    html += `
+                        <div class="app-card bg-zinc-900 border border-zinc-800 rounded-3xl p-4 flex gap-x-4 cursor-pointer" onclick="showPreview(${app.id})">
+                            <div class="w-14 h-14 flex-shrink-0 rounded-2xl overflow-hidden flex items-center justify-center text-4xl bg-zinc-800">
+                                ${app.icon ? (app.icon.startsWith('http') ? `<img src="${app.icon}" class="w-full h-full object-cover">` : app.icon) : '📱'}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="font-semibold truncate">${app.name}</div>
+                                <div class="text-sm text-zinc-400 line-clamp-2 mt-0.5">${app.description || ''}</div>
+                                
+                                ${app.appStoreUrl ? `
+                                    <button onclick="event.stopImmediatePropagation(); window.open('${app.appStoreUrl}', '_blank')" 
+                                            class="mt-3 text-xs bg-emerald-900 hover:bg-emerald-800 text-emerald-300 px-3 py-1 rounded-2xl flex items-center gap-x-1 w-fit">
+                                        <i class="fa-solid fa-external-link-alt text-xs"></i>
+                                        <span>App Store</span>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>`;
+                });
+                
+                html += `</div></div>`;
+                container.innerHTML += html;
+            });
+        }
+
+        function showPreview(id) {
+            const app = apps.find(a => a.id === id);
+            if (!app) return;
+            currentPreviewApp = app;
+            
+            const content = document.getElementById('previewContent');
+            content.innerHTML = `
+                <div class="flex gap-x-5">
+                    <div class="w-20 h-20 flex-shrink-0 rounded-3xl overflow-hidden flex items-center justify-center text-6xl bg-zinc-800">
+                        ${app.icon ? (app.icon.startsWith('http') ? `<img src="${app.icon}" class="w-full h-full object-cover">` : app.icon) : '📱'}
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-bold text-2xl">${app.name}</div>
+                        <div class="text-emerald-400 text-sm">${app.category}</div>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <div class="text-xs text-zinc-400 mb-1">DESCRIPTION</div>
+                    <div class="text-sm">${app.description || 'No description added yet.'}</div>
+                </div>
+                
+                ${app.notes ? `
+                    <div class="mt-5">
+                        <div class="text-xs text-zinc-400 mb-1">YOUR NOTES</div>
+                        <div class="text-sm bg-zinc-950 border border-zinc-800 p-3 rounded-2xl">${app.notes}</div>
+                    </div>
+                ` : ''}
+            `;
+            
+            const openBtn = document.getElementById('openStoreBtn');
+            openBtn.style.display = app.appStoreUrl ? 'flex' : 'none';
+            
+            document.getElementById('previewModal').classList.remove('hidden');
+            document.getElementById('previewModal').classList.add('flex');
+        }
+
+        function openInAppStore() {
+            if (currentPreviewApp && currentPreviewApp.appStoreUrl) {
+                window.open(currentPreviewApp.appStoreUrl, '_blank');
+            }
+        }
+
+        function hidePreviewModal() {
+            document.getElementById('previewModal').classList.remove('flex');
+            document.getElementById('previewModal').classList.add('hidden');
+        }
+
+        function filterApps() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = apps.filter(a => 
+                a.name.toLowerCase().includes(term) || 
+                (a.description && a.description.toLowerCase().includes(term))
+            );
+            renderApps(filtered);
+        }
+
+        function showAddModal() {
+            alert("Add/Edit modal would open here (full version available if needed)");
+        }
+
+        function init() {
+            const saved = localStorage.getItem('myAppCatalog');
+            if (saved) apps = JSON.parse(saved);
+            renderApps();
+        }
+        
+        window.onload = init;
+    </script>
+</body>
+</html>
