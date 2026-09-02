@@ -1,8 +1,9 @@
 export function createInput(car, opts) {
   const keys = new Set();
   const pedals = { clutch: null, brake: null, throttle: null };
-  let draggingPedal = null;
+  const pointers = new Map();
   let draggingKnob = false;
+  let rlockHeld = false;
 
   window.addEventListener("keydown", (e) => {
     if (e.repeat && [" ", "Control", "Shift", "c", "C"].includes(e.key)) e.preventDefault();
@@ -21,12 +22,27 @@ export function createInput(car, opts) {
   document.querySelectorAll(".pedal-arm").forEach((el) => {
     const name = el.parentElement.dataset.pedal;
     const go = (ev) => {
-      draggingPedal = name;
-      pedals[name] = pedalFromY(el, ev.clientY ?? ev.touches?.[0].clientY);
+      const y = ev.clientY ?? ev.touches?.[0]?.clientY;
+      if (y == null) return;
+      pedals[name] = pedalFromY(el, y);
     };
-    el.addEventListener("pointerdown", (ev) => { el.setPointerCapture(ev.pointerId); go(ev); });
-    el.addEventListener("pointermove", (ev) => { if (draggingPedal === name) go(ev); });
-    el.addEventListener("pointerup", () => { draggingPedal = null; pedals[name] = null; });
+    el.addEventListener("pointerdown", (ev) => {
+      ev.preventDefault();
+      el.setPointerCapture(ev.pointerId);
+      pointers.set(ev.pointerId, name);
+      go(ev);
+    });
+    el.addEventListener("pointermove", (ev) => {
+      if (pointers.get(ev.pointerId) !== name) return;
+      go(ev);
+    });
+    const end = (ev) => {
+      if (pointers.get(ev.pointerId) !== name) return;
+      pointers.delete(ev.pointerId);
+      if (![...pointers.values()].includes(name)) pedals[name] = null;
+    };
+    el.addEventListener("pointerup", end);
+    el.addEventListener("pointercancel", end);
   });
 
   window.addEventListener("wheel", (e) => {
@@ -66,9 +82,9 @@ export function createInput(car, opts) {
   return {
     keys,
     pedals,
-    draggingKnob,
     setDraggingKnob(v) { draggingKnob = v; },
     isDraggingKnob() { return draggingKnob; },
+    setReverseLock(v) { rlockHeld = v; },
     held,
     poll(dt) {
       const gp = readGamepad();
@@ -93,7 +109,7 @@ export function createInput(car, opts) {
       if (pedals.brake != null) car.brake = pedals.brake;
       else car.brake = approach(car.brake, brTarget, dt * 5);
 
-      car.reverseLock = held("q", "Q") || gp?.reverseLock;
+      car.reverseLock = held("q", "Q") || gp?.reverseLock || rlockHeld;
       if (!opts.autoSteer()) {
         const l = held("a", "A");
         const r = held("d", "D");
