@@ -346,21 +346,37 @@ body.mode-mobile .help-pc { display: none; }
 
 /* —— Mobile cockpit —— */
 html.mode-mobile, html.mode-mobile body {
-  height: var(--app-h, 100svh);
-  max-height: var(--app-h, 100svh);
   overflow: hidden;
   overscroll-behavior: none;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 body.mode-mobile {
   padding: 0;
 }
 body.mode-mobile #app {
+  position: fixed;
+  top: var(--app-top, 0px);
+  left: var(--app-left, 0px);
+  width: var(--app-w, 100%);
   height: var(--app-h, 100svh);
   max-height: var(--app-h, 100svh);
   grid-template-columns: 1fr;
   grid-template-rows: auto minmax(0, 1fr);
   grid-template-areas: "top" "cockpit";
   overflow: hidden;
+}
+body.mode-mobile #gauges,
+body.mode-mobile #road {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  min-width: 0;
+  min-height: 0;
 }
 body.mode-mobile .topbar {
   padding: 0.25rem 0.45rem;
@@ -372,7 +388,8 @@ body.mode-mobile .brand div span,
 body.mode-mobile .brand strong { display: none; }
 body.mode-mobile .logo { width: 26px; height: 26px; font-size: 0.7rem; }
 body.mode-mobile .hud-pills { flex-wrap: nowrap; min-width: 0; }
-body.mode-mobile .pill.warn { display: none; }
+body.mode-mobile .pill.warn,
+body.mode-mobile #pill-smooth { display: none; }
 body.mode-mobile .pill { min-width: 44px; padding: 0.08rem 0.35rem; }
 body.mode-mobile .pill b { font-size: 0.9rem; }
 body.mode-mobile .ghost { padding: 0.3rem 0.5rem; min-height: 32px; flex: 0 0 auto; }
@@ -453,46 +470,49 @@ body.mode-mobile #road, body.mode-mobile #gate, body.mode-mobile .pedal-arm { to
 
 @media (orientation: portrait) {
   body.mode-mobile .cockpit {
-    grid-template-rows: minmax(0, 0.16fr) minmax(0, 0.84fr);
-  }
-  body.mode-mobile .dash {
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows:
-      minmax(0, 0.30fr)
-      minmax(0, 0.40fr)
-      minmax(84px, 0.30fr);
+      minmax(44px, 0.14fr)
+      minmax(88px, 0.24fr)
+      auto
+      minmax(90px, 0.28fr)
+      minmax(86px, 0.22fr);
+    gap: 0.2rem;
+    padding: 0.15rem 0.35rem 0.2rem;
+    min-height: 0;
     overflow: hidden;
   }
+  body.mode-mobile .dash,
+  body.mode-mobile .center-stack { display: contents; }
+  body.mode-mobile .windshield-wrap { grid-column: 1; grid-row: 1; min-height: 0; overflow: hidden; }
   body.mode-mobile #gauges {
     display: block !important;
-    grid-row: 1;
+    grid-column: 1;
+    grid-row: 2;
     width: 100%;
     height: 100%;
     min-height: 0;
-    max-height: none;
+    max-height: 100%;
   }
-  body.mode-mobile .center-stack {
-    grid-row: 2;
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
-    min-height: 0;
-    overflow: hidden;
-  }
+  body.mode-mobile .ignition-row { grid-column: 1; grid-row: 3; }
   body.mode-mobile .shifter-block {
+    grid-column: 1;
+    grid-row: 4;
     min-height: 0;
     overflow: hidden;
     justify-content: center;
   }
   body.mode-mobile #gate {
-    width: min(152px, 46vw);
-    height: min(148px, 100%);
-    max-height: 148px;
+    width: min(140px, 44vw);
+    height: 100%;
+    max-height: 140px;
   }
   body.mode-mobile .pedal-block {
-    grid-row: 3;
+    grid-column: 1;
+    grid-row: 5;
     z-index: 3;
-    min-height: 84px;
+    min-height: 0;
     background: linear-gradient(#241a14, #140f0c);
   }
   body.mode-mobile .pedal[data-pedal="clutch"],
@@ -500,13 +520,14 @@ body.mode-mobile #road, body.mode-mobile #gate, body.mode-mobile .pedal-arm { to
   body.mode-mobile .pedal[data-pedal="brake"] { flex: 0.7; }
   body.mode-mobile .pedal-arm,
   body.mode-mobile .pedal-arm.wide {
-    min-height: 56px;
+    min-height: 48px;
     height: 100%;
   }
   body.mode-mobile .shift-hint { display: none !important; }
   body.mode-mobile .winds-hud { display: none; }
   body.mode-mobile #btn-units,
-  body.mode-mobile #btn-mute { display: none !important; }
+  body.mode-mobile #btn-mute,
+  body.mode-mobile #btn-help { display: none !important; }
 }
 
 @media (orientation: landscape) {
@@ -531,7 +552,9 @@ body.mode-mobile #road, body.mode-mobile #gate, body.mode-mobile .pedal-arm { to
     grid-row: 2;
     height: 100%;
     min-height: 0;
+    max-height: 100%;
     width: 100%;
+    overflow: hidden;
   }
   body.mode-mobile .pedal[data-pedal="clutch"] {
     grid-column: 1;
