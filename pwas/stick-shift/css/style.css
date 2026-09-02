@@ -160,10 +160,16 @@ body.mode-mobile .help-pc { display: none; }
 .cockpit {
   grid-area: cockpit;
   display: grid;
+  grid-template-columns: 1.3fr 0.9fr 0.6fr 0.3fr;
   grid-template-rows: 1fr auto;
   min-height: 0;
   background: #0b0a09;
 }
+.windshield-wrap { grid-column: 1 / -1; grid-row: 1; }
+#gauges { grid-column: 1; grid-row: 2; }
+.center-stack { grid-column: 2; grid-row: 2; }
+.pedal-left { grid-column: 3; grid-row: 2; }
+.pedal-right { grid-column: 4; grid-row: 2; }
 .windshield-wrap { position: relative; min-height: 0; overflow: hidden; }
 #road { width: 100%; height: 100%; display: block; }
 .hood {
@@ -210,17 +216,12 @@ body.mode-mobile .help-pc { display: none; }
   background: white; left: 42%;
 }
 
-.dash {
-  display: grid;
-  grid-template-columns: 1.3fr 0.9fr 0.9fr;
-  gap: 0.6rem;
-  padding: 0.6rem 0.8rem 0.8rem;
-  background:
-    linear-gradient(#241a14, #140f0c);
+#gauges, .center-stack, .pedal-left, .pedal-right {
+  background: linear-gradient(#241a14, #140f0c);
   border-top: 1px solid #3a2c22;
-  align-items: stretch;
+  min-height: 0;
 }
-#gauges { width: 100%; height: 220px; }
+#gauges { width: 100%; height: 220px; padding: 0.4rem; box-sizing: border-box; }
 
 .center-stack { display: flex; flex-direction: column; gap: 0.4rem; }
 .ignition-row { display: flex; gap: 0.4rem; align-items: center; }
@@ -256,7 +257,7 @@ body.mode-mobile .help-pc { display: none; }
 .shift-hint { margin: 0; font-size: 0.72rem; color: var(--muted); }
 .shift-hint.dim { opacity: 0.75; }
 
-.pedal-block {
+.pedal-left, .pedal-right {
   display: flex; gap: 0.8rem; align-items: flex-end; justify-content: center;
   padding: 0.4rem 0.4rem 0;
 }
@@ -339,22 +340,20 @@ body.mode-mobile .help-pc { display: none; }
 @media (max-width: 1100px) {
   body.mode-pc #app { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; grid-template-areas: "top" "cockpit" "lesson"; }
   body.mode-pc .lesson-rail { max-height: 280px; border-left: none; border-top: 1px solid var(--line); }
-  body.mode-pc .dash { grid-template-columns: 1fr; }
+  body.mode-pc .cockpit { grid-template-columns: 1fr 1fr; }
+  body.mode-pc .windshield-wrap { grid-column: 1 / -1; }
+  body.mode-pc #gauges { grid-column: 1 / -1; height: 160px; }
+  body.mode-pc .center-stack { grid-column: 1; }
+  body.mode-pc .pedal-left { grid-column: 2; }
+  body.mode-pc .pedal-right { grid-column: 2; }
   .help-grid { grid-template-columns: 1fr; }
   .mode-pick { grid-template-columns: 1fr; }
 }
 
 /* —— Mobile cockpit —— */
-html.mode-mobile, html.mode-mobile body {
+html.mode-mobile body {
   overflow: hidden;
   overscroll-behavior: none;
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-body.mode-mobile {
-  padding: 0;
 }
 body.mode-mobile #app {
   position: fixed;
@@ -371,17 +370,19 @@ body.mode-mobile #app {
 body.mode-mobile #gauges,
 body.mode-mobile #road {
   display: block;
-  width: 100%;
-  height: 100%;
+  width: 100% !important;
+  height: 100% !important;
   max-width: 100%;
   max-height: 100%;
   min-width: 0;
-  min-height: 0;
+  min-height: 0 !important;
+  pointer-events: none;
 }
 body.mode-mobile .topbar {
   padding: 0.25rem 0.45rem;
   gap: 0.3rem;
   flex-wrap: wrap;
+  z-index: 5;
 }
 body.mode-mobile .brand { min-width: 0; gap: 0.35rem; flex: 0 0 auto; }
 body.mode-mobile .brand div span,
@@ -394,53 +395,28 @@ body.mode-mobile .pill { min-width: 44px; padding: 0.08rem 0.35rem; }
 body.mode-mobile .pill b { font-size: 0.9rem; }
 body.mode-mobile .ghost { padding: 0.3rem 0.5rem; min-height: 32px; flex: 0 0 auto; }
 body.mode-mobile .top-actions { flex-shrink: 0; }
-body.mode-mobile .cockpit {
-  min-height: 0;
-  grid-template-rows: minmax(0, 0.28fr) minmax(0, 0.72fr);
-}
-body.mode-mobile .dash {
-  min-height: 0;
-  grid-template-columns: 1fr;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: 0.25rem;
-  padding: 0.25rem 0.4rem 0.3rem;
-}
-body.mode-mobile #gauges { height: 100%; min-height: 0; }
-body.mode-mobile .bite-meter small { display: none; }
-body.mode-mobile .winds-hud { left: 8px; bottom: 8%; }
 body.mode-mobile .ignition, body.mode-mobile .handbrake, body.mode-mobile .rlock {
-  height: 40px;
+  height: 44px;
   min-width: 64px;
   font-size: 0.88rem;
   touch-action: manipulation;
+  position: relative;
+  z-index: 6;
 }
 body.mode-mobile .status-lamps { display: none; }
-body.mode-mobile .shifter-block { min-height: 0; }
-body.mode-mobile #gate {
-  width: min(240px, 78vw);
-  height: 100%;
-  max-height: 100%;
-  touch-action: none;
-}
-body.mode-mobile .pedal-block {
-  gap: 0.45rem;
-  padding: 0.1rem 0.1rem 0;
-  min-height: 0;
-}
+body.mode-mobile .shifter-block { min-height: 0; overflow: hidden; }
+body.mode-mobile #gate { touch-action: none; }
 body.mode-mobile .pedal { flex: 1; min-width: 0; }
 body.mode-mobile .pedal-arm,
 body.mode-mobile .pedal-arm.wide {
   width: 100%;
   max-width: none;
-  height: 100%;
-  min-height: 72px;
   touch-action: none;
   border-radius: 12px;
 }
 body.mode-mobile .pedal-arm i { height: 18%; }
 body.mode-mobile .pedal label { font-size: 0.8rem; }
 body.mode-mobile .pedal small { font-size: 0.65rem; }
-body.mode-mobile .shift-hint { font-size: 0.7rem; text-align: center; padding: 0 0.4rem; margin-top: 0.15rem; }
 body.mode-mobile .lesson-scrim {
   position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 14;
 }
@@ -465,136 +441,84 @@ body.mode-mobile .bite-meter { width: min(220px, 68vw); font-size: 0.72rem; }
 body.mode-mobile .alert { font-size: 0.8rem; }
 body.mode-mobile .modal-card { padding: 1rem; max-height: 85%; overflow: auto; }
 body.mode-mobile .windshield-wrap,
-body.mode-mobile .center-stack { min-height: 0; }
-body.mode-mobile #road, body.mode-mobile #gate, body.mode-mobile .pedal-arm { touch-action: none; }
+body.mode-mobile .center-stack,
+body.mode-mobile .pedal-left,
+body.mode-mobile .pedal-right { min-height: 0; overflow: hidden; }
+body.mode-mobile #gate, body.mode-mobile .pedal-arm { touch-action: none; }
+body.mode-mobile .winds-hud { display: none; }
+body.mode-mobile .shift-hint { display: none !important; }
 
 @media (orientation: portrait) {
   body.mode-mobile .cockpit {
-    display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1.3fr 0.7fr 1.3fr;
     grid-template-rows:
-      minmax(44px, 0.14fr)
-      minmax(88px, 0.24fr)
+      minmax(40px, 0.14fr)
+      minmax(96px, 0.26fr)
       auto
-      minmax(90px, 0.28fr)
-      minmax(86px, 0.22fr);
+      minmax(100px, 0.28fr)
+      minmax(90px, 0.24fr);
     gap: 0.2rem;
     padding: 0.15rem 0.35rem 0.2rem;
-    min-height: 0;
     overflow: hidden;
   }
-  body.mode-mobile .dash,
-  body.mode-mobile .center-stack { display: contents; }
-  body.mode-mobile .windshield-wrap { grid-column: 1; grid-row: 1; min-height: 0; overflow: hidden; }
-  body.mode-mobile #gauges {
-    display: block !important;
-    grid-column: 1;
-    grid-row: 2;
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    max-height: 100%;
-  }
-  body.mode-mobile .ignition-row { grid-column: 1; grid-row: 3; }
-  body.mode-mobile .shifter-block {
-    grid-column: 1;
-    grid-row: 4;
-    min-height: 0;
-    overflow: hidden;
-    justify-content: center;
+  body.mode-mobile .windshield-wrap { grid-column: 1 / -1; grid-row: 1; }
+  body.mode-mobile #gauges { grid-column: 1 / -1; grid-row: 2; height: 100% !important; }
+  body.mode-mobile .center-stack { grid-column: 1 / -1; grid-row: 3 / 5; overflow: hidden; }
+  body.mode-mobile .pedal-left { grid-column: 1 / 3; grid-row: 5; z-index: 4; }
+  body.mode-mobile .pedal-right { grid-column: 3; grid-row: 5; z-index: 4; }
+  body.mode-mobile .center-stack {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
   }
   body.mode-mobile #gate {
-    width: min(140px, 44vw);
+    width: min(140px, 42vw);
     height: 100%;
     max-height: 140px;
   }
-  body.mode-mobile .pedal-block {
-    grid-column: 1;
-    grid-row: 5;
-    z-index: 3;
-    min-height: 0;
-    background: linear-gradient(#241a14, #140f0c);
-  }
-  body.mode-mobile .pedal[data-pedal="clutch"],
-  body.mode-mobile .pedal[data-pedal="throttle"] { flex: 1.35; }
-  body.mode-mobile .pedal[data-pedal="brake"] { flex: 0.7; }
-  body.mode-mobile .pedal-arm,
-  body.mode-mobile .pedal-arm.wide {
-    min-height: 48px;
-    height: 100%;
-  }
-  body.mode-mobile .shift-hint { display: none !important; }
-  body.mode-mobile .winds-hud { display: none; }
+  body.mode-mobile .pedal-arm { min-height: 52px; height: 100%; }
   body.mode-mobile #btn-units,
   body.mode-mobile #btn-mute,
   body.mode-mobile #btn-help { display: none !important; }
 }
 
 @media (orientation: landscape) {
-  /* Left thumb = clutch/brake. Right thumb = gas, then shifter. */
   body.mode-mobile .cockpit {
-    display: grid;
-    grid-template-columns: minmax(70px, 0.72fr) minmax(0, 1.55fr) minmax(70px, 0.72fr) minmax(118px, 1.05fr);
-    grid-template-rows: minmax(0, 1.05fr) minmax(0, 1fr);
+    grid-template-columns: minmax(72px, 0.72fr) minmax(0, 1.5fr) minmax(72px, 0.72fr) minmax(120px, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1.05fr);
     gap: 0.25rem;
     padding: 0.2rem 0.3rem 0.2rem;
-  }
-  body.mode-mobile .dash { display: contents; }
-  body.mode-mobile .pedal-block { display: contents; }
-  body.mode-mobile .windshield-wrap {
-    grid-column: 2;
-    grid-row: 1;
-    min-height: 0;
-  }
-  body.mode-mobile #gauges {
-    display: block !important;
-    grid-column: 2;
-    grid-row: 2;
-    height: 100%;
-    min-height: 0;
-    max-height: 100%;
-    width: 100%;
     overflow: hidden;
   }
-  body.mode-mobile .pedal[data-pedal="clutch"] {
+  body.mode-mobile .windshield-wrap { grid-column: 2; grid-row: 1; }
+  body.mode-mobile #gauges { grid-column: 2; grid-row: 2; height: 100% !important; overflow: hidden; }
+  body.mode-mobile .pedal-left {
     grid-column: 1;
-    grid-row: 1;
-    display: flex;
+    grid-row: 1 / span 2;
     flex-direction: column;
-    min-height: 0;
+    align-items: stretch;
   }
-  body.mode-mobile .pedal[data-pedal="brake"] {
-    grid-column: 1;
-    grid-row: 2;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
-  body.mode-mobile .pedal[data-pedal="throttle"] {
+  body.mode-mobile .pedal-right {
     grid-column: 3;
     grid-row: 1 / span 2;
-    display: flex;
     flex-direction: column;
-    min-height: 0;
+    align-items: stretch;
+  }
+  body.mode-mobile .center-stack {
+    grid-column: 4;
+    grid-row: 1 / span 2;
+    overflow: hidden;
   }
   body.mode-mobile .pedal-arm,
   body.mode-mobile .pedal-arm.wide {
     flex: 1;
     min-height: 0;
     height: auto;
-    max-width: none;
-  }
-  body.mode-mobile .center-stack {
-    grid-column: 4;
-    grid-row: 1 / span 2;
-    min-height: 0;
   }
   body.mode-mobile #gate {
     width: 100%;
     height: auto;
     flex: 1;
     min-height: 0;
+    max-height: none;
   }
-  body.mode-mobile .shift-hint { display: none !important; }
-  body.mode-mobile .winds-hud { display: none; }
 }
