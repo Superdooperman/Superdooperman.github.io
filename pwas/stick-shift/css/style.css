@@ -452,9 +452,9 @@ body.mode-mobile #road, body.mode-mobile #gate, body.mode-mobile .pedal-arm { to
   body.mode-mobile .cockpit {
     display: grid;
     grid-template-columns: minmax(92px, 0.85fr) minmax(0, 1.45fr) minmax(120px, 1.05fr);
-    grid-template-rows: minmax(0, 0.42fr) minmax(0, 0.58fr);
-    gap: 0.3rem;
-    padding: 0.25rem 0.35rem 0.3rem;
+    grid-template-rows: minmax(0, 0.28fr) minmax(0, 0.72fr);
+    gap: 0.25rem;
+    padding: 0.2rem 0.3rem 0.2rem;
   }
   body.mode-mobile .dash { display: contents; }
   body.mode-mobile .windshield-wrap {
