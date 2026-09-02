@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stick Shift Simulator — Manual Transmission Trainer</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>" />
+</head>
+<body>
+  <div id="boot">
+    <div class="boot-card">
+      <p class="eyebrow">Manual transmission trainer</p>
+      <h1>Learn the stick</h1>
+      <p class="lede">
+        A full H-pattern gearbox with clutch bite, stalling, grinding, rev-matching,
+        hills, and engine sound. Keyboard, mouse, or a gamepad.
+      </p>
+      <button id="start-btn" class="primary">Ignition</button>
+      <p class="hint">Click once so the engine audio is allowed. You can mute later.</p>
+    </div>
+  </div>
+
+  <div id="app" hidden>
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo">MT</span>
+        <div>
+          <strong>Stick Shift Simulator</strong>
+          <span>6-speed · clutch required to start</span>
+        </div>
+      </div>
+      <div class="hud-pills">
+        <div class="pill"><label>Gear</label><b id="hud-gear">N</b></div>
+        <div class="pill"><label>RPM</label><b id="hud-rpm">0</b></div>
+        <div class="pill"><label>Speed</label><b id="hud-speed">0</b><small id="hud-unit">mph</small></div>
+        <div class="pill warn" id="pill-stalls"><label>Stalls</label><b id="hud-stalls">0</b></div>
+        <div class="pill warn" id="pill-grinds"><label>Grinds</label><b id="hud-grinds">0</b></div>
+        <div class="pill"><label>Smooth</label><b id="hud-smooth">100</b></div>
+      </div>
+      <div class="top-actions">
+        <button id="btn-units" class="ghost" title="Toggle mph / km/h">mph</button>
+        <button id="btn-mute" class="ghost" title="Mute engine">Mute</button>
+        <button id="btn-help" class="ghost">Controls</button>
+      </div>
+    </header>
+
+    <main class="cockpit">
+      <section class="windshield-wrap">
+        <canvas id="road"></canvas>
+        <div class="hood"></div>
+        <div id="alerts"></div>
+        <div class="winds-hud">
+          <div id="bite-meter" class="bite-meter" hidden>
+            <span>Clutch engagement</span>
+            <div class="bite-track"><i id="bite-fill"></i><em id="bite-mark"></em></div>
+            <small>Friction zone is the glowing band. That’s the bite.</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="dash">
+        <canvas id="gauges" width="720" height="280"></canvas>
+
+        <div class="center-stack">
+          <div class="ignition-row">
+            <button id="btn-start" class="ignition">START</button>
+            <button id="btn-hb" class="handbrake on" title="Handbrake">HB</button>
+            <div class="status-lamps">
+              <span id="lamp-engine" class="lamp">ENG</span>
+              <span id="lamp-hb" class="lamp on">HB</span>
+              <span id="lamp-clutch" class="lamp">CL</span>
+              <span id="lamp-rev" class="lamp">REV</span>
+            </div>
+          </div>
+          <div class="shifter-block">
+            <svg id="gate" viewBox="0 0 220 260" aria-label="H-pattern shifter">
+              <defs>
+                <linearGradient id="bootGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#3a2a22"/>
+                  <stop offset="100%" stop-color="#1a120e"/>
+                </linearGradient>
+              </defs>
+              <rect x="10" y="10" width="200" height="240" rx="18" fill="url(#bootGrad)" stroke="#5a4638" stroke-width="2"/>
+              <path d="M40 50 L40 210 M100 50 L100 210 M160 50 L160 210 M40 130 L190 130 M190 130 L190 68"
+                    fill="none" stroke="#c4a574" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M40 50 L40 210 M100 50 L100 210 M160 50 L160 210 M40 130 L190 130 M190 130 L190 68"
+                    fill="none" stroke="#2b2118" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="40" y="42" class="g">1</text>
+              <text x="100" y="42" class="g">3</text>
+              <text x="160" y="42" class="g">5</text>
+              <text x="40" y="236" class="g">2</text>
+              <text x="100" y="236" class="g">4</text>
+              <text x="160" y="236" class="g">6</text>
+              <text x="190" y="88" class="g r">R</text>
+              <circle id="knob" cx="100" cy="130" r="16" fill="#1c1c1c" stroke="#d8b07a" stroke-width="3"/>
+              <circle cx="100" cy="126" r="6" fill="#3a3a3a"/>
+            </svg>
+            <p class="shift-hint">Drag the knob · or press 1–6 / N / R</p>
+            <p class="shift-hint dim">Reverse lock: hold <kbd>Q</kbd> then <kbd>R</kbd></p>
+          </div>
+        </div>
+
+        <div class="pedal-block">
+          <div class="pedal" data-pedal="clutch">
+            <div class="pedal-arm"><i id="pedal-clutch"></i></div>
+            <label>Clutch</label>
+            <small>Ctrl / C / Space</small>
+          </div>
+          <div class="pedal" data-pedal="brake">
+            <div class="pedal-arm wide"><i id="pedal-brake"></i></div>
+            <label>Brake</label>
+            <small>S / ↓</small>
+          </div>
+          <div class="pedal" data-pedal="throttle">
+            <div class="pedal-arm"><i id="pedal-throttle"></i></div>
+            <label>Throttle</label>
+            <small>W / ↑</small>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="lesson-rail">
+      <div class="lesson-head">
+        <span class="eyebrow">Practice</span>
+        <h2 id="lesson-title">Free drive</h2>
+      </div>
+      <ol id="lesson-list"></ol>
+      <div class="lesson-body">
+        <p id="lesson-text"></p>
+        <ul id="lesson-goals"></ul>
+        <div class="lesson-progress"><i id="lesson-bar"></i></div>
+        <p class="feedback" id="lesson-feedback"></p>
+      </div>
+      <div class="toggles">
+        <label><input type="checkbox" id="opt-autosteer" checked /> Keep car in lane</label>
+        <label><input type="checkbox" id="opt-bite" /> Show bite meter</label>
+        <label><input type="checkbox" id="opt-match" checked /> Show rev-match cue</label>
+        <label><input type="checkbox" id="opt-slowclutch" checked /> Slow keyboard clutch</label>
+      </div>
+    </aside>
+  </div>
+
+  <div id="help" class="modal" hidden>
+    <div class="modal-card">
+      <h2>Controls</h2>
+      <div class="help-grid">
+        <div>
+          <h3>Pedals</h3>
+          <ul>
+            <li><kbd>Ctrl</kbd> <kbd>C</kbd> <kbd>Space</kbd> clutch in</li>
+            <li><kbd>W</kbd> / <kbd>↑</kbd> throttle</li>
+            <li><kbd>S</kbd> / <kbd>↓</kbd> brake</li>
+            <li>Drag pedals for analog bite</li>
+            <li>Mouse wheel over clutch to feather</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Gearbox</h3>
+          <ul>
+            <li><kbd>1</kbd>–<kbd>6</kbd> gears · <kbd>N</kbd> or <kbd>`</kbd> neutral</li>
+            <li><kbd>Q</kbd> + <kbd>R</kbd> reverse (lockout)</li>
+            <li>Or drag the H-pattern knob</li>
+            <li>Clutch in to shift cleanly</li>
+            <li>Rev-match to skip the grind</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Car</h3>
+          <ul>
+            <li><kbd>Enter</kbd> / START — clutch must be down</li>
+            <li><kbd>B</kbd> handbrake</li>
+            <li><kbd>A</kbd> <kbd>D</kbd> steer (if lane-keep off)</li>
+            <li>Gamepad: LT clutch, RT throttle, LB brake, A start, B HB</li>
+          </ul>
+        </div>
+      </div>
+      <button id="help-close" class="primary">Got it</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
