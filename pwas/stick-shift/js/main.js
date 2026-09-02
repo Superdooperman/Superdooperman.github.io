@@ -20,13 +20,44 @@ let unitsMph = true;
 let last = performance.now();
 let hbLatch = false;
 let startLatch = false;
+let mode = "pc";
+let booted = false;
 
 function fitCanvas(id) {
   const c = document.getElementById(id);
   const r = c.getBoundingClientRect();
   const dpr = Math.min(2, window.devicePixelRatio || 1);
-  c.width = Math.max(320, r.width * dpr);
-  c.height = Math.max(160, r.height * dpr);
+  const minH = id === "gauges" ? 80 : 160;
+  c.width = Math.max(280, r.width * dpr);
+  c.height = Math.max(minH, r.height * dpr);
+}
+
+function applyMode(next) {
+  mode = next === "mobile" ? "mobile" : "pc";
+  document.documentElement.classList.toggle("mode-mobile", mode === "mobile");
+  document.documentElement.classList.toggle("mode-pc", mode === "pc");
+  document.body.classList.toggle("mode-mobile", mode === "mobile");
+  document.body.classList.toggle("mode-pc", mode === "pc");
+  const btn = document.getElementById("btn-mode");
+  if (btn) btn.textContent = mode === "mobile" ? "Mobile" : "PC";
+  const knob = document.getElementById("knob");
+  if (knob) knob.setAttribute("r", mode === "mobile" ? "22" : "16");
+  document.getElementById("opt-slowclutch").checked = mode === "pc";
+  if (mode === "mobile") document.getElementById("opt-bite").checked = true;
+  closeLessons();
+  requestAnimationFrame(() => {
+    fitCanvas("road");
+    fitCanvas("gauges");
+  });
+}
+
+function openLessons() {
+  document.querySelector(".lesson-rail").classList.add("open");
+  document.getElementById("lesson-scrim").hidden = false;
+}
+function closeLessons() {
+  document.querySelector(".lesson-rail").classList.remove("open");
+  document.getElementById("lesson-scrim").hidden = true;
 }
 
 function renderLessons() {
@@ -41,6 +72,7 @@ function renderLessons() {
       lessons.select(i);
       renderLessons();
       refreshLessonCopy();
+      if (mode === "mobile") closeLessons();
     });
     list.appendChild(b);
   });
@@ -106,6 +138,7 @@ function setupShifter() {
     return pt.matrixTransform(svg.getScreenCTM().inverse());
   }
   svg.addEventListener("pointerdown", (ev) => {
+    ev.preventDefault();
     svg.setPointerCapture(ev.pointerId);
     input.setDraggingKnob(true);
     const p = local(ev);
@@ -156,27 +189,41 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 
-function boot() {
+function boot(nextMode = "pc") {
+  applyMode(nextMode);
   document.getElementById("boot").hidden = true;
   document.getElementById("app").hidden = false;
   audio.resume();
   fitCanvas("road");
-  window.addEventListener("resize", () => fitCanvas("road"));
-  window.addEventListener("keydown", (e) => {
-    if (e.repeat) return;
-    let g = null;
-    if (e.key === "n" || e.key === "N" || e.key === "`") g = 0;
-    else if (e.key === "r" || e.key === "R") g = -1;
-    else if (e.key >= "1" && e.key <= "6") g = Number(e.key);
-    if (g !== null) applyGear(g);
-  });
-  renderLessons();
-  setupShifter();
+  fitCanvas("gauges");
+  if (!booted) {
+    booted = true;
+    window.addEventListener("resize", () => {
+      fitCanvas("road");
+      fitCanvas("gauges");
+    });
+    window.addEventListener("keydown", (e) => {
+      if (e.repeat) return;
+      let g = null;
+      if (e.key === "n" || e.key === "N" || e.key === "`") g = 0;
+      else if (e.key === "r" || e.key === "R") g = -1;
+      else if (e.key >= "1" && e.key <= "6") g = Number(e.key);
+      if (g !== null) applyGear(g);
+    });
+    window.addEventListener("touchmove", (e) => {
+      if (mode !== "mobile") return;
+      if (e.target.closest?.(".lesson-rail, .modal-card")) return;
+      e.preventDefault();
+    }, { passive: false });
+    renderLessons();
+    setupShifter();
+    requestAnimationFrame((t) => { last = t; loop(t); });
+  }
   syncKnob(car);
-  requestAnimationFrame((t) => { last = t; loop(t); });
 }
 
-document.getElementById("start-btn").addEventListener("click", boot);
+document.getElementById("btn-pc").addEventListener("click", () => boot("pc"));
+document.getElementById("btn-mobile").addEventListener("click", () => boot("mobile"));
 document.getElementById("btn-start").addEventListener("click", () => {
   const r = tryStart(car);
   if (r.ok) { audio.start(); flash("ENGINE ON", "info"); }
@@ -199,5 +246,29 @@ document.getElementById("help-close").addEventListener("click", () => {
 document.getElementById("opt-bite").addEventListener("change", () => {
   document.getElementById("bite-meter").hidden = !document.getElementById("opt-bite").checked;
 });
+document.getElementById("btn-mode").addEventListener("click", () => {
+  applyMode(mode === "mobile" ? "pc" : "mobile");
+});
+document.getElementById("btn-lessons").addEventListener("click", () => {
+  const rail = document.querySelector(".lesson-rail");
+  if (rail.classList.contains("open")) closeLessons();
+  else openLessons();
+});
+document.getElementById("lesson-scrim").addEventListener("click", closeLessons);
+const rlock = document.getElementById("btn-rlock");
+rlock.addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+  rlock.setPointerCapture(e.pointerId);
+  rlock.classList.add("held");
+  input.setReverseLock(true);
+});
+const rlockOff = () => {
+  rlock.classList.remove("held");
+  input.setReverseLock(false);
+};
+rlock.addEventListener("pointerup", rlockOff);
+rlock.addEventListener("pointercancel", rlockOff);
 
-if (location.hash === "#play") boot();
+const hash = location.hash.replace("#", "");
+if (hash === "play" || hash === "pc") boot("pc");
+if (hash === "mobile") boot("mobile");

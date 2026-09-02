@@ -2,11 +2,9 @@
 
 A browser trainer for a 6-speed H-pattern manual. It models clutch bite, stalling, synchro grind, rev-matching, engine braking, hills, and a scored free-drive.
 
-## Play it
+## Run it
 
-Live: [https://superdooperman.github.io/pwas/stick-shift/](https://superdooperman.github.io/pwas/stick-shift/)
-
-Or from this folder:
+From this folder:
 
 ```bash
 python3 -m http.server 8765

@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <title>Stick Shift Simulator — Manual Transmission Trainer</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>" />
@@ -13,11 +15,22 @@
       <p class="eyebrow">Manual transmission trainer</p>
       <h1>Learn the stick</h1>
       <p class="lede">
-        A full H-pattern gearbox with clutch bite, stalling, grinding, rev-matching,
-        hills, and engine sound. Keyboard, mouse, or a gamepad.
+        Pick how you want to drive. Same gearbox either way — clutch bite, stalling,
+        grinding, rev-matching, and hills.
       </p>
-      <button id="start-btn" class="primary">Ignition</button>
-      <p class="hint">Click once so the engine audio is allowed. You can mute later.</p>
+      <div class="mode-pick">
+        <button id="btn-pc" class="mode-card" type="button">
+          <span class="mode-icon">PC</span>
+          <strong>PC</strong>
+          <small>Keyboard, mouse, and a wide dashboard. The original layout.</small>
+        </button>
+        <button id="btn-mobile" class="mode-card" type="button">
+          <span class="mode-icon">phone</span>
+          <strong>Mobile</strong>
+          <small>Portrait screen, analog touch pedals, and a big H-pattern for your thumbs.</small>
+        </button>
+      </div>
+      <p class="hint">Tap once so engine audio is allowed. You can switch later from the top bar.</p>
     </div>
   </div>
 
@@ -41,6 +54,8 @@
       <div class="top-actions">
         <button id="btn-units" class="ghost" title="Toggle mph / km/h">mph</button>
         <button id="btn-mute" class="ghost" title="Mute engine">Mute</button>
+        <button id="btn-lessons" class="ghost mobile-only">Practice</button>
+        <button id="btn-mode" class="ghost" title="Switch PC / Mobile">PC</button>
         <button id="btn-help" class="ghost">Controls</button>
       </div>
     </header>
@@ -66,6 +81,7 @@
           <div class="ignition-row">
             <button id="btn-start" class="ignition">START</button>
             <button id="btn-hb" class="handbrake on" title="Handbrake">HB</button>
+            <button id="btn-rlock" class="rlock mobile-only" title="Hold for reverse">R LOCK</button>
             <div class="status-lamps">
               <span id="lamp-engine" class="lamp">ENG</span>
               <span id="lamp-hb" class="lamp on">HB</span>
@@ -96,8 +112,9 @@
               <circle id="knob" cx="100" cy="130" r="16" fill="#1c1c1c" stroke="#d8b07a" stroke-width="3"/>
               <circle cx="100" cy="126" r="6" fill="#3a3a3a"/>
             </svg>
-            <p class="shift-hint">Drag the knob · or press 1–6 / N / R</p>
-            <p class="shift-hint dim">Reverse lock: hold <kbd>Q</kbd> then <kbd>R</kbd></p>
+            <p class="shift-hint pc-only">Drag the knob · or press 1–6 / N / R</p>
+            <p class="shift-hint dim pc-only">Reverse lock: hold <kbd>Q</kbd> then <kbd>R</kbd></p>
+            <p class="shift-hint mobile-only">Drag the knob with a thumb. Hold <b>R LOCK</b> for reverse.</p>
           </div>
         </div>
 
@@ -105,22 +122,26 @@
           <div class="pedal" data-pedal="clutch">
             <div class="pedal-arm"><i id="pedal-clutch"></i></div>
             <label>Clutch</label>
-            <small>Ctrl / C / Space</small>
+            <small class="pc-only">Ctrl / C / Space</small>
+            <small class="mobile-only">Slide down</small>
           </div>
           <div class="pedal" data-pedal="brake">
             <div class="pedal-arm wide"><i id="pedal-brake"></i></div>
             <label>Brake</label>
-            <small>S / ↓</small>
+            <small class="pc-only">S / ↓</small>
+            <small class="mobile-only">Slide down</small>
           </div>
           <div class="pedal" data-pedal="throttle">
             <div class="pedal-arm"><i id="pedal-throttle"></i></div>
             <label>Throttle</label>
-            <small>W / ↑</small>
+            <small class="pc-only">W / ↑</small>
+            <small class="mobile-only">Slide down</small>
           </div>
         </div>
       </section>
     </main>
 
+    <div id="lesson-scrim" class="lesson-scrim mobile-only" hidden></div>
     <aside class="lesson-rail">
       <div class="lesson-head">
         <span class="eyebrow">Practice</span>
@@ -145,7 +166,7 @@
   <div id="help" class="modal" hidden>
     <div class="modal-card">
       <h2>Controls</h2>
-      <div class="help-grid">
+      <div class="help-grid help-pc">
         <div>
           <h3>Pedals</h3>
           <ul>
@@ -173,6 +194,32 @@
             <li><kbd>B</kbd> handbrake</li>
             <li><kbd>A</kbd> <kbd>D</kbd> steer (if lane-keep off)</li>
             <li>Gamepad: LT clutch, RT throttle, LB brake, A start, B HB</li>
+          </ul>
+        </div>
+      </div>
+      <div class="help-grid help-mobile">
+        <div>
+          <h3>Pedals (two thumbs)</h3>
+          <ul>
+            <li>Slide a pedal <b>down</b> to press it</li>
+            <li>Hold clutch with one thumb, gas with the other to pull away</li>
+            <li>Find the bite by easing clutch up while giving a little gas</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Shifter</h3>
+          <ul>
+            <li>Drag the knob through the H-pattern</li>
+            <li>Clutch must be down to shift cleanly</li>
+            <li>Hold <b>R LOCK</b>, then drag to R for reverse</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Car</h3>
+          <ul>
+            <li><b>START</b> — clutch must be on the floor</li>
+            <li><b>HB</b> handbrake</li>
+            <li><b>Practice</b> opens the lesson list</li>
           </ul>
         </div>
       </div>

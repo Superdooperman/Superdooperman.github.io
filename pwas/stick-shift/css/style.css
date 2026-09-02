@@ -55,6 +55,46 @@ kbd {
 .boot-card h1 { font-size: 2.4rem; margin: 0 0 0.7rem; letter-spacing: -0.03em; }
 .lede { color: var(--muted); line-height: 1.5; }
 .hint { color: var(--muted); font-size: 0.85rem; }
+.mode-pick {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+  margin: 1.1rem 0 0.8rem;
+}
+.mode-card {
+  text-align: left;
+  background: #1c1612;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1rem 1rem 1.1rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.mode-card:hover, .mode-card:focus {
+  border-color: var(--amber-dim);
+  background: #241c16;
+}
+.mode-card strong { font-size: 1.15rem; }
+.mode-card small { color: var(--muted); line-height: 1.35; }
+.mode-icon {
+  display: inline-grid; place-items: center;
+  width: 2.4rem; height: 2.4rem; margin-bottom: 0.2rem;
+  border-radius: 8px; background: #2a211a; color: var(--amber);
+  font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.mobile-only { display: none !important; }
+body.mode-mobile .mobile-only { display: revert !important; }
+body.mode-mobile button.mobile-only,
+body.mode-mobile .ghost.mobile-only { display: inline-flex !important; }
+body.mode-mobile .rlock.mobile-only { display: inline-block !important; }
+body.mode-mobile .pc-only { display: none !important; }
+body.mode-mobile .mobile-only[hidden] { display: none !important; }
+body.mode-pc .help-mobile { display: none; }
+body.mode-mobile .help-pc { display: none; }
 .primary {
   background: linear-gradient(#f3c14e, #c88812);
   color: #1a1208;
@@ -194,6 +234,11 @@ kbd {
 .ignition:active { transform: translateY(1px); }
 .handbrake { background: #3a1515; color: #f8b; border: 1px solid #833; }
 .handbrake.on { background: #a31b1b; color: white; box-shadow: 0 0 10px #e23b32aa; }
+.rlock {
+  min-width: 72px; height: 36px; border-radius: 8px; cursor: pointer; font-weight: 800;
+  background: #1a1a22; color: #bbb; border: 1px solid #555;
+}
+.rlock.held { background: var(--red); color: white; border-color: var(--red); }
 .status-lamps { display: flex; gap: 0.3rem; margin-left: auto; }
 .lamp {
   font-size: 0.65rem; letter-spacing: 0.08em;
@@ -279,8 +324,128 @@ kbd {
 .help-grid h3 { margin: 0 0 0.3rem; color: var(--amber); font-size: 0.9rem; }
 
 @media (max-width: 1100px) {
-  #app { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; grid-template-areas: "top" "cockpit" "lesson"; }
-  .lesson-rail { max-height: 280px; border-left: none; border-top: 1px solid var(--line); }
-  .dash { grid-template-columns: 1fr; }
+  body.mode-pc #app { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; grid-template-areas: "top" "cockpit" "lesson"; }
+  body.mode-pc .lesson-rail { max-height: 280px; border-left: none; border-top: 1px solid var(--line); }
+  body.mode-pc .dash { grid-template-columns: 1fr; }
   .help-grid { grid-template-columns: 1fr; }
+  .mode-pick { grid-template-columns: 1fr; }
+}
+
+/* —— Mobile cockpit —— */
+html.mode-mobile, html.mode-mobile body {
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+body.mode-mobile {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+body.mode-mobile #app {
+  height: 100%;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr;
+  grid-template-areas: "top" "cockpit";
+}
+body.mode-mobile .topbar {
+  padding: 0.35rem 0.55rem;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+body.mode-mobile .brand { min-width: 0; gap: 0.4rem; }
+body.mode-mobile .brand div span { display: none; }
+body.mode-mobile .logo { width: 28px; height: 28px; font-size: 0.75rem; }
+body.mode-mobile .pill.warn { display: none; }
+body.mode-mobile .pill { min-width: 48px; padding: 0.12rem 0.4rem; }
+body.mode-mobile .pill b { font-size: 0.95rem; }
+body.mode-mobile .ghost { padding: 0.4rem 0.65rem; min-height: 36px; }
+body.mode-mobile .cockpit {
+  grid-template-rows: minmax(120px, 28dvh) 1fr;
+}
+body.mode-mobile .dash {
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto 1fr;
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem calc(0.5rem + env(safe-area-inset-bottom));
+}
+body.mode-mobile #gauges { height: 96px; }
+body.mode-mobile .bite-meter small { display: none; }
+body.mode-mobile .winds-hud { left: 8px; bottom: 8%; }
+body.mode-mobile .brand strong { font-size: 0.9rem; }
+body.mode-mobile .ignition, body.mode-mobile .handbrake, body.mode-mobile .rlock {
+  height: 44px;
+  min-width: 72px;
+  font-size: 0.95rem;
+}
+body.mode-mobile .status-lamps { display: none; }
+body.mode-mobile .shifter-block { min-height: 0; }
+body.mode-mobile #gate {
+  width: min(280px, 86vw);
+  height: min(38dvh, 280px);
+  touch-action: none;
+}
+body.mode-mobile .pedal-block {
+  gap: 0.7rem;
+  padding: 0.2rem 0.2rem 0.15rem;
+}
+body.mode-mobile .pedal { flex: 1; }
+body.mode-mobile .pedal-arm,
+body.mode-mobile .pedal-arm.wide {
+  width: 100%;
+  max-width: 110px;
+  height: min(22dvh, 170px);
+  touch-action: none;
+  border-radius: 12px;
+}
+body.mode-mobile .pedal-arm i { height: 36px; }
+body.mode-mobile .pedal label { font-size: 0.9rem; }
+body.mode-mobile .shift-hint { font-size: 0.78rem; text-align: center; padding: 0 0.5rem; }
+body.mode-mobile .lesson-scrim {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 14;
+}
+body.mode-mobile .lesson-scrim:not([hidden]) { display: block !important; }
+body.mode-mobile .lesson-rail {
+  position: fixed;
+  z-index: 16;
+  left: 0; right: 0; bottom: 0;
+  max-height: 72dvh;
+  border-left: none;
+  border-top: 1px solid var(--line);
+  border-radius: 18px 18px 0 0;
+  transform: translateY(110%);
+  transition: transform 0.22s ease;
+  box-shadow: 0 -12px 40px rgba(0,0,0,0.4);
+}
+body.mode-mobile .lesson-rail.open { transform: none; }
+body.mode-mobile #lesson-list button { padding: 0.7rem 0.65rem; font-size: 1rem; }
+body.mode-mobile .lesson-rail,
+body.mode-mobile .modal-card { touch-action: pan-y; }
+body.mode-mobile .bite-meter { width: min(240px, 70vw); font-size: 0.75rem; }
+body.mode-mobile .winds-hud { left: 10px; bottom: 10%; }
+body.mode-mobile .alert { font-size: 0.85rem; }
+body.mode-mobile .modal-card { padding: 1rem; max-height: 88dvh; overflow: auto; }
+
+@media (orientation: portrait) {
+  body.mode-mobile #gauges { display: none; }
+  body.mode-mobile .dash { grid-template-rows: auto 1fr auto; }
+  body.mode-mobile #gate { height: min(34dvh, 250px); }
+  body.mode-mobile .pedal-arm,
+  body.mode-mobile .pedal-arm.wide { height: min(18dvh, 150px); }
+  body.mode-mobile .cockpit { grid-template-rows: minmax(110px, 24dvh) 1fr; }
+}
+
+@media (orientation: landscape) {
+  body.mode-mobile .cockpit {
+    grid-template-rows: minmax(90px, 34dvh) 1fr;
+  }
+  body.mode-mobile .dash {
+    grid-template-columns: 1fr 1.15fr 1fr;
+    grid-template-rows: 1fr;
+    align-items: stretch;
+  }
+  body.mode-mobile #gauges { height: 100%; min-height: 120px; }
+  body.mode-mobile #gate { height: min(52dvh, 260px); width: min(220px, 100%); }
+  body.mode-mobile .pedal-arm,
+  body.mode-mobile .pedal-arm.wide { height: min(36dvh, 150px); }
 }
