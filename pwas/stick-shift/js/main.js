@@ -20,12 +20,14 @@ function syncViewport() {
   const h = Math.round(vv?.height || window.innerHeight);
   const w = Math.round(vv?.width || window.innerWidth);
   const top = Math.round(vv?.offsetTop || 0);
-  const left = Math.round(vv?.offsetLeft || 0);
   const root = document.documentElement;
   root.style.setProperty("--app-h", `${h}px`);
-  root.style.setProperty("--app-w", `${w}px`);
   root.style.setProperty("--app-top", `${top}px`);
-  root.style.setProperty("--app-left", `${left}px`);
+  const land = w > h + 20;
+  document.body.classList.toggle("is-landscape", land);
+  document.body.classList.toggle("is-portrait", !land);
+  document.documentElement.classList.toggle("is-landscape", land);
+  document.documentElement.classList.toggle("is-portrait", !land);
   if (booted) {
     fitCanvas("road");
     fitCanvas("gauges");
@@ -217,8 +219,11 @@ function boot(nextMode = "pc") {
   if (!booted) {
     booted = true;
     window.addEventListener("resize", syncViewport);
+    window.addEventListener("orientationchange", () => setTimeout(syncViewport, 150));
+    window.addEventListener("pageshow", syncViewport);
     window.visualViewport?.addEventListener("resize", syncViewport);
     window.visualViewport?.addEventListener("scroll", syncViewport);
+    screen.orientation?.addEventListener("change", () => setTimeout(syncViewport, 80));
     window.addEventListener("keydown", (e) => {
       if (e.repeat) return;
       let g = null;
