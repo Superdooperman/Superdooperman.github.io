@@ -12,7 +12,18 @@ const opts = {
   bite: () => document.getElementById("opt-bite").checked,
   match: () => document.getElementById("opt-match").checked,
   slowClutch: () => document.getElementById("opt-slowclutch").checked,
+  stickyPedals: () => document.body.classList.contains("mode-mobile"),
 };
+
+function syncViewport() {
+  const vv = window.visualViewport;
+  const h = Math.round(vv?.height || window.innerHeight);
+  document.documentElement.style.setProperty("--app-h", `${h}px`);
+  if (booted) {
+    fitCanvas("road");
+    fitCanvas("gauges");
+  }
+}
 const input = createInput(car, opts);
 const lessons = createLessons(car);
 
@@ -45,6 +56,7 @@ function applyMode(next) {
   document.getElementById("opt-slowclutch").checked = mode === "pc";
   if (mode === "mobile") document.getElementById("opt-bite").checked = true;
   closeLessons();
+  syncViewport();
   requestAnimationFrame(() => {
     fitCanvas("road");
     fitCanvas("gauges");
@@ -198,10 +210,9 @@ function boot(nextMode = "pc") {
   fitCanvas("gauges");
   if (!booted) {
     booted = true;
-    window.addEventListener("resize", () => {
-      fitCanvas("road");
-      fitCanvas("gauges");
-    });
+    window.addEventListener("resize", syncViewport);
+    window.visualViewport?.addEventListener("resize", syncViewport);
+    window.visualViewport?.addEventListener("scroll", syncViewport);
     window.addEventListener("keydown", (e) => {
       if (e.repeat) return;
       let g = null;
@@ -224,10 +235,14 @@ function boot(nextMode = "pc") {
 
 document.getElementById("btn-pc").addEventListener("click", () => boot("pc"));
 document.getElementById("btn-mobile").addEventListener("click", () => boot("mobile"));
-document.getElementById("btn-start").addEventListener("click", () => {
+function ignition() {
   const r = tryStart(car);
   if (r.ok) { audio.start(); flash("ENGINE ON", "info"); }
   else flash(r.reason, "info");
+}
+document.getElementById("btn-start").addEventListener("pointerup", (e) => {
+  if (e.button) return;
+  ignition();
 });
 document.getElementById("btn-hb").addEventListener("click", () => { car.handbrake = !car.handbrake; });
 document.getElementById("btn-units").addEventListener("click", (e) => {
@@ -270,5 +285,6 @@ rlock.addEventListener("pointerup", rlockOff);
 rlock.addEventListener("pointercancel", rlockOff);
 
 const hash = location.hash.replace("#", "");
+syncViewport();
 if (hash === "play" || hash === "pc") boot("pc");
 if (hash === "mobile") boot("mobile");

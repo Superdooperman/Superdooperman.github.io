@@ -206,7 +206,7 @@ export function step(car, dt) {
 
 export function tryStart(car) {
   if (car.engineOn) return { ok: false, reason: "Already running" };
-  if (car.clutch < 0.75) return { ok: false, reason: "Clutch to the floor to start" };
+  if (car.clutch < 0.62) return { ok: false, reason: "Clutch to the floor to start" };
   car.engineOn = true;
   car.rpm = IDLE;
   return { ok: true };

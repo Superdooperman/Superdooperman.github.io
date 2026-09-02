@@ -208,9 +208,15 @@ export function updateDom(car, unitsMph) {
   document.getElementById("hud-stalls").textContent = car.stallCount;
   document.getElementById("hud-grinds").textContent = car.grindCount;
   document.getElementById("hud-smooth").textContent = Math.round(car.smoothness).toString();
-  document.getElementById("pedal-clutch").style.transform = `translateY(${car.clutch * 88}px)`;
-  document.getElementById("pedal-brake").style.transform = `translateY(${car.brake * 88}px)`;
-  document.getElementById("pedal-throttle").style.transform = `translateY(${car.throttle * 88}px)`;
+  const setPos = (id, v) => {
+    const pad = document.getElementById(id);
+    pad.style.setProperty("--pos", String(v));
+    pad.parentElement?.style.setProperty("--pos", String(v));
+  };
+  setPos("pedal-clutch", car.clutch);
+  setPos("pedal-brake", car.brake);
+  setPos("pedal-throttle", car.throttle);
+  document.querySelector("[data-pedal='clutch']")?.classList.toggle("floored", car.clutch >= 0.62);
   document.getElementById("btn-hb").classList.toggle("on", car.handbrake);
   document.getElementById("lamp-engine").classList.toggle("on", car.engineOn);
   document.getElementById("lamp-hb").classList.toggle("on", car.handbrake);
