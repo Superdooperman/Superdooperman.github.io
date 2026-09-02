@@ -1,6 +1,7 @@
 export function createInput(car, opts) {
   const keys = new Set();
-  const pedals = { clutch: null, brake: null, throttle: null };
+  const heldPedal = { clutch: null, brake: null, throttle: null };
+  const sticky = { clutch: 0, brake: 0, throttle: 0 };
   const pointers = new Map();
   let draggingKnob = false;
   let rlockHeld = false;
@@ -13,9 +14,9 @@ export function createInput(car, opts) {
   window.addEventListener("keyup", (e) => keys.delete(e.key));
   window.addEventListener("blur", () => keys.clear());
 
-  function pedalFromY(el, clientY) {
+  function valueFromY(el, clientY) {
     const r = el.getBoundingClientRect();
-    const t = (clientY - r.top) / r.height;
+    const t = (clientY - r.top) / Math.max(1, r.height);
     return Math.max(0, Math.min(1, t));
   }
 
@@ -24,7 +25,9 @@ export function createInput(car, opts) {
     const go = (ev) => {
       const y = ev.clientY ?? ev.touches?.[0]?.clientY;
       if (y == null) return;
-      pedals[name] = pedalFromY(el, y);
+      const v = valueFromY(el, y);
+      heldPedal[name] = v;
+      sticky[name] = v;
     };
     el.addEventListener("pointerdown", (ev) => {
       ev.preventDefault();
@@ -39,7 +42,7 @@ export function createInput(car, opts) {
     const end = (ev) => {
       if (pointers.get(ev.pointerId) !== name) return;
       pointers.delete(ev.pointerId);
-      if (![...pointers.values()].includes(name)) pedals[name] = null;
+      if (![...pointers.values()].includes(name)) heldPedal[name] = null;
     };
     el.addEventListener("pointerup", end);
     el.addEventListener("pointercancel", end);
@@ -49,7 +52,9 @@ export function createInput(car, opts) {
     const over = e.target.closest?.("[data-pedal='clutch']");
     if (!over) return;
     e.preventDefault();
-    car.clutch = Math.max(0, Math.min(1, car.clutch + Math.sign(e.deltaY) * 0.05));
+    const next = Math.max(0, Math.min(1, car.clutch + Math.sign(e.deltaY) * 0.05));
+    sticky.clutch = next;
+    car.clutch = next;
   }, { passive: false });
 
   function readGamepad() {
@@ -81,33 +86,40 @@ export function createInput(car, opts) {
 
   return {
     keys,
-    pedals,
+    sticky,
     setDraggingKnob(v) { draggingKnob = v; },
     isDraggingKnob() { return draggingKnob; },
     setReverseLock(v) { rlockHeld = v; },
     held,
     poll(dt) {
       const gp = readGamepad();
+      const stickyMode = opts.stickyPedals();
       const slow = opts.slowClutch();
 
-      let clutchTarget = held("Control", "c", "C", " ") ? 1 : 0;
-      if (gp) clutchTarget = Math.max(clutchTarget, gp.clutch);
-      if (pedals.clutch != null) car.clutch = pedals.clutch;
-      else {
-        const upRate = slow ? 1.35 : 5;
-        car.clutch = approach(car.clutch, clutchTarget, dt * (clutchTarget > car.clutch ? 8 : upRate));
-      }
+      if (stickyMode) {
+        car.clutch = sticky.clutch;
+        car.brake = sticky.brake;
+        car.throttle = sticky.throttle;
+      } else {
+        let clutchTarget = held("Control", "c", "C", " ") ? 1 : 0;
+        if (gp) clutchTarget = Math.max(clutchTarget, gp.clutch);
+        if (heldPedal.clutch != null) car.clutch = heldPedal.clutch;
+        else {
+          const upRate = slow ? 1.35 : 5;
+          car.clutch = approach(car.clutch, clutchTarget, dt * (clutchTarget > car.clutch ? 8 : upRate));
+        }
 
-      let thTarget = held("w", "W", "ArrowUp") ? 1 : 0;
-      let brTarget = held("s", "S", "ArrowDown") ? 1 : 0;
-      if (gp) {
-        thTarget = Math.max(thTarget, gp.throttle);
-        brTarget = Math.max(brTarget, gp.brake);
+        let thTarget = held("w", "W", "ArrowUp") ? 1 : 0;
+        let brTarget = held("s", "S", "ArrowDown") ? 1 : 0;
+        if (gp) {
+          thTarget = Math.max(thTarget, gp.throttle);
+          brTarget = Math.max(brTarget, gp.brake);
+        }
+        if (heldPedal.throttle != null) car.throttle = heldPedal.throttle;
+        else car.throttle = approach(car.throttle, thTarget, dt * (thTarget ? 2.4 : 3.5));
+        if (heldPedal.brake != null) car.brake = heldPedal.brake;
+        else car.brake = approach(car.brake, brTarget, dt * 5);
       }
-      if (pedals.throttle != null) car.throttle = 1 - pedals.throttle;
-      else car.throttle = approach(car.throttle, thTarget, dt * (thTarget ? 2.4 : 3.5));
-      if (pedals.brake != null) car.brake = pedals.brake;
-      else car.brake = approach(car.brake, brTarget, dt * 5);
 
       car.reverseLock = held("q", "Q") || gp?.reverseLock || rlockHeld;
       if (!opts.autoSteer()) {
