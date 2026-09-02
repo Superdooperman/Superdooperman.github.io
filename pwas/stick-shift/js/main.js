@@ -18,7 +18,14 @@ const opts = {
 function syncViewport() {
   const vv = window.visualViewport;
   const h = Math.round(vv?.height || window.innerHeight);
-  document.documentElement.style.setProperty("--app-h", `${h}px`);
+  const w = Math.round(vv?.width || window.innerWidth);
+  const top = Math.round(vv?.offsetTop || 0);
+  const left = Math.round(vv?.offsetLeft || 0);
+  const root = document.documentElement;
+  root.style.setProperty("--app-h", `${h}px`);
+  root.style.setProperty("--app-w", `${w}px`);
+  root.style.setProperty("--app-top", `${top}px`);
+  root.style.setProperty("--app-left", `${left}px`);
   if (booted) {
     fitCanvas("road");
     fitCanvas("gauges");
