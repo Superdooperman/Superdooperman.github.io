@@ -441,9 +441,56 @@ body.mode-mobile .center-stack { min-height: 0; }
 body.mode-mobile #road, body.mode-mobile #gate, body.mode-mobile .pedal-arm { touch-action: none; }
 
 @media (orientation: portrait) {
-  body.mode-mobile #gauges { display: none; }
-  body.mode-mobile .dash { grid-template-rows: auto minmax(0, 1fr) minmax(96px, 0.34fr); }
-  body.mode-mobile .cockpit { grid-template-rows: minmax(0, 0.22fr) minmax(0, 0.78fr); }
+  body.mode-mobile .cockpit {
+    grid-template-rows: minmax(0, 0.16fr) minmax(0, 0.84fr);
+  }
+  body.mode-mobile .dash {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows:
+      minmax(0, 0.30fr)
+      minmax(0, 0.40fr)
+      minmax(84px, 0.30fr);
+    overflow: hidden;
+  }
+  body.mode-mobile #gauges {
+    display: block !important;
+    grid-row: 1;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+  }
+  body.mode-mobile .center-stack {
+    grid-row: 2;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    min-height: 0;
+    overflow: hidden;
+  }
+  body.mode-mobile .shifter-block {
+    min-height: 0;
+    overflow: hidden;
+    justify-content: center;
+  }
+  body.mode-mobile #gate {
+    width: min(152px, 46vw);
+    height: min(148px, 100%);
+    max-height: 148px;
+  }
+  body.mode-mobile .pedal-block {
+    grid-row: 3;
+    z-index: 3;
+    min-height: 84px;
+    background: linear-gradient(#241a14, #140f0c);
+  }
+  body.mode-mobile .pedal-arm,
+  body.mode-mobile .pedal-arm.wide {
+    min-height: 56px;
+    height: 100%;
+  }
+  body.mode-mobile .shift-hint { display: none !important; }
+  body.mode-mobile .winds-hud { display: none; }
   body.mode-mobile #btn-units,
   body.mode-mobile #btn-mute { display: none !important; }
 }
