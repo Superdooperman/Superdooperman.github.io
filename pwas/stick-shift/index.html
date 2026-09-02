@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <title>Stick Shift Simulator — Manual Transmission Trainer</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css?v=8" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>" />
 </head>
 <body>
@@ -74,10 +74,9 @@
         </div>
       </section>
 
-      <section class="dash">
-        <canvas id="gauges" width="720" height="280"></canvas>
+      <canvas id="gauges" width="720" height="280"></canvas>
 
-        <div class="center-stack">
+      <div class="center-stack">
           <div class="ignition-row">
             <button id="btn-start" class="ignition">START</button>
             <button id="btn-hb" class="handbrake on" title="Handbrake">HB</button>
@@ -118,7 +117,7 @@
           </div>
         </div>
 
-        <div class="pedal-block">
+        <div class="pedal-left">
           <div class="pedal" data-pedal="clutch">
             <div class="pedal-arm"><i id="pedal-clutch"></i></div>
             <label>Clutch</label>
@@ -131,6 +130,8 @@
             <small class="pc-only">S / ↓</small>
             <small class="mobile-only">Left</small>
           </div>
+        </div>
+        <div class="pedal-right">
           <div class="pedal" data-pedal="throttle">
             <div class="pedal-arm"><i id="pedal-throttle"></i></div>
             <label>Throttle</label>
@@ -138,7 +139,6 @@
             <small class="mobile-only">Right · full travel</small>
           </div>
         </div>
-      </section>
     </main>
 
     <div id="lesson-scrim" class="lesson-scrim mobile-only" hidden></div>
@@ -227,6 +227,6 @@
     </div>
   </div>
 
-  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/main.js?v=8"></script>
 </body>
 </html>

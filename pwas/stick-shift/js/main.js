@@ -227,11 +227,6 @@ function boot(nextMode = "pc") {
       else if (e.key >= "1" && e.key <= "6") g = Number(e.key);
       if (g !== null) applyGear(g);
     });
-    window.addEventListener("touchmove", (e) => {
-      if (mode !== "mobile") return;
-      if (e.target.closest?.(".lesson-rail, .modal-card")) return;
-      e.preventDefault();
-    }, { passive: false });
     renderLessons();
     setupShifter();
     requestAnimationFrame((t) => { last = t; loop(t); });
@@ -241,16 +236,32 @@ function boot(nextMode = "pc") {
 
 document.getElementById("btn-pc").addEventListener("click", () => boot("pc"));
 document.getElementById("btn-mobile").addEventListener("click", () => boot("mobile"));
+let lastIgnition = 0;
 function ignition() {
+  const now = performance.now();
+  if (now - lastIgnition < 400) return;
+  lastIgnition = now;
   const r = tryStart(car);
   if (r.ok) { audio.start(); flash("ENGINE ON", "info"); }
   else flash(r.reason, "info");
 }
-document.getElementById("btn-start").addEventListener("pointerup", (e) => {
-  if (e.button) return;
+let lastHb = 0;
+function toggleHb() {
+  const now = performance.now();
+  if (now - lastHb < 400) return;
+  lastHb = now;
+  car.handbrake = !car.handbrake;
+}
+document.getElementById("btn-start").addEventListener("click", ignition);
+document.getElementById("btn-start").addEventListener("touchend", (e) => {
+  e.preventDefault();
   ignition();
-});
-document.getElementById("btn-hb").addEventListener("click", () => { car.handbrake = !car.handbrake; });
+}, { passive: false });
+document.getElementById("btn-hb").addEventListener("click", toggleHb);
+document.getElementById("btn-hb").addEventListener("touchend", (e) => {
+  e.preventDefault();
+  toggleHb();
+}, { passive: false });
 document.getElementById("btn-units").addEventListener("click", (e) => {
   unitsMph = !unitsMph;
   e.target.textContent = unitsMph ? "mph" : "km/h";
