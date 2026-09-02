@@ -72,14 +72,15 @@ export function drawRoad(canvas, car, opts) {
 }
 
 function needle(ctx, cx, cy, ang, len, color = "#e23b32") {
+  const w = Math.max(2, len * 0.045);
   ctx.save();
   ctx.translate(cx, cy);
   ctx.rotate(ang);
   ctx.fillStyle = color;
   ctx.beginPath();
-  ctx.moveTo(-4, 8);
+  ctx.moveTo(-w, w * 2);
   ctx.lineTo(0, -len);
-  ctx.lineTo(4, 8);
+  ctx.lineTo(w, w * 2);
   ctx.fill();
   ctx.restore();
 }
@@ -89,18 +90,18 @@ function gaugeFace(ctx, cx, cy, r, label) {
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
   ctx.fillStyle = "#141210";
   ctx.strokeStyle = "#c4b49a";
-  ctx.lineWidth = 6;
+  ctx.lineWidth = Math.max(3, r * 0.055);
   ctx.fill();
   ctx.stroke();
   ctx.beginPath();
-  ctx.arc(cx, cy, r - 8, 0, Math.PI * 2);
+  ctx.arc(cx, cy, r - Math.max(5, r * 0.07), 0, Math.PI * 2);
   ctx.strokeStyle = "#3a3228";
   ctx.lineWidth = 2;
   ctx.stroke();
   ctx.fillStyle = "#d8c8a8";
-  ctx.font = "11px sans-serif";
+  ctx.font = `${Math.max(8, r * 0.1)}px sans-serif`;
   ctx.textAlign = "center";
-  ctx.fillText(label, cx, cy + r * 0.38);
+  ctx.fillText(label, cx, cy + r * 0.36);
 }
 
 export function drawGauges(canvas, car, opts, unitsMph) {
@@ -108,31 +109,36 @@ export function drawGauges(canvas, car, opts, unitsMph) {
   const w = canvas.width;
   const h = canvas.height;
   ctx.clearRect(0, 0, w, h);
+  if (w < 8 || h < 8) return;
 
-  const tach = { x: w * 0.28, y: h * 0.52, r: 108 };
-  const spd = { x: w * 0.72, y: h * 0.52, r: 108 };
+  const pad = Math.max(6, Math.min(w, h) * 0.04);
+  const r = Math.max(28, Math.min(w * 0.23, (h - pad * 2) / 2));
+  const cy = h / 2;
+  const tach = { x: w * 0.27, y: cy, r };
+  const spd = { x: w * 0.73, y: cy, r };
   gaugeFace(ctx, tach.x, tach.y, tach.r, "RPM x1000");
   gaugeFace(ctx, spd.x, spd.y, spd.r, unitsMph ? "mph" : "km/h");
 
   const start = -Math.PI * 0.75;
   const span = Math.PI * 1.5;
+  const tickIn = r * 0.17;
+  const tickOut = r * 0.07;
+  const numR = r * 0.3;
+  const numSize = Math.max(8, r * 0.11);
 
-  ctx.strokeStyle = "#e8dcc8";
-  ctx.fillStyle = "#e8dcc8";
-  ctx.font = "12px sans-serif";
   ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = `${numSize}px sans-serif`;
   for (let i = 0; i <= 7; i++) {
     const a = start + span * (i / 7);
-    const x1 = tach.x + Math.cos(a) * (tach.r - 18);
-    const y1 = tach.y + Math.sin(a) * (tach.r - 18);
-    const x2 = tach.x + Math.cos(a) * (tach.r - 8);
-    const y2 = tach.y + Math.sin(a) * (tach.r - 8);
     ctx.beginPath();
     ctx.strokeStyle = i >= 6 ? "#e23b32" : "#e8dcc8";
-    ctx.lineWidth = 2;
-    ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    ctx.lineWidth = Math.max(1.5, r * 0.018);
+    ctx.moveTo(tach.x + Math.cos(a) * (r - tickIn), tach.y + Math.sin(a) * (r - tickIn));
+    ctx.lineTo(tach.x + Math.cos(a) * (r - tickOut), tach.y + Math.sin(a) * (r - tickOut));
+    ctx.stroke();
     ctx.fillStyle = i >= 6 ? "#e23b32" : "#e8dcc8";
-    ctx.fillText(String(i), tach.x + Math.cos(a) * (tach.r - 32), tach.y + Math.sin(a) * (tach.r - 32) + 4);
+    ctx.fillText(String(i), tach.x + Math.cos(a) * (r - numR), tach.y + Math.sin(a) * (r - numR));
   }
 
   const vmax = unitsMph ? 140 : 220;
@@ -140,12 +146,13 @@ export function drawGauges(canvas, car, opts, unitsMph) {
     const a = start + span * (i / 14);
     ctx.beginPath();
     ctx.strokeStyle = "#e8dcc8";
-    ctx.moveTo(spd.x + Math.cos(a) * (spd.r - 16), spd.y + Math.sin(a) * (spd.r - 16));
-    ctx.lineTo(spd.x + Math.cos(a) * (spd.r - 8), spd.y + Math.sin(a) * (spd.r - 8));
+    ctx.lineWidth = Math.max(1.5, r * 0.018);
+    ctx.moveTo(spd.x + Math.cos(a) * (r - tickIn), spd.y + Math.sin(a) * (r - tickIn));
+    ctx.lineTo(spd.x + Math.cos(a) * (r - tickOut), spd.y + Math.sin(a) * (r - tickOut));
     ctx.stroke();
     if (i % 2 === 0) {
       ctx.fillStyle = "#e8dcc8";
-      ctx.fillText(String(i * (vmax / 14)), spd.x + Math.cos(a) * (spd.r - 30), spd.y + Math.sin(a) * (spd.r - 30) + 4);
+      ctx.fillText(String(i * (vmax / 14)), spd.x + Math.cos(a) * (r - numR), spd.y + Math.sin(a) * (r - numR));
     }
   }
 
@@ -154,30 +161,32 @@ export function drawGauges(canvas, car, opts, unitsMph) {
     const ghost = rpmForGear(car.speed, next);
     if (ghost > 800) {
       const ga = start + span * Math.min(1, ghost / 7000);
-      needle(ctx, tach.x, tach.y, ga + Math.PI / 2, tach.r - 28, "#7ad4ff88");
+      needle(ctx, tach.x, tach.y, ga + Math.PI / 2, r * 0.72, "#7ad4ff88");
     }
   }
 
   const ta = start + span * Math.min(1, car.rpm / 7000);
-  needle(ctx, tach.x, tach.y, ta + Math.PI / 2, tach.r - 22);
+  needle(ctx, tach.x, tach.y, ta + Math.PI / 2, r * 0.78);
   const speedVal = unitsMph ? Math.abs(car.speed) * 2.23694 : Math.abs(car.speed) * 3.6;
   const sa = start + span * Math.min(1, speedVal / vmax);
-  needle(ctx, spd.x, spd.y, sa + Math.PI / 2, spd.r - 22);
+  needle(ctx, spd.x, spd.y, sa + Math.PI / 2, r * 0.78);
 
+  const hub = Math.max(5, r * 0.07);
   ctx.beginPath();
-  ctx.arc(tach.x, tach.y, 8, 0, Math.PI * 2);
-  ctx.arc(spd.x, spd.y, 8, 0, Math.PI * 2);
+  ctx.arc(tach.x, tach.y, hub, 0, Math.PI * 2);
+  ctx.arc(spd.x, spd.y, hub, 0, Math.PI * 2);
   ctx.fillStyle = "#222";
   ctx.fill();
 
   ctx.fillStyle = car.gear === -1 ? "#e23b32" : "#f0b429";
-  ctx.font = "bold 28px sans-serif";
-  ctx.fillText(car.gear === 0 ? "N" : car.gear === -1 ? "R" : String(car.gear), w / 2, h * 0.22);
+  ctx.font = `bold ${Math.max(14, r * 0.22)}px sans-serif`;
+  ctx.textBaseline = "alphabetic";
+  ctx.fillText(car.gear === 0 ? "N" : car.gear === -1 ? "R" : String(car.gear), w / 2, Math.max(numSize + 4, cy - r * 0.15));
 
   if (car.rpm > 6200) {
     ctx.fillStyle = "#e23b32";
-    ctx.font = "bold 13px sans-serif";
-    ctx.fillText("SHIFT", tach.x, tach.y + 24);
+    ctx.font = `bold ${Math.max(10, r * 0.12)}px sans-serif`;
+    ctx.fillText("SHIFT", tach.x, tach.y + r * 0.22);
   }
 }
 

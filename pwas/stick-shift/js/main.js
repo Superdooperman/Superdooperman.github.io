@@ -38,9 +38,8 @@ function fitCanvas(id) {
   const c = document.getElementById(id);
   const r = c.getBoundingClientRect();
   const dpr = Math.min(2, window.devicePixelRatio || 1);
-  const minH = id === "gauges" ? 80 : 160;
-  c.width = Math.max(280, r.width * dpr);
-  c.height = Math.max(minH, r.height * dpr);
+  c.width = Math.max(1, Math.round(r.width * dpr));
+  c.height = Math.max(1, Math.round(r.height * dpr));
 }
 
 function applyMode(next) {
