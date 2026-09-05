@@ -6,8 +6,31 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <title>Stick Shift Simulator — Manual Transmission Trainer</title>
-  <link rel="stylesheet" href="css/style.css?v=9" />
+  <link rel="stylesheet" href="css/style.css?v=10" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>" />
+  <script>
+    (function () {
+      function orient() {
+        var w = (window.visualViewport && visualViewport.width) || innerWidth;
+        var h = (window.visualViewport && visualViewport.height) || innerHeight;
+        var land = w > h + 20;
+        var r = document.documentElement;
+        r.classList.toggle("is-landscape", land);
+        r.classList.toggle("is-portrait", !land);
+        if (document.body) {
+          document.body.classList.toggle("is-landscape", land);
+          document.body.classList.toggle("is-portrait", !land);
+        }
+      }
+      orient();
+      addEventListener("resize", orient);
+      addEventListener("orientationchange", function () { setTimeout(orient, 80); });
+      if (window.visualViewport) {
+        visualViewport.addEventListener("resize", orient);
+        visualViewport.addEventListener("scroll", orient);
+      }
+    })();
+  </script>
 </head>
 <body>
   <div id="boot">
@@ -227,6 +250,6 @@
     </div>
   </div>
 
-  <script type="module" src="js/main.js?v=9"></script>
+  <script type="module" src="js/main.js?v=10"></script>
 </body>
 </html>
