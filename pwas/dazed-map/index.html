@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0f0c0a" />
+  <title>Dazed &amp; Confused · Austin Film Map</title>
+  <meta name="description" content="Interactive map of Dazed and Confused (1993) filming locations in and around Austin, Texas." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <style>
+    :root {
+      --bg: #0f0c0a;
+      --panel: #1a1410;
+      --panel-2: #241c16;
+      --border: #3a2e24;
+      --text: #f3e6d0;
+      --muted: #b8a48a;
+      --amber: #f0a030;
+      --orange: #e85d2a;
+      --gold: #f5c76a;
+      --cream: #fff1d6;
+      --green: #6dbf6a;
+      --blue: #5aa8d4;
+      --purple: #b07ad4;
+      --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+      --radius: 14px;
+      --sidebar-w: min(400px, 100vw);
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "DM Sans", system-ui, sans-serif;
+      overflow: hidden;
+    }
+    [hidden] { display: none !important; }
+
+    #boot {
+      position: fixed;
+      inset: 0;
+      z-index: 3000;
+      display: grid;
+      place-items: center;
+      padding: 1.25rem;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(240, 160, 48, 0.18), transparent 55%),
+        linear-gradient(#1a1410, #0f0c0a);
+    }
+    .boot-card {
+      width: min(440px, 100%);
+      padding: 1.6rem 1.4rem 1.4rem;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+    .boot-card h1 {
+      font-size: clamp(2rem, 8vw, 2.6rem);
+      margin-bottom: 0.45rem;
+    }
+    .boot-pick {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.7rem;
+      margin-top: 1.1rem;
+    }
+    .boot-pick button {
+      text-align: left;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.9rem;
+      cursor: pointer;
+    }
+    .boot-pick button:hover { border-color: var(--amber); }
+    .boot-pick strong { display: block; color: var(--cream); margin-bottom: 0.2rem; }
+    .boot-pick small { color: var(--muted); line-height: 1.35; }
+
+    button, input, select { font: inherit; color: inherit; }
+
+    .app {
+      display: grid;
+      grid-template-columns: var(--sidebar-w) 1fr;
+      height: 100%;
+    }
+
+    /* —— Sidebar —— */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      background:
+        radial-gradient(ellipse 120% 80% at 0% 0%, rgba(240, 160, 48, 0.12), transparent 55%),
+        radial-gradient(ellipse 80% 50% at 100% 100%, rgba(232, 93, 42, 0.08), transparent 50%),
+        var(--panel);
+      border-right: 1px solid var(--border);
+      z-index: 500;
+      min-height: 0;
+    }
+
+    .hero {
+      padding: 1.25rem 1.25rem 1rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--amber);
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+    }
+
+    .kicker::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--orange);
+      box-shadow: 0 0 10px var(--orange);
+    }
+
+    h1 {
+      font-family: "Bebas Neue", Impact, sans-serif;
+      font-size: clamp(2rem, 4vw, 2.55rem);
+      line-height: 0.95;
+      margin: 0 0 0.4rem;
+      letter-spacing: 0.02em;
+      /* Solid light cream — gradient on dark panel was washing out */
+      color: #fff8e8;
+      text-shadow:
+        0 1px 0 rgba(0, 0, 0, 0.55),
+        0 2px 14px rgba(0, 0, 0, 0.35),
+        0 0 28px rgba(240, 160, 48, 0.22);
+    }
+
+    .tagline {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .quote {
+      margin: 0.75rem 0 0;
+      padding: 0.65rem 0.8rem;
+      border-left: 3px solid var(--orange);
+      background: rgba(232, 93, 42, 0.08);
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      color: var(--gold);
+      font-size: 0.88rem;
+    }
+
+    .controls {
+      padding: 0.85rem 1.1rem;
+      display: grid;
+      gap: 0.65rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .search-wrap { position: relative; }
+    .search-wrap input {
+      width: 100%;
+      padding: 0.7rem 0.85rem 0.7rem 2.2rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .search-wrap input:focus {
+      border-color: var(--amber);
+      box-shadow: 0 0 0 3px rgba(240, 160, 48, 0.15);
+    }
+    .search-wrap::before {
+      content: "⌕";
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 1rem;
+      pointer-events: none;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .chip {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 0.35rem 0.7rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+    .chip:hover { border-color: var(--amber); color: var(--cream); }
+    .chip.active {
+      background: linear-gradient(135deg, var(--orange), var(--amber));
+      border-color: transparent;
+      color: #1a1008;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .stats strong { color: var(--cream); font-weight: 600; }
+
+    .list {
+      overflow: auto;
+      padding: 0.6rem;
+      flex: 1;
+      min-height: 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .card {
+      width: 100%;
+      text-align: left;
+      border: 1px solid transparent;
+      background: transparent;
+      border-radius: 12px;
+      padding: 0.85rem 0.9rem;
+      cursor: pointer;
+      transition: 0.15s ease;
+      margin-bottom: 0.35rem;
+    }
+    .card:hover {
+      background: var(--panel-2);
+      border-color: var(--border);
+    }
+    .card.active {
+      background: linear-gradient(135deg, rgba(232, 93, 42, 0.16), rgba(240, 160, 48, 0.08));
+      border-color: rgba(240, 160, 48, 0.45);
+    }
+
+    .card-top {
+      display: flex;
+      gap: 0.65rem;
+      align-items: flex-start;
+    }
+
+    .badge {
+      flex-shrink: 0;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+      color: #1a1008;
+      font-weight: 700;
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 0.98rem;
+      font-weight: 650;
+      color: var(--cream);
+      line-height: 1.25;
+    }
+    .card .scene {
+      margin: 0.15rem 0 0;
+      font-size: 0.8rem;
+      color: var(--amber);
+      font-weight: 500;
+    }
+    .card .addr {
+      margin: 0.35rem 0 0;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .card .meta {
+      margin-top: 0.45rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+    .pill {
+      font-size: 0.68rem;
+      padding: 0.18rem 0.45rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .footer-note {
+      padding: 0.7rem 1rem;
+      font-size: 0.7rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      line-height: 1.4;
+      flex-shrink: 0;
+    }
+    .footer-note a { color: var(--amber); }
+
+    /* —— Map —— */
+    .map-wrap {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+    }
+    #map { width: 100%; height: 100%; background: #1a1510; }
+
+    .map-overlay {
+      position: absolute;
+      top: 0.85rem;
+      right: 0.85rem;
+      z-index: 400;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: flex-end;
+    }
+
+    .map-btn {
+      border: 1px solid var(--border);
+      background: rgba(26, 20, 16, 0.92);
+      backdrop-filter: blur(8px);
+      color: var(--cream);
+      border-radius: 10px;
+      padding: 0.55rem 0.85rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: 0.15s ease;
+    }
+    .map-btn:hover {
+      border-color: var(--amber);
+      color: var(--amber);
+    }
+
+    .mobile-toggle {
+      display: none;
+      position: absolute;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 400;
+    }
+
+    /* —— Leaflet overrides —— */
+    .leaflet-container { font: inherit; background: #1a1510; }
+    .leaflet-control-zoom a {
+      background: var(--panel) !important;
+      color: var(--cream) !important;
+      border-color: var(--border) !important;
+    }
+    .leaflet-control-attribution {
+      background: rgba(15, 12, 10, 0.75) !important;
+      color: var(--muted) !important;
+      font-size: 0.65rem !important;
+    }
+    .leaflet-control-attribution a { color: var(--amber) !important; }
+
+    .leaflet-popup-content-wrapper {
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 0;
+    }
+    .leaflet-popup-content {
+      margin: 0;
+      min-width: 240px;
+      max-width: 300px;
+    }
+    .leaflet-popup-tip { background: var(--panel); border: 1px solid var(--border); }
+    .leaflet-popup-close-button {
+      color: var(--muted) !important;
+      font-size: 18px !important;
+      top: 6px !important;
+      right: 8px !important;
+    }
+
+    .popup {
+      padding: 0.95rem 1rem 1rem;
+    }
+    .popup .num {
+      display: inline-grid;
+      place-items: center;
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--orange), var(--amber));
+      color: #1a1008;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 0.95rem;
+      margin-bottom: 0.4rem;
+    }
+    .popup h3 {
+      margin: 0 0 0.25rem;
+      font-size: 1.05rem;
+      color: var(--cream);
+      padding-right: 1rem;
+    }
+    .popup .scene {
+      color: var(--amber);
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin: 0 0 0.5rem;
+    }
+    .popup p {
+      margin: 0 0 0.55rem;
+      font-size: 0.84rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .popup .today {
+      font-size: 0.78rem;
+      color: var(--green);
+      margin-bottom: 0.65rem;
+    }
+    .popup .actions {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .popup a.btn {
+      display: inline-block;
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-weight: 650;
+      padding: 0.4rem 0.65rem;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--orange), var(--amber));
+      color: #1a1008;
+    }
+    .popup a.btn.ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--cream);
+    }
+
+    .pin {
+      width: 32px;
+      height: 32px;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      border: 2px solid #1a1008;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+      display: grid;
+      place-items: center;
+    }
+    .pin span {
+      transform: rotate(45deg);
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 0.85rem;
+      color: #1a1008;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .pin.selected {
+      transform: rotate(-45deg) scale(1.18);
+      box-shadow: 0 0 0 4px rgba(240, 160, 48, 0.35), 0 6px 16px rgba(0, 0, 0, 0.5);
+    }
+
+    .empty {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    /* —— Mobile (class-based so the picker always wins) —— */
+    html.mode-mobile, body.mode-mobile { overflow: hidden; overscroll-behavior: none; }
+    body.mode-mobile .app {
+      position: fixed;
+      top: var(--app-top, 0px);
+      left: 0;
+      right: 0;
+      width: auto;
+      height: var(--app-h, 100dvh);
+      max-height: var(--app-h, 100dvh);
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr;
+    }
+    body.mode-mobile .sidebar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      top: auto;
+      width: 100%;
+      height: min(78%, calc(var(--app-h, 100dvh) - 2.5rem));
+      transform: translateY(calc(100% - 4.4rem));
+      transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+      border-right: none;
+      border-top: 1px solid var(--border);
+      border-radius: 18px 18px 0 0;
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    body.mode-mobile .sidebar.open { transform: none; }
+    body.mode-mobile .sidebar .hero { padding: 0.7rem 1rem 0.65rem; }
+    body.mode-mobile .sidebar .hero::before {
+      content: "";
+      display: block;
+      width: 42px;
+      height: 4px;
+      border-radius: 999px;
+      background: var(--border);
+      margin: 0 auto 0.55rem;
+    }
+    body.mode-mobile h1 { font-size: clamp(1.7rem, 7vw, 2.2rem); }
+    body.mode-mobile .tagline, body.mode-mobile .quote { display: none; }
+    body.mode-mobile .controls { padding: 0.65rem 0.85rem; }
+    body.mode-mobile .search-wrap input { font-size: 16px; padding: 0.75rem 0.85rem 0.75rem 2.2rem; }
+    body.mode-mobile .chip { min-height: 36px; padding: 0.4rem 0.75rem; }
+    body.mode-mobile .card { padding: 0.75rem; }
+    body.mode-mobile .map-btn { min-height: 44px; }
+    body.mode-mobile .mobile-toggle { display: block; bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); }
+    body.mode-mobile .map-overlay { top: 0.55rem; right: 0.55rem; }
+    body.mode-mobile .leaflet-bottom.leaflet-right { margin-bottom: 5rem; }
+    body.mode-mobile .pin { width: 36px; height: 36px; }
+    body.mode-mobile .leaflet-popup-content { min-width: 200px; max-width: min(300px, 78vw); }
+  </style>
+</head>
+<body>
+  <div id="boot">
+    <div class="boot-card">
+      <div class="kicker">Richard Linklater · 1993</div>
+      <h1>Dazed &amp; Confused</h1>
+      <p class="tagline">Austin film map. Pick a layout — same locations either way.</p>
+      <div class="boot-pick">
+        <button id="btn-pc" type="button">
+          <strong>Desktop</strong>
+          <small>Sidebar list + wide map</small>
+        </button>
+        <button id="btn-mobile" type="button">
+          <strong>Mobile</strong>
+          <small>Full-screen map, list slides up</small>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <header class="hero">
+        <div class="kicker">Richard Linklater · 1993</div>
+        <h1>Dazed &amp; Confused</h1>
+        <p class="tagline">Interactive map of filming locations across Austin — and a couple nearby Texas stops.</p>
+        <p class="quote">“Alright, alright, alright.”</p>
+      </header>
+
+      <div class="controls">
+        <div class="search-wrap">
+          <input id="search" type="search" placeholder="Search scenes, places, characters…" autocomplete="off" />
+        </div>
+        <div class="filters" id="filters"></div>
+        <div class="stats">
+          <span><strong id="count">0</strong> locations</span>
+          <span>Last day of school, 1976</span>
+        </div>
+      </div>
+
+      <div class="list" id="list"></div>
+
+      <div class="footer-note">
+        Locations compiled from the
+        <a href="https://www.austintexas.org/film-commission/film-tourism-guide/dazed-and-confused/" target="_blank" rel="noopener">Austin Film Commission</a>
+        and fan research. Some homes are private — please be respectful.
+      </div>
+    </aside>
+
+    <div class="map-wrap">
+      <div id="map"></div>
+      <div class="map-overlay">
+        <button class="map-btn" id="fitAll" type="button">Fit all</button>
+        <button class="map-btn" id="austinOnly" type="button">Austin only</button>
+        <button class="map-btn" id="btn-mode" type="button">Mobile layout</button>
+      </div>
+      <button class="map-btn mobile-toggle" id="toggleList" type="button">Locations list</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    const CATEGORIES = {
+      all: { label: "All", color: "#f0a030" },
+      iconic: { label: "Iconic", color: "#e85d2a" },
+      school: { label: "School", color: "#5aa8d4" },
+      hangout: { label: "Hangouts", color: "#f5c76a" },
+      party: { label: "Party night", color: "#b07ad4" },
+      house: { label: "Houses", color: "#6dbf6a" },
+      nearby: { label: "Outside Austin", color: "#9aa0a6" },
+    };
+
+    /**
+     * Coordinates cross-checked 2026 against OpenStreetMap Nominatim + Photon
+     * (Google Maps–aligned street addresses; building pins prefer named POIs).
+     * Emporium ↔ 821 Brentwood ≈ 100 m across N Lamar.
+     */
+    const LOCATIONS = [
+      {
+        id: "top-notch",
+        num: 1,
+        name: "Top Notch Hamburgers",
+        scene: "Burgers · Wooderson joins Mike, Cynthia & Tony",
+        address: "7525 Burnet Rd, Austin, TX 78757",
+        lat: 30.351076,
+        lng: -97.733410,
+        category: "iconic",
+        act: "Act 1",
+        description:
+          "Mike, Cynthia, and Tony pull into the drive-in for burgers. Wooderson rolls up in his ’70 Chevelle, hangs at the posts with them, and ropes the trio into the night’s party plans. Classic cruise-stop energy — just not the famous first line.",
+        today:
+          "Still a classic drive-in since 1971. Order the Longhorn Special. Hosts outdoor screenings on 4/20.",
+        characters: ["Wooderson", "Mike", "Cynthia", "Tony"],
+      },
+      {
+        id: "lee-high",
+        num: 2,
+        name: "Lee High School (Bedichek Middle)",
+        scene: "Opening · last day of school",
+        address: "6800 Bill Hughes Rd, Austin, TX 78745",
+        lat: 30.195328,
+        lng: -97.785824,
+        category: "school",
+        act: "Act 1",
+        description:
+          "Fictional Robert E. Lee High School. Opening parking-lot shots with Aerosmith’s “Sweet Emotion,” classrooms, and the end-of-day chaos.",
+        today: "Still Bedichek Middle School (Austin ISD). Exterior remains recognizable.",
+        characters: ["Pink", "Mitch", "Simone", "Don"],
+      },
+      {
+        id: "northwest-park",
+        num: 3,
+        name: "Beverly S. Sheffield Northwest District Park",
+        scene: "Mitch’s baseball game & paddling",
+        address: "7000 Ardath St, Austin, TX 78757",
+        lat: 30.348531,
+        lng: -97.742248,
+        category: "party",
+        act: "Act 1",
+        description:
+          "After junior baseball, Mitch is ambushed in the parking lot by O’Bannion and Benny for the freshman hazing ritual.",
+        today: "Public City of Austin park. Baseball diamond and lot still there.",
+        characters: ["Mitch", "O’Bannion", "Benny"],
+      },
+      {
+        id: "mitch-house",
+        num: 4,
+        name: "Mitch Kramer’s house",
+        scene: "Home base",
+        address: "6806 Pioneer Pl, Austin, TX 78757",
+        lat: 30.348726,
+        lng: -97.746403,
+        category: "house",
+        act: "Act 1",
+        description: "Mitch’s home — where the night of cruising and trouble begins for the incoming freshman.",
+        today: "Private residence. View from the street only.",
+        characters: ["Mitch"],
+      },
+      {
+        id: "carl-house",
+        num: 5,
+        name: "Carl Burnett’s house",
+        scene: "O’Bannion vs. Carl & Mitch",
+        address: "6409 Wilbur Dr, Austin, TX 78757",
+        lat: 30.342806,
+        lng: -97.744306,
+        category: "house",
+        act: "Act 2",
+        description: "Mitch and Carl stand up to local bully O’Bannion at Carl’s place.",
+        today: "Private residence. Be a good neighbor — stay on the public street.",
+        characters: ["Carl", "Mitch", "O’Bannion"],
+      },
+      {
+        id: "emporium",
+        num: 6,
+        name: "The Emporium · Violet Crown Plaza",
+        scene: "Alright, alright, alright · parking lot",
+        address: "6600 N Lamar Blvd, Austin, TX 78752",
+        // Building pin = Stiles Switch BBQ (same Violet Crown block as 6600–6610 N Lamar)
+        lat: 30.334490,
+        lng: -97.721353,
+        category: "iconic",
+        act: "Act 2",
+        description:
+          "The Emporium pool hall / arcade sat in Violet Crown Plaza on the east side of N Lamar (address 6600 N Lamar; the storefront is ~6610 today). Wooderson’s “Alright, alright, alright” hits as he drives into the lot and parks; later the crew hangs out front — including “I get older, they stay the same age” as the girl in the blue truck rolls by. Pin 7 (paint garage) is directly across the street to the west.",
+        today: "Stiles Switch BBQ & Brew, 6610 N Lamar Blvd — same Violet Crown building. Art deco bones intact.",
+        characters: ["Wooderson", "Pink", "Mitch", "Don"],
+      },
+      {
+        id: "ricks-auto",
+        num: 7,
+        name: "Paint drop garage · 821 Brentwood",
+        scene: "White paint on O’Bannion",
+        address: "821 Brentwood St, Austin, TX 78757",
+        lat: 30.334389,
+        lng: -97.722414,
+        category: "iconic",
+        act: "Act 2",
+        description:
+          "West side of N Lamar, ~100 m across from the Emporium / Violet Crown building (pin 6). O’Bannion rushes over thinking Carl is getting busted; Hirshfelder dumps a can of white paint on him from the garage rooftop.",
+        today: "Old Rick’s Auto / machine-shop building at 821 Brentwood. Roofline still reads as the film; recently vacant.",
+        characters: ["O’Bannion", "Hirshfelder", "Carl"],
+      },
+      {
+        id: "wild-ruth",
+        num: 8,
+        name: "Wild Street & Ruth Avenue",
+        scene: "Paddling chase (not the paint drop)",
+        address: "Wild St at Ruth Ave, Austin, TX 78757",
+        // Intersection of Wild St & Ruth Ave (west of Brentwood garage)
+        lat: 30.335188,
+        lng: -97.723091,
+        category: "party",
+        act: "Act 2",
+        description:
+          "Just around the corner from the Emporium / Brentwood garage cluster — Hirshfelder gets cornered by O’Bannion and the paddle. The paint can falls at the garage on 821 Brentwood (pin 7), not here.",
+        today: "Quiet public residential streets — quick completist stop.",
+        characters: ["Hirshfelder", "O’Bannion", "Carl"],
+      },
+      {
+        id: "centennial",
+        num: 9,
+        name: "Centennial Liquor (site)",
+        scene: "Beer run / parking lot",
+        address: "6534 N Lamar Blvd, Austin, TX 78752",
+        lat: 30.333222,
+        lng: -97.721840,
+        category: "hangout",
+        act: "Act 2",
+        description: "Liquor-store stop in the Lamar cruise loop near the Emporium.",
+        today: "Demolished in 2003 — now a parking lot. Historical pin only.",
+        characters: ["Pink", "Don", "Pickford"],
+      },
+      {
+        id: "yarborough",
+        num: 10,
+        name: "Austin Public Library — Yarborough Branch",
+        scene: "Senior girls hazing freshmen",
+        address: "2200 Hancock Dr, Austin, TX 78756",
+        lat: 30.323461,
+        lng: -97.740728,
+        category: "party",
+        act: "Act 2",
+        description:
+          "Darla, Simone, and the seniors haze incoming freshmen girls (including Sabrina) in the parking lot of what was then a movie theater building.",
+        today: "Still the Yarborough Branch library. Exterior profile is nearly identical.",
+        characters: ["Darla", "Simone", "Sabrina"],
+      },
+      {
+        id: "ballards",
+        num: 11,
+        name: "Ballard’s Grocery",
+        scene: "Beer run & mailbox payback",
+        address: "4001 Medical Pkwy, Austin, TX 78756",
+        lat: 30.308632,
+        lng: -97.742462,
+        category: "hangout",
+        act: "Act 3",
+        description:
+          "After smashing a mailbox, the crew stops for beer and runs into the very upset owner.",
+        today: "Now a Shell convenience store (fully redeveloped).",
+        characters: ["Pickford", "Don", "Pink", "Mitch"],
+      },
+      {
+        id: "mike-house",
+        num: 12,
+        name: "Mike Newhouse’s house",
+        scene: "Intellectual trio hangout",
+        address: "2513 Great Oaks Pkwy, Austin, TX 78756",
+        lat: 30.319387,
+        lng: -97.747000,
+        category: "house",
+        act: "Act 2",
+        description: "Home associated with Mike Newhouse’s scenes in the quieter side of the night.",
+        today: "Private residence.",
+        characters: ["Mike", "Cynthia", "Tony"],
+      },
+      {
+        id: "pickford-house",
+        num: 13,
+        name: "Kevin Pickford’s house",
+        scene: "The busted kegger",
+        address: "5800 Coventry Ln, Austin, TX 78723",
+        lat: 30.308049,
+        lng: -97.684670,
+        category: "party",
+        act: "Act 3",
+        description:
+          "Pickford’s party gets busted — the catalyst that sends everyone toward the Moontower.",
+        today: "Private residence.",
+        characters: ["Pickford", "Pink", "Don", "Mitch"],
+      },
+      {
+        id: "moontower-enfield",
+        num: 14,
+        name: "West Enfield Park (Moontower prop)",
+        scene: "The Moontower party",
+        address: "2008 Enfield Rd, Austin, TX 78703",
+        lat: 30.286452,
+        lng: -97.764742,
+        category: "iconic",
+        act: "Act 3",
+        description:
+          "After Pickford’s kegger is busted, the crew heads to the woods under a glowing tower. The tower itself was a film prop (~30 ft), not a permanent city moontower.",
+        today: "Public park. Prop is gone; the vibe remains. (Some guides also cite Walter E. Long Park.)",
+        characters: ["Wooderson", "Pink", "Mitch", "full cast"],
+      },
+      {
+        id: "walter-long",
+        num: 15,
+        name: "Walter E. Long Metropolitan Park",
+        scene: "Moontower / woods (official guide)",
+        address: "6620 Blue Bluff Rd, Austin, TX 78724",
+        lat: 30.282846,
+        lng: -97.608715,
+        category: "party",
+        act: "Act 3",
+        description:
+          "Listed by the Austin Film Commission as the Moontower wooded-area location. Huge park around Decker Lake.",
+        today: "Austin’s largest public park. Day-use fees may apply. Site not marked as a film landmark.",
+        characters: ["full cast"],
+      },
+      {
+        id: "toney-burger",
+        num: 16,
+        name: "Toney Burger Athletic Center",
+        scene: "Closing · 50-yard line at dawn",
+        address: "3200 Jones Rd, Austin, TX 78745",
+        lat: 30.230461,
+        lng: -97.809752, // Toney Burger Activity Center (named POI)
+        category: "iconic",
+        act: "Closing",
+        description:
+          "Wooderson and Pink lie on the 50-yard line at dawn talking about what comes next — the emotional center of the film.",
+        today: "Austin ISD stadium. Public access when no events. SFC Farmers Market nearby on Saturdays.",
+        characters: ["Wooderson", "Pink"],
+      },
+      {
+        id: "sabrina-house",
+        num: 17,
+        name: "Sabrina’s house",
+        scene: "Character home",
+        address: "2100 Travis Heights Blvd, Austin, TX 78704",
+        lat: 30.238844,
+        lng: -97.745077,
+        category: "house",
+        act: "Act 2",
+        description: "Sabrina’s house in South Austin’s Travis Heights neighborhood.",
+        today: "Private residence. Front renovated in 2023.",
+        characters: ["Sabrina"],
+      },
+      {
+        id: "georgetown-school",
+        num: 18,
+        name: "Williams Middle (Everette L. Williams Elem.)",
+        scene: "Junior high / freshman hazing day",
+        address: "507 E University Ave, Georgetown, TX 78626",
+        lat: 30.634118,
+        lng: -97.672486,
+        category: "nearby",
+        act: "Act 1",
+        description:
+          "Outside Austin proper — the junior-high campus used for incoming-freshman hazing scenes with Mitch and friends.",
+        today: "School campus in Georgetown (~30 min north of Austin).",
+        characters: ["Mitch", "freshmen"],
+      },
+      {
+        id: "seguin-carwash",
+        num: 19,
+        name: "Car wash — Seguin",
+        scene: "Car wash sequence",
+        address: "904 S Austin St, Seguin, TX 78155",
+        lat: 29.561781,
+        lng: -97.968209,
+        category: "nearby",
+        act: "Act 2",
+        description: "Car wash filmed in Seguin, east of San Antonio — a true road-trip stop for completists.",
+        today: "Seguin location; well outside the Austin cluster.",
+        characters: ["ensemble"],
+      },
+    ];
+
+    const state = {
+      filter: "all",
+      query: "",
+      selectedId: null,
+      markers: new Map(),
+    };
+
+    // —— Map setup ——
+    const map = L.map("map", {
+      zoomControl: true,
+      attributionControl: true,
+    }).setView([30.30, -97.74], 11);
+
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      subdomains: "abcd",
+      maxZoom: 19,
+    }).addTo(map);
+
+    function categoryColor(cat) {
+      return (CATEGORIES[cat] || CATEGORIES.all).color;
+    }
+
+    function makeIcon(loc, selected) {
+      const color = categoryColor(loc.category);
+      const html = `<div class="pin${selected ? " selected" : ""}" style="background:${color}"><span>${loc.num}</span></div>`;
+      return L.divIcon({
+        className: "",
+        html,
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -28],
+      });
+    }
+
+    function mapsUrl(loc) {
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.address)}`;
+    }
+
+    function popupHtml(loc) {
+      return `
+        <div class="popup">
+          <div class="num">${loc.num}</div>
+          <h3>${escapeHtml(loc.name)}</h3>
+          <div class="scene">${escapeHtml(loc.scene)}</div>
+          <p>${escapeHtml(loc.description)}</p>
+          <div class="today"><strong>Today:</strong> ${escapeHtml(loc.today)}</div>
+          <div class="actions">
+            <a class="btn" href="${mapsUrl(loc)}" target="_blank" rel="noopener">Directions</a>
+            <a class="btn ghost" href="https://www.openstreetmap.org/?mlat=${loc.lat}&mlon=${loc.lng}#map=17/${loc.lat}/${loc.lng}" target="_blank" rel="noopener">OSM</a>
+          </div>
+        </div>`;
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function filtered() {
+      const q = state.query.trim().toLowerCase();
+      return LOCATIONS.filter((loc) => {
+        if (state.filter !== "all" && loc.category !== state.filter) return false;
+        if (!q) return true;
+        const hay = [
+          loc.name,
+          loc.scene,
+          loc.address,
+          loc.description,
+          loc.act,
+          ...(loc.characters || []),
+        ]
+          .join(" ")
+          .toLowerCase();
+        return hay.includes(q);
+      });
+    }
+
+    function renderFilters() {
+      const el = document.getElementById("filters");
+      el.innerHTML = "";
+      Object.entries(CATEGORIES).forEach(([key, meta]) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "chip" + (state.filter === key ? " active" : "");
+        btn.textContent = meta.label;
+        btn.addEventListener("click", () => {
+          state.filter = key;
+          render();
+        });
+        el.appendChild(btn);
+      });
+    }
+
+    function renderList(items) {
+      const list = document.getElementById("list");
+      document.getElementById("count").textContent = String(items.length);
+      list.innerHTML = "";
+      if (!items.length) {
+        list.innerHTML = `<div class="empty">No locations match. Try another filter or clear search.</div>`;
+        return;
+      }
+      items.forEach((loc) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "card" + (state.selectedId === loc.id ? " active" : "");
+        btn.dataset.id = loc.id;
+        btn.innerHTML = `
+          <div class="card-top">
+            <div class="badge" style="background:${categoryColor(loc.category)}">${loc.num}</div>
+            <div>
+              <h2>${escapeHtml(loc.name)}</h2>
+              <p class="scene">${escapeHtml(loc.scene)}</p>
+              <p class="addr">${escapeHtml(loc.address)}</p>
+              <div class="meta">
+                <span class="pill">${escapeHtml(CATEGORIES[loc.category]?.label || loc.category)}</span>
+                <span class="pill">${escapeHtml(loc.act)}</span>
+              </div>
+            </div>
+          </div>`;
+        btn.addEventListener("click", () => selectLocation(loc.id, true));
+        list.appendChild(btn);
+      });
+    }
+
+    function syncMarkers(items) {
+      const visibleIds = new Set(items.map((i) => i.id));
+      // remove markers not visible
+      for (const [id, marker] of state.markers) {
+        if (!visibleIds.has(id)) {
+          map.removeLayer(marker);
+          state.markers.delete(id);
+        }
+      }
+      items.forEach((loc) => {
+        let marker = state.markers.get(loc.id);
+        if (!marker) {
+          marker = L.marker([loc.lat, loc.lng], {
+            icon: makeIcon(loc, state.selectedId === loc.id),
+            title: loc.name,
+          });
+          marker.bindPopup(popupHtml(loc), { maxWidth: 320 });
+          marker.on("click", () => selectLocation(loc.id, false));
+          marker.addTo(map);
+          state.markers.set(loc.id, marker);
+        } else {
+          marker.setIcon(makeIcon(loc, state.selectedId === loc.id));
+        }
+      });
+    }
+
+    function selectLocation(id, pan) {
+      state.selectedId = id;
+      const loc = LOCATIONS.find((l) => l.id === id);
+      const items = filtered();
+      renderList(items);
+      syncMarkers(items);
+
+      const marker = state.markers.get(id);
+      if (marker) {
+        marker.openPopup();
+        if (pan && loc) {
+          map.flyTo([loc.lat, loc.lng], Math.max(map.getZoom(), 15), { duration: 0.7 });
+        }
+      }
+
+      if (document.body.classList.contains("mode-mobile")) {
+        document.getElementById("sidebar").classList.remove("open");
+        document.getElementById("toggleList").textContent = "Locations list";
+      }
+
+      // scroll active card into view
+      const card = document.querySelector(`.card[data-id="${id}"]`);
+      if (card) card.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+
+    function fitTo(items, maxZoom = 13) {
+      if (!items.length) return;
+      const bounds = L.latLngBounds(items.map((l) => [l.lat, l.lng]));
+      map.fitBounds(bounds.pad(0.12), { maxZoom, animate: true });
+    }
+
+    function render() {
+      renderFilters();
+      const items = filtered();
+      renderList(items);
+      syncMarkers(items);
+    }
+
+    // —— Events ——
+    document.getElementById("search").addEventListener("input", (e) => {
+      state.query = e.target.value;
+      render();
+    });
+
+    document.getElementById("fitAll").addEventListener("click", () => fitTo(filtered(), 10));
+    document.getElementById("austinOnly").addEventListener("click", () => {
+      state.filter = "all";
+      state.query = "";
+      document.getElementById("search").value = "";
+      const austin = LOCATIONS.filter((l) => l.category !== "nearby");
+      render();
+      fitTo(austin, 12);
+    });
+
+    document.getElementById("toggleList").addEventListener("click", () => {
+      const sb = document.getElementById("sidebar");
+      sb.classList.toggle("open");
+      document.getElementById("toggleList").textContent = sb.classList.contains("open")
+        ? "Show map"
+        : "Locations list";
+    });
+
+    function syncViewport() {
+      const vv = window.visualViewport;
+      const h = Math.round(vv?.height || window.innerHeight);
+      const top = Math.round(vv?.offsetTop || 0);
+      document.documentElement.style.setProperty("--app-h", `${h}px`);
+      document.documentElement.style.setProperty("--app-top", `${top}px`);
+      map.invalidateSize();
+    }
+
+    function applyMode(mode) {
+      const mobile = mode === "mobile";
+      document.body.classList.toggle("mode-mobile", mobile);
+      document.body.classList.toggle("mode-pc", !mobile);
+      document.documentElement.classList.toggle("mode-mobile", mobile);
+      document.getElementById("boot").hidden = true;
+      document.getElementById("btn-mode").textContent = mobile ? "Desktop layout" : "Mobile layout";
+      document.getElementById("sidebar").classList.remove("open");
+      document.getElementById("toggleList").textContent = "Locations list";
+      requestAnimationFrame(() => {
+        map.invalidateSize();
+        fitTo(LOCATIONS.filter((l) => l.category !== "nearby"), 12);
+      });
+    }
+
+    document.getElementById("btn-pc").addEventListener("click", () => applyMode("pc"));
+    document.getElementById("btn-mobile").addEventListener("click", () => applyMode("mobile"));
+    document.getElementById("btn-mode").addEventListener("click", () => {
+      applyMode(document.body.classList.contains("mode-mobile") ? "pc" : "mobile");
+    });
+
+    window.addEventListener("resize", syncViewport);
+    window.visualViewport?.addEventListener("resize", syncViewport);
+    window.visualViewport?.addEventListener("scroll", syncViewport);
+    syncViewport();
+
+    // init
+    render();
+    fitTo(
+      LOCATIONS.filter((l) => l.category !== "nearby"),
+      12
+    );
+
+    const params = new URLSearchParams(location.search);
+    const deep = params.get("id");
+    if (deep && LOCATIONS.some((l) => l.id === deep)) {
+      setTimeout(() => selectLocation(deep, true), 400);
+    }
+    const hash = location.hash.replace("#", "");
+    if (hash === "mobile") applyMode("mobile");
+    if (hash === "pc") applyMode("pc");
+  </script>
+</body>
+</html>
