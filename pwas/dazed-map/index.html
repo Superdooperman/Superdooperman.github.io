@@ -361,14 +361,9 @@
       color: var(--amber);
     }
 
-    .mobile-toggle {
-      display: none;
-      position: absolute;
-      bottom: 1rem;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 400;
-    }
+    .mobile-toggle { display: none; }
+    .sheet-handle { display: none; }
+    .sheet-scrim { display: none; }
 
     /* —— Leaflet overrides —— */
     .leaflet-container { font: inherit; background: #1a1510; }
@@ -497,6 +492,7 @@
     /* —— Mobile (class-based so the picker always wins) —— */
     html.mode-mobile, body.mode-mobile { overflow: hidden; overscroll-behavior: none; }
     body.mode-mobile .app {
+      display: block !important;
       position: fixed;
       top: var(--app-top, 0px);
       left: 0;
@@ -504,8 +500,10 @@
       width: auto;
       height: var(--app-h, 100dvh);
       max-height: var(--app-h, 100dvh);
-      grid-template-columns: 1fr;
-      grid-template-rows: 1fr;
+    }
+    body.mode-mobile .map-wrap {
+      position: absolute;
+      inset: 0;
     }
     body.mode-mobile .sidebar {
       position: absolute;
@@ -515,25 +513,51 @@
       top: auto;
       width: 100%;
       height: min(78%, calc(var(--app-h, 100dvh) - 2.5rem));
-      transform: translateY(calc(100% - 4.4rem));
+      transform: translateY(calc(100% - 3.6rem));
+      -webkit-transform: translateY(calc(100% - 3.6rem));
       transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
       border-right: none;
       border-top: 1px solid var(--border);
       border-radius: 18px 18px 0 0;
       box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
       padding-bottom: env(safe-area-inset-bottom, 0px);
+      z-index: 600;
     }
-    body.mode-mobile .sidebar.open { transform: none; }
-    body.mode-mobile .sidebar .hero { padding: 0.7rem 1rem 0.65rem; }
-    body.mode-mobile .sidebar .hero::before {
+    body.mode-mobile .sidebar.open {
+      transform: none;
+      -webkit-transform: none;
+    }
+    body.mode-mobile .sheet-handle {
+      display: flex;
+      position: relative;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: 100%;
+      min-height: 48px;
+      padding: 0.35rem 1rem 0.45rem;
+      border: none;
+      background: transparent;
+      color: var(--cream);
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body.mode-mobile .sheet-handle::before {
       content: "";
-      display: block;
+      position: absolute;
+      top: 8px;
+      left: 50%;
       width: 42px;
       height: 4px;
+      margin-left: -21px;
       border-radius: 999px;
       background: var(--border);
-      margin: 0 auto 0.55rem;
     }
+    body.mode-mobile .sidebar .hero { padding: 0.35rem 1rem 0.55rem; }
+    body.mode-mobile .sidebar .hero::before { display: none; }
     body.mode-mobile h1 { font-size: clamp(1.7rem, 7vw, 2.2rem); }
     body.mode-mobile .tagline, body.mode-mobile .quote { display: none; }
     body.mode-mobile .controls { padding: 0.65rem 0.85rem; }
@@ -541,8 +565,16 @@
     body.mode-mobile .chip { min-height: 36px; padding: 0.4rem 0.75rem; }
     body.mode-mobile .card { padding: 0.75rem; }
     body.mode-mobile .map-btn { min-height: 44px; }
-    body.mode-mobile .mobile-toggle { display: block; bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); }
-    body.mode-mobile .map-overlay { top: 0.55rem; right: 0.55rem; }
+    body.mode-mobile .sheet-scrim {
+      position: absolute;
+      inset: 0;
+      z-index: 550;
+      background: rgba(0, 0, 0, 0.4);
+      border: none;
+      padding: 0;
+    }
+    body.mode-mobile .sheet-scrim:not([hidden]) { display: block; }
+    body.mode-mobile .map-overlay { top: 0.55rem; right: 0.55rem; z-index: 500; }
     body.mode-mobile .leaflet-bottom.leaflet-right { margin-bottom: 5rem; }
     body.mode-mobile .pin { width: 36px; height: 36px; }
     body.mode-mobile .leaflet-popup-content { min-width: 200px; max-width: min(300px, 78vw); }
@@ -568,6 +600,7 @@
   </div>
   <div class="app">
     <aside class="sidebar" id="sidebar">
+      <button class="sheet-handle" id="sheetHandle" type="button">Locations list</button>
       <header class="hero">
         <div class="kicker">Richard Linklater · 1993</div>
         <h1>Dazed &amp; Confused</h1>
@@ -602,7 +635,7 @@
         <button class="map-btn" id="austinOnly" type="button">Austin only</button>
         <button class="map-btn" id="btn-mode" type="button">Mobile layout</button>
       </div>
-      <button class="map-btn mobile-toggle" id="toggleList" type="button">Locations list</button>
+      <button class="sheet-scrim" id="sheetScrim" type="button" hidden aria-label="Close list"></button>
     </div>
   </div>
 
@@ -1078,10 +1111,7 @@
         }
       }
 
-      if (document.body.classList.contains("mode-mobile")) {
-        document.getElementById("sidebar").classList.remove("open");
-        document.getElementById("toggleList").textContent = "Locations list";
-      }
+      if (document.body.classList.contains("mode-mobile")) setSheet(false);
 
       // scroll active card into view
       const card = document.querySelector(`.card[data-id="${id}"]`);
@@ -1117,13 +1147,27 @@
       fitTo(austin, 12);
     });
 
-    document.getElementById("toggleList").addEventListener("click", () => {
-      const sb = document.getElementById("sidebar");
-      sb.classList.toggle("open");
-      document.getElementById("toggleList").textContent = sb.classList.contains("open")
-        ? "Show map"
-        : "Locations list";
+    function setSheet(open) {
+      document.getElementById("sidebar").classList.toggle("open", open);
+      document.getElementById("sheetScrim").hidden = !open;
+      document.getElementById("sheetHandle").textContent = open ? "Show map" : "Locations list";
+    }
+    function bindTap(el, fn) {
+      let last = 0;
+      const go = (e) => {
+        const n = performance.now();
+        if (n - last < 400) return;
+        last = n;
+        if (e.type === "touchend") e.preventDefault();
+        fn(e);
+      };
+      el.addEventListener("click", go);
+      el.addEventListener("touchend", go, { passive: false });
+    }
+    bindTap(document.getElementById("sheetHandle"), () => {
+      setSheet(!document.getElementById("sidebar").classList.contains("open"));
     });
+    bindTap(document.getElementById("sheetScrim"), () => setSheet(false));
 
     function syncViewport() {
       const vv = window.visualViewport;
@@ -1141,8 +1185,7 @@
       document.documentElement.classList.toggle("mode-mobile", mobile);
       document.getElementById("boot").hidden = true;
       document.getElementById("btn-mode").textContent = mobile ? "Desktop layout" : "Mobile layout";
-      document.getElementById("sidebar").classList.remove("open");
-      document.getElementById("toggleList").textContent = "Locations list";
+      setSheet(false);
       requestAnimationFrame(() => {
         map.invalidateSize();
         fitTo(LOCATIONS.filter((l) => l.category !== "nearby"), 12);
