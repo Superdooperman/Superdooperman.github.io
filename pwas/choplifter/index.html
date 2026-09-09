@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#000000">
+  <title>Choplifter!</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <canvas id="game" width="280" height="192"></canvas>
+    <div id="touch-controls" class="hidden">
+      <div id="joystick-zone"><div id="joystick-knob"></div></div>
+      <div id="action-buttons">
+        <button id="btn-facing" type="button" aria-label="Aim down">AIM DN</button>
+        <button id="btn-fire" type="button" aria-label="Fire">FIRE</button>
+        <button id="btn-motion" type="button" aria-label="Toggle motion controls">MOTION</button>
+      </div>
+    </div>
+    <div id="motion-panel" class="hidden">
+      <p>Tilt device to fly. Hold level, then tap Calibrate.</p>
+      <button id="btn-calibrate" type="button">Calibrate</button>
+      <label>Sensitivity <input id="motion-sensitivity" type="range" min="0.5" max="2" step="0.1" value="1"></label>
+      <button id="btn-motion-close" type="button">Close</button>
+    </div>
+    <div id="rotate-hint" class="hidden">Rotate to landscape</div>
+  </div>
+  <script src="js/audio.js"></script>
+  <script src="js/sprite-atlas.js"></script>
+  <script src="js/sprites.js"></script>
+  <script src="js/collision.js"></script>
+  <script src="js/motion.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/entities/projectile.js"></script>
+  <script src="js/entities/hostage.js"></script>
+  <script src="js/entities/tank.js"></script>
+  <script src="js/entities/jet.js"></script>
+  <script src="js/entities/bomber.js"></script>
+  <script src="js/entities/alien.js"></script>
+  <script src="js/entities/helicopter.js"></script>
+  <script src="js/scenes/hud.js"></script>
+  <script src="js/scenes/title.js"></script>
+  <script src="js/scenes/end.js"></script>
+  <script src="js/scenes/play.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
