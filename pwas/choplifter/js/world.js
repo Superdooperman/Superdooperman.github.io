@@ -5,11 +5,13 @@ const World = {
   CHOPPER_GROUND_Y: 160,
   WORLD_WIDTH: 1600,
   WIN_TARGET: 64,
-  // Max 5 per trip; max 5 wandering in field; 16 total field+runners on screen
+  // Max 5 per trip. Field hostages are spread across barracks, not one door.
   MAX_ABOARD: 5,
-  MAX_FIELD_HOSTAGES: 5,
+  MAX_FIELD_HOSTAGES: 12,
+  MAX_OUT_PER_BARRACK: 3,
   MAX_TOTAL_ACTIVE: 16,
   HOSTAGES_PER_BARRACK: 16,
+  HOSTAGE_SPAWN_INTERVAL: 0.7,
   HOUSE_SPACING: 220,
 
   // Original layout: base on the right, fly left to rescue
