@@ -32,6 +32,9 @@ const Input = (() => {
     const btnFire = document.getElementById('btn-fire');
     const btnFacing = document.getElementById('btn-facing');
     const btnMotion = document.getElementById('btn-motion');
+    const btnStart = document.getElementById('btn-start');
+    const btnPause = document.getElementById('btn-pause');
+    const canvas = document.getElementById('game');
     const motionPanel = document.getElementById('motion-panel');
     const btnCalibrate = document.getElementById('btn-calibrate');
     const btnMotionClose = document.getElementById('btn-motion-close');
@@ -103,15 +106,41 @@ const Input = (() => {
       if (joystick.pointer) endJoystick();
     });
 
-    btnFire.addEventListener('touchstart', (e) => { e.preventDefault(); fire = true; }, { passive: false });
-    btnFire.addEventListener('touchend', () => { fire = false; });
-    btnFire.addEventListener('mousedown', (e) => { e.preventDefault(); fire = true; });
-    btnFire.addEventListener('mouseup', () => { fire = false; });
+    function bindHold(el, onDown, onUp) {
+      const down = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.pointerId != null) {
+          try { el.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ }
+        }
+        onDown();
+      };
+      const up = (e) => {
+        if (e) e.preventDefault();
+        onUp();
+      };
+      el.addEventListener('pointerdown', down);
+      el.addEventListener('pointerup', up);
+      el.addEventListener('pointercancel', up);
+      el.addEventListener('lostpointercapture', () => onUp());
+    }
 
-    btnFacing.addEventListener('touchstart', (e) => { e.preventDefault(); aimDown = true; }, { passive: false });
-    btnFacing.addEventListener('touchend', () => { aimDown = false; });
-    btnFacing.addEventListener('mousedown', (e) => { e.preventDefault(); aimDown = true; });
-    btnFacing.addEventListener('mouseup', () => { aimDown = false; });
+    function pressStart(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      startPressed = true;
+    }
+
+    bindHold(btnFire, () => { fire = true; startPressed = true; }, () => { fire = false; });
+    bindHold(btnFacing, () => { aimDown = true; }, () => { aimDown = false; });
+    bindHold(btnStart, () => pressStart(), () => {});
+    bindHold(btnPause, () => { pausePressed = true; }, () => {});
+
+    canvas.addEventListener('pointerdown', (e) => {
+      if (e.target === canvas) pressStart(e);
+    });
 
     if (Motion.isAvailable()) {
       btnMotion.addEventListener('touchstart', async (e) => {

@@ -35,7 +35,7 @@ const EndScene = {
     }
     Sprites.drawText(ctx, `SCORE ${this.score}`, 140, 130, 10, COLORS.green, true);
     if (Math.floor(this.timer * 2) % 2 === 0) {
-      Sprites.drawText(ctx, 'PRESS SPACE', 140, 155, 8, COLORS.orange, true);
+      Sprites.drawText(ctx, Input.isTouchDevice() ? 'TAP TO CONTINUE' : 'PRESS SPACE', 140, 155, 8, COLORS.orange, true);
     }
   },
 };
