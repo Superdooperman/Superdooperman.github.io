@@ -51,6 +51,8 @@ const PlayScene = {
     this.heliInvuln = 0;
     this.levelBanner = 0;
     this.sortieBanner = 2.5;
+    this.hostageSpawnTimer = 0;
+    this.hostageSpawnCursor = 0;
     this.gameOver = false;
     this.victoryTimer = 0;
     this.victoryPending = false;
@@ -94,7 +96,11 @@ const PlayScene = {
     return this.heli.x >= World.homeBaseX + 22 && this.heli.x <= World.homeBaseX + 78;
   },
 
-  // Original spawnHostages — called every 4 frames via spawnEnemies
+  fieldCountForBarrack(index) {
+    return this.hostages.filter((h) => h.alive && h.barrackIndex === index).length;
+  },
+
+  // Trickle hostages from every opened barracks, not a dump from the one under the chopper.
   trySpawnHostage() {
     if (this.totalActiveCount() >= World.MAX_TOTAL_ACTIVE) return;
 
@@ -106,24 +112,19 @@ const PlayScene = {
     if (World.hostagesLeft <= 0) return;
     if (this.fieldHostageCount() >= World.MAX_FIELD_HOSTAGES) return;
 
-    const over = World.houseIndexAt(this.heli.x);
-    if (over >= 0) {
-      const b = World.barracks[over];
-      if (b.burning && b.inside > 0) {
-        this.spawnOneHostage(over);
-        return;
-      }
+    const candidates = [];
+    for (let i = 0; i < World.barracks.length; i++) {
+      const b = World.barracks[i];
+      if (!b.burning || b.inside <= 0) continue;
+      if (this.fieldCountForBarrack(i) >= World.MAX_OUT_PER_BARRACK) continue;
+      candidates.push(i);
     }
+    if (!candidates.length) return;
 
-    const start = Math.floor(Math.random() * 4);
-    for (let i = 0; i < 4; i++) {
-      const idx = (start + i) % 4;
-      const b = World.barracks[idx];
-      if (b.burning && b.inside > 0) {
-        this.spawnOneHostage(idx);
-        return;
-      }
-    }
+    const start = this.hostageSpawnCursor % candidates.length;
+    const idx = candidates[start];
+    this.hostageSpawnCursor = start + 1;
+    this.spawnOneHostage(idx);
   },
 
   spawnOneHostage(barrackIndex) {
@@ -137,7 +138,9 @@ const PlayScene = {
       this.hostages.length
     );
     h.state = 'exiting';
-    h.exitTarget = b.x + 30;
+    // Out the door first (otherwise they stay hidden inside the sprite), then wander both ways.
+    h.exitTarget = b.x + 32 + Math.random() * 90;
+    h.runDir = 1;
     this.hostages.push(h);
   },
 
@@ -239,8 +242,11 @@ const PlayScene = {
       World.WORLD_WIDTH - World.WIDTH
     ));
 
-    // Original: hostage spawn every 4 frames; enemy spawn every 47 frames
-    if ((this.frameCount & 3) === 0) this.trySpawnHostage();
+    this.hostageSpawnTimer += dt;
+    if (this.hostageSpawnTimer >= World.HOSTAGE_SPAWN_INTERVAL) {
+      this.hostageSpawnTimer = 0;
+      this.trySpawnHostage();
+    }
     if (!World.inSafeZone(this.heli.x) && (this.frameCount & 0x2f) === 0) {
       this.trySpawnEnemy();
     }

@@ -82,10 +82,12 @@ class Hostage {
     if (prox) return prox;
 
     if (this.state === 'exiting') {
-      this.x += runSpeed;
-      if (this.x >= this.exitTarget) {
+      const dir = Math.sign(this.exitTarget - this.x) || this.runDir;
+      this.x += dir * runSpeed;
+      if (Math.abs(this.x - this.exitTarget) < 3) {
         this.state = 'wandering';
         this.wanderTimer = 0.4 + Math.random();
+        this.runDir = Math.random() < 0.5 ? -1 : 1;
       }
       return;
     }
@@ -119,11 +121,12 @@ class Hostage {
 
       if (this.barrackIndex >= 0) {
         const anchor = World.barracks[this.barrackIndex].x + 24;
-        if (this.x < anchor - 35) this.runDir = 1;
-        if (this.x > anchor + 45) this.runDir = -1;
+        const range = 110;
+        if (this.x < anchor - range) this.runDir = 1;
+        if (this.x > anchor + range) this.runDir = -1;
       }
 
-      this.x += this.runDir * runSpeed * 0.45;
+      this.x += this.runDir * runSpeed * 0.55;
 
       // Original: don't run to chopper when it's full (HOSTAGES_LOADED == $10)
       if (heli.landed && heli.canBoard() && Math.abs(heli.x - this.x) < 70) {
