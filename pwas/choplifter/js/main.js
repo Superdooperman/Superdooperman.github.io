@@ -13,6 +13,9 @@ const Game = (() => {
 
   function setScene(name) {
     scene = name;
+    document.body.dataset.scene = name;
+    const startBtn = document.getElementById('btn-start');
+    if (startBtn) startBtn.textContent = name === 'end' ? 'TAP TO CONTINUE' : 'TAP TO START';
     if (name === 'title') TitleScene.enter();
     if (name === 'play') PlayScene.enter();
     if (name === 'end') {
@@ -70,6 +73,7 @@ const Game = (() => {
     await Sprites.load();
     document.body.addEventListener('click', () => AudioFX.init(), { once: true });
     document.body.addEventListener('touchstart', () => AudioFX.init(), { once: true });
+    document.body.dataset.scene = 'title';
     TitleScene.enter();
     requestAnimationFrame(loop);
   }
