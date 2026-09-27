@@ -1,0 +1,171 @@
+:root {
+  --color-bg: #12141c;
+  --color-surface: #1c2438;
+  --color-fg: #f3e6c1;
+  --color-muted: #8b93ad;
+  --color-primary: #c4542c;
+  --color-accent: #3ecfb2;
+  --color-border: #3d4663;
+  --font-pixel: "Press Start 2P", ui-monospace, monospace;
+}
+
+button {
+  font-family: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-pixel);
+}
+
+.stage {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  color: var(--color-fg);
+}
+
+.frame {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+}
+
+.pixel {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  touch-action: none;
+  background: var(--color-bg);
+  width: min(100%, calc((100dvh - 4.5rem) * 16 / 9));
+  height: auto;
+  max-height: calc(100dvh - 4.5rem);
+}
+
+.touchbar {
+  display: none;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  background: var(--color-surface);
+  border-top: 2px solid var(--color-border);
+}
+
+.touchbar button {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.5rem;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  border: 2px solid var(--color-border);
+  font-family: var(--font-pixel);
+  font-size: 0.625rem;
+  line-height: 1.4;
+}
+
+.touchbar button:active {
+  background: var(--color-primary);
+  color: var(--color-fg);
+}
+
+@media (pointer: coarse), (max-width: 800px) {
+  .touchbar {
+    display: flex;
+  }
+}
+
+.title-ui {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 2rem;
+}
+
+.title-actions {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+@media (max-width: 800px) {
+  .frame {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+  }
+
+  .title-ui {
+    position: static;
+    pointer-events: auto;
+    padding-block: 0;
+    order: -1;
+    gap: 1rem;
+    justify-content: flex-start;
+  }
+}
+
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  margin: 0;
+}
+
+.text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  margin: 0;
+}
+
+.text-fg { color: var(--color-fg); }
+.text-muted { color: var(--color-muted); }
+.text-accent { color: var(--color-accent); }
+.text-center { text-align: center; }
+.min-h-11 { min-height: 2.75rem; }
+.bg-primary { background: var(--color-primary); }
+.bg-surface { background: var(--color-surface); }
+.bg-bg\/80 { background: color-mix(in srgb, var(--color-bg) 80%, transparent); }
+.px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
+.py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+.p-4 { padding: 1rem; }
+.p-6 { padding: 1.5rem; }
+.absolute { position: absolute; }
+.inset-0 { inset: 0; }
+.grid { display: grid; }
+.place-items-center { place-items: center; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.w-full { width: 100%; }
+.max-w-sm { max-width: 24rem; }
+.gap-3 { gap: 0.75rem; }
+.gap-4 { gap: 1rem; }
+.border-2 { border-width: 2px; border-style: solid; }
+.border-border { border-color: var(--color-border); }
+.mt-2 { margin-top: 0.5rem; }
