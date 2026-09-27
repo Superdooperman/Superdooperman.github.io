@@ -1,4 +1,4 @@
-const CACHE = "night-lark-v1";
+const CACHE = "night-lark-v2";
 const CORE = [
   "./",
   "./index.html",
@@ -6,9 +6,15 @@ const CORE = [
   "./favicon.svg",
   "./manifest.webmanifest",
   "./parts/part0.js",
-  "./parts/part1.js",
-  "./parts/part2.js",
-  "./parts/part3.js",
+  "./parts/p10.js",
+  "./parts/p11.js",
+  "./parts/p12.js",
+  "./parts/p20.js",
+  "./parts/p21.js",
+  "./parts/p22.js",
+  "./parts/p30.js",
+  "./parts/p31.js",
+  "./parts/p32.js",
 ];
 
 self.addEventListener("install", (event) => {
