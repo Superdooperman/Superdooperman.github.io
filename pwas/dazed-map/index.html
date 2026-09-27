@@ -625,7 +625,7 @@
       <div class="footer-note">
         Locations compiled from the
         <a href="https://www.austintexas.org/film-commission/film-tourism-guide/dazed-and-confused/" target="_blank" rel="noopener">Austin Film Commission</a>
-        and fan research. Some homes are private — please be respectful.
+        and fan research. Open a pin for a YouTube scene when one exists. Some homes are private — please be respectful.
       </div>
     </aside>
 
@@ -663,6 +663,7 @@
         num: 1,
         name: "Top Notch Hamburgers",
         scene: "Burgers · Wooderson joins Mike, Cynthia & Tony",
+        youtube: "https://www.youtube.com/watch?v=jiwblxUW514",
         address: "7525 Burnet Rd, Austin, TX 78757",
         lat: 30.351076,
         lng: -97.733410,
@@ -679,6 +680,7 @@
         num: 2,
         name: "Lee High School (Bedichek Middle)",
         scene: "Opening · last day of school",
+        youtube: "https://www.youtube.com/watch?v=MrtQ5uIOcKY",
         address: "6800 Bill Hughes Rd, Austin, TX 78745",
         lat: 30.195328,
         lng: -97.785824,
@@ -694,6 +696,7 @@
         num: 3,
         name: "Beverly S. Sheffield Northwest District Park",
         scene: "Mitch’s baseball game & paddling",
+        youtube: "https://www.youtube.com/watch?v=bG5nacqlJNk",
         address: "7000 Ardath St, Austin, TX 78757",
         lat: 30.348531,
         lng: -97.742248,
@@ -723,6 +726,7 @@
         num: 5,
         name: "Carl Burnett’s house",
         scene: "O’Bannion vs. Carl & Mitch",
+        youtube: "https://www.youtube.com/watch?v=rtkI87FeqOY",
         address: "6409 Wilbur Dr, Austin, TX 78757",
         lat: 30.342806,
         lng: -97.744306,
@@ -737,6 +741,7 @@
         num: 6,
         name: "The Emporium · Violet Crown Plaza",
         scene: "Alright, alright, alright · parking lot",
+        youtube: "https://www.youtube.com/watch?v=oVsSHkukhig",
         address: "6600 N Lamar Blvd, Austin, TX 78752",
         // Building pin = Stiles Switch BBQ (same Violet Crown block as 6600–6610 N Lamar)
         lat: 30.334490,
@@ -753,6 +758,7 @@
         num: 7,
         name: "Paint drop garage · 821 Brentwood",
         scene: "White paint on O’Bannion",
+        youtube: "https://www.youtube.com/watch?v=I7MwxFdb0Ls",
         address: "821 Brentwood St, Austin, TX 78757",
         lat: 30.334389,
         lng: -97.722414,
@@ -768,6 +774,7 @@
         num: 8,
         name: "Wild Street & Ruth Avenue",
         scene: "Paddling chase (not the paint drop)",
+        youtube: "https://www.youtube.com/watch?v=GIK3ydfRLzc",
         address: "Wild St at Ruth Ave, Austin, TX 78757",
         // Intersection of Wild St & Ruth Ave (west of Brentwood garage)
         lat: 30.335188,
@@ -798,6 +805,7 @@
         num: 10,
         name: "Austin Public Library — Yarborough Branch",
         scene: "Senior girls hazing freshmen",
+        youtube: "https://www.youtube.com/watch?v=Olm0KUtsFE8",
         address: "2200 Hancock Dr, Austin, TX 78756",
         lat: 30.323461,
         lng: -97.740728,
@@ -813,6 +821,7 @@
         num: 11,
         name: "Ballard’s Grocery",
         scene: "Beer run & mailbox payback",
+        youtube: "https://www.youtube.com/watch?v=NjN-PLW521s",
         address: "4001 Medical Pkwy, Austin, TX 78756",
         lat: 30.308632,
         lng: -97.742462,
@@ -842,6 +851,7 @@
         num: 13,
         name: "Kevin Pickford’s house",
         scene: "The busted kegger",
+        youtube: "https://www.youtube.com/watch?v=ATrg7G5dSbg",
         address: "5800 Coventry Ln, Austin, TX 78723",
         lat: 30.308049,
         lng: -97.684670,
@@ -857,6 +867,7 @@
         num: 14,
         name: "West Enfield Park (Moontower prop)",
         scene: "The Moontower party",
+        youtube: "https://www.youtube.com/watch?v=wxRWjC8LGjE",
         address: "2008 Enfield Rd, Austin, TX 78703",
         lat: 30.286452,
         lng: -97.764742,
@@ -872,6 +883,7 @@
         num: 15,
         name: "Walter E. Long Metropolitan Park",
         scene: "Moontower / woods (official guide)",
+        youtube: "https://www.youtube.com/watch?v=wxRWjC8LGjE",
         address: "6620 Blue Bluff Rd, Austin, TX 78724",
         lat: 30.282846,
         lng: -97.608715,
@@ -887,6 +899,7 @@
         num: 16,
         name: "Toney Burger Athletic Center",
         scene: "Closing · 50-yard line at dawn",
+        youtube: "https://www.youtube.com/watch?v=Ls_8cFgBUj4",
         address: "3200 Jones Rd, Austin, TX 78745",
         lat: 30.230461,
         lng: -97.809752, // Toney Burger Activity Center (named POI)
@@ -916,6 +929,7 @@
         num: 18,
         name: "Williams Middle (Everette L. Williams Elem.)",
         scene: "Junior high / freshman hazing day",
+        youtube: "https://www.youtube.com/watch?v=aF3BXL1cQYY",
         address: "507 E University Ave, Georgetown, TX 78626",
         lat: 30.634118,
         lng: -97.672486,
@@ -981,6 +995,9 @@
     }
 
     function popupHtml(loc) {
+      const watch = loc.youtube
+        ? `<a class="btn" href="${loc.youtube}" target="_blank" rel="noopener">Watch the scene</a>`
+        : "";
       return `
         <div class="popup">
           <div class="num">${loc.num}</div>
@@ -989,7 +1006,8 @@
           <p>${escapeHtml(loc.description)}</p>
           <div class="today"><strong>Today:</strong> ${escapeHtml(loc.today)}</div>
           <div class="actions">
-            <a class="btn" href="${mapsUrl(loc)}" target="_blank" rel="noopener">Directions</a>
+            ${watch}
+            <a class="btn${loc.youtube ? " ghost" : ""}" href="${mapsUrl(loc)}" target="_blank" rel="noopener">Directions</a>
             <a class="btn ghost" href="https://www.openstreetmap.org/?mlat=${loc.lat}&mlon=${loc.lng}#map=17/${loc.lat}/${loc.lng}" target="_blank" rel="noopener">OSM</a>
           </div>
         </div>`;
@@ -1061,6 +1079,7 @@
               <div class="meta">
                 <span class="pill">${escapeHtml(CATEGORIES[loc.category]?.label || loc.category)}</span>
                 <span class="pill">${escapeHtml(loc.act)}</span>
+                ${loc.youtube ? `<span class="pill">Scene clip</span>` : ""}
               </div>
             </div>
           </div>`;
