@@ -23,7 +23,18 @@
   <body>
     <div id="root"></div>
     <script type="module">
-      const parts = ["./parts/part0.js", "./parts/part1.js", "./parts/part2.js", "./parts/part3.js"];
+      const parts = [
+        "./parts/part0.js",
+        "./parts/p10.js",
+        "./parts/p11.js",
+        "./parts/p12.js",
+        "./parts/p20.js",
+        "./parts/p21.js",
+        "./parts/p22.js",
+        "./parts/p30.js",
+        "./parts/p31.js",
+        "./parts/p32.js",
+      ];
       const chunks = [];
       for (const href of parts) {
         const res = await fetch(href);
