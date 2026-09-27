@@ -31,7 +31,11 @@
         chunks.push(await res.text());
       }
       let code = chunks.join("");
-      code = code.replaceAll('".": : :', '"." :').replaceAll('"!": :', '"!" :');
+      const q = '"';
+      const dot = String.fromCharCode(46);
+      const bang = String.fromCharCode(33);
+      code = code.split(q + dot + q + ": :").join(q + dot + q + ":");
+      code = code.split(q + bang + q + ": :").join(q + bang + q + ":");
       const url = URL.createObjectURL(new Blob([code], { type: "text/javascript" }));
       await import(url);
     </script>
