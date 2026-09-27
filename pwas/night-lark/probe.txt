@@ -1,6 +1,0 @@
-A: "1"
-DOT ".": : "2"
-BANG "!" : "3"
-LABEL "aria-label": "Night"
-PLAIN "hello": "world"
-END
