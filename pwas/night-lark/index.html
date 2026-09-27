@@ -30,7 +30,9 @@
         if (!res.ok) throw new Error(href);
         chunks.push(await res.text());
       }
-      const url = URL.createObjectURL(new Blob([chunks.join("")], { type: "text/javascript" }));
+      let code = chunks.join("");
+      code = code.replaceAll('".": : :', '"." :').replaceAll('"!": :', '"!" :');
+      const url = URL.createObjectURL(new Blob([code], { type: "text/javascript" }));
       await import(url);
     </script>
     <script>
