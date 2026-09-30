@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { COL, lineMat, starfield, shatterBurst, updateShatter, moonWire, trenchFrame, flakTower } from '../render/vector.js';
+import { COL, lineMat, starfield, shatterBurst, updateShatter, moonWire, trenchFrame, flakTower, tracerBolt, tracerTrail, updateTrail } from '../render/vector.js';
 import { BUILDERS } from '../ships/catalog.js';
 import AudioFX from '../audio.js';
 
@@ -67,6 +67,7 @@ export default function createPlay(ctx) {
     noHit: true,
     boss: null,
     over: null,
+    kick: 0,
   };
 
   const tmp = new THREE.Vector3();
@@ -262,33 +263,56 @@ export default function createPlay(ctx) {
 
   function fire() {
     const dir = lookDir().clone();
-    const origin = camera.position.clone().add(dir.clone().multiplyScalar(1.2));
-    origin.x += state.px * 0.02;
-    const mat = lineMat(COL.ally, 1);
-    const geo = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(0, 0, 0),
-      dir.clone().multiplyScalar(2.2),
-    ]);
-    const mesh = new THREE.Line(geo, mat);
+    const origin = camera.position.clone().add(dir.clone().multiplyScalar(1.35));
+    const down = new THREE.Vector3(0, -1, 0).applyQuaternion(camera.quaternion);
+    origin.addScaledVector(down, 0.28);
+    const mesh = tracerBolt(dir, { ally: true, twin: true });
     mesh.position.copy(origin);
     scene.add(mesh);
-    state.bullets.push({ mesh, vel: dir.multiplyScalar(160), life: 1.1 });
+    const trail = tracerTrail(COL.ally);
+    scene.add(trail);
+    state.bullets.push({
+      mesh,
+      trail,
+      hist: [origin.clone()],
+      vel: dir.multiplyScalar(170),
+      life: 1.15,
+    });
+    state.kick = 0.14;
     AudioFX.shoot();
   }
 
   function enemyShoot(e) {
     const origin = e.mesh.position.clone();
     tmp.copy(camera.position).sub(origin).normalize();
-    const mat = lineMat(COL.axis, 1);
-    const geo = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(0, 0, 0),
-      tmp.clone().multiplyScalar(1.4),
-    ]);
-    const mesh = new THREE.Line(geo, mat);
+    const mesh = tracerBolt(tmp, { ally: false, twin: false });
     mesh.position.copy(origin);
     scene.add(mesh);
+    const trail = tracerTrail(COL.axis);
+    scene.add(trail);
     const speed = e.boss ? 48 : 38;
-    state.ebullets.push({ mesh, vel: tmp.multiplyScalar(speed), life: 2.4 });
+    state.ebullets.push({
+      mesh,
+      trail,
+      hist: [origin.clone()],
+      vel: tmp.multiplyScalar(speed),
+      life: 2.4,
+    });
+  }
+
+  function dropBolt(b) {
+    scene.remove(b.mesh);
+    if (b.trail) scene.remove(b.trail);
+  }
+
+  function setPaused(on) {
+    state.paused = !!on;
+    const el = document.getElementById('pause');
+    if (el) el.classList.toggle('hidden', !state.paused);
+    if (state.paused) {
+      const bannerEl = document.getElementById('banner');
+      if (bannerEl) bannerEl.classList.add('hidden');
+    }
   }
 
   function killEnemy(e) {
@@ -332,6 +356,7 @@ export default function createPlay(ctx) {
     state.over = { won };
     const h = saveHi();
     document.body.classList.remove('playing');
+    setPaused(false);
     const end = document.getElementById('end');
     end.classList.remove('hidden');
     document.getElementById('end-kicker').textContent = won ? 'MISSION REPORT' : 'VOIDCAT LOST';
@@ -358,8 +383,8 @@ export default function createPlay(ctx) {
     state.awaitingExit = false;
     state.spawnFlags = new Set();
     for (const e of state.enemies) scene.remove(e.mesh);
-    for (const b of state.bullets) scene.remove(b.mesh);
-    for (const b of state.ebullets) scene.remove(b.mesh);
+    for (const b of state.bullets) dropBolt(b);
+    for (const b of state.ebullets) dropBolt(b);
     state.enemies = [];
     state.bullets = [];
     state.ebullets = [];
@@ -370,8 +395,8 @@ export default function createPlay(ctx) {
 
   function enter() {
     for (const e of state.enemies) scene.remove(e.mesh);
-    for (const b of state.bullets) scene.remove(b.mesh);
-    for (const b of state.ebullets) scene.remove(b.mesh);
+    for (const b of state.bullets) dropBolt(b);
+    for (const b of state.ebullets) dropBolt(b);
     for (const f of state.fx) scene.remove(f);
     Object.assign(state, {
       running: true,
@@ -400,7 +425,9 @@ export default function createPlay(ctx) {
       over: null,
       noHit: true,
       boostHeld: false,
+      kick: 0,
     });
+    setPaused(false);
     document.body.classList.add('playing');
     document.getElementById('end').classList.add('hidden');
     document.getElementById('briefing').classList.add('hidden');
@@ -416,10 +443,7 @@ export default function createPlay(ctx) {
 
   function update(dt, input) {
     if (!state.running) return state.over;
-    if (input.pause) {
-      state.paused = !state.paused;
-      banner(state.paused ? 'PAUSED' : 'FIGHT', 700);
-    }
+    if (input.pause) setPaused(!state.paused);
     if (state.paused) return null;
 
     const speed = 22 + (input.boost ? 18 : 0);
@@ -442,7 +466,8 @@ export default function createPlay(ctx) {
     const targetRoll = -input.aimX * 0.45 + (state.rollT > 0 ? Math.sin((1 - state.rollT / 0.55) * Math.PI * 2) * Math.PI * 2 : 0);
     state.roll += (targetRoll - state.roll) * Math.min(1, dt * 6);
 
-    camera.position.set(state.px * 0.15, state.py * 0.15 + 0.4, 0);
+    state.kick = Math.max(0, state.kick - dt * 2.6);
+    camera.position.set(state.px * 0.15, state.py * 0.15 + 0.4, state.kick * 0.45);
     const lookX = state.px + input.aimX * 10;
     const lookY = state.py + input.aimY * 8;
     camera.lookAt(lookX, lookY, -40);
@@ -496,13 +521,22 @@ export default function createPlay(ctx) {
       }
     }
 
-    // player bullets
-    for (const b of state.bullets) {
+    function stepBolt(b, maxHist) {
       b.mesh.position.addScaledVector(b.vel, dt);
       b.life -= dt;
+      if (b.hist) {
+        b.hist.push(b.mesh.position.clone());
+        if (b.hist.length > maxHist) b.hist.shift();
+        if (b.trail) updateTrail(b.trail, b.hist);
+      }
+    }
+
+    // player bullets
+    for (const b of state.bullets) {
+      stepBolt(b, 10);
       for (const e of state.enemies) {
         if (e.dead || e.ally) continue;
-        if (b.mesh.position.distanceTo(e.mesh.position) < e.r + 0.6) {
+        if (b.mesh.position.distanceTo(e.mesh.position) < e.r + 0.75) {
           b.life = 0;
           e.hp -= 1;
           AudioFX.hit();
@@ -513,8 +547,7 @@ export default function createPlay(ctx) {
 
     // enemy bullets
     for (const b of state.ebullets) {
-      b.mesh.position.addScaledVector(b.vel, dt);
-      b.life -= dt;
+      stepBolt(b, 8);
       tmp.copy(b.mesh.position);
       tmp2.set(state.px * 0.15, state.py * 0.15 + 0.4, 0);
       if (tmp.distanceTo(tmp2) < 1.15) {
@@ -535,14 +568,14 @@ export default function createPlay(ctx) {
 
     state.bullets = state.bullets.filter((b) => {
       if (b.life <= 0 || b.mesh.position.z < -220) {
-        scene.remove(b.mesh);
+        dropBolt(b);
         return false;
       }
       return true;
     });
     state.ebullets = state.ebullets.filter((b) => {
       if (b.life <= 0) {
-        scene.remove(b.mesh);
+        dropBolt(b);
         return false;
       }
       return true;
@@ -581,5 +614,5 @@ export default function createPlay(ctx) {
     document.body.classList.remove('playing');
   }
 
-  return { enter, update, dispose, hi, STAGES };
+  return { enter, update, dispose, hi, STAGES, setPaused };
 }

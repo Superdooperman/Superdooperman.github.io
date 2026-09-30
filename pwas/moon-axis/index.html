@@ -47,8 +47,8 @@
       <p class="crawl">Festung Selene is live. Kinetic rods over the Pacific.<br>Catapult off the Void Hornet. Do not let them finish the rod.</p>
       <p id="title-hi" class="hi">HI SCORE 000000</p>
       <button id="btn-start" type="button">PRESS FIRE TO LAUNCH</button>
-      <p class="hint desktop-only">MOUSE AIM · WASD TRIM · CLICK/SPACE FIRE · SHIFT BOOST · B ROLL</p>
-      <p class="hint mobile-only">STICK AIM · FIRE · BOOST · ROLL</p>
+      <p class="hint desktop-only">MOUSE AIM · WASD TRIM · CLICK/SPACE FIRE · SHIFT BOOST · B ROLL · P PAUSE</p>
+      <p class="hint mobile-only">STICK AIM · FIRE · BOOST · ROLL · PAUSE FOR SETTINGS</p>
     </div>
 
     <div id="briefing" class="overlay panel hidden">
@@ -59,6 +59,17 @@
     </div>
 
     <div id="banner" class="overlay hidden"><span id="banner-text"></span></div>
+
+    <div id="pause" class="overlay panel hidden">
+      <p class="eyebrow">VOIDCAT HOLD</p>
+      <h2>PAUSED</h2>
+      <button id="btn-resume" type="button">RESUME</button>
+      <button id="opt-invert" type="button" class="opt">INVERT Y  OFF</button>
+      <p class="hint">Classic flight: pull back to climb</p>
+      <button id="opt-haptics" type="button" class="opt">HAPTICS  ON</button>
+      <button id="btn-fs-pause" type="button" class="btn-fs">FULL SCREEN</button>
+      <p id="fs-hint" class="hint hidden">iPhone Safari keeps its tabs. This hides as much chrome as iOS allows — Add to Home Screen is the true full cabinet.</p>
+    </div>
 
     <div id="end" class="overlay panel hidden">
       <p class="eyebrow" id="end-kicker">MISSION REPORT</p>
@@ -75,6 +86,10 @@
         <button id="btn-roll" type="button">ROLL</button>
         <button id="btn-fire" type="button">FIRE</button>
       </div>
+    </div>
+
+    <div id="top-chrome">
+      <button id="btn-fs" type="button" class="btn-fs" aria-label="Fullscreen">FULL</button>
       <button id="btn-pause" type="button">II</button>
     </div>
 

@@ -1,3 +1,5 @@
+import Settings from './settings.js';
+
 const Input = {
   keys: Object.create(null),
   aimX: 0,
@@ -116,7 +118,8 @@ const Input = {
     const kx = (k.KeyD || k.ArrowRight ? 1 : 0) - (k.KeyA || k.ArrowLeft ? 1 : 0);
     const ky = (k.KeyW || k.ArrowUp ? 1 : 0) - (k.KeyS || k.ArrowDown ? 1 : 0);
     const aimX = Math.max(-1, Math.min(1, this.aimX + kx * 0.55));
-    const aimY = Math.max(-1, Math.min(1, this.aimY + ky * 0.55));
+    let aimY = Math.max(-1, Math.min(1, this.aimY + ky * 0.55));
+    if (Settings.invertY) aimY = -aimY;
     const fire = this.fire || !!k.Space;
     const boost = this.boost || !!k.ShiftLeft || !!k.ShiftRight;
     const rollEdge = (!this._rollLatch && (k.KeyB || this._rollTap));
