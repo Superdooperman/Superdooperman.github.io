@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import Input from './input.js';
 import AudioFX from './audio.js';
+import Settings from './settings.js';
 import { voidcat, starfork } from './ships/catalog.js';
 import { starfield } from './render/vector.js';
 import createPlay from './scenes/play.js';
@@ -22,13 +23,22 @@ scene.fog = new THREE.FogExp2(0x000000, 0.012);
 const camera = new THREE.PerspectiveCamera(62, 1, 0.1, 500);
 
 function resize() {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
+  const vv = window.visualViewport;
+  const w = Math.max(1, Math.round(vv ? vv.width : window.innerWidth));
+  const h = Math.max(1, Math.round(vv ? vv.height : window.innerHeight));
+  const x = vv ? vv.offsetLeft : 0;
+  const y = vv ? vv.offsetTop : 0;
+  const app = document.getElementById('app');
+  app.style.width = w + 'px';
+  app.style.height = h + 'px';
+  app.style.transform = `translate(${x}px, ${y}px)`;
   renderer.setSize(w, h, false);
   camera.aspect = w / Math.max(1, h);
   camera.updateProjectionMatrix();
 }
 window.addEventListener('resize', resize);
+window.visualViewport?.addEventListener('resize', resize);
+window.visualViewport?.addEventListener('scroll', resize);
 resize();
 
 try {
@@ -126,6 +136,104 @@ document.getElementById('briefing').addEventListener('click', (e) => {
 document.getElementById('btn-again').addEventListener('click', () => {
   enterTitle();
 });
+
+function syncSettingsUI() {
+  const inv = document.getElementById('opt-invert');
+  const hap = document.getElementById('opt-haptics');
+  inv.textContent = Settings.invertY ? 'INVERT Y  ON' : 'INVERT Y  OFF';
+  inv.classList.toggle('on', Settings.invertY);
+  hap.textContent = Settings.haptics ? 'HAPTICS  ON' : 'HAPTICS  OFF';
+  hap.classList.toggle('on', Settings.haptics);
+  const hint = document.getElementById('fs-hint');
+  hint.classList.toggle('hidden', !(Settings.isIOS() && !Settings.isStandalone()));
+  if (Settings.isStandalone()) document.body.classList.add('standalone');
+  syncFsButtons();
+}
+
+function isNativeFs() {
+  return !!(document.fullscreenElement || document.webkitFullscreenElement);
+}
+
+function syncFsButtons() {
+  const on = isNativeFs() || document.body.classList.contains('immersive');
+  document.querySelectorAll('.btn-fs').forEach((b) => {
+    b.textContent = b.id === 'btn-fs' ? (on ? 'EXIT' : 'FULL') : (on ? 'EXIT FULL SCREEN' : 'FULL SCREEN');
+  });
+}
+
+async function toggleFullscreen() {
+  AudioFX.init();
+  const root = document.documentElement;
+  if (isNativeFs()) {
+    try {
+      if (document.exitFullscreen) await document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    } catch (_) { /* ignore */ }
+    document.body.classList.remove('immersive');
+    syncFsButtons();
+    resize();
+    return;
+  }
+  let native = false;
+  const canFs = document.fullscreenEnabled || document.webkitFullscreenEnabled;
+  try {
+    if (canFs && root.requestFullscreen) {
+      await root.requestFullscreen({ navigationUI: 'hide' });
+      native = true;
+    } else if (canFs && root.webkitRequestFullscreen) {
+      root.webkitRequestFullscreen();
+      native = true;
+    }
+  } catch (_) {
+    native = false;
+  }
+  document.body.classList.add('immersive');
+  window.scrollTo(0, 0);
+  requestAnimationFrame(() => {
+    window.scrollTo(0, 1);
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+      resize();
+    }, 60);
+  });
+  try { await screen.orientation?.lock?.('landscape'); } catch (_) { /* iOS often blocks */ }
+  if (!native && Settings.isIOS() && !Settings.isStandalone()) {
+    const hint = document.getElementById('fs-hint');
+    hint.classList.remove('hidden');
+  }
+  syncFsButtons();
+  resize();
+}
+
+document.querySelectorAll('.btn-fs').forEach((b) => {
+  b.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleFullscreen();
+  });
+});
+document.getElementById('btn-resume').addEventListener('click', (e) => {
+  e.preventDefault();
+  play.setPaused(false);
+});
+document.getElementById('opt-invert').addEventListener('click', (e) => {
+  e.preventDefault();
+  Settings.setInvertY(!Settings.invertY);
+  syncSettingsUI();
+});
+document.getElementById('opt-haptics').addEventListener('click', (e) => {
+  e.preventDefault();
+  Settings.setHaptics(!Settings.haptics);
+  syncSettingsUI();
+  if (Settings.haptics) {
+    AudioFX.init();
+    Settings.rumble(25);
+    AudioFX.shoot();
+  }
+});
+document.addEventListener('fullscreenchange', syncFsButtons);
+document.addEventListener('webkitfullscreenchange', syncFsButtons);
+syncSettingsUI();
 
 const clock = new THREE.Clock();
 

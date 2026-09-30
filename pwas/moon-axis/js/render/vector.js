@@ -20,6 +20,69 @@ export function lineMat(color, opacity = 0.95) {
   });
 }
 
+function pointFlare(color, size, opacity) {
+  const geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0)]);
+  const mat = new THREE.PointsMaterial({
+    color,
+    size,
+    sizeAttenuation: false,
+    transparent: true,
+    opacity,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  return new THREE.Points(geo, mat);
+}
+
+/** Bright bolt: pixel-sized flare (readable on phones) + long additive tracer. Twin = Hispano-X pair. */
+export function tracerBolt(dir, { ally = true, twin = false } = {}) {
+  const group = new THREE.Group();
+  const len = ally ? 10 : 6.2;
+  const coreCol = ally ? 0xffffff : 0xfff3c0;
+  const glowCol = ally ? COL.ally : COL.axis;
+  const right = new THREE.Vector3().crossVectors(dir, new THREE.Vector3(0, 1, 0));
+  if (right.lengthSq() < 1e-6) right.set(1, 0, 0);
+  else right.normalize();
+
+  const addBolt = (offset) => {
+    const g = new THREE.Group();
+    const tip = dir.clone().multiplyScalar(len);
+    const mid = dir.clone().multiplyScalar(len * 0.68);
+    g.add(new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), tip]),
+      lineMat(glowCol, 0.55),
+    ));
+    g.add(new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), mid]),
+      lineMat(coreCol, 1),
+    ));
+    g.add(pointFlare(glowCol, ally ? 30 : 20, 0.55));
+    g.add(pointFlare(coreCol, ally ? 13 : 10, 1));
+    g.position.copy(right).multiplyScalar(offset);
+    group.add(g);
+  };
+
+  if (twin) {
+    addBolt(-0.64);
+    addBolt(0.64);
+  } else {
+    addBolt(0);
+  }
+  return group;
+}
+
+export function tracerTrail(color) {
+  const geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+  const line = new THREE.Line(geo, lineMat(color, 0.4));
+  line.frustumCulled = false;
+  return line;
+}
+
+export function updateTrail(line, hist) {
+  if (hist.length < 2) return;
+  line.geometry.setFromPoints(hist);
+}
+
 export function linesFromPaths(paths, material) {
   const group = new THREE.Group();
   for (const path of paths) {

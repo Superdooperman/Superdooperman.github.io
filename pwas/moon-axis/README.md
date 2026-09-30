@@ -46,9 +46,9 @@ Then open `http://localhost:8765` (or `http://<pi-ip>:8765` from a phone on the 
 
 ## Controls
 
-**Desktop:** mouse aims (yoke), WASD trims, click / Space fire, Shift boost, B barrel-roll (i-frames), P pause.
+**Desktop:** mouse aims (yoke), WASD trims, click / Space fire, Shift boost, B barrel-roll (i-frames), P pause / settings.
 
-**Phone (landscape):** left stick aims, FIRE / BOOST / ROLL. Rotate to landscape. Add to Home Screen for the full-cabinet PWA.
+**Phone (landscape):** left stick aims, FIRE / BOOST / ROLL. FULL (top right) hides browser chrome. Pause opens settings: invert Y (classic flight — pull back to climb) and haptics. Rotate to landscape. Add to Home Screen for the true full cabinet — iPhone Safari cannot drop its tab bar via the web Fullscreen API.
 
 ## Scoring
 

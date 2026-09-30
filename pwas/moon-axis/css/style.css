@@ -3,6 +3,8 @@
 html, body {
   width: 100%;
   height: 100%;
+  height: 100dvh;
+  height: 100svh;
   overflow: hidden;
   background: #000;
   touch-action: none;
@@ -151,7 +153,7 @@ body.playing #title { display: none; }
   pointer-events: none;
 }
 
-#hud-top { top: max(8px, env(safe-area-inset-top)); }
+#hud-top { top: max(8px, env(safe-area-inset-top)); padding-right: 120px; }
 #hud-bottom { bottom: max(8px, env(safe-area-inset-bottom)); }
 
 #reticle {
@@ -198,10 +200,7 @@ body.playing #title { display: none; }
 }
 
 #joystick-zone,
-#action-buttons,
-#btn-pause,
-#btn-start,
-#btn-again {
+#action-buttons {
   pointer-events: auto;
   -webkit-tap-highlight-color: transparent;
   touch-action: none;
@@ -256,14 +255,60 @@ body.playing #title { display: none; }
   color: #f99;
 }
 
-#btn-pause {
+#top-chrome {
   position: absolute;
   top: max(10px, env(safe-area-inset-top));
   right: max(12px, env(safe-area-inset-right));
-  width: 44px;
+  z-index: 14;
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+#top-chrome button {
+  width: 48px;
   height: 44px;
   padding: 0;
   border-radius: 4px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+
+body:not(.playing) #btn-pause { visibility: hidden; }
+body.standalone #btn-fs { display: none; }
+
+#pause {
+  z-index: 16;
+  gap: 10px;
+  overflow: auto;
+  background: radial-gradient(ellipse at center, rgba(0, 16, 24, 0.88) 0%, rgba(0, 0, 0, 0.82) 70%);
+}
+
+#pause button {
+  min-width: 240px;
+}
+
+#pause .opt.on {
+  background: #7fe9ff;
+  color: #000;
+  text-shadow: none;
+}
+
+#pause .hint {
+  max-width: 420px;
+  margin-top: 0;
+}
+
+#joystick-zone,
+#action-buttons,
+#btn-pause,
+#btn-fs,
+#btn-start,
+#btn-again,
+#btn-resume {
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
 }
 
 #rotate-hint {
