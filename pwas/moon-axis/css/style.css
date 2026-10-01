@@ -136,6 +136,12 @@ button {
 
 button:active { background: #7fe9ff; color: #000; }
 
+#btn-scores {
+  min-width: 180px;
+  font-size: 12px;
+  padding: 8px 16px;
+}
+
 #hud { display: none; }
 body.playing #hud { display: block; }
 body.playing #title { display: none; }
@@ -297,6 +303,53 @@ body.standalone #btn-fs { display: none; }
 #pause .hint {
   max-width: 420px;
   margin-top: 0;
+}
+
+.score-wrap {
+  width: min(420px, 92vw);
+  max-height: 40vh;
+  overflow: auto;
+}
+
+.score-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+}
+
+.score-table th,
+.score-table td {
+  padding: 4px 8px;
+  text-align: left;
+}
+
+.score-table th { color: #c9a227; }
+.score-table td:nth-child(3) { text-align: right; font-variant-numeric: tabular-nums; }
+.score-table tr.hi-row td {
+  color: #fff;
+  text-shadow: 0 0 8px #3cf;
+}
+
+.tag-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.2em;
+  font-size: 13px;
+  color: #7fe9ff;
+}
+
+.tag-row input {
+  width: 4.2em;
+  background: rgba(0, 20, 28, 0.7);
+  border: 1px solid #7fe9ff;
+  color: #7fe9ff;
+  font: inherit;
+  letter-spacing: 0.28em;
+  text-align: center;
+  text-transform: uppercase;
+  padding: 6px 4px;
 }
 
 #joystick-zone,

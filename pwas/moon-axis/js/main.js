@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import Input from './input.js';
 import AudioFX from './audio.js';
 import Settings from './settings.js';
+import Scores from './scores.js';
 import { voidcat, starfork } from './ships/catalog.js';
 import { starfield } from './render/vector.js';
 import createPlay from './scenes/play.js';
@@ -50,8 +51,11 @@ try {
 Input.init();
 const play = createPlay({ scene, camera, renderer });
 
-document.getElementById('title-hi').textContent = `HI SCORE ${String(play.hi()).padStart(6, '0')}`;
-document.getElementById('hud-hi').textContent = `HI ${String(play.hi()).padStart(6, '0')}`;
+function paintHi() {
+  document.getElementById('title-hi').textContent = `HI SCORE ${Scores.pad(Scores.best())}`;
+  document.getElementById('hud-hi').textContent = `HI ${Scores.pad(Scores.best())}`;
+}
+paintHi();
 
 let mode = 'title';
 let titleShip = null;
@@ -78,7 +82,9 @@ function enterTitle() {
   show('title', true);
   show('briefing', false);
   show('end', false);
+  show('scores', false);
   show('banner', false);
+  paintHi();
   titleStars = starfield(700);
   scene.add(titleStars);
   titleShip = voidcat();
@@ -104,6 +110,7 @@ function enterBrief(stageIndex) {
   const s = play.STAGES[stageIndex];
   show('title', false);
   show('end', false);
+  show('scores', false);
   show('briefing', true);
   document.getElementById('brief-kicker').textContent = s.briefKicker;
   document.getElementById('brief-title').textContent = s.briefTitle;
@@ -118,6 +125,7 @@ function enterPlay() {
   clearScene();
   show('briefing', false);
   show('title', false);
+  show('scores', false);
   play.enter();
 }
 
@@ -126,6 +134,29 @@ function launchFromTitle() {
   enterBrief(0);
 }
 document.getElementById('btn-start').addEventListener('click', launchFromTitle);
+document.getElementById('btn-scores').addEventListener('click', (e) => {
+  e.preventDefault();
+  mode = 'scores';
+  holdoff = 0.25;
+  show('title', false);
+  show('scores', true);
+  document.getElementById('scores-best').textContent = `HI ${Scores.pad(Scores.best())}`;
+  Scores.render(document.getElementById('scores-table'));
+  document.getElementById('tag-input-title').value = Scores.tag();
+});
+document.getElementById('btn-scores-back').addEventListener('click', (e) => {
+  e.preventDefault();
+  enterTitle();
+});
+function bindTag(id) {
+  const el = document.getElementById(id);
+  el.value = Scores.tag();
+  el.addEventListener('input', () => {
+    el.value = Scores.setTag(el.value);
+  });
+}
+bindTag('tag-input');
+bindTag('tag-input-title');
 document.getElementById('btn-brief').addEventListener('click', () => {
   if (mode === 'brief' && holdoff <= 0) enterPlay();
 });
@@ -266,7 +297,10 @@ function frame() {
     if (over) {
       mode = 'end';
       holdoff = 0.7;
+      paintHi();
     }
+  } else if (mode === 'scores') {
+    holdoff = Math.max(0, holdoff - dt);
   } else if (mode === 'end') {
     holdoff = Math.max(0, holdoff - dt);
     if (holdoff <= 0 && input.start) enterTitle();

@@ -47,6 +47,7 @@
       <p class="crawl">Festung Selene is live. Kinetic rods over the Pacific.<br>Catapult off the Void Hornet. Do not let them finish the rod.</p>
       <p id="title-hi" class="hi">HI SCORE 000000</p>
       <button id="btn-start" type="button">PRESS FIRE TO LAUNCH</button>
+      <button id="btn-scores" type="button" class="opt">HI SCORES</button>
       <p class="hint desktop-only">MOUSE AIM · WASD TRIM · CLICK/SPACE FIRE · SHIFT BOOST · B ROLL · P PAUSE</p>
       <p class="hint mobile-only">STICK AIM · FIRE · BOOST · ROLL · PAUSE FOR SETTINGS</p>
     </div>
@@ -71,11 +72,22 @@
       <p id="fs-hint" class="hint hidden">iPhone Safari keeps its tabs. This hides as much chrome as iOS allows — Add to Home Screen is the true full cabinet.</p>
     </div>
 
+    <div id="scores" class="overlay panel hidden">
+      <p class="eyebrow">PACIFIC VOID COMMAND</p>
+      <h2>HI SCORES</h2>
+      <p id="scores-best" class="hi">HI 000000</p>
+      <div id="scores-table" class="score-wrap"></div>
+      <label class="tag-row">ACE <input id="tag-input-title" maxlength="3" spellcheck="false" autocomplete="off" value="ACE"></label>
+      <button id="btn-scores-back" type="button">BACK</button>
+    </div>
+
     <div id="end" class="overlay panel hidden">
       <p class="eyebrow" id="end-kicker">MISSION REPORT</p>
       <h2 id="end-title">FESTUNG SELENE FALLS</h2>
       <p id="end-body"></p>
       <p id="end-score" class="hi"></p>
+      <div id="end-table" class="score-wrap"></div>
+      <label class="tag-row">ACE <input id="tag-input" maxlength="3" spellcheck="false" autocomplete="off" value="ACE"></label>
       <button id="btn-again" type="button">FLY AGAIN</button>
     </div>
 
