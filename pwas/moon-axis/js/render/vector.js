@@ -225,3 +225,64 @@ export function flakTower() {
   ];
   return linesFromPaths(paths, mat);
 }
+
+/** Double-pyramid pylon for void / trench lane. Turrets at both tips. */
+export function diamondPylon() {
+  const mat = lineMat(COL.magenta, 0.9);
+  const paths = [
+    [[0, 3.6, 0], [1.3, 0, 1.3], [0, -3.6, 0], [-1.3, 0, 1.3], [0, 3.6, 0]],
+    [[0, 3.6, 0], [1.3, 0, -1.3], [0, -3.6, 0], [-1.3, 0, -1.3], [0, 3.6, 0]],
+    [[1.3, 0, 1.3], [1.3, 0, -1.3], [-1.3, 0, -1.3], [-1.3, 0, 1.3], [1.3, 0, 1.3]],
+    [[-0.7, 3.6, 0], [0.7, 3.6, 0]],
+    [[-0.7, -3.6, 0], [0.7, -3.6, 0]],
+    [[0, 3.6, 0], [0, 4.4, 0]],
+    [[0, -3.6, 0], [0, -4.4, 0]],
+  ];
+  return linesFromPaths(paths, mat);
+}
+
+/** Wire crater apron the stage-2 battery sits on. Local y = 0 is the deck. */
+export function craterFloor() {
+  const mat = lineMat(COL.terrain, 0.48);
+  const paths = [];
+  for (const r of [10, 18, 28, 40, 54]) {
+    paths.push(ring(r, 28, 'y'));
+  }
+  for (let i = 0; i < 14; i++) {
+    const a = (i / 14) * Math.PI * 2;
+    paths.push([[Math.cos(a) * 8, 0, Math.sin(a) * 8], [Math.cos(a) * 54, 0, Math.sin(a) * 54]]);
+  }
+  paths.push([[-40, 0, -8], [40, 0, -8], [40, 0, 8], [-40, 0, 8], [-40, 0, -8]]);
+  return linesFromPaths(paths, mat);
+}
+
+export function laserBolt(dir, { heavy = false } = {}) {
+  const group = new THREE.Group();
+  const len = heavy ? 16 : 13;
+  const glowCol = heavy ? COL.magenta : COL.axis;
+  const back = dir.clone().multiplyScalar(-len);
+  const near = dir.clone().multiplyScalar(-len * 0.28);
+  group.add(new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), back]),
+    lineMat(glowCol, 0.5),
+  ));
+  group.add(new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), near]),
+    lineMat(0xffe8f0, 0.95),
+  ));
+  const halo = pointFlare(glowCol, heavy ? 16 : 9, 0.55);
+  const core = pointFlare(0xffffff, heavy ? 7 : 4, 1);
+  group.add(halo, core);
+  group.userData.halo = halo;
+  group.userData.core = core;
+  group.userData.heavy = heavy;
+  group.userData.laser = true;
+  return group;
+}
+
+export function updateLaser(group, dist) {
+  const t = 1 - Math.min(1, Math.max(0, dist / 72));
+  const h = group.userData.heavy;
+  if (group.userData.halo) group.userData.halo.material.size = (h ? 12 : 7) + t * (h ? 34 : 38);
+  if (group.userData.core) group.userData.core.material.size = (h ? 6 : 3.5) + t * (h ? 18 : 22);
+}

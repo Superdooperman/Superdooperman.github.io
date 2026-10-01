@@ -18,6 +18,7 @@ const Input = {
     if (this.touch) document.body.classList.add('touch');
 
     window.addEventListener('keydown', (e) => {
+      if (e.target && e.target.tagName === 'INPUT') return;
       this.keys[e.code] = true;
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) {
         e.preventDefault();

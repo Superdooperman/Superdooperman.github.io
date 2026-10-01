@@ -52,4 +52,4 @@ Then open `http://localhost:8765` (or `http://<pi-ip>:8765` from a phone on the 
 
 ## Scoring
 
-Fighters, towers, trench guns, no-hit stage bonus, Mondsichel core. High score is stored in `localStorage` as `moon-axis-hiscore`.
+Fighters, towers, trench guns, no-hit stage bonus, Mondsichel core. HI SCORES is a top-10 on this device (`moon-axis-scores`); best is also `moon-axis-hiscore`. GitHub Pages cannot host a worldwide board without a backend.
