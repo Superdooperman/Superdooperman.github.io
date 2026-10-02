@@ -197,6 +197,35 @@ body.playing #title { display: none; }
   background: linear-gradient(to bottom, rgba(0,0,0,0.0), rgba(0,0,0,0.35), rgba(0,0,0,0.0));
 }
 
+#radio {
+  position: absolute;
+  left: 50%;
+  bottom: max(72px, calc(env(safe-area-inset-bottom) + 56px));
+  transform: translateX(-50%);
+  width: min(92vw, 640px);
+  z-index: 14;
+  pointer-events: none;
+  text-align: center;
+  padding: 8px 14px;
+  background: rgba(0, 8, 12, 0.55);
+  border: 1px solid rgba(127, 233, 255, 0.25);
+  text-shadow: 0 0 10px #3cf;
+}
+#radio.hidden { display: none; }
+#radio-who {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  color: #c9a227;
+  margin-bottom: 4px;
+}
+#radio-line {
+  display: block;
+  font-size: clamp(13px, 2.4vw, 18px);
+  letter-spacing: 0.04em;
+  color: #b8f4ff;
+}
+
 #touch-controls {
   display: none;
   position: absolute;

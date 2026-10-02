@@ -1,4 +1,5 @@
 import Settings from './settings.js';
+import Vox from './vox.js';
 
 const AudioFX = (() => {
   let ctx = null;
@@ -85,7 +86,10 @@ const AudioFX = (() => {
   }
 
   return {
-    init: ensure,
+    init() {
+      ensure();
+      Vox.preload();
+    },
     shoot() {
       Settings.rumble(18);
       thump();

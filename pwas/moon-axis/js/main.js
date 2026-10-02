@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import Input from './input.js';
 import AudioFX from './audio.js';
+import Vox from './vox.js';
 import Settings from './settings.js';
 import Scores from './scores.js';
 import { voidcat, starfork } from './ships/catalog.js';
@@ -79,6 +80,9 @@ function enterTitle() {
   holdoff = 0.45;
   clearScene();
   document.body.classList.remove('playing');
+  Vox.stopRadio();
+  const radioEl = document.getElementById('radio');
+  if (radioEl) radioEl.classList.add('hidden');
   show('title', true);
   show('briefing', false);
   show('end', false);
@@ -114,19 +118,24 @@ function enterBrief(stageIndex) {
   show('briefing', true);
   document.getElementById('brief-kicker').textContent = s.briefKicker;
   document.getElementById('brief-title').textContent = s.briefTitle;
-  document.getElementById('brief-body').textContent = s.briefBody;
+  const body = typeof s.briefBody === 'function' ? s.briefBody({ forkDead: false, sichelAlive: true }) : s.briefBody;
+  document.getElementById('brief-body').textContent = body;
+  Vox.preload();
+  Vox.stopRadio();
+  Vox.radio(s.radio({ forkDead: false, sichelAlive: true }));
 }
 
-function enterPlay() {
+function enterPlay(stageIndex = 0) {
   if (mode === 'play') return;
   mode = 'play';
   AudioFX.stopMusic();
   AudioFX.init();
+  Vox.stopRadio();
   clearScene();
   show('briefing', false);
   show('title', false);
   show('scores', false);
-  play.enter();
+  play.enter(stageIndex);
 }
 
 function launchFromTitle() {
@@ -159,10 +168,12 @@ bindTag('tag-input');
 bindTag('tag-input-title');
 document.getElementById('btn-brief').addEventListener('click', () => {
   if (mode === 'brief' && holdoff <= 0) enterPlay();
+  else if (mode === 'play') play.continueBrief();
 });
 document.getElementById('briefing').addEventListener('click', (e) => {
   if (e.target && e.target.id === 'btn-brief') return;
   if (mode === 'brief' && holdoff <= 0) enterPlay();
+  else if (mode === 'play') play.continueBrief();
 });
 document.getElementById('btn-again').addEventListener('click', () => {
   enterTitle();
@@ -309,7 +320,9 @@ function frame() {
   renderer.render(scene, camera);
 }
 
-const boot = new URLSearchParams(location.search).get('scene');
-if (boot === 'play') enterPlay();
+const params = new URLSearchParams(location.search);
+const boot = params.get('scene');
+const bootStage = Number.parseInt(params.get('stage') || '0', 10);
+if (boot === 'play') enterPlay(Number.isFinite(bootStage) ? bootStage : 0);
 else enterTitle();
 frame();

@@ -1,4 +1,4 @@
-const CACHE = 'moon-axis-v4';
+const CACHE = 'moon-axis-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -8,6 +8,7 @@ const ASSETS = [
   './icons/icon-512.png',
   './js/main.js',
   './js/audio.js',
+  './js/vox.js',
   './js/input.js',
   './js/settings.js',
   './js/scores.js',
