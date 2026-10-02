@@ -286,3 +286,63 @@ export function updateLaser(group, dist) {
   if (group.userData.halo) group.userData.halo.material.size = (h ? 12 : 7) + t * (h ? 34 : 38);
   if (group.userData.core) group.userData.core.material.size = (h ? 6 : 3.5) + t * (h ? 18 : 22);
 }
+
+/** Twin rails + ties. Local y = 0 is the bed. */
+export function railTrack() {
+  const mat = lineMat(COL.amber, 0.55);
+  const paths = [
+    [[-3.2, 0, -24], [-3.2, 0, 24]],
+    [[3.2, 0, -24], [3.2, 0, 24]],
+  ];
+  for (let z = -24; z <= 24; z += 4) {
+    paths.push([[-3.2, 0, z], [3.2, 0, z]]);
+    paths.push([[-3.6, -0.4, z], [-3.2, 0, z], [3.2, 0, z], [3.6, -0.4, z]]);
+  }
+  return linesFromPaths(paths, mat);
+}
+
+/** Interior ribs of the Staff. Amber foundry light. */
+export function staffRibs(width = 16, height = 12, depth = 10) {
+  const hw = width / 2;
+  const hh = height / 2;
+  const mat = lineMat(COL.amber, 0.72);
+  const paths = [
+    [[-hw, -hh, 0], [hw, -hh, 0], [hw, hh, 0], [-hw, hh, 0], [-hw, -hh, 0]],
+    [[-hw, -hh, -depth], [hw, -hh, -depth], [hw, hh, -depth], [-hw, hh, -depth], [-hw, -hh, -depth]],
+    [[-hw, -hh, 0], [-hw, -hh, -depth]],
+    [[hw, -hh, 0], [hw, -hh, -depth]],
+    [[-hw, hh, 0], [-hw, hh, -depth]],
+    [[hw, hh, 0], [hw, hh, -depth]],
+    [[-hw, -hh, 0], [0, hh, -depth * 0.5], [hw, -hh, -depth]],
+    [[hw, -hh, 0], [0, hh, -depth * 0.5], [-hw, -hh, -depth]],
+  ];
+  return linesFromPaths(paths, mat);
+}
+
+/** Hanging rod / bell in the foundry well. */
+export function foundryCore() {
+  const mat = lineMat(COL.amber, 0.95);
+  const paths = [
+    ring(2.4, 16, 'y').map((p) => [p[0], 3.2, p[2]]),
+    ring(1.6, 14, 'y').map((p) => [p[0], 1.2, p[2]]),
+    ring(0.9, 12, 'y').map((p) => [p[0], -0.4, p[2]]),
+    ring(1.8, 14, 'y').map((p) => [p[0], -2.2, p[2]]),
+    [[0, 4.6, 0], [0, -2.8, 0]],
+    [[-2.4, 3.2, 0], [-0.9, -0.4, 0], [-1.8, -2.2, 0]],
+    [[2.4, 3.2, 0], [0.9, -0.4, 0], [1.8, -2.2, 0]],
+    [[0, 3.2, -2.4], [0, -0.4, -0.9], [0, -2.2, -1.8]],
+    [[0, 3.2, 2.4], [0, -0.4, 0.9], [0, -2.2, 1.8]],
+  ];
+  return linesFromPaths(paths, mat);
+}
+
+/** Escape scatter. */
+export function debrisChunk() {
+  const mat = lineMat(COL.amber, 0.7);
+  const s = 0.6 + Math.random() * 1.4;
+  const paths = [
+    [[-s, 0, 0], [s, 0.2, -s * 0.4], [0.2, s, s * 0.3], [-s, 0, 0]],
+    [[0, -s, 0], [s * 0.5, 0.1, s], [-0.3, s * 0.4, -s]],
+  ];
+  return linesFromPaths(paths, mat);
+}
