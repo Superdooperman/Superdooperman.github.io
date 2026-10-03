@@ -139,7 +139,8 @@ export default function createPlay(ctx) {
   const tmp2 = new THREE.Vector3();
   const tmp3 = new THREE.Vector3();
   const tmp4 = new THREE.Vector3();
-  const PLAYER_R = 4.2;
+  const tmp5 = new THREE.Vector3();
+  const PLAYER_R = 2.35;
   const ROLL_IFRAME = 0.32;
   const ROLL_CD = 1.6;
   const BOOST_BURST = 1.4;
@@ -793,6 +794,11 @@ export default function createPlay(ctx) {
     return state.look;
   }
 
+  /** Dodgeable cockpit — stick moves this a lot more than the camera. */
+  function cockpitPos(out = tmp5) {
+    return out.set(state.px * 0.72, state.py * 0.58 + 0.35, 0);
+  }
+
   function fire() {
     if ((state.gunLock || 0) > 0 || state.cinematic) return;
     const dir = lookDir().clone();
@@ -833,29 +839,26 @@ export default function createPlay(ctx) {
     worldPos(e, tmp2);
     if (offset) tmp2.add(offset);
     const origin = tmp2.clone();
-    // Aim at the cockpit, not along the ship's nose. After lookAt+180 the
-    // nose points into the scene, which made every Axis bolt fly *with* you.
-    const dir = new THREE.Vector3().copy(camera.position).sub(origin);
-    dir.x += state.px * 0.04;
-    dir.y += state.py * 0.04;
+    // Snapshot at the cockpit *now*. Velocity never updates after this, so a
+    // bank out of the lane lets the bolt fly through empty space.
+    const dir = cockpitPos(new THREE.Vector3()).sub(origin);
     if (opts.fan) dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), opts.fan);
-    if (!opts.heavy) {
-      dir.x += (Math.random() - 0.5) * 0.55;
-      dir.y += (Math.random() - 0.5) * 0.35;
-    }
+    const spread = opts.heavy ? 1.1 : (e.turret || e.boss || e.kind === 'core' ? 1.8 : 2.8);
+    dir.x += (Math.random() - 0.5) * spread;
+    dir.y += (Math.random() - 0.5) * spread * 0.72;
     dir.normalize();
     const heavy = !!(opts.heavy || e.turret || e.boss || e.kind === 'eisenwurm' || e.kind === 'core');
     const mesh = laserBolt(dir, { heavy });
     mesh.position.copy(origin);
     scene.add(mesh);
-    const speed = opts.slow ? 22 : (e.boss || e.kind === 'core' ? 30 : e.turret ? 24 : 26);
+    const speed = opts.slow ? 28 : (e.boss || e.kind === 'core' ? 38 : e.turret ? 34 : 36);
     state.ebullets.push({
       mesh,
       laser: true,
       vel: dir.multiplyScalar(speed),
-      life: 3.6,
+      life: 2.8,
       prev: origin.clone(),
-      r: opts.slow ? 5.4 : 4.4,
+      r: opts.slow ? 2.8 : 2.2,
     });
   }
 
@@ -1432,7 +1435,7 @@ export default function createPlay(ctx) {
     state.kick = Math.max(0, state.kick - dt * 2.6);
     const sx = (Math.random() - 0.5) * state.shake * 0.55;
     const sy = (Math.random() - 0.5) * state.shake * 0.4;
-    camera.position.set(state.px * 0.15 + sx, state.py * 0.15 + 0.4 + sy, state.kick * 0.45);
+    camera.position.set(state.px * 0.24 + sx, state.py * 0.22 + 0.4 + sy, state.kick * 0.45);
     const lookX = state.px + input.aimX * 18;
     const lookY = state.py + input.aimY * 14;
     camera.lookAt(lookX, lookY, -40);
@@ -1717,7 +1720,7 @@ export default function createPlay(ctx) {
     for (const b of state.ebullets) {
       stepBolt(b, 8);
       const hitR = b.r || PLAYER_R;
-      if (segmentHitsSphere(b.prev, b.mesh.position, camera.position, hitR)) {
+      if (segmentHitsSphere(b.prev, b.mesh.position, cockpitPos(tmp5), hitR)) {
         b.life = 0;
         playerHit();
       }
@@ -1736,7 +1739,7 @@ export default function createPlay(ctx) {
     for (const e of state.enemies) {
       if (e.dead || e.turret || e.ally || e.kind === 'core' || e.coreOrb || e.mode === 'holdwing' || e.kind === 'eisenwurm') continue;
       worldPos(e, tmp);
-      if (tmp.distanceTo(camera.position) < e.r * 0.85 + 1.4) {
+      if (tmp.distanceTo(cockpitPos(tmp5)) < e.r * 0.85 + 1.4) {
         if (e.debris) {
           if (boosting) {
             killEnemy(e);

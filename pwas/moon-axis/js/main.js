@@ -322,6 +322,8 @@ function makeReelState(tag) {
     done: false,
     cycleLatch: 0,
     cycleWait: 0,
+    slotLatch: 0,
+    slotWait: 0,
     fireLatch: false,
   };
 }
@@ -357,7 +359,7 @@ function paintReelMount(el, st) {
       <button type="button" data-act="back">◀ BACK</button>
       <button type="button" data-act="lock">SET LETTER</button>
     </div>
-    <p class="hint">W/S OR ▲▼ · FIRE SETS LETTER · ◀ GOES BACK</p>`;
+    <p class="hint">W/S ▲▼ LETTER · A/D ◀▶ WHEEL · FIRE SETS</p>`;
   el.innerHTML = `<p class="reel-kicker">${st.done ? 'ACE LOCKED' : 'ACE'}</p><div class="reel-row">${cells}</div>${nav}`;
 }
 
@@ -385,6 +387,15 @@ function backReel(st) {
     st.slot -= 1;
     st.locked[st.slot] = false;
   }
+}
+
+function shiftReelSlot(st, dir) {
+  if (st.done || !dir) return false;
+  const next = Math.max(0, Math.min(2, st.slot + dir));
+  if (next === st.slot) return false;
+  st.slot = next;
+  st.locked[st.slot] = false;
+  return true;
 }
 
 function bindReelMount(el, getSt, onPaint, onComplete) {
@@ -480,6 +491,24 @@ function stepReels(st, input, paint, onAllLocked, dt = 1 / 60) {
   } else {
     st.cycleLatch = 0;
     st.cycleWait = 0;
+  }
+  let slotDir = 0;
+  if (input.reelLeft) slotDir = -1;
+  else if (input.reelRight) slotDir = 1;
+  else if (Math.abs(input.reelX || 0) > 0.45) slotDir = Math.sign(input.reelX);
+  st.slotWait = (st.slotWait || 0) - dt;
+  if (slotDir) {
+    if (st.slotLatch !== slotDir) {
+      if (shiftReelSlot(st, slotDir)) paint();
+      st.slotLatch = slotDir;
+      st.slotWait = 0.28;
+    } else if (st.slotWait <= 0) {
+      if (shiftReelSlot(st, slotDir)) paint();
+      st.slotWait = 0.16;
+    }
+  } else {
+    st.slotLatch = 0;
+    st.slotWait = 0;
   }
   if (input.roll) {
     backReel(st);
