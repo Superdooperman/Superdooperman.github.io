@@ -210,10 +210,10 @@ function show(id, on) {
   document.getElementById(id).classList.toggle('hidden', !on);
 }
 
-function enterTitle() {
+function enterTitle(opts = {}) {
   mode = 'title';
   titleT = 0;
-  holdoff = 0.45;
+  holdoff = opts.quiet ? 1.35 : 0.45;
   attractOn = false;
   hideStills();
   clearScene();
@@ -321,6 +321,7 @@ function makeReelState(tag) {
     locked: [false, false, false],
     done: false,
     cycleLatch: 0,
+    cycleWait: 0,
     fireLatch: false,
   };
 }
@@ -335,24 +336,29 @@ function neighbor(i, d) {
 
 function paintReelMount(el, st) {
   if (!el) return;
+  el.classList.toggle('is-done', !!st.done);
   const cells = st.idx.map((n, i) => {
     const cls = [
       'reel',
       i === st.slot && !st.done ? 'active' : '',
       st.locked[i] ? 'locked' : '',
     ].filter(Boolean).join(' ');
-    return `<button type="button" class="${cls}" data-slot="${i}">
-      <span class="up">${neighbor(n, -1)}</span>
+    const up = st.done ? '&nbsp;' : neighbor(n, -1);
+    const dn = st.done ? '&nbsp;' : neighbor(n, 1);
+    return `<button type="button" class="${cls}" data-slot="${i}" ${st.done ? 'disabled' : ''}>
+      <span class="up">${up}</span>
       <span class="ch">${ALPHA[n]}</span>
-      <span class="dn">${neighbor(n, 1)}</span>
+      <span class="dn">${dn}</span>
     </button>`;
   }).join('');
-  el.innerHTML = `<p class="reel-kicker">ACE</p><div class="reel-row">${cells}</div>
-    <div class="reel-nav">
+  const nav = st.done
+    ? '<p class="hint">INITIALS LOCKED</p>'
+    : `<div class="reel-nav">
       <button type="button" data-act="back">◀ BACK</button>
       <button type="button" data-act="lock">SET LETTER</button>
     </div>
-    <p class="hint">STICK / TAP ▲▼ · FIRE SETS LETTER · ◀ GOES BACK</p>`;
+    <p class="hint">W/S OR ▲▼ · FIRE SETS LETTER · ◀ GOES BACK</p>`;
+  el.innerHTML = `<p class="reel-kicker">${st.done ? 'ACE LOCKED' : 'ACE'}</p><div class="reel-row">${cells}</div>${nav}`;
 }
 
 function reelTag(st) {
@@ -415,7 +421,7 @@ function paintEndReels() {
   if (!endReel) return;
   const ready = endReel.locked[0] && endReel.locked[1] && endReel.locked[2] && !endReel.done;
   conf.classList.toggle('hidden', !ready);
-  again.classList.toggle('hidden', !endReel.done);
+  again.classList.add('hidden');
 }
 
 function paintTitleReels() {
@@ -436,6 +442,7 @@ function confirmEndReels() {
   Scores.render(document.getElementById('end-table'), posted.row.t);
   paintHi();
   paintEndReels();
+  holdoff = 6;
 }
 
 bindReelMount(document.getElementById('ace-reels-end'), () => endReel, paintEndReels, () => {
@@ -452,18 +459,27 @@ document.getElementById('reel-confirm').addEventListener('click', (e) => {
   confirmEndReels();
 });
 
-function stepReels(st, input, paint, onAllLocked) {
+function stepReels(st, input, paint, onAllLocked, dt = 1 / 60) {
   if (!st || st.done) return;
-  const y = input.aimY;
-  if (Math.abs(y) > 0.55) {
-    const dir = y > 0 ? -1 : 1;
+  let dir = 0;
+  if (input.reelUp) dir = -1;
+  else if (input.reelDown) dir = 1;
+  else if (Math.abs(input.reelY || 0) > 0.4) dir = input.reelY > 0 ? -1 : 1;
+  st.cycleWait = (st.cycleWait || 0) - dt;
+  if (dir) {
     if (st.cycleLatch !== dir) {
       cycleReel(st, dir);
       st.cycleLatch = dir;
+      st.cycleWait = 0.28;
+      paint();
+    } else if (st.cycleWait <= 0) {
+      cycleReel(st, dir);
+      st.cycleWait = 0.11;
       paint();
     }
   } else {
     st.cycleLatch = 0;
+    st.cycleWait = 0;
   }
   if (input.roll) {
     backReel(st);
@@ -646,18 +662,15 @@ function frame() {
     stepReels(titleReel, input, () => {
       Scores.setTag(reelTag(titleReel));
       paintTitleReels();
-    });
+    }, null, dt);
   } else if (mode === 'end') {
     holdoff = Math.max(0, holdoff - dt);
     if (endReel && !endReel.done) {
       stepReels(endReel, input, paintEndReels, () => {
         document.getElementById('reel-confirm').classList.remove('hidden');
-      });
-      if (endReel.locked[0] && endReel.locked[1] && endReel.locked[2] && (input.fire || input.start) && !document.getElementById('reel-confirm').classList.contains('hidden')) {
-        // wait for explicit confirm button or a second fire after all locked — handled below
-      }
-    } else if (endReel?.done && holdoff <= 0 && input.start) {
-      enterTitle();
+      }, dt);
+    } else if (endReel?.done && holdoff <= 0) {
+      enterTitle({ quiet: true });
     }
   }
 

@@ -3,6 +3,7 @@ import * as THREE from 'three';
 export const COL = {
   ally: 0x7fe9ff,
   amber: 0xc9a227,
+  orange: 0xff6a12,
   axis: 0xff3366,
   magenta: 0xff44aa,
   terrain: 0x3d8f5a,
@@ -258,33 +259,53 @@ export function craterFloor() {
 
 export function laserBolt(dir, { heavy = false } = {}) {
   const group = new THREE.Group();
-  const len = heavy ? 16 : 13;
+  const len = heavy ? 6.4 : 4.6;
   const glowCol = heavy ? COL.magenta : COL.axis;
-  const back = dir.clone().multiplyScalar(-len);
-  const near = dir.clone().multiplyScalar(-len * 0.28);
+  // Head at origin (leading edge, traveling toward the cockpit). Tail goes
+  // BACK toward the gun so the streak reads as incoming, not as your own
+  // Hispano tracers flying out with you.
+  const tail = dir.clone().multiplyScalar(-len);
+  const core = dir.clone().multiplyScalar(-len * 0.42);
   group.add(new THREE.Line(
-    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), back]),
-    lineMat(glowCol, 0.5),
+    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), tail]),
+    lineMat(glowCol, 0.9),
   ));
   group.add(new THREE.Line(
-    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), near]),
-    lineMat(0xffe8f0, 0.95),
+    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), core]),
+    lineMat(0xffe8f0, 1),
   ));
-  const halo = pointFlare(glowCol, heavy ? 16 : 9, 0.55);
-  const core = pointFlare(0xffffff, heavy ? 7 : 4, 1);
-  group.add(halo, core);
+  const up = new THREE.Vector3(0, 1, 0);
+  if (Math.abs(dir.dot(up)) > 0.92) up.set(1, 0, 0);
+  const side = new THREE.Vector3().crossVectors(dir, up).normalize().multiplyScalar(heavy ? 0.7 : 0.46);
+  const lift = new THREE.Vector3().crossVectors(side, dir).normalize().multiplyScalar(heavy ? 0.55 : 0.36);
+  group.add(new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([side.clone().negate(), side]),
+    lineMat(glowCol, 0.95),
+  ));
+  group.add(new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([lift.clone().negate(), lift]),
+    lineMat(0xffffff, 0.85),
+  ));
+  const ringPts = ring(heavy ? 0.72 : 0.5, 10, 'z').map((p) => new THREE.Vector3(p[0], p[1], p[2]));
+  const face = new THREE.Line(new THREE.BufferGeometry().setFromPoints(ringPts), lineMat(glowCol, 0.8));
+  group.add(face);
+  const halo = pointFlare(glowCol, heavy ? 26 : 18, 0.9);
+  const spark = pointFlare(0xffffff, heavy ? 12 : 8, 1);
+  group.add(halo, spark);
   group.userData.halo = halo;
-  group.userData.core = core;
+  group.userData.core = spark;
+  group.userData.face = face;
   group.userData.heavy = heavy;
   group.userData.laser = true;
   return group;
 }
 
 export function updateLaser(group, dist) {
-  const t = 1 - Math.min(1, Math.max(0, dist / 72));
+  const t = 1 - Math.min(1, Math.max(0, dist / 64));
   const h = group.userData.heavy;
-  if (group.userData.halo) group.userData.halo.material.size = (h ? 12 : 7) + t * (h ? 34 : 38);
-  if (group.userData.core) group.userData.core.material.size = (h ? 6 : 3.5) + t * (h ? 18 : 22);
+  if (group.userData.halo) group.userData.halo.material.size = (h ? 18 : 12) + t * (h ? 86 : 74);
+  if (group.userData.core) group.userData.core.material.size = (h ? 9 : 6) + t * (h ? 34 : 28);
+  if (group.userData.face) group.userData.face.material.opacity = 0.35 + t * 0.65;
 }
 
 /** Twin rails + ties. Local y = 0 is the bed. */
@@ -348,13 +369,37 @@ export function turretOrb() {
   return linesFromPaths(paths, mat);
 }
 
-/** Escape scatter. */
+/** Escape scatter — big, hot panels so they read against the well. */
 export function debrisChunk() {
-  const mat = lineMat(COL.amber, 0.7);
-  const s = 0.6 + Math.random() * 1.4;
+  const mat = lineMat(COL.orange, 0.98);
+  const s = 2.1 + Math.random() * 2.4;
   const paths = [
-    [[-s, 0, 0], [s, 0.2, -s * 0.4], [0.2, s, s * 0.3], [-s, 0, 0]],
-    [[0, -s, 0], [s * 0.5, 0.1, s], [-0.3, s * 0.4, -s]],
+    [[-s, -s * 0.4, 0], [s, -s * 0.3, 0], [s, s * 0.45, 0], [-s, s * 0.35, 0], [-s, -s * 0.4, 0]],
+    [[-s, -s * 0.4, 0], [s, s * 0.45, 0]],
+    [[s, -s * 0.3, 0], [-s, s * 0.35, 0]],
+    [[0, -s * 0.2, -s * 0.3], [0, s * 0.2, s * 0.3]],
   ];
-  return linesFromPaths(paths, mat);
+  const g = linesFromPaths(paths, mat);
+  g.add(pointFlare(COL.orange, 24, 0.95));
+  g.add(pointFlare(0xffffff, 10, 1));
+  return g;
+}
+
+/** Falling bulkhead — fat orange plate, reads as a wall not a fighter. */
+export function fallingPanel() {
+  const mat = lineMat(COL.orange, 1);
+  const w = 2.6 + Math.random() * 2.0;
+  const h = 1.6 + Math.random() * 1.4;
+  const paths = [
+    [[-w, -h, 0], [w, -h, 0], [w, h, 0], [-w, h, 0], [-w, -h, 0]],
+    [[-w, -h, 0], [w, h, 0]],
+    [[w, -h, 0], [-w, h, 0]],
+    [[-w * 0.55, 0, 0], [w * 0.55, 0, 0]],
+    [[0, -h * 0.55, 0], [0, h * 0.55, 0]],
+    ring(Math.min(w, h) * 0.28, 10, 'z'),
+  ];
+  const g = linesFromPaths(paths, mat);
+  g.add(pointFlare(COL.orange, 28, 1));
+  g.add(pointFlare(0xffffff, 12, 1));
+  return g;
 }

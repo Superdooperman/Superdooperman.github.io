@@ -552,6 +552,15 @@ body.standalone #btn-fs { display: none; }
   display: flex;
   gap: 8px;
 }
+.ace-reels.is-done .reel {
+  pointer-events: none;
+  cursor: default;
+  opacity: 1;
+}
+.ace-reels.is-done .reel .up,
+.ace-reels.is-done .reel .dn {
+  visibility: hidden;
+}
 .reel-nav button,
 #reel-confirm {
   min-width: 120px;

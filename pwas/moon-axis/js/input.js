@@ -126,13 +126,23 @@ const Input = {
     const rollEdge = (!this._rollLatch && (k.KeyB || this._rollTap));
     const pauseEdge = (!this._pauseLatch && (k.KeyP || k.Escape || this._pauseTap));
     const start = this.start || k.Enter || k.Space;
+    const reelUp = !!(k.KeyW || k.ArrowUp);
+    const reelDown = !!(k.KeyS || k.ArrowDown);
+    // Reels ignore invert-Y and the mouse rest that flight aim uses.
+    // Touch stick still works; desktop mouse is left to the on-screen ▲▼.
+    const reelY = reelUp || reelDown
+      ? ((reelUp ? 1 : 0) - (reelDown ? 1 : 0))
+      : (this.touch ? this.aimY : 0);
     this._rollLatch = !!(k.KeyB || this._rollTap);
     this._pauseLatch = !!(k.KeyP || k.Escape || this._pauseTap);
     this._rollTap = false;
     this._pauseTap = false;
     this.start = false;
     if (fire || boost || rollEdge) Settings.flushRumble();
-    return { aimX, aimY, fire, boost, roll: rollEdge, pause: pauseEdge, start };
+    return {
+      aimX, aimY, fire, boost, roll: rollEdge, pause: pauseEdge, start,
+      reelUp, reelDown, reelY,
+    };
   },
 };
 
