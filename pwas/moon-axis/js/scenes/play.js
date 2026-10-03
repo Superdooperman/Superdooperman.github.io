@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { COL, lineMat, starfield, shatterBurst, updateShatter, moonWire, trenchFrame, flakTower, diamondPylon, craterFloor, tracerBolt, tracerTrail, updateTrail, laserBolt, updateLaser, railTrack, staffRibs, foundryCore, debrisChunk } from '../render/vector.js';
+import { COL, lineMat, starfield, shatterBurst, updateShatter, moonWire, trenchFrame, flakTower, diamondPylon, craterFloor, tracerBolt, tracerTrail, updateTrail, laserBolt, updateLaser, railTrack, staffRibs, foundryCore, debrisChunk, turretOrb } from '../render/vector.js';
 import { BUILDERS } from '../ships/catalog.js';
 import AudioFX from '../audio.js';
 import Vox from '../vox.js';
@@ -76,7 +76,7 @@ const STAGES = [
     briefKicker: 'SORTIE 7 OF 7',
     briefTitle: 'OUT OF THE WELL',
     briefBody: 'That was the match. The Staff is the weapon. Burn with it, or fly.',
-    length: 42,
+    length: 56,
     bg: 'escape',
     radio: () => ['card_07', 'hale_bark_06', 'rabe_radio_03', 'cat_radio_03'],
   },
@@ -102,12 +102,17 @@ export default function createPlay(ctx) {
     shields: 3,
     invuln: 0,
     rollT: 0,
+    rollCd: 0,
+    boostT: 0,
+    boostCd: 0,
     fireCd: 0,
     spawnFlags: new Set(),
     px: 0,
     py: 0,
     roll: 0,
     boost: 0,
+    shake: 0,
+    hitFlash: 0,
     look: new THREE.Vector3(),
     enemies: [],
     bullets: [],
@@ -129,6 +134,40 @@ export default function createPlay(ctx) {
 
   const tmp = new THREE.Vector3();
   const tmp2 = new THREE.Vector3();
+  const tmp3 = new THREE.Vector3();
+  const tmp4 = new THREE.Vector3();
+  const PLAYER_R = 4.2;
+  const ROLL_IFRAME = 0.32;
+  const ROLL_CD = 1.6;
+  const BOOST_BURST = 1.4;
+  const BOOST_CD = 3.5;
+  const PEEL_WINDOW = 12;
+
+  function segmentHitsSphere(a, b, center, radius) {
+    tmp3.copy(b).sub(a);
+    const len2 = tmp3.lengthSq();
+    if (len2 < 1e-8) return a.distanceToSquared(center) <= radius * radius;
+    const t = THREE.MathUtils.clamp(tmp4.copy(center).sub(a).dot(tmp3) / len2, 0, 1);
+    tmp4.copy(a).addScaledVector(tmp3, t);
+    return tmp4.distanceToSquared(center) <= radius * radius;
+  }
+
+  function tintGroup(mesh, hex) {
+    mesh.traverse((n) => {
+      if (n.material && n.material.color) {
+        if (!n.userData._base) n.userData._base = n.material.color.getHex();
+        n.material.color.setHex(hex);
+      }
+    });
+  }
+
+  function clearTint(mesh) {
+    mesh.traverse((n) => {
+      if (n.material && n.material.color && n.userData._base != null) {
+        n.material.color.setHex(n.userData._base);
+      }
+    });
+  }
 
   function hi() {
     return Scores.best();
@@ -248,21 +287,21 @@ export default function createPlay(ctx) {
     const mat = lineMat(COL.ally, 0.85);
     const mk = (x) => {
       const g = new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(x, -0.9, -0.4),
-        new THREE.Vector3(x * 0.4, -0.35, -1.6),
+        new THREE.Vector3(x, -0.28, -0.4),
+        new THREE.Vector3(x * 0.4, -0.08, -1.7),
       ]);
       return new THREE.Line(g, mat);
     };
-    state.guns.add(mk(-1.1), mk(1.1));
+    state.guns.add(mk(-1.05), mk(1.05));
     const rail = lineMat(COL.ally, 0.28);
     const dash = (pts) => {
       const g = new THREE.BufferGeometry().setFromPoints(pts.map((p) => new THREE.Vector3(...p)));
       return new THREE.Line(g, rail);
     };
     state.guns.add(
-      dash([[-1.6, -1.05, -1.35], [-0.35, -0.82, -1.75], [0.35, -0.82, -1.75], [1.6, -1.05, -1.35]]),
-      dash([[-1.7, 0.85, -1.4], [-0.45, 1.0, -1.8]]),
-      dash([[1.7, 0.85, -1.4], [0.45, 1.0, -1.8]]),
+      dash([[-1.35, -0.42, -1.55], [-0.28, -0.18, -1.85], [0.28, -0.18, -1.85], [1.35, -0.42, -1.55]]),
+      dash([[-1.45, 0.42, -1.55], [-0.32, 0.22, -1.85]]),
+      dash([[1.45, 0.42, -1.55], [0.32, 0.22, -1.85]]),
     );
     camera.add(state.guns);
   }
@@ -277,7 +316,7 @@ export default function createPlay(ctx) {
   }
 
   function spawnEnemy(kind, x, y, z, extra = {}) {
-    const isFighter = kind !== 'tower' && kind !== 'diamond' && kind !== 'core' && kind !== 'stabzugCar' && kind !== 'eisenwurm' && !extra.turret && !extra.ally && !extra.boss && !extra.debris;
+    const isFighter = kind !== 'tower' && kind !== 'diamond' && kind !== 'core' && kind !== 'orb' && kind !== 'stabzugCar' && kind !== 'eisenwurm' && !extra.turret && !extra.ally && !extra.boss && !extra.debris;
     if (isFighter && liveFighters() >= 16) return null;
     const mesh = kind === 'tower'
       ? flakTower()
@@ -285,6 +324,8 @@ export default function createPlay(ctx) {
         ? diamondPylon()
         : kind === 'core'
           ? foundryCore()
+          : kind === 'orb'
+            ? turretOrb()
           : extra.debris
             ? debrisChunk()
             : (BUILDERS[kind] || BUILDERS.nachtschwalbe)();
@@ -297,6 +338,7 @@ export default function createPlay(ctx) {
       mesh,
       hp: extra.hp ?? (
         kind === 'eisenwurm' || kind === 'core' ? 36
+          : kind === 'orb' ? 4
           : kind === 'wuerger' || kind === 'silbergeist' ? 3
             : kind === 'stuka' || kind === 'stabzugCar' ? 2
               : kind === 'tower' || kind === 'diamond' ? 4
@@ -306,6 +348,7 @@ export default function createPlay(ctx) {
       r: extra.r ?? (
         kind === 'mondsichel' ? 3.4
           : kind === 'eisenwurm' || kind === 'core' ? 2.8
+            : kind === 'orb' ? 1.15
             : kind === 'tower' || kind === 'diamond' || kind === 'stabzugCar' ? 2.2
               : kind === 'moonhog' ? 1.8
                 : 1.3
@@ -497,15 +540,19 @@ export default function createPlay(ctx) {
       }
       if (beat('peel', 22)) {
         Vox.play('fork_03');
-        spawnEnemy('wuerger', -7, 1, -70, { vz: 18, peel: true, hp: 4, passes: 2 });
-        spawnEnemy('wuerger', -4, 3, -78, { vz: 18, peel: true, hp: 4, passes: 2 });
+        banner('PEEL THEM OFF HER', 2200);
+        const p1 = spawnEnemy('wuerger', -7, 1, -70, { vz: 18, peel: true, hp: 4, passes: 2, r: 1.7 });
+        const p2 = spawnEnemy('wuerger', -4, 3, -78, { vz: 18, peel: true, hp: 4, passes: 2, r: 1.7 });
+        if (p1) tintGroup(p1.mesh, COL.ally);
+        if (p2) tintGroup(p2.mesh, COL.ally);
         Vox.play('wurger_02');
         const fork = state.enemies.find((e) => e.named === 'fork' && !e.dead);
         if (fork) {
           fork.mode = 'peelchase';
-          fork.vz = 8;
+          fork.vz = 0;
+          fork.invuln = 1.4;
         }
-        state.peelUntil = state.stageT + 8;
+        state.peelUntil = state.stageT + PEEL_WINDOW;
       }
     }
     if (s === 4) {
@@ -524,6 +571,7 @@ export default function createPlay(ctx) {
             hp: 5,
             r: 2.1,
             score: 350,
+            railIndex: i,
           });
         }
         spawnEnemy('eisenwurm', 0, -6.6, -130, {
@@ -582,7 +630,21 @@ export default function createPlay(ctx) {
       }
       if (beat('core', 24) && !state.boss) {
         banner('FOUNDRY CORE');
-        spawnEnemy('core', 0, 0, -60, { boss: true, kind: 'core', hp: 32, r: 2.8, score: 5000, mode: 'core' });
+        spawnEnemy('core', 0, 0, -60, {
+          boss: true, kind: 'core', hp: 36, r: 2.8, score: 5000, mode: 'core', exposed: false,
+        });
+        for (let i = 0; i < 5; i++) {
+          spawnEnemy('orb', 0, 0, -60, {
+            turret: true,
+            coreOrb: true,
+            orbit: i,
+            orbitN: 5,
+            hp: 4,
+            r: 1.2,
+            score: 300,
+            vz: 0,
+          });
+        }
         Vox.play('cat_boss_05');
         if (state.sichelAlive) Vox.play('sichel_04');
         else Vox.play('rabe_01');
@@ -597,37 +659,61 @@ export default function createPlay(ctx) {
     if (s === 6) {
       if (beat('shock', 0.2)) {
         Vox.play('rabe_04');
+        banner('THE WELL IS CLOSING', 2200);
         for (let i = 0; i < 8; i++) {
           spawnEnemy('nachtschwalbe', (i - 3.5) * 3, (i % 2 ? 3 : -2), -70 - i * 8, {
             debris: true,
             vz: 18,
             hp: 1,
             score: 50,
-            r: 1.1,
+            r: 1.35,
             mode: 'debris',
           });
         }
+        const zs = [-40, -90, -140, -190];
+        for (const z of zs) {
+          spawnEnemy('tower', -7.2, -2.0, z, { turret: true, hp: 3, r: 1.5 });
+          spawnEnemy('tower', 7.2, -2.0, z - 6, { turret: true, hp: 3, r: 1.5 });
+        }
       }
-      if (beat('last', 10) && state.sichelAlive) {
+      if (beat('gate1', 6)) {
+        spawnEnemy('diamond', -4.2, 0, -55, { turret: true, dual: true, hp: 5, r: 2.2 });
+        spawnEnemy('diamond', 4.2, 0, -55, { turret: true, dual: true, hp: 5, r: 2.2 });
+      }
+      if (beat('blast1', 8)) state.shockAt = state.stageT;
+      if (beat('last', 12) && state.sichelAlive) {
         spawnEnemy('mondsichel', 3, 2, -80, {
           vz: 24, hp: 10, r: 2.6, scale: 0.9, score: 1200, passes: 1, sichel: true,
         });
         Vox.play('sichel_alt_03');
       }
       if (beat('shock2', 18)) {
-        for (let i = 0; i < 6; i++) {
-          spawnEnemy('nachtschwalbe', (i - 2.5) * 3.2, (i % 2 ? 4 : -3), -60 - i * 7, {
-            debris: true, vz: 22, hp: 1, score: 50, r: 1.1, mode: 'debris',
+        for (let i = 0; i < 8; i++) {
+          spawnEnemy('nachtschwalbe', (i - 3.5) * 3.2, (i % 2 ? 4 : -3), -60 - i * 7, {
+            debris: true, vz: 22, hp: 1, score: 50, r: 1.35, mode: 'debris',
           });
         }
       }
-      for (const at of [4, 14, 22, 32]) {
+      if (beat('gate2', 24)) {
+        spawnEnemy('diamond', 0, 3.2, -50, { turret: true, dual: true, hp: 6, r: 2.3 });
+        spawnEnemy('diamond', 0, -3.2, -58, { turret: true, dual: true, hp: 6, r: 2.3 });
+      }
+      if (beat('blast2', 28)) state.shockAt = state.stageT;
+      if (beat('shock3', 34)) {
+        for (let i = 0; i < 6; i++) {
+          spawnEnemy('nachtschwalbe', (i - 2.5) * 3.4, (i % 2 ? 5 : -4), -55 - i * 6, {
+            debris: true, vz: 26, hp: 1, score: 50, r: 1.4, mode: 'debris',
+          });
+        }
+      }
+      if (beat('blast3', 40)) state.shockAt = state.stageT;
+      for (const at of [4, 14, 22, 32, 44]) {
         if (beat('en' + at, at)) {
           spawnEnemy('nachtschwalbe', at % 8 < 4 ? -6 : 7, 2, -85, { vz: 34 });
           spawnEnemy('wuerger', at % 8 < 4 ? 5 : -5, 0, -92, { vz: 30 });
         }
       }
-      if (beat('mouth', 36)) Vox.play('cat_win_02');
+      if (beat('mouth', 48)) Vox.play('cat_win_02');
     }
   }
 
@@ -638,9 +724,22 @@ export default function createPlay(ctx) {
 
   function fire() {
     const dir = lookDir().clone();
+    let best = null;
+    let bestDot = 0.935;
+    for (const e of state.enemies) {
+      if (e.dead || e.ally || e.debris) continue;
+      worldPos(e, tmp);
+      tmp3.copy(tmp).sub(camera.position).normalize();
+      const d = dir.dot(tmp3);
+      if (d > bestDot) {
+        bestDot = d;
+        best = tmp3.clone();
+      }
+    }
+    if (best) dir.lerp(best, 0.62).normalize();
     const origin = camera.position.clone().add(dir.clone().multiplyScalar(1.35));
     const down = new THREE.Vector3(0, -1, 0).applyQuaternion(camera.quaternion);
-    origin.addScaledVector(down, 0.28);
+    origin.addScaledVector(down, 0.08);
     const mesh = tracerBolt(dir, { ally: true, twin: true });
     mesh.position.copy(origin);
     scene.add(mesh);
@@ -650,6 +749,7 @@ export default function createPlay(ctx) {
       mesh,
       trail,
       hist: [origin.clone()],
+      prev: origin.clone(),
       vel: dir.multiplyScalar(170),
       life: 1.15,
     });
@@ -657,20 +757,82 @@ export default function createPlay(ctx) {
     AudioFX.shoot();
   }
 
-  function enemyShoot(e, offset) {
+  function enemyShoot(e, offset, opts = {}) {
     worldPos(e, tmp2);
     if (offset) tmp2.add(offset);
     tmp.copy(camera.position).sub(tmp2).normalize();
-    const mesh = laserBolt(tmp, { heavy: !!(e.turret || e.boss || e.kind === 'eisenwurm') });
+    if (opts.fan) {
+      tmp.applyAxisAngle(new THREE.Vector3(0, 1, 0), opts.fan);
+    }
+    const heavy = !!(opts.heavy || e.turret || e.boss || e.kind === 'eisenwurm' || e.kind === 'core');
+    const mesh = laserBolt(tmp, { heavy });
     mesh.position.copy(tmp2);
     scene.add(mesh);
-    const speed = e.boss ? 50 : e.turret ? 36 : 44;
+    const speed = opts.slow ? 28 : (e.boss || e.kind === 'core' ? 42 : e.turret ? 34 : 40);
+    const pos = tmp2.clone();
     state.ebullets.push({
       mesh,
       laser: true,
       vel: tmp.multiplyScalar(speed),
-      life: 2.6,
+      life: 3.2,
+      prev: pos,
+      r: opts.slow ? 5.2 : 4.2,
     });
+  }
+
+  function bossVolley(e) {
+    const kind = e.kind;
+    e.gunT = (e.gunT || 0);
+    e.gunPhase = e.gunPhase || 'quiet';
+    if (kind === 'stabzugCar') {
+      const slot = e.railIndex ?? 0;
+      const phase = (state.t + slot * 0.7) % 3.0;
+      if (phase < 0.28 && e.shootCd <= 0) {
+        enemyShoot(e);
+        e.shootCd = 0.12;
+      }
+      return;
+    }
+    if (e.gunPhase === 'quiet') {
+      clearTint(e.mesh);
+      if (e.gunT > (kind === 'eisenwurm' ? 1.35 : 1.1)) {
+        e.gunPhase = 'wind';
+        e.gunT = 0;
+        tintGroup(e.mesh, 0xffee88);
+      }
+    } else if (e.gunPhase === 'wind') {
+      if (e.gunT > 0.4) {
+        e.gunPhase = 'volley';
+        e.gunT = 0;
+        e.gunShots = 0;
+        clearTint(e.mesh);
+      }
+    } else if (e.gunPhase === 'volley') {
+      if (e.shootCd <= 0) {
+        if (kind === 'eisenwurm') {
+          enemyShoot(e, new THREE.Vector3(0, 3.2, 0), { heavy: true, slow: true });
+          enemyShoot(e, new THREE.Vector3(0, -3.2, 0), { heavy: true, slow: true });
+          e.gunShots = 99;
+        } else if (kind === 'core' && e.exposed) {
+          enemyShoot(e, null, { fan: -0.18 });
+          enemyShoot(e);
+          enemyShoot(e, null, { fan: 0.18 });
+          e.gunShots = 99;
+        } else {
+          const fan = (e.gunShots - 1) * 0.14;
+          enemyShoot(e, null, { fan });
+          e.gunShots += 1;
+        }
+        e.shootCd = 0.12;
+        if (e.gunShots >= 3) {
+          e.gunPhase = 'quiet';
+          e.gunT = 0;
+          if (kind === 'mondsichel' && Math.random() < 0.34) {
+            enemyShoot(e, null, { heavy: true, slow: true });
+          }
+        }
+      }
+    }
   }
 
   function dropBolt(b) {
@@ -739,6 +901,15 @@ export default function createPlay(ctx) {
     } else if (e.boss && e.kind === 'mondsichel' && state.stage === 2) {
       state.boss = null;
       startSichelEject(tmp);
+    } else if (e.coreOrb) {
+      const left = state.enemies.some((x) => x.coreOrb && !x.dead && x !== e);
+      if (!left) {
+        const core = state.enemies.find((x) => x.kind === 'core' && !x.dead);
+        if (core) {
+          core.exposed = true;
+          banner('CORE EXPOSED', 1800);
+        }
+      }
     } else if (e.boss) {
       state.boss = null;
       state.bossKilled = true;
@@ -794,20 +965,28 @@ export default function createPlay(ctx) {
     if (state.invuln > 0 || state.rollT > 0) return;
     state.noHit = false;
     state.shields -= 1;
-    state.invuln = 1.0;
+    state.invuln = 0.7;
+    state.shake = 1;
+    state.hitFlash = 0.22;
     AudioFX.damage();
-    Settings.rumble([22, 30, 45]);
+    Settings.rumble([30, 40, 70]);
+    Settings.queueRumble?.([30, 40, 70]);
     const sh = document.getElementById('hud-shields');
     if (sh) {
       sh.classList.add('hit');
-      setTimeout(() => sh.classList.remove('hit'), 220);
+      setTimeout(() => sh.classList.remove('hit'), 480);
+    }
+    const hurt = document.getElementById('hurt');
+    if (hurt) {
+      hurt.classList.add('on');
+      setTimeout(() => hurt.classList.remove('on'), 220);
     }
     if (state.shields <= 0) Vox.play('cat_hurt_05', { priority: true });
     else if (state.shields === 1) Vox.play(Math.random() < 0.5 ? 'cat_hurt_03' : 'cat_hurt_04', { priority: true });
     else if (state.shields === 2) Vox.play('cat_hurt_02', { priority: true });
     else Vox.play('cat_hurt_01', { priority: true });
-    renderer.domElement.style.filter = 'brightness(2.2) saturate(0.4)';
-    setTimeout(() => { renderer.domElement.style.filter = ''; }, 80);
+    renderer.domElement.style.filter = 'brightness(2.4) saturate(0.25) hue-rotate(-20deg)';
+    setTimeout(() => { renderer.domElement.style.filter = ''; }, 180);
     if (state.shields <= 0) {
       state.lives -= 1;
       state.shields = 3;
@@ -815,7 +994,9 @@ export default function createPlay(ctx) {
         finish(false);
         return;
       }
-      banner('VOIDCAT DOWN');
+      banner('VOIDCAT DOWN', 1600);
+    } else {
+      banner('SHIELD HIT', 700);
     }
     hud();
   }
@@ -823,9 +1004,8 @@ export default function createPlay(ctx) {
   function finish(won) {
     state.running = false;
     state.intermission = false;
-    state.over = { won };
+    state.over = { won, score: state.score, stage: state.stage, pending: true };
     syncFlags();
-    const posted = Scores.submit({ score: state.score, stage: state.stage, won });
     document.body.classList.remove('playing');
     setPaused(false);
     document.getElementById('briefing').classList.add('hidden');
@@ -836,9 +1016,8 @@ export default function createPlay(ctx) {
     document.getElementById('end-body').textContent = won
       ? 'The Staff is dark. Come home on the hook, Hellcat.'
       : 'Schrödinger still burns. Pacific Void Command will re-arm the next catapult.';
-    const rank = posted.rank && posted.rank <= 10 ? `   RANK ${posted.rank}` : '';
-    document.getElementById('end-score').textContent = `SCORE ${pad(state.score)}   HI ${pad(posted.best)}${rank}`;
-    Scores.render(document.getElementById('end-table'), posted.row.t);
+    document.getElementById('end-score').textContent = `SCORE ${pad(state.score)}   HI ${pad(Scores.best())}`;
+    document.getElementById('end-table').innerHTML = '';
     Vox.stopRadio();
     if (won) {
       Vox.play('cat_win_01');
@@ -925,11 +1104,16 @@ export default function createPlay(ctx) {
       shields: 3,
       invuln: 0,
       rollT: 0,
+      rollCd: 0,
+      boostT: 0,
+      boostCd: 0,
       fireCd: 0,
       px: 0,
       py: 0,
       roll: 0,
       boost: 0,
+      shake: 0,
+      hitFlash: 0,
       enemies: [],
       bullets: [],
       ebullets: [],
@@ -949,6 +1133,7 @@ export default function createPlay(ctx) {
       sichelEjecting: false,
       ejectAt: 0,
       peelUntil: 0,
+      shockAt: null,
     });
     syncFlags();
     setPaused(false);
@@ -971,28 +1156,47 @@ export default function createPlay(ctx) {
       return null;
     }
 
-    const speed = 22 + (input.boost ? 18 : 0);
-    state.boost = input.boost ? Math.min(1, state.boost + dt * 3) : Math.max(0, state.boost - dt * 2);
-    if (input.boost && !state.boostHeld) AudioFX.boost();
+    if (input.boost && !state.boostHeld && state.boostT <= 0 && state.boostCd <= 0) {
+      state.boostT = BOOST_BURST;
+      AudioFX.boost();
+    }
     state.boostHeld = !!input.boost;
+    const boosting = state.boostT > 0;
+    if (state.boostT > 0) {
+      state.boostT -= dt;
+      if (state.boostT <= 0) state.boostCd = BOOST_CD;
+    } else {
+      state.boostCd = Math.max(0, state.boostCd - dt);
+    }
+    state.boost = boosting ? Math.min(1, state.boost + dt * 4) : Math.max(0, state.boost - dt * 2);
+    const speed = 22 + (boosting ? 18 : 0);
 
     state.t += dt;
     state.stageT += dt;
     state.invuln = Math.max(0, state.invuln - dt);
     state.fireCd = Math.max(0, state.fireCd - dt);
+    state.shake = Math.max(0, state.shake - dt * 3.2);
+    state.hitFlash = Math.max(0, state.hitFlash - dt);
     if (state.rollT > 0) state.rollT -= dt;
-    if (input.roll && state.rollT <= 0) {
-      state.rollT = 0.55;
+    else state.rollCd = Math.max(0, state.rollCd - dt);
+    if (input.roll && state.rollT <= 0 && state.rollCd <= 0) {
+      state.rollT = ROLL_IFRAME;
+      state.rollCd = ROLL_CD;
+      const hop = (Math.abs(input.aimX) > 0.12 ? Math.sign(input.aimX) : (Math.random() < 0.5 ? 1 : -1)) * 6.2;
+      state.px = THREE.MathUtils.clamp(state.px + hop, -16, 16);
       AudioFX.roll();
     }
 
-    state.px = THREE.MathUtils.clamp(state.px + input.aimX * 36 * dt, -16, 16);
+    const steer = boosting ? 52 : 36;
+    state.px = THREE.MathUtils.clamp(state.px + input.aimX * steer * dt, -16, 16);
     state.py = THREE.MathUtils.clamp(state.py + input.aimY * 28 * dt, -10, 10);
-    const targetRoll = -input.aimX * 0.45 + (state.rollT > 0 ? Math.sin((1 - state.rollT / 0.55) * Math.PI * 2) * Math.PI * 2 : 0);
+    const targetRoll = -input.aimX * 0.45 + (state.rollT > 0 ? Math.sin((1 - state.rollT / ROLL_IFRAME) * Math.PI * 2) * Math.PI * 2 : 0);
     state.roll += (targetRoll - state.roll) * Math.min(1, dt * 6);
 
     state.kick = Math.max(0, state.kick - dt * 2.6);
-    camera.position.set(state.px * 0.15, state.py * 0.15 + 0.4, state.kick * 0.45);
+    const sx = (Math.random() - 0.5) * state.shake * 0.55;
+    const sy = (Math.random() - 0.5) * state.shake * 0.4;
+    camera.position.set(state.px * 0.15 + sx, state.py * 0.15 + 0.4 + sy, state.kick * 0.45);
     const lookX = state.px + input.aimX * 18;
     const lookY = state.py + input.aimY * 14;
     camera.lookAt(lookX, lookY, -40);
@@ -1015,6 +1219,7 @@ export default function createPlay(ctx) {
       state.env.position.z += speed * dt * 1.85;
       state.env.rotation.z = Math.sin(state.t * 1.8) * 0.05;
       if (state.env.position.z > 24) state.env.position.z = 0;
+      if (scene.fog) scene.fog.density = 0.02 + Math.min(0.03, state.stageT * 0.0007);
     }
 
     scriptSpawns();
@@ -1038,9 +1243,22 @@ export default function createPlay(ctx) {
       }
     }
 
+    if (state.shockAt != null && state.stageT - state.shockAt < 0.05) {
+      const burst = shatterBurst(COL.amber);
+      burst.position.set((Math.random() - 0.5) * 10, (Math.random() - 0.5) * 7, -10);
+      scene.add(burst);
+      state.fx.push(burst);
+      state.shake = 1;
+      Settings.rumble([40, 25, 80]);
+      renderer.domElement.style.filter = 'brightness(2.8)';
+      setTimeout(() => { renderer.domElement.style.filter = ''; }, 90);
+      if (!boosting && burst.position.distanceTo(camera.position) < 18) playerHit();
+      state.shockAt = null;
+    }
+
     if (input.fire && state.fireCd <= 0) {
       fire();
-      state.fireCd = input.boost ? 0.08 : 0.12;
+      state.fireCd = boosting ? 0.08 : 0.12;
     }
 
     for (const e of state.enemies) {
@@ -1055,6 +1273,13 @@ export default function createPlay(ctx) {
         e.mesh.position.x += 11 * dt;
         e.mesh.position.y += 3.5 * dt;
         e.mesh.rotation.z += dt * 2.2;
+      } else if (e.coreOrb) {
+        const core = state.enemies.find((x) => x.kind === 'core' && !x.dead);
+        const ang = state.t * 0.95 + ((e.orbit || 0) / (e.orbitN || 5)) * Math.PI * 2;
+        const rad = 6.4;
+        const cz = core ? core.mesh.position.z : -42;
+        e.mesh.position.set(Math.cos(ang) * rad, Math.sin(ang) * rad * 0.62, cz + Math.sin(ang * 2) * 1.1);
+        e.mesh.rotation.y += dt * 2.2;
       } else if (e.mode === 'core' || e.kind === 'core') {
         e.mesh.position.z += (-42 - e.mesh.position.z) * dt * 0.35;
         e.mesh.rotation.y += dt * 0.45;
@@ -1071,11 +1296,12 @@ export default function createPlay(ctx) {
         e.mesh.position.z += (-55 - e.mesh.position.z) * dt * 0.4;
         e.mesh.rotation.y = Math.sin(state.t) * 0.2;
       } else if (e.mode === 'peelchase') {
-        e.mesh.position.x -= 9 * dt;
-        e.mesh.position.z -= 14 * dt;
-        e.mesh.position.y += Math.sin(state.t * 3 + e.phase) * dt;
+        e.mesh.position.x = -3.4 + Math.sin(state.t * 2.1) * 2.4;
+        e.mesh.position.y = 0.6 + Math.sin(state.t * 3.1 + e.phase) * 1.1;
+        e.mesh.position.z = -26 + Math.sin(state.t * 1.4) * 2;
         e.mesh.rotation.y = Math.PI;
-        e.mesh.rotation.z = -0.4;
+        e.mesh.rotation.z = -0.25 + Math.sin(state.t * 4) * 0.15;
+        if (e.invuln) e.invuln = Math.max(0, e.invuln - dt);
       } else if (e.mode === 'wing') {
         e.mesh.position.x = (e.lane ?? -5.4) + Math.sin(state.t * 1.4) * 0.25;
         e.mesh.position.y = -1.3 + Math.sin(state.t * 1.8 + e.phase) * 0.2;
@@ -1106,8 +1332,8 @@ export default function createPlay(ctx) {
         e.mesh.rotation.z = e.breakSign * 0.5;
       } else {
         e.mesh.position.z += e.vz * dt;
-        e.mesh.position.x += Math.sin(e.phase * 2.2) * (e.dive ? 1 : 6) * dt + e.vx * dt;
-        e.mesh.position.y += e.vy * dt + Math.cos(e.phase * 1.4) * 2 * dt;
+        e.mesh.position.x += Math.sin(e.phase * 2.2) * (e.dive ? 1 : 3.2) * dt + e.vx * dt;
+        e.mesh.position.y += e.vy * dt + Math.cos(e.phase * 1.4) * 1.1 * dt;
         if (e.dive && e.mesh.position.y < -6) e.vy = 4;
         if (e.mode === 'reattack') {
           e.mesh.lookAt(camera.position);
@@ -1130,22 +1356,30 @@ export default function createPlay(ctx) {
         }
       }
       e.shootCd -= dt;
+      e.gunT = (e.gunT || 0) + dt;
       worldPos(e, tmp);
       const z = tmp.z;
+      const patterned = e.boss || e.kind === 'eisenwurm' || e.kind === 'stabzugCar' || (e.kind === 'core' && e.exposed) || (e.kind === 'mondsichel' && (e.boss || e.sichel));
       const canShoot = !e.ally && !e.debris && !e.ejecting && e.mode !== 'break' && e.mode !== 'egress' && e.mode !== 'debris' && z > -95 && z < 4;
-      if (canShoot && e.shootCd <= 0) {
-        if (e.dual) {
-          enemyShoot(e, new THREE.Vector3(0, 3.8, 0));
-          enemyShoot(e, new THREE.Vector3(0, -3.8, 0));
-        } else {
-          enemyShoot(e);
+      if (canShoot) {
+        if (patterned) {
+          bossVolley(e);
+        } else if (e.shootCd <= 0) {
+          if (e.dual) {
+            enemyShoot(e, new THREE.Vector3(0, 3.8, 0));
+            enemyShoot(e, new THREE.Vector3(0, -3.8, 0));
+          } else {
+            enemyShoot(e);
+          }
+          const base = e.turret || e.coreOrb ? 0.9 : (e.kind === 'wuerger' || e.kind === 'silbergeist' ? 0.55 : 0.72);
+          e.shootCd = base + Math.random() * 0.22;
         }
-        const base = e.boss || e.kind === 'eisenwurm' ? 0.32 : e.turret ? 0.8 : (e.kind === 'wuerger' || e.kind === 'silbergeist' ? 0.48 : 0.68);
-        e.shootCd = base + Math.random() * 0.22;
       }
     }
 
     function stepBolt(b, maxHist) {
+      if (!b.prev) b.prev = b.mesh.position.clone();
+      else b.prev.copy(b.mesh.position);
       b.mesh.position.addScaledVector(b.vel, dt);
       b.life -= dt;
       if (b.laser) {
@@ -1162,9 +1396,19 @@ export default function createPlay(ctx) {
       for (const e of state.enemies) {
         if (e.dead || e.ally) continue;
         worldPos(e, tmp);
-        if (b.mesh.position.distanceTo(tmp) < e.r + 0.75) {
+        const z = Math.abs(tmp.z);
+        const pad = z > 50 ? 2.2 : z > 25 ? 1.55 : 0.95;
+        if (b.mesh.position.distanceTo(tmp) < e.r + pad) {
           b.life = 0;
-          e.hp -= 1;
+          if (e.kind === 'core' && !e.exposed) {
+            AudioFX.hit();
+            continue;
+          }
+          if (e.kind === 'eisenwurm' && e.gunPhase === 'volley') {
+            e.hp -= 0.35;
+          } else {
+            e.hp -= 1;
+          }
           AudioFX.hit();
           if (e.hp <= 0) killEnemy(e);
         }
@@ -1173,15 +1417,16 @@ export default function createPlay(ctx) {
 
     for (const b of state.ebullets) {
       stepBolt(b, 8);
-      tmp.copy(b.mesh.position);
-      if (tmp.distanceTo(camera.position) < 2.6) {
+      const hitR = b.r || PLAYER_R;
+      if (segmentHitsSphere(b.prev, b.mesh.position, camera.position, hitR)) {
         b.life = 0;
         playerHit();
       }
       for (const e of state.enemies) {
         if (e.dead || e.named !== 'fork') continue;
+        if (e.invuln > 0) continue;
         worldPos(e, tmp2);
-        if (tmp.distanceTo(tmp2) < e.r + 0.5) {
+        if (b.mesh.position.distanceTo(tmp2) < e.r + 0.5) {
           b.life = 0;
           e.hp -= 1;
           if (e.hp <= 0) killFork(e);
@@ -1190,10 +1435,18 @@ export default function createPlay(ctx) {
     }
 
     for (const e of state.enemies) {
-      if (e.dead || e.turret || e.ally || e.debris || e.kind === 'core') continue;
+      if (e.dead || e.turret || e.ally || e.kind === 'core' || e.coreOrb) continue;
       worldPos(e, tmp);
-      if (tmp.distanceTo(camera.position) < e.r * 0.85 + 1.2) {
-        killEnemy(e);
+      if (tmp.distanceTo(camera.position) < e.r * 0.85 + 1.4) {
+        if (e.debris) {
+          if (boosting) {
+            killEnemy(e);
+            continue;
+          }
+          if (state.rollT > 0) continue;
+        }
+        if (!e.debris) killEnemy(e);
+        else killEnemy(e);
         playerHit();
       }
     }
@@ -1242,7 +1495,12 @@ export default function createPlay(ctx) {
     }
 
     const wep = document.getElementById('hud-weapon');
-    if (wep) wep.textContent = input.boost ? 'BOOST' : 'HISPANO-X';
+    if (wep) {
+      if (boosting) wep.textContent = 'BOOST';
+      else if (state.boostCd > 0) wep.textContent = `BOOST ${state.boostCd.toFixed(1)}`;
+      else if (state.rollCd > 0 && state.rollT <= 0) wep.textContent = 'HISPANO-X';
+      else wep.textContent = 'HISPANO-X';
+    }
     hud();
     return state.over;
   }

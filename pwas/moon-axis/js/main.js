@@ -84,13 +84,13 @@ const ATTRACT_STORY = [
   { img: 'img/attract/attract_04_doors.jpg', title: 'YOU ARE CAT.', body: 'F6F-V VOIDCAT.\nHALE HAS THE DECK. FORK HAS YOUR WING.\nOPEN THE DOORS.\nBE WARY OF A CHANNEL THAT GOES QUIET.' },
 ];
 const ATTRACT_CHARS = [
-  { img: 'img/charcards/charcard_catshadow.jpg', title: 'CAT', body: 'Voidcat. The seat you are in.\nPacific Void Command. No face on the wire, on purpose.\nFlies the F6F-V. Guns, a fusion ring, and a mouth he should use less.\nIf the channel is quiet, he is still up.' },
-  { img: 'img/charcards/charcard_hale.jpg', title: 'HALE', body: 'Captain. Flag bridge, carrier in orbit.\nGives the order and does not decorate it.\nThree things, then launch. He counts you home on the hook.' },
-  { img: 'img/charcards/charcard_fork.jpg', title: 'FORK', body: 'Lieutenant Reyes. Callsign Fork.\nYour wing. Twin-boom fighter, cyan mark on the helmet.\nShe peels targets off you and does not ask you to thank her.\nIf her channel goes quiet, do not sit on it.' },
-  { img: 'img/charcards/charcard_sichel.jpg', title: 'SICHEL', body: 'Mondsichel. Flying wing.\nThe rival. Wide turn, long gun, red crescent.\nHe talks like the fight is a courtesy.\nDo not chase him off the brief.' },
-  { img: 'img/charcards/charcard_geist.jpg', title: 'GEIST', body: 'Silbergeist. Twin nacelle.\nHe does not fly the patrol. He comes down for the rod.\nSilver helmet, two engines, mean on the wire.\nIf the cradle is still alive, he is already in the dark.' },
-  { img: 'img/charcards/charcard_rabe.jpg', title: 'RABE', body: 'Oberst. Festung Selene.\nThe man at the foundry console, not the man in the dart.\nCalm. The gun is his. The moon is the barrel.\nHe will still be talking when the well starts to close.' },
-  { img: 'img/charcards/charcard_mond.jpg', title: 'MONDSTAB', body: 'Dart pilot. The ones in the trench.\nRed crescent, short life, shorter temper.\nThey are the noise on the channel.\nThe aces are the ones who do not yell.' },
+  { kind: 'char', img: 'img/charcards/charcard_catshadow.jpg', title: 'CAT', body: 'Voidcat. The seat you are in.\nPacific Void Command. No face on the wire, on purpose.\nFlies the F6F-V. Guns, a fusion ring, and a mouth he should use less.\nIf the channel is quiet, he is still up.' },
+  { kind: 'char', img: 'img/charcards/charcard_hale.jpg', title: 'HALE', body: 'Captain. Flag bridge, carrier in orbit.\nGives the order and does not decorate it.\nThree things, then launch. He counts you home on the hook.' },
+  { kind: 'char', img: 'img/charcards/charcard_fork.jpg', title: 'FORK', body: 'Lieutenant Reyes. Callsign Fork.\nYour wing. Twin-boom fighter, cyan mark on the helmet.\nShe peels targets off you and does not ask you to thank her.\nIf her channel goes quiet, do not sit on it.' },
+  { kind: 'char', img: 'img/charcards/charcard_sichel.jpg', title: 'SICHEL', body: 'Mondsichel. Flying wing.\nThe rival. Wide turn, long gun, red crescent.\nHe talks like the fight is a courtesy.\nDo not chase him off the brief.' },
+  { kind: 'char', img: 'img/charcards/charcard_geist.jpg', title: 'GEIST', body: 'Silbergeist. Twin nacelle.\nHe does not fly the patrol. He comes down for the rod.\nSilver helmet, two engines, mean on the wire.\nIf the cradle is still alive, he is already in the dark.' },
+  { kind: 'char', img: 'img/charcards/charcard_rabe.jpg', title: 'RABE', body: 'Oberst. Festung Selene.\nThe man at the foundry console, not the man in the dart.\nCalm. The gun is his. The moon is the barrel.\nHe will still be talking when the well starts to close.' },
+  { kind: 'char', img: 'img/charcards/charcard_mond.jpg', title: 'MONDSTAB', body: 'Dart pilot. The ones in the trench.\nRed crescent, short life, shorter temper.\nThey are the noise on the channel.\nThe aces are the ones who do not yell.' },
 ];
 const BRIEF_STILLS = {
   hale_brief_01: [
@@ -155,10 +155,12 @@ function startBriefStills(id) {
 }
 
 function paintAttractCard(card) {
+  const wrap = document.getElementById('attract-card');
   const img = document.getElementById('attract-img');
   const title = document.getElementById('attract-title');
   const body = document.getElementById('attract-body');
   const kicker = document.getElementById('attract-kicker');
+  if (wrap) wrap.classList.toggle('char', card.kind === 'char');
   if (img) img.src = card.img;
   if (kicker) kicker.textContent = card.kicker || 'PACIFIC VOID COMMAND';
   if (title) title.textContent = card.title || '';
@@ -296,21 +298,185 @@ document.getElementById('btn-scores').addEventListener('click', (e) => {
   show('scores', true);
   document.getElementById('scores-best').textContent = `HI ${Scores.pad(Scores.best())}`;
   Scores.render(document.getElementById('scores-table'));
-  document.getElementById('tag-input-title').value = Scores.tag();
+  titleReel = makeReelState(Scores.tag());
+  paintTitleReels();
 });
 document.getElementById('btn-scores-back').addEventListener('click', (e) => {
   e.preventDefault();
   enterTitle();
 });
-function bindTag(id) {
-  const el = document.getElementById(id);
-  el.value = Scores.tag();
-  el.addEventListener('input', () => {
-    el.value = Scores.setTag(el.value);
+const ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+function tagToIdx(tag) {
+  const t = (tag || 'ACE').padEnd(3, 'A').slice(0, 3).toUpperCase();
+  return [...t].map((ch) => {
+    const i = ALPHA.indexOf(ch);
+    return i < 0 ? 0 : i;
   });
 }
-bindTag('tag-input');
-bindTag('tag-input-title');
+
+function makeReelState(tag) {
+  return {
+    idx: tagToIdx(tag),
+    slot: 0,
+    locked: [false, false, false],
+    done: false,
+    cycleLatch: 0,
+    fireLatch: false,
+  };
+}
+
+let endReel = null;
+let titleReel = makeReelState(Scores.tag());
+let pendingOver = null;
+
+function neighbor(i, d) {
+  return ALPHA[(i + d + ALPHA.length) % ALPHA.length];
+}
+
+function paintReelMount(el, st) {
+  if (!el) return;
+  const cells = st.idx.map((n, i) => {
+    const cls = [
+      'reel',
+      i === st.slot && !st.done ? 'active' : '',
+      st.locked[i] ? 'locked' : '',
+    ].filter(Boolean).join(' ');
+    return `<button type="button" class="${cls}" data-slot="${i}">
+      <span class="up">${neighbor(n, -1)}</span>
+      <span class="ch">${ALPHA[n]}</span>
+      <span class="dn">${neighbor(n, 1)}</span>
+    </button>`;
+  }).join('');
+  el.innerHTML = `<p class="reel-kicker">ACE</p><div class="reel-row">${cells}</div>
+    <div class="reel-nav">
+      <button type="button" data-act="back">◀ BACK</button>
+      <button type="button" data-act="lock">SET LETTER</button>
+    </div>
+    <p class="hint">STICK / TAP ▲▼ · FIRE SETS LETTER · ◀ GOES BACK</p>`;
+}
+
+function reelTag(st) {
+  return st.idx.map((n) => ALPHA[n]).join('');
+}
+
+function cycleReel(st, dir) {
+  if (st.done || st.locked[st.slot]) return;
+  st.idx[st.slot] = (st.idx[st.slot] + dir + ALPHA.length) % ALPHA.length;
+}
+
+function lockReel(st) {
+  if (st.done) return false;
+  st.locked[st.slot] = true;
+  if (st.slot < 2) st.slot += 1;
+  else return true;
+  return false;
+}
+
+function backReel(st) {
+  if (st.done) return;
+  st.locked[st.slot] = false;
+  if (st.slot > 0) {
+    st.slot -= 1;
+    st.locked[st.slot] = false;
+  }
+}
+
+function bindReelMount(el, getSt, onPaint, onComplete) {
+  el.addEventListener('click', (e) => {
+    const st = getSt();
+    if (!st || st.done) return;
+    const slotBtn = e.target.closest('[data-slot]');
+    const act = e.target.closest('[data-act]');
+    if (slotBtn) {
+      const i = Number(slotBtn.getAttribute('data-slot'));
+      if (i <= st.slot || st.locked[i] === false) {
+        for (let k = i; k < 3; k++) st.locked[k] = false;
+        st.slot = i;
+      }
+      if (e.target.classList.contains('up')) cycleReel(st, -1);
+      if (e.target.classList.contains('dn')) cycleReel(st, 1);
+      onPaint();
+      return;
+    }
+    if (!act) return;
+    const a = act.getAttribute('data-act');
+    if (a === 'back') backReel(st);
+    if (a === 'lock') {
+      if (lockReel(st) && onComplete) onComplete(st);
+    }
+    onPaint();
+  });
+}
+
+function paintEndReels() {
+  paintReelMount(document.getElementById('ace-reels-end'), endReel);
+  const conf = document.getElementById('reel-confirm');
+  const again = document.getElementById('btn-again');
+  if (!endReel) return;
+  const ready = endReel.locked[0] && endReel.locked[1] && endReel.locked[2] && !endReel.done;
+  conf.classList.toggle('hidden', !ready);
+  again.classList.toggle('hidden', !endReel.done);
+}
+
+function paintTitleReels() {
+  paintReelMount(document.getElementById('ace-reels-title'), titleReel);
+}
+
+function confirmEndReels() {
+  if (!endReel || endReel.done || !pendingOver) return;
+  endReel.done = true;
+  const tag = Scores.setTag(reelTag(endReel));
+  const posted = Scores.submit({
+    score: pendingOver.score,
+    stage: pendingOver.stage,
+    won: pendingOver.won,
+  });
+  const rank = posted.rank && posted.rank <= 10 ? `   RANK ${posted.rank}` : '';
+  document.getElementById('end-score').textContent = `SCORE ${Scores.pad(pendingOver.score)}   HI ${Scores.pad(posted.best)}${rank}`;
+  Scores.render(document.getElementById('end-table'), posted.row.t);
+  paintHi();
+  paintEndReels();
+}
+
+bindReelMount(document.getElementById('ace-reels-end'), () => endReel, paintEndReels, () => {
+  document.getElementById('reel-confirm').classList.remove('hidden');
+});
+bindReelMount(document.getElementById('ace-reels-title'), () => titleReel, () => {
+  Scores.setTag(reelTag(titleReel));
+  paintTitleReels();
+}, () => {
+  Scores.setTag(reelTag(titleReel));
+});
+document.getElementById('reel-confirm').addEventListener('click', (e) => {
+  e.preventDefault();
+  confirmEndReels();
+});
+
+function stepReels(st, input, paint, onAllLocked) {
+  if (!st || st.done) return;
+  const y = input.aimY;
+  if (Math.abs(y) > 0.55) {
+    const dir = y > 0 ? -1 : 1;
+    if (st.cycleLatch !== dir) {
+      cycleReel(st, dir);
+      st.cycleLatch = dir;
+      paint();
+    }
+  } else {
+    st.cycleLatch = 0;
+  }
+  if (input.roll) {
+    backReel(st);
+    paint();
+  }
+  if ((input.fire || input.start) && !st.fireLatch) {
+    st.fireLatch = true;
+    const all = lockReel(st);
+    paint();
+    if (all && onAllLocked) onAllLocked();
+  }
+  if (!input.fire && !input.start) st.fireLatch = false;
+}
 document.getElementById('btn-brief').addEventListener('click', (e) => {
   e.preventDefault();
   e.stopPropagation();
@@ -330,7 +496,7 @@ function syncSettingsUI() {
   const hap = document.getElementById('opt-haptics');
   inv.textContent = Settings.invertY ? 'INVERT Y  ON' : 'INVERT Y  OFF';
   inv.classList.toggle('on', Settings.invertY);
-  hap.textContent = Settings.haptics ? 'HAPTICS  ON' : 'HAPTICS  OFF';
+  hap.textContent = Settings.hapticLabel();
   hap.classList.toggle('on', Settings.haptics);
   const hint = document.getElementById('fs-hint');
   hint.classList.toggle('hidden', !(Settings.isIOS() && !Settings.isStandalone()));
@@ -467,14 +633,32 @@ function frame() {
     const over = play.update(dt, input);
     if (over) {
       mode = 'end';
-      holdoff = 0.7;
+      holdoff = 0.35;
+      pendingOver = over;
+      endReel = makeReelState(Scores.tag());
+      document.getElementById('reel-confirm').classList.add('hidden');
+      document.getElementById('btn-again').classList.add('hidden');
+      paintEndReels();
       paintHi();
     }
   } else if (mode === 'scores') {
     holdoff = Math.max(0, holdoff - dt);
+    stepReels(titleReel, input, () => {
+      Scores.setTag(reelTag(titleReel));
+      paintTitleReels();
+    });
   } else if (mode === 'end') {
     holdoff = Math.max(0, holdoff - dt);
-    if (holdoff <= 0 && input.start) enterTitle();
+    if (endReel && !endReel.done) {
+      stepReels(endReel, input, paintEndReels, () => {
+        document.getElementById('reel-confirm').classList.remove('hidden');
+      });
+      if (endReel.locked[0] && endReel.locked[1] && endReel.locked[2] && (input.fire || input.start) && !document.getElementById('reel-confirm').classList.contains('hidden')) {
+        // wait for explicit confirm button or a second fire after all locked — handled below
+      }
+    } else if (endReel?.done && holdoff <= 0 && input.start) {
+      enterTitle();
+    }
   }
 
   renderer.render(scene, camera);
