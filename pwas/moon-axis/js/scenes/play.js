@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { COL, lineMat, starfield, shatterBurst, updateShatter, moonWire, trenchFrame, flakTower, diamondPylon, craterFloor, tracerBolt, tracerTrail, updateTrail, laserBolt, updateLaser, railTrack, staffRibs, foundryCore, debrisChunk, turretOrb } from '../render/vector.js';
+import { COL, lineMat, starfield, shatterBurst, updateShatter, moonWire, trenchFrame, flakTower, diamondPylon, craterFloor, tracerBolt, tracerTrail, updateTrail, laserBolt, updateLaser, railTrack, staffRibs, foundryCore, debrisChunk, fallingPanel, turretOrb } from '../render/vector.js';
 import { BUILDERS } from '../ships/catalog.js';
 import AudioFX from '../audio.js';
 import Vox from '../vox.js';
@@ -130,6 +130,9 @@ export default function createPlay(ctx) {
     sichelEjecting: false,
     ejectAt: 0,
     peelUntil: 0,
+    gunLock: 0,
+    cinematic: false,
+    cineT: 0,
   };
 
   const tmp = new THREE.Vector3();
@@ -272,9 +275,10 @@ export default function createPlay(ctx) {
       }
     }
     if (kind === 'escape') {
-      for (let i = 0; i < 18; i++) {
-        const d = debrisChunk();
-        d.position.set((Math.random() - 0.5) * 18, (Math.random() - 0.5) * 10, -i * 16 - 20);
+      for (let i = 0; i < 28; i++) {
+        const d = i % 2 ? fallingPanel() : debrisChunk();
+        d.scale.setScalar(1.45 + Math.random() * 0.7);
+        d.position.set((Math.random() - 0.5) * 16, (Math.random() - 0.5) * 9, -i * 12 - 14);
         state.env.add(d);
       }
     }
@@ -326,6 +330,8 @@ export default function createPlay(ctx) {
           ? foundryCore()
           : kind === 'orb'
             ? turretOrb()
+          : extra.panel
+            ? fallingPanel()
           : extra.debris
             ? debrisChunk()
             : (BUILDERS[kind] || BUILDERS.nachtschwalbe)();
@@ -380,6 +386,30 @@ export default function createPlay(ctx) {
     state.enemies.push(e);
     if (e.boss) state.boss = e;
     return e;
+  }
+
+  function voLen(id, fallback = 2.6) {
+    const d = Vox.duration(id);
+    return d > 0.25 ? d : fallback;
+  }
+
+  function lockGunsFor(sec) {
+    state.gunLock = Math.max(state.gunLock || 0, sec);
+  }
+
+  function spawnDrones(n, extra = {}) {
+    for (let i = 0; i < n; i++) {
+      spawnEnemy('orb', 0, 0, -70, {
+        drone: true,
+        turret: true,
+        hp: extra.hp || 2,
+        r: 0.95,
+        score: 180,
+        orbit: i,
+        orbitN: n,
+        vz: 0,
+      });
+    }
   }
 
   function scriptSpawns() {
@@ -496,9 +526,12 @@ export default function createPlay(ctx) {
       }
       if (beat('boss', 22) && !state.boss) {
         banner('MONDSICHEL');
-        spawnEnemy('mondsichel', 0, 1, -70, { boss: true, vz: 8, hp: 42, r: 3.6, scale: 1.35, score: 5000 });
+        spawnEnemy('mondsichel', 0, 1, -70, {
+          boss: true, vz: 8, hp: 42, r: 3.6, scale: 1.35, score: 5000, talkArmor: true,
+        });
         Vox.play('cat_boss_01');
         Vox.play('sichel_02');
+        lockGunsFor(Math.max(voLen('cat_boss_01'), voLen('sichel_02')) + 0.5);
       }
     }
     if (s === 3) {
@@ -543,8 +576,8 @@ export default function createPlay(ctx) {
         banner('PEEL THEM OFF HER', 2200);
         const p1 = spawnEnemy('wuerger', -7, 1, -70, { vz: 18, peel: true, hp: 4, passes: 2, r: 1.7 });
         const p2 = spawnEnemy('wuerger', -4, 3, -78, { vz: 18, peel: true, hp: 4, passes: 2, r: 1.7 });
-        if (p1) tintGroup(p1.mesh, COL.ally);
-        if (p2) tintGroup(p2.mesh, COL.ally);
+        if (p1) tintGroup(p1.mesh, COL.orange);
+        if (p2) tintGroup(p2.mesh, COL.orange);
         Vox.play('wurger_02');
         const fork = state.enemies.find((e) => e.named === 'fork' && !e.dead);
         if (fork) {
@@ -568,10 +601,11 @@ export default function createPlay(ctx) {
             mode: 'rail',
             holdZ: -36 - i * 7,
             lane: (i % 2 === 0 ? -1.2 : 1.2),
-            hp: 5,
+            hp: 6,
             r: 2.1,
             score: 350,
             railIndex: i,
+            exposed: false,
           });
         }
         spawnEnemy('eisenwurm', 0, -6.6, -130, {
@@ -579,13 +613,28 @@ export default function createPlay(ctx) {
           mode: 'rail',
           holdZ: -50,
           lane: 0,
-          hp: 38,
+          hp: 42,
           r: 3.0,
           dual: true,
           score: 5000,
+          exposed: false,
+          talkArmor: true,
         });
-        banner('EISENWURM');
+        for (let i = 0; i < 4; i++) {
+          spawnEnemy('orb', 0, 0, -80, {
+            trainOrb: true,
+            turret: true,
+            hp: 5,
+            r: 1.25,
+            score: 300,
+            orbit: i,
+            orbitN: 4,
+            vz: 0,
+          });
+        }
+        banner('KILL THE SHIELD ORBS');
         Vox.play('cat_boss_02');
+        lockGunsFor(voLen('cat_boss_02') + 0.45);
       }
       if (beat('geist', 8)) {
         spawnEnemy('silbergeist', 6, 4, -110, { vz: 26, hp: 6, score: 800, passes: 3 });
@@ -616,22 +665,39 @@ export default function createPlay(ctx) {
       }
       if (beat('throat', 6)) {
         if (state.sichelAlive) {
-          spawnEnemy('mondsichel', 0, 2, -75, {
-            vz: 10, hp: 22, r: 3.0, scale: 1.15, score: 2500, passes: 2, sichel: true,
+          spawnEnemy('mondsichel', 0, 2, -88, {
+            vz: 0,
+            hp: 32,
+            r: 3.6,
+            scale: 2.0,
+            score: 2500,
+            sichel: true,
+            named: 'staffwing',
+            mode: 'holdwing',
+            holdZ: -50,
+            talkArmor: true,
           });
+          spawnDrones(5, { hp: 2 });
           Vox.play('cat_boss_04');
           setTimeout(() => { if (state.running && state.sichelAlive) Vox.play('sichel_03'); }, 1400);
           setTimeout(() => { if (state.running && state.sichelAlive) Vox.play('sichel_alt_01'); }, 3000);
           setTimeout(() => { if (state.running && state.sichelAlive) Vox.play('sichel_alt_02'); }, 5200);
+          lockGunsFor(5.2 + voLen('sichel_alt_02', 3.0) + 0.55);
         } else {
-          spawnEnemy('mondsichel', 0, 2, -75, { vz: 10, hp: 18, r: 3.0, scale: 1.1, score: 1800, passes: 1 });
+          spawnEnemy('mondsichel', 0, 2, -88, {
+            vz: 0, hp: 26, r: 3.5, scale: 1.85, score: 1800,
+            named: 'staffwing', mode: 'holdwing', holdZ: -50, talkArmor: true,
+          });
+          spawnDrones(5, { hp: 2 });
           Vox.play('sichel_05');
+          lockGunsFor(voLen('sichel_05') + 0.45);
         }
+        banner('CLEAR THE DRONES', 1800);
       }
       if (beat('core', 24) && !state.boss) {
         banner('FOUNDRY CORE');
         spawnEnemy('core', 0, 0, -60, {
-          boss: true, kind: 'core', hp: 36, r: 2.8, score: 5000, mode: 'core', exposed: false,
+          boss: true, kind: 'core', hp: 36, r: 2.8, score: 5000, mode: 'core', exposed: false, talkArmor: true,
         });
         for (let i = 0; i < 5; i++) {
           spawnEnemy('orb', 0, 0, -60, {
@@ -648,6 +714,7 @@ export default function createPlay(ctx) {
         Vox.play('cat_boss_05');
         if (state.sichelAlive) Vox.play('sichel_04');
         else Vox.play('rabe_01');
+        lockGunsFor(voLen('cat_boss_05') + (state.sichelAlive ? voLen('sichel_04') : 0) + 0.4);
       }
       for (const at of [10, 16, 32]) {
         if (beat('sn' + at, at)) {
@@ -661,12 +728,14 @@ export default function createPlay(ctx) {
         Vox.play('rabe_04');
         banner('THE WELL IS CLOSING', 2200);
         for (let i = 0; i < 8; i++) {
-          spawnEnemy('nachtschwalbe', (i - 3.5) * 3, (i % 2 ? 3 : -2), -70 - i * 8, {
+          spawnEnemy('nachtschwalbe', (i - 3.5) * 3.2, (i % 2 ? 3.4 : -2.4), -70 - i * 8, {
             debris: true,
-            vz: 18,
+            panel: i % 2 === 0,
+            vz: 16,
             hp: 1,
             score: 50,
-            r: 1.35,
+            r: 2.0,
+            scale: 1.35,
             mode: 'debris',
           });
         }
@@ -688,9 +757,10 @@ export default function createPlay(ctx) {
         Vox.play('sichel_alt_03');
       }
       if (beat('shock2', 18)) {
+        banner('FALLING PANELS', 1400);
         for (let i = 0; i < 8; i++) {
           spawnEnemy('nachtschwalbe', (i - 3.5) * 3.2, (i % 2 ? 4 : -3), -60 - i * 7, {
-            debris: true, vz: 22, hp: 1, score: 50, r: 1.35, mode: 'debris',
+            debris: true, panel: true, vz: 20, hp: 1, score: 50, r: 2.1, scale: 1.4, mode: 'debris',
           });
         }
       }
@@ -700,9 +770,10 @@ export default function createPlay(ctx) {
       }
       if (beat('blast2', 28)) state.shockAt = state.stageT;
       if (beat('shock3', 34)) {
+        banner('MOUTH COLLAPSING', 1400);
         for (let i = 0; i < 6; i++) {
           spawnEnemy('nachtschwalbe', (i - 2.5) * 3.4, (i % 2 ? 5 : -4), -55 - i * 6, {
-            debris: true, vz: 26, hp: 1, score: 50, r: 1.4, mode: 'debris',
+            debris: true, panel: i % 2 === 0, vz: 24, hp: 1, score: 50, r: 2.2, scale: 1.5, mode: 'debris',
           });
         }
       }
@@ -723,6 +794,7 @@ export default function createPlay(ctx) {
   }
 
   function fire() {
+    if ((state.gunLock || 0) > 0 || state.cinematic) return;
     const dir = lookDir().clone();
     let best = null;
     let bestDot = 0.935;
@@ -760,23 +832,30 @@ export default function createPlay(ctx) {
   function enemyShoot(e, offset, opts = {}) {
     worldPos(e, tmp2);
     if (offset) tmp2.add(offset);
-    tmp.copy(camera.position).sub(tmp2).normalize();
-    if (opts.fan) {
-      tmp.applyAxisAngle(new THREE.Vector3(0, 1, 0), opts.fan);
+    const origin = tmp2.clone();
+    // Aim at the cockpit, not along the ship's nose. After lookAt+180 the
+    // nose points into the scene, which made every Axis bolt fly *with* you.
+    const dir = new THREE.Vector3().copy(camera.position).sub(origin);
+    dir.x += state.px * 0.04;
+    dir.y += state.py * 0.04;
+    if (opts.fan) dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), opts.fan);
+    if (!opts.heavy) {
+      dir.x += (Math.random() - 0.5) * 0.55;
+      dir.y += (Math.random() - 0.5) * 0.35;
     }
+    dir.normalize();
     const heavy = !!(opts.heavy || e.turret || e.boss || e.kind === 'eisenwurm' || e.kind === 'core');
-    const mesh = laserBolt(tmp, { heavy });
-    mesh.position.copy(tmp2);
+    const mesh = laserBolt(dir, { heavy });
+    mesh.position.copy(origin);
     scene.add(mesh);
-    const speed = opts.slow ? 28 : (e.boss || e.kind === 'core' ? 42 : e.turret ? 34 : 40);
-    const pos = tmp2.clone();
+    const speed = opts.slow ? 22 : (e.boss || e.kind === 'core' ? 30 : e.turret ? 24 : 26);
     state.ebullets.push({
       mesh,
       laser: true,
-      vel: tmp.multiplyScalar(speed),
-      life: 3.2,
-      prev: pos,
-      r: opts.slow ? 5.2 : 4.2,
+      vel: dir.multiplyScalar(speed),
+      life: 3.6,
+      prev: origin.clone(),
+      r: opts.slow ? 5.4 : 4.4,
     });
   }
 
@@ -908,6 +987,27 @@ export default function createPlay(ctx) {
         if (core) {
           core.exposed = true;
           banner('CORE EXPOSED', 1800);
+        }
+      }
+    } else if (e.trainOrb) {
+      const left = state.enemies.some((x) => x.trainOrb && !x.dead && x !== e);
+      if (!left) {
+        for (const x of state.enemies) {
+          if ((x.kind === 'eisenwurm' || x.kind === 'stabzugCar') && !x.dead) x.exposed = true;
+        }
+        banner('CRADLE EXPOSED', 1800);
+      }
+    } else if (e.mode === 'holdwing' || e.named === 'staffwing') {
+      if (e.sichel && state.sichelAlive) {
+        state.sichelAlive = false;
+        syncFlags();
+      }
+      for (const d of state.enemies) {
+        if (d.drone && !d.dead) {
+          d.drone = false;
+          d.mode = 'inbound';
+          d.vz = 22;
+          d.turret = false;
         }
       }
     } else if (e.boss) {
@@ -1043,6 +1143,15 @@ export default function createPlay(ctx) {
     state.sichelEjecting = false;
     state.peelUntil = 0;
     state.spawnFlags = new Set();
+    if (state.cineShip) {
+      scene.remove(state.cineShip);
+      state.cineShip = null;
+    }
+    if (state.cineCrater) {
+      scene.remove(state.cineCrater);
+      state.cineCrater = null;
+    }
+    state.cinematic = false;
   }
 
   function beginCombat() {
@@ -1068,7 +1177,7 @@ export default function createPlay(ctx) {
   function nextStage() {
     if (state.noHit) state.score += 1500;
     if (state.stage >= 6) {
-      finish(true);
+      startEscapeCinematic();
       return;
     }
     state.stage += 1;
@@ -1084,6 +1193,118 @@ export default function createPlay(ctx) {
         e.breakSign = 1;
       }
     }
+  }
+
+  function startEscapeCinematic() {
+    state.cinematic = true;
+    state.cineT = 0;
+    state.gunLock = 99;
+    state.invuln = 12;
+    state.awaitingExit = true;
+    banner('BREAKING THE MOUTH', 2200);
+    for (const e of state.enemies) {
+      if (!e.dead && (e.debris || e.turret) && !e.boss) {
+        dropEnemyMesh(e);
+        e.dead = true;
+      }
+    }
+    if (state.guns && state.guns.parent) state.guns.parent.remove(state.guns);
+    const cat = BUILDERS.voidcat();
+    cat.scale.setScalar(1.55);
+    cat.position.set(0, -11, -32);
+    cat.rotation.x = -0.55;
+    scene.add(cat);
+    state.cineShip = cat;
+    const floor = craterFloor();
+    floor.position.set(0, -14, -42);
+    scene.add(floor);
+    state.cineCrater = floor;
+    Vox.play('cat_win_02');
+  }
+
+  function tickCinematic(dt) {
+    state.cineT += dt;
+    const t = state.cineT;
+    state.gunLock = 1;
+    state.invuln = 2;
+    if (state.cineShip) {
+      const u = Math.min(1, t / 4.4);
+      const rise = -11 + u * 18;
+      state.cineShip.position.set(Math.sin(t * 1.15) * 1.4, rise, -34 + u * 14);
+      state.cineShip.rotation.x = -0.55 + u * 0.42;
+      state.cineShip.rotation.z = Math.sin(t * 2.1) * 0.14;
+      state.cineShip.rotation.y = Math.sin(t * 0.7) * 0.2;
+      if (t < 3.2 && (state.cineShotCd || 0) <= 0) {
+        const nose = state.cineShip.position.clone().add(new THREE.Vector3(0, 0.4, 2.2));
+        const out = new THREE.Vector3(0, 0.35, 1).normalize();
+        const bolt = tracerBolt(out, { ally: true, twin: true });
+        bolt.position.copy(nose);
+        scene.add(bolt);
+        state.ebullets.push({
+          mesh: bolt,
+          vel: out.multiplyScalar(48),
+          life: 0.7,
+          prev: nose.clone(),
+          r: 0,
+        });
+        state.cineShotCd = 0.16;
+        AudioFX.shoot();
+      }
+      state.cineShotCd = Math.max(0, (state.cineShotCd || 0) - dt);
+    }
+    const camBack = 10 + Math.min(8, t * 1.6);
+    camera.position.set(Math.sin(t * 0.35) * 2.4, 1.6 + t * 0.55, camBack);
+    const look = state.cineShip
+      ? state.cineShip.position.clone().add(new THREE.Vector3(0, 0.4, 0))
+      : new THREE.Vector3(0, 0, -20);
+    camera.lookAt(look);
+    camera.fov = 62 - Math.min(14, t * 2.2);
+    camera.updateProjectionMatrix();
+
+    if (t > 2.5 && !state.cineBlast) {
+      state.cineBlast = true;
+      const burst = shatterBurst(COL.orange);
+      burst.position.set(0, -12, -40);
+      scene.add(burst);
+      state.fx.push(burst);
+      state.shake = 1.5;
+      AudioFX.explosion();
+      banner('OUT OF THE WELL', 2000);
+    }
+    if (t > 2.7 && t < 5.2 && Math.random() < dt * 8) {
+      const follow = shatterBurst(Math.random() < 0.5 ? COL.orange : COL.axis);
+      const y = state.cineShip ? state.cineShip.position.y - 4 - Math.random() * 3 : -8;
+      follow.position.set((Math.random() - 0.5) * 5, y, -40 + Math.random() * 6);
+      scene.add(follow);
+      state.fx.push(follow);
+      if (Math.random() < 0.35) AudioFX.explosion();
+    }
+    for (const b of state.ebullets) {
+      b.mesh.position.addScaledVector(b.vel, dt);
+      b.life -= dt;
+    }
+    state.ebullets = state.ebullets.filter((b) => {
+      if (b.life <= 0) {
+        dropBolt(b);
+        return false;
+      }
+      return true;
+    });
+    state.fx = state.fx.filter((f) => {
+      const alive = updateShatter(f, dt);
+      if (!alive) scene.remove(f);
+      return alive;
+    });
+    if (t > 6.1) {
+      if (state.cineShip) scene.remove(state.cineShip);
+      if (state.cineCrater) scene.remove(state.cineCrater);
+      state.cineShip = null;
+      state.cineCrater = null;
+      state.cinematic = false;
+      finish(true);
+    }
+    hud();
+    return state.over;
   }
 
   function enter(startStage = 0) {
@@ -1134,6 +1355,13 @@ export default function createPlay(ctx) {
       ejectAt: 0,
       peelUntil: 0,
       shockAt: null,
+      gunLock: 0,
+      cinematic: false,
+      cineT: 0,
+      cineShip: null,
+      cineCrater: null,
+      cineBlast: false,
+      cineShotCd: 0,
     });
     syncFlags();
     setPaused(false);
@@ -1149,6 +1377,8 @@ export default function createPlay(ctx) {
     if (!state.running) return state.over;
     if (input.pause) setPaused(!state.paused);
     if (state.paused) return null;
+
+    if (state.cinematic) return tickCinematic(dt);
 
     if (state.intermission) {
       state.interHold = Math.max(0, state.interHold - dt);
@@ -1175,6 +1405,12 @@ export default function createPlay(ctx) {
     state.stageT += dt;
     state.invuln = Math.max(0, state.invuln - dt);
     state.fireCd = Math.max(0, state.fireCd - dt);
+    state.gunLock = Math.max(0, (state.gunLock || 0) - dt);
+    if (state.gunLock <= 0) {
+      for (const e of state.enemies) {
+        if (e.talkArmor) e.talkArmor = false;
+      }
+    }
     state.shake = Math.max(0, state.shake - dt * 3.2);
     state.hitFlash = Math.max(0, state.hitFlash - dt);
     if (state.rollT > 0) state.rollT -= dt;
@@ -1215,6 +1451,12 @@ export default function createPlay(ctx) {
     } else if (bg === 'surface' || bg === 'yard' || bg === 'rail') {
       state.env.position.z += speed * dt;
       if (state.env.position.z > 48) state.env.position.z = 0;
+      if (bg === 'rail') {
+        state.env.children.forEach((c, i) => {
+          c.position.x = Math.sin(state.t * 0.62 + i * 0.45) * 8.4;
+          c.rotation.y = Math.cos(state.t * 0.62 + i * 0.45) * 0.22;
+        });
+      }
     } else if (bg === 'escape') {
       state.env.position.z += speed * dt * 1.85;
       state.env.rotation.z = Math.sin(state.t * 1.8) * 0.05;
@@ -1257,7 +1499,7 @@ export default function createPlay(ctx) {
     }
 
     if (input.fire && state.fireCd <= 0) {
-      fire();
+      if ((state.gunLock || 0) <= 0) fire();
       state.fireCd = boosting ? 0.08 : 0.12;
     }
 
@@ -1265,9 +1507,49 @@ export default function createPlay(ctx) {
       e.phase += dt;
       if (e.mode === 'rail') {
         const hold = e.holdZ ?? -48;
+        const wind = Math.sin(state.t * 0.62) * 9.0;
         e.mesh.position.z += (hold - e.mesh.position.z) * Math.min(1, dt * 1.5);
-        e.mesh.position.x = (e.lane ?? 0) + Math.sin(state.t * 0.7 + e.phase) * 0.55;
+        e.mesh.position.x = (e.lane ?? 0) + wind;
         e.mesh.rotation.y += dt * 0.12;
+        e.mesh.rotation.z = -Math.cos(state.t * 0.62) * 0.2;
+      } else if (e.mode === 'holdwing') {
+        const hold = e.holdZ ?? -50;
+        e.mesh.position.z += (hold - e.mesh.position.z) * Math.min(1, dt * 0.55);
+        e.mesh.position.x = Math.sin(state.t * 0.45) * 4.2;
+        e.mesh.position.y = 1.6 + Math.sin(state.t * 0.7) * 1.1;
+        e.mesh.lookAt(camera.position);
+        e.mesh.rotateY(Math.PI);
+        if (e.hp < 14 && !e.droneWave2) {
+          e.droneWave2 = true;
+          spawnDrones(6, { hp: 2 });
+          banner('MORE DRONES', 1400);
+        }
+      } else if (e.drone) {
+        const host = state.enemies.find((x) => x.mode === 'holdwing' && !x.dead);
+        const ang = state.t * 1.65 + ((e.orbit || 0) / (e.orbitN || 4)) * Math.PI * 2;
+        const rad = 5.4;
+        const hx = host ? host.mesh.position.x : 0;
+        const hy = host ? host.mesh.position.y : 2;
+        const hz = host ? host.mesh.position.z : -50;
+        e.mesh.position.set(
+          hx + Math.cos(ang) * rad,
+          hy + Math.sin(ang) * rad * 0.55,
+          hz + Math.sin(ang * 1.4) * 1.5,
+        );
+        e.mesh.rotation.y += dt * 2.4;
+      } else if (e.trainOrb) {
+        const host = state.enemies.find((x) => x.kind === 'eisenwurm' && !x.dead);
+        const ang = state.t * 0.9 + ((e.orbit || 0) / (e.orbitN || 4)) * Math.PI * 2;
+        const rad = 7.6;
+        const hx = host ? host.mesh.position.x : 0;
+        const hy = host ? host.mesh.position.y + 2.6 : -4;
+        const hz = host ? host.mesh.position.z : -50;
+        e.mesh.position.set(
+          hx + Math.cos(ang) * rad,
+          hy + Math.sin(ang) * 2.4,
+          hz + Math.sin(ang) * rad * 0.32,
+        );
+        e.mesh.rotation.y += dt * 2.1;
       } else if (e.mode === 'eject') {
         e.mesh.position.z -= 22 * dt;
         e.mesh.position.x += 11 * dt;
@@ -1287,6 +1569,8 @@ export default function createPlay(ctx) {
         e.mesh.position.z += (e.vz || 20) * dt;
         e.mesh.rotation.x += dt * 1.4;
         e.mesh.rotation.z += dt * 0.8;
+        const pulse = 0.92 + Math.sin(state.t * 9 + e.phase) * 0.12;
+        e.mesh.scale.setScalar((e.scale || 1) * pulse);
       } else if (e.turret) {
         if (!e.anchored) e.mesh.position.z += speed * dt;
         e.mesh.rotation.y += dt * 0.8;
@@ -1359,7 +1643,7 @@ export default function createPlay(ctx) {
       e.gunT = (e.gunT || 0) + dt;
       worldPos(e, tmp);
       const z = tmp.z;
-      const patterned = e.boss || e.kind === 'eisenwurm' || e.kind === 'stabzugCar' || (e.kind === 'core' && e.exposed) || (e.kind === 'mondsichel' && (e.boss || e.sichel));
+      const patterned = e.boss || e.kind === 'eisenwurm' || e.kind === 'stabzugCar' || (e.kind === 'core' && e.exposed) || (e.kind === 'mondsichel' && (e.boss || e.sichel || e.mode === 'holdwing'));
       const canShoot = !e.ally && !e.debris && !e.ejecting && e.mode !== 'break' && e.mode !== 'egress' && e.mode !== 'debris' && z > -95 && z < 4;
       if (canShoot) {
         if (patterned) {
@@ -1384,6 +1668,7 @@ export default function createPlay(ctx) {
       b.life -= dt;
       if (b.laser) {
         updateLaser(b.mesh, b.mesh.position.distanceTo(camera.position));
+        if (b.mesh.userData.face) b.mesh.userData.face.lookAt(camera.position);
       } else if (b.hist) {
         b.hist.push(b.mesh.position.clone());
         if (b.hist.length > maxHist) b.hist.shift();
@@ -1400,8 +1685,22 @@ export default function createPlay(ctx) {
         const pad = z > 50 ? 2.2 : z > 25 ? 1.55 : 0.95;
         if (b.mesh.position.distanceTo(tmp) < e.r + pad) {
           b.life = 0;
+          if (e.talkArmor) {
+            AudioFX.hit();
+            continue;
+          }
           if (e.kind === 'core' && !e.exposed) {
             AudioFX.hit();
+            continue;
+          }
+          if ((e.kind === 'eisenwurm' || e.kind === 'stabzugCar') && !e.exposed) {
+            AudioFX.hit();
+            continue;
+          }
+          if (e.mode === 'holdwing' && state.enemies.some((d) => d.drone && !d.dead)) {
+            e.hp -= 0.35;
+            AudioFX.hit();
+            if (e.hp <= 0) killEnemy(e);
             continue;
           }
           if (e.kind === 'eisenwurm' && e.gunPhase === 'volley') {
@@ -1435,7 +1734,7 @@ export default function createPlay(ctx) {
     }
 
     for (const e of state.enemies) {
-      if (e.dead || e.turret || e.ally || e.kind === 'core' || e.coreOrb) continue;
+      if (e.dead || e.turret || e.ally || e.kind === 'core' || e.coreOrb || e.mode === 'holdwing' || e.kind === 'eisenwurm') continue;
       worldPos(e, tmp);
       if (tmp.distanceTo(camera.position) < e.r * 0.85 + 1.4) {
         if (e.debris) {
@@ -1496,7 +1795,8 @@ export default function createPlay(ctx) {
 
     const wep = document.getElementById('hud-weapon');
     if (wep) {
-      if (boosting) wep.textContent = 'BOOST';
+      if ((state.gunLock || 0) > 0) wep.textContent = 'HOLD FIRE';
+      else if (boosting) wep.textContent = 'BOOST';
       else if (state.boostCd > 0) wep.textContent = `BOOST ${state.boostCd.toFixed(1)}`;
       else if (state.rollCd > 0 && state.rollT <= 0) wep.textContent = 'HISPANO-X';
       else wep.textContent = 'HISPANO-X';
