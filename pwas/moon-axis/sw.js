@@ -1,4 +1,4 @@
-const CACHE = 'moon-axis-v11';
+const CACHE = 'moon-axis-v12';
 const ASSETS = [
   './',
   './index.html',
@@ -15,6 +15,7 @@ const ASSETS = [
   './js/render/vector.js',
   './js/ships/catalog.js',
   './js/scenes/play.js',
+  './music/sortie1-cislunar.mp3',
   'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
 ];
 

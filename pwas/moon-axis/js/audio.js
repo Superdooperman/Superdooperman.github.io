@@ -1,9 +1,15 @@
 import Settings from './settings.js';
 import Vox from './vox.js';
 
+const STAGE_TRACKS = {
+  0: './music/sortie1-cislunar.mp3',
+};
+
 const AudioFX = (() => {
   let ctx = null;
   let music = null;
+  let stageEl = null;
+  let stageUrl = null;
 
   function ensure() {
     if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -121,6 +127,7 @@ const AudioFX = (() => {
       [392, 349, 294, 220].forEach((f, i) => setTimeout(() => beep(f, 0.28, 'sawtooth', 0.07), i * 180));
     },
     startMusic() {
+      this.stopStage();
       this.stopMusic();
       const ac = ensure();
       const notes = [196, 247, 294, 233, 196, 311, 294, 247];
@@ -136,6 +143,43 @@ const AudioFX = (() => {
     stopMusic() {
       if (music) clearInterval(music);
       music = null;
+    },
+    startStage(index) {
+      this.stopMusic();
+      const url = STAGE_TRACKS[index];
+      if (!url) {
+        this.stopStage();
+        return;
+      }
+      ensure();
+      if (!stageEl) {
+        stageEl = new Audio();
+        stageEl.loop = true;
+        stageEl.preload = 'auto';
+        stageEl.volume = 0.38;
+      }
+      if (stageUrl !== url) {
+        stageEl.pause();
+        stageEl.src = url;
+        stageUrl = url;
+      }
+      try { stageEl.currentTime = 0; } catch (_) { /* iOS may throw until playing */ }
+      const play = stageEl.play();
+      if (play && play.catch) play.catch(() => {});
+    },
+    stopStage() {
+      if (!stageEl) return;
+      stageEl.pause();
+      try { stageEl.currentTime = 0; } catch (_) { /* ignore */ }
+    },
+    pauseStage() {
+      if (stageEl && !stageEl.paused) stageEl.pause();
+    },
+    resumeStage() {
+      if (stageEl && stageEl.paused && stageUrl) {
+        const play = stageEl.play();
+        if (play && play.catch) play.catch(() => {});
+      }
     },
   };
 })();

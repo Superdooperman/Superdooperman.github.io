@@ -244,6 +244,7 @@ function enterTitle(opts = {}) {
   wingmen = [w1, w2];
   camera.position.set(0, 0.35, 0);
   camera.lookAt(0, -0.6, -8);
+  AudioFX.stopStage();
   AudioFX.startMusic();
 }
 
