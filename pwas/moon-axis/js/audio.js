@@ -3,6 +3,7 @@ import Vox from './vox.js';
 
 const STAGE_TRACKS = {
   0: './music/sortie1-cislunar.mp3',
+  1: './music/sortie2-schrodinger.mp3',
 };
 
 const AudioFX = (() => {
@@ -33,7 +34,7 @@ const AudioFX = (() => {
     osc.stop(t + duration);
   }
 
-  function noiseBurst(duration = 0.2, vol = 0.08) {
+  function noiseBurst(duration = 0.2, vol = 0.08, freq = 800, type = 'bandpass') {
     const ac = ensure();
     const n = ac.createBuffer(1, ac.sampleRate * duration, ac.sampleRate);
     const d = n.getChannelData(0);
@@ -41,14 +42,31 @@ const AudioFX = (() => {
     const src = ac.createBufferSource();
     const gain = ac.createGain();
     const filter = ac.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.value = 800;
+    filter.type = type;
+    filter.frequency.value = freq;
     src.buffer = n;
     src.connect(filter);
     filter.connect(gain);
     gain.connect(ac.destination);
     gain.gain.value = vol;
     src.start();
+  }
+
+  function subDrop(freq, dur, vol) {
+    const ac = ensure();
+    const t = ac.currentTime;
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, t);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(28, freq * 0.38), t + dur);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.connect(gain);
+    gain.connect(ac.destination);
+    osc.start(t);
+    osc.stop(t + dur + 0.02);
   }
 
   function thump() {
@@ -111,6 +129,25 @@ const AudioFX = (() => {
       Settings.rumble([35, 25, 55]);
       beep(140, 0.18, 'sawtooth', 0.09, -100);
       noiseBurst(0.22, 0.1);
+    },
+    boom() {
+      Settings.rumble([45, 30, 70]);
+      subDrop(88, 0.42, 0.22);
+      beep(110, 0.28, 'sawtooth', 0.08, -70);
+      noiseBurst(0.4, 0.16, 240, 'lowpass');
+      noiseBurst(0.18, 0.08, 1800, 'bandpass');
+    },
+    blast() {
+      Settings.rumble([60, 40, 90, 50, 80]);
+      subDrop(62, 0.85, 0.28);
+      beep(86, 0.5, 'sawtooth', 0.11, -48);
+      beep(190, 0.22, 'square', 0.05, -150);
+      noiseBurst(0.72, 0.2, 160, 'lowpass');
+      noiseBurst(0.28, 0.1, 900, 'bandpass');
+      setTimeout(() => {
+        noiseBurst(0.4, 0.12, 220, 'lowpass');
+        subDrop(48, 0.45, 0.14);
+      }, 90);
     },
     siren() { beep(420, 0.35, 'triangle', 0.05, 180); },
     boost() { beep(180, 0.2, 'sawtooth', 0.04, 220); },

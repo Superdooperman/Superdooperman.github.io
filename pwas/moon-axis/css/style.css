@@ -256,16 +256,26 @@ body.playing #title { display: none; }
 
 #brief-stills {
   width: min(92vw, 640px);
+  max-height: min(46vh, 400px);
   margin: 4px 0 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #05080a;
+  border: 1px solid rgba(201, 162, 39, 0.5);
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
 }
 #brief-stills.hidden { display: none; }
 #brief-still {
   display: block;
-  width: 100%;
+  max-width: 100%;
   max-height: min(42vh, 360px);
-  object-fit: cover;
-  border: 1px solid rgba(201, 162, 39, 0.5);
-  box-shadow: 0 0 24px rgba(0, 0, 0, 0.6);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
 }
 #brief-caption {
   margin-top: 8px;
@@ -476,23 +486,37 @@ body.standalone #btn-fs { display: none; }
   margin-top: 0;
 }
 
+#scores {
+  overflow: hidden;
+  gap: 8px;
+}
+#end {
+  overflow: hidden;
+  gap: 8px;
+}
+
 .score-wrap {
   width: min(420px, 92vw);
-  max-height: 40vh;
-  overflow: auto;
+  flex: 0 0 auto;
+  overflow: hidden;
 }
 
 .score-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: clamp(10px, 1.65vh, 13px);
   letter-spacing: 0.14em;
+  line-height: 1.15;
 }
 
 .score-table th,
 .score-table td {
-  padding: 4px 8px;
+  padding: 0.28vh 8px;
   text-align: left;
+}
+.score-table tr.empty td {
+  color: #345;
+  text-shadow: none;
 }
 
 .score-table th { color: #c9a227; }

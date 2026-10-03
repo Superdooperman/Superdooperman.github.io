@@ -218,6 +218,7 @@ function enterTitle(opts = {}) {
   hideStills();
   clearScene();
   document.body.classList.remove('playing');
+  Vox.live();
   Vox.stopRadio();
   Vox.flushCombat();
   const radioEl = document.getElementById('radio');
@@ -266,6 +267,7 @@ function enterBrief(stageIndex) {
   document.getElementById('brief-body').textContent = body;
   setBriefLocked(true);
   Vox.preload();
+  Vox.live();
   Vox.stopRadio();
   Vox.radio(s.radio({ forkDead: false, sichelAlive: true }));
 }
@@ -275,6 +277,7 @@ function enterPlay(stageIndex = 0) {
   mode = 'play';
   AudioFX.stopMusic();
   AudioFX.init();
+  Vox.live();
   Vox.stopRadio();
   Vox.flushCombat();
   hideStills();
@@ -457,7 +460,7 @@ function confirmEndReels() {
 }
 
 bindReelMount(document.getElementById('ace-reels-end'), () => endReel, paintEndReels, () => {
-  document.getElementById('reel-confirm').classList.remove('hidden');
+  confirmEndReels();
 });
 bindReelMount(document.getElementById('ace-reels-title'), () => titleReel, () => {
   Scores.setTag(reelTag(titleReel));
@@ -517,8 +520,8 @@ function stepReels(st, input, paint, onAllLocked, dt = 1 / 60) {
   if ((input.fire || input.start) && !st.fireLatch) {
     st.fireLatch = true;
     const all = lockReel(st);
-    paint();
     if (all && onAllLocked) onAllLocked();
+    else paint();
   }
   if (!input.fire && !input.start) st.fireLatch = false;
 }
@@ -703,7 +706,7 @@ function frame() {
     holdoff = Math.max(0, holdoff - dt);
     if (endReel && !endReel.done) {
       stepReels(endReel, input, paintEndReels, () => {
-        document.getElementById('reel-confirm').classList.remove('hidden');
+        confirmEndReels();
       }, dt);
     } else if (holdoff <= 0 && (!endReel || endReel.done)) {
       enterTitle({ quiet: true });

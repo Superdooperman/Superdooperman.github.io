@@ -210,6 +210,7 @@ export default function createPlay(ctx) {
     state.briefReady = false;
     const btn = document.getElementById('btn-brief');
     if (btn) btn.textContent = 'SKIP';
+    Vox.live();
     Vox.stopRadio();
     Vox.radio(s.radio(state));
   }
@@ -1027,7 +1028,9 @@ export default function createPlay(ctx) {
       state.sichelAlive = false;
       syncFlags();
     }
-    AudioFX.explosion();
+    if (e.kind === 'core' || e.kind === 'eisenwurm' || e.kind === 'mondsichel') AudioFX.blast();
+    else if (e.kind === 'tower' || e.kind === 'diamond' || e.kind === 'stabzugCar' || e.debris || e.coreOrb || e.trainOrb) AudioFX.boom();
+    else AudioFX.explosion();
     if (!e.ally && !e.turret && !e.debris && Math.random() < 0.22) {
       if (e.kind === 'nachtschwalbe') Vox.play('cat_kill_03');
       else Vox.bark('cat_kill');
@@ -1128,14 +1131,15 @@ export default function createPlay(ctx) {
       : 'Schrödinger still burns. Pacific Void Command will re-arm the next catapult.';
     document.getElementById('end-score').textContent = `SCORE ${pad(state.score)}   HI ${pad(Scores.best())}`;
     document.getElementById('end-table').innerHTML = '';
-    Vox.stopRadio();
     if (won) {
+      Vox.stopRadio();
+      Vox.flushCombat();
       Vox.play('cat_win_01');
       setTimeout(() => Vox.play('hale_bark_07'), 1800);
       setTimeout(() => Vox.play('cat_win_03'), 3200);
       AudioFX.fanfare();
     } else {
-      Vox.play('cat_lose_01');
+      Vox.silence();
       AudioFX.gameOver();
     }
   }
@@ -1180,6 +1184,7 @@ export default function createPlay(ctx) {
     addGuns();
     if (!scene.children.includes(camera)) scene.add(camera);
     banner(STAGES[state.stage].name, 2000);
+    Vox.live();
     Vox.bark('cat_launch');
     AudioFX.startStage(state.stage);
     hud();
@@ -1279,7 +1284,7 @@ export default function createPlay(ctx) {
       scene.add(burst);
       state.fx.push(burst);
       state.shake = 1.5;
-      AudioFX.explosion();
+      AudioFX.blast();
       banner('OUT OF THE WELL', 2000);
     }
     if (t > 2.7 && t < 5.2 && Math.random() < dt * 8) {

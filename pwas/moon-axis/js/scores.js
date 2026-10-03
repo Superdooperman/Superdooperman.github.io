@@ -57,12 +57,10 @@ const Scores = {
     return { row, rank: rank || 11, list: top, best };
   },
   render(el, highlightT = 0) {
-    const rows = this.list();
-    if (!rows.length) {
-      el.innerHTML = '<p class="hint">NO SORTIES LOGGED</p>';
-      return;
-    }
-    const body = rows.map((r, i) => {
+    const rows = this.list().slice(0, 10);
+    const body = Array.from({ length: 10 }, (_, i) => {
+      const r = rows[i];
+      if (!r) return `<tr class="empty"><td>${i + 1}</td><td>---</td><td>000000</td><td></td></tr>`;
       const hi = highlightT && r.t === highlightT ? ' class="hi-row"' : '';
       const mark = r.won ? 'WIN' : `S${(r.stage | 0) + 1}`;
       return `<tr${hi}><td>${i + 1}</td><td>${r.tag || 'ACE'}</td><td>${pad(r.score)}</td><td>${mark}</td></tr>`;
