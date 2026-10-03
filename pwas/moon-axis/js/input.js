@@ -20,7 +20,7 @@ const Input = {
     window.addEventListener('keydown', (e) => {
       if (e.target && e.target.tagName === 'INPUT') return;
       this.keys[e.code] = true;
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyE'].includes(e.code)) {
         e.preventDefault();
       }
     });
@@ -39,8 +39,17 @@ const Input = {
     });
     canvas.addEventListener('mousedown', (e) => {
       if (e.button === 0) this.fire = true;
+      if (e.button === 2) {
+        e.preventDefault();
+        this._rollTap = true;
+        Settings.flushRumble();
+      }
     });
-    window.addEventListener('mouseup', () => { this.fire = false; });
+    window.addEventListener('mouseup', (e) => {
+      if (e.button === 0) this.fire = false;
+    });
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+    window.addEventListener('contextmenu', (e) => e.preventDefault());
 
     this._bindTouch();
   },
@@ -123,7 +132,8 @@ const Input = {
     if (Settings.invertY) aimY = -aimY;
     const fire = this.fire || !!k.Space;
     const boost = this.boost || !!k.ShiftLeft || !!k.ShiftRight;
-    const rollEdge = (!this._rollLatch && (k.KeyB || this._rollTap));
+    const rollHeld = !!(k.KeyE || k.KeyB || this._rollTap);
+    const rollEdge = !this._rollLatch && rollHeld;
     const pauseEdge = (!this._pauseLatch && (k.KeyP || k.Escape || this._pauseTap));
     const start = this.start || k.Enter || k.Space;
     const reelUp = !!(k.KeyW || k.ArrowUp);
@@ -137,7 +147,7 @@ const Input = {
     const reelX = reelLeft || reelRight
       ? ((reelRight ? 1 : 0) - (reelLeft ? 1 : 0))
       : (this.touch ? this.aimX : 0);
-    this._rollLatch = !!(k.KeyB || this._rollTap);
+    this._rollLatch = rollHeld;
     this._pauseLatch = !!(k.KeyP || k.Escape || this._pauseTap);
     this._rollTap = false;
     this._pauseTap = false;

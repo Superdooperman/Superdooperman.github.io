@@ -33,6 +33,11 @@ const Scores = {
     localStorage.setItem(TAG_KEY, t);
     return t;
   },
+  qualifies(score) {
+    const list = this.list();
+    if (list.length < 10) return true;
+    return (score | 0) >= (list[list.length - 1].score | 0);
+  },
   submit({ score, stage, won }) {
     const row = {
       score: score | 0,

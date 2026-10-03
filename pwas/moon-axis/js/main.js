@@ -298,8 +298,7 @@ document.getElementById('btn-scores').addEventListener('click', (e) => {
   show('scores', true);
   document.getElementById('scores-best').textContent = `HI ${Scores.pad(Scores.best())}`;
   Scores.render(document.getElementById('scores-table'));
-  titleReel = makeReelState(Scores.tag());
-  paintTitleReels();
+  document.getElementById('ace-reels-title').classList.add('hidden');
 });
 document.getElementById('btn-scores-back').addEventListener('click', (e) => {
   e.preventDefault();
@@ -678,27 +677,34 @@ function frame() {
     const over = play.update(dt, input);
     if (over) {
       mode = 'end';
-      holdoff = 0.35;
       pendingOver = over;
-      endReel = makeReelState(Scores.tag());
-      document.getElementById('reel-confirm').classList.add('hidden');
       document.getElementById('btn-again').classList.add('hidden');
-      paintEndReels();
+      document.getElementById('reel-confirm').classList.add('hidden');
+      const earned = Scores.qualifies(over.score);
+      const reelsEl = document.getElementById('ace-reels-end');
+      if (earned) {
+        holdoff = 0.35;
+        endReel = makeReelState(Scores.tag());
+        reelsEl.classList.remove('hidden');
+        paintEndReels();
+      } else {
+        holdoff = 6;
+        endReel = null;
+        reelsEl.classList.add('hidden');
+        reelsEl.innerHTML = '';
+        Scores.render(document.getElementById('end-table'));
+      }
       paintHi();
     }
   } else if (mode === 'scores') {
     holdoff = Math.max(0, holdoff - dt);
-    stepReels(titleReel, input, () => {
-      Scores.setTag(reelTag(titleReel));
-      paintTitleReels();
-    }, null, dt);
   } else if (mode === 'end') {
     holdoff = Math.max(0, holdoff - dt);
     if (endReel && !endReel.done) {
       stepReels(endReel, input, paintEndReels, () => {
         document.getElementById('reel-confirm').classList.remove('hidden');
       }, dt);
-    } else if (endReel?.done && holdoff <= 0) {
+    } else if (holdoff <= 0 && (!endReel || endReel.done)) {
       enterTitle({ quiet: true });
     }
   }
