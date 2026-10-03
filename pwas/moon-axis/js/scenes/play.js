@@ -4,6 +4,7 @@ import { BUILDERS } from '../ships/catalog.js';
 import AudioFX from '../audio.js';
 import Vox from '../vox.js';
 import Scores from '../scores.js';
+import Settings from '../settings.js';
 
 const STAGES = [
   {
@@ -163,6 +164,9 @@ export default function createPlay(ctx) {
     document.getElementById('briefing').classList.remove('hidden');
     document.body.classList.remove('playing');
     syncFlags();
+    state.briefReady = false;
+    const btn = document.getElementById('btn-brief');
+    if (btn) btn.textContent = 'SKIP';
     Vox.stopRadio();
     Vox.radio(s.radio(state));
   }
@@ -390,7 +394,10 @@ export default function createPlay(ctx) {
       if (beat('n5', 35)) {
         spawnEnemy('nachtschwalbe', -8, 2, -90);
         spawnEnemy('wuerger', 5, 0, -105);
-        if (Math.random() < 0.5) Vox.bark('mond');
+        if (state.stageT - (state.mondAt || 0) > 8) {
+          Vox.bark('mond');
+          state.mondAt = state.stageT;
+        }
       }
     }
     if (s === 1) {
@@ -696,7 +703,7 @@ export default function createPlay(ctx) {
     }
     state.forkDead = true;
     syncFlags();
-    Vox.play('fork_05');
+    Vox.play('fork_05', { priority: true });
     setTimeout(() => { if (state.running) Vox.play('hale_bark_03'); }, 900);
     banner('STARFORK DOWN', 2000);
     if (e && !e.dead) {
@@ -741,7 +748,7 @@ export default function createPlay(ctx) {
       syncFlags();
     }
     AudioFX.explosion();
-    if (!e.ally && !e.turret && !e.debris && Math.random() < 0.45) {
+    if (!e.ally && !e.turret && !e.debris && Math.random() < 0.22) {
       if (e.kind === 'nachtschwalbe') Vox.play('cat_kill_03');
       else Vox.bark('cat_kill');
     }
@@ -787,12 +794,18 @@ export default function createPlay(ctx) {
     if (state.invuln > 0 || state.rollT > 0) return;
     state.noHit = false;
     state.shields -= 1;
-    state.invuln = 1.4;
+    state.invuln = 1.0;
     AudioFX.damage();
-    if (state.shields <= 0) Vox.play('cat_hurt_05');
-    else if (state.shields === 1) Vox.play(Math.random() < 0.5 ? 'cat_hurt_03' : 'cat_hurt_04');
-    else if (state.shields === 2) Vox.play('cat_hurt_02');
-    else Vox.play('cat_hurt_01');
+    Settings.rumble([22, 30, 45]);
+    const sh = document.getElementById('hud-shields');
+    if (sh) {
+      sh.classList.add('hit');
+      setTimeout(() => sh.classList.remove('hit'), 220);
+    }
+    if (state.shields <= 0) Vox.play('cat_hurt_05', { priority: true });
+    else if (state.shields === 1) Vox.play(Math.random() < 0.5 ? 'cat_hurt_03' : 'cat_hurt_04', { priority: true });
+    else if (state.shields === 2) Vox.play('cat_hurt_02', { priority: true });
+    else Vox.play('cat_hurt_01', { priority: true });
     renderer.domElement.style.filter = 'brightness(2.2) saturate(0.4)';
     setTimeout(() => { renderer.domElement.style.filter = ''; }, 80);
     if (state.shields <= 0) {
@@ -856,6 +869,8 @@ export default function createPlay(ctx) {
   function beginCombat() {
     Vox.stopRadio();
     document.getElementById('briefing').classList.add('hidden');
+    const stills = document.getElementById('brief-stills');
+    if (stills) stills.classList.add('hidden');
     document.body.classList.add('playing');
     state.intermission = false;
     state.stageT = 0;
@@ -927,6 +942,8 @@ export default function createPlay(ctx) {
       noHit: true,
       boostHeld: false,
       kick: 0,
+      briefReady: false,
+      mondAt: -8,
       forkDead: false,
       sichelAlive: true,
       sichelEjecting: false,
@@ -950,7 +967,7 @@ export default function createPlay(ctx) {
 
     if (state.intermission) {
       state.interHold = Math.max(0, state.interHold - dt);
-      if (state.interHold <= 0 && (input.fire || input.start)) beginCombat();
+      if (state.briefReady && state.interHold <= 0 && (input.fire || input.start)) beginCombat();
       return null;
     }
 
@@ -1157,8 +1174,7 @@ export default function createPlay(ctx) {
     for (const b of state.ebullets) {
       stepBolt(b, 8);
       tmp.copy(b.mesh.position);
-      tmp2.set(state.px * 0.15, state.py * 0.15 + 0.4, 0);
-      if (tmp.distanceTo(tmp2) < 1.15) {
+      if (tmp.distanceTo(camera.position) < 2.6) {
         b.life = 0;
         playerHit();
       }
@@ -1175,9 +1191,8 @@ export default function createPlay(ctx) {
 
     for (const e of state.enemies) {
       if (e.dead || e.turret || e.ally || e.debris || e.kind === 'core') continue;
-      tmp2.set(state.px * 0.15, state.py * 0.15 + 0.4, 0);
       worldPos(e, tmp);
-      if (tmp.distanceTo(tmp2) < e.r * 0.7) {
+      if (tmp.distanceTo(camera.position) < e.r * 0.85 + 1.2) {
         killEnemy(e);
         playerHit();
       }
@@ -1236,9 +1251,17 @@ export default function createPlay(ctx) {
     document.body.classList.remove('playing');
   }
 
-  function continueBrief() {
-    if (state.intermission && state.interHold <= 0) beginCombat();
+  function continueBrief(force = false) {
+    if (state.intermission && (force || state.briefReady)) beginCombat();
   }
 
-  return { enter, update, dispose, hi, STAGES, setPaused, paintBrief, continueBrief };
+  function isIntermission() {
+    return !!state.intermission;
+  }
+
+  function setBriefReady(on) {
+    state.briefReady = !!on;
+  }
+
+  return { enter, update, dispose, hi, STAGES, setPaused, paintBrief, continueBrief, isIntermission, setBriefReady };
 }

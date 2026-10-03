@@ -65,6 +65,140 @@ let wingmen = [];
 let briefStage = 0;
 let holdoff = 0;
 let titleT = 0;
+let briefLocked = true;
+let attractOn = false;
+let attractT = 0;
+let attractStep = 0;
+let attractSeq = [];
+let charRotate = 0;
+let stillTimer = 0;
+
+const ATTRACT_IDLE = 14;
+const ATTRACT_HOLD = 6;
+const ATTRACT_REST = 8;
+
+const ATTRACT_STORY = [
+  { img: 'img/attract/attract_01_void.jpg', title: 'THE PACIFIC VOID, 1947.', body: 'THE WAR DID NOT STOP AT THE SEA.\nIT WENT UP.' },
+  { img: 'img/attract/attract_02_selene.jpg', title: 'MONDSTAB HOLDS THE FAR SIDE.', body: 'FESTUNG SELENE.\nA GUN CUT FROM THE MOON ITSELF.' },
+  { img: 'img/attract/attract_03_rail.jpg', title: 'ONE ROD HAS ALREADY FIRED.', body: 'A SECOND IS ON THE RAIL.\nTHE YARD THAT FEEDS IT IS MOVING.' },
+  { img: 'img/attract/attract_04_doors.jpg', title: 'YOU ARE CAT.', body: 'F6F-V VOIDCAT.\nHALE HAS THE DECK. FORK HAS YOUR WING.\nOPEN THE DOORS.\nBE WARY OF A CHANNEL THAT GOES QUIET.' },
+];
+const ATTRACT_CHARS = [
+  { img: 'img/charcards/charcard_catshadow.jpg', title: 'CAT', body: 'Voidcat. The seat you are in.\nPacific Void Command. No face on the wire, on purpose.\nFlies the F6F-V. Guns, a fusion ring, and a mouth he should use less.\nIf the channel is quiet, he is still up.' },
+  { img: 'img/charcards/charcard_hale.jpg', title: 'HALE', body: 'Captain. Flag bridge, carrier in orbit.\nGives the order and does not decorate it.\nThree things, then launch. He counts you home on the hook.' },
+  { img: 'img/charcards/charcard_fork.jpg', title: 'FORK', body: 'Lieutenant Reyes. Callsign Fork.\nYour wing. Twin-boom fighter, cyan mark on the helmet.\nShe peels targets off you and does not ask you to thank her.\nIf her channel goes quiet, do not sit on it.' },
+  { img: 'img/charcards/charcard_sichel.jpg', title: 'SICHEL', body: 'Mondsichel. Flying wing.\nThe rival. Wide turn, long gun, red crescent.\nHe talks like the fight is a courtesy.\nDo not chase him off the brief.' },
+  { img: 'img/charcards/charcard_geist.jpg', title: 'GEIST', body: 'Silbergeist. Twin nacelle.\nHe does not fly the patrol. He comes down for the rod.\nSilver helmet, two engines, mean on the wire.\nIf the cradle is still alive, he is already in the dark.' },
+  { img: 'img/charcards/charcard_rabe.jpg', title: 'RABE', body: 'Oberst. Festung Selene.\nThe man at the foundry console, not the man in the dart.\nCalm. The gun is his. The moon is the barrel.\nHe will still be talking when the well starts to close.' },
+  { img: 'img/charcards/charcard_mond.jpg', title: 'MONDSTAB', body: 'Dart pilot. The ones in the trench.\nRed crescent, short life, shorter temper.\nThey are the noise on the channel.\nThe aces are the ones who do not yell.' },
+];
+const BRIEF_STILLS = {
+  hale_brief_01: [
+    { src: 'img/briefings/brief01_01_kesselgrube.jpg', cap: 'Far side is lighting up a second crater. Kesselgrube.' },
+    { src: 'img/briefings/brief01_02_second_rod.jpg', cap: "They're loading another rod." },
+    { src: 'img/briefings/brief01_03_doors.jpg', cap: 'Moonhogs will follow once you open the doors.' },
+  ],
+  hale_brief_02: [
+    { src: 'img/briefings/brief02_01_stabzug.jpg', cap: 'Stabzug is on the rail.' },
+    { src: 'img/briefings/brief02_02_cradle.jpg', cap: 'Meteor-iron flatcars, a cradle.' },
+    { src: 'img/briefings/brief02_03_aa_tail.jpg', cap: 'AA cars on the tail.' },
+    { src: 'img/briefings/brief02_04_geist.jpg', cap: "If a twin-engine ghost drops in, that's Geist." },
+  ],
+  hale_brief_03: [
+    { src: 'img/briefings/brief03_01_rod_stayed.jpg', cap: "The yard is slag. The rod didn't leave." },
+    { src: 'img/briefings/brief03_02_mouth.jpg', cap: "Mouth looks like a crater. It isn't." },
+    { src: 'img/briefings/brief03_03_foundry.jpg', cap: 'You fly in, you kill the foundry, you fly out.' },
+    { src: 'img/briefings/brief03_04_sichel.jpg', cap: 'If Sichel is on the channel, do not chase him.' },
+  ],
+};
+
+function setBriefLocked(on) {
+  briefLocked = !!on;
+  const btn = document.getElementById('btn-brief');
+  if (btn) btn.textContent = briefLocked ? 'SKIP' : 'LAUNCH';
+  play.setBriefReady?.(!briefLocked);
+}
+
+function hideStills() {
+  clearInterval(stillTimer);
+  stillTimer = 0;
+  const wrap = document.getElementById('brief-stills');
+  if (wrap) wrap.classList.add('hidden');
+}
+
+function showStill(slide) {
+  const wrap = document.getElementById('brief-stills');
+  const img = document.getElementById('brief-still');
+  const cap = document.getElementById('brief-caption');
+  if (!wrap || !img) return;
+  wrap.classList.remove('hidden');
+  img.src = slide.src;
+  if (cap) cap.textContent = slide.cap || '';
+}
+
+function startBriefStills(id) {
+  const slides = BRIEF_STILLS[id];
+  if (!slides || !slides.length) return;
+  clearInterval(stillTimer);
+  const dur = Math.max(4, (Vox.duration(id) || slides.length * 5) / slides.length);
+  let i = 0;
+  showStill(slides[0]);
+  stillTimer = setInterval(() => {
+    i += 1;
+    if (i >= slides.length) {
+      clearInterval(stillTimer);
+      stillTimer = 0;
+      return;
+    }
+    showStill(slides[i]);
+  }, dur * 1000);
+}
+
+function paintAttractCard(card) {
+  const img = document.getElementById('attract-img');
+  const title = document.getElementById('attract-title');
+  const body = document.getElementById('attract-body');
+  const kicker = document.getElementById('attract-kicker');
+  if (img) img.src = card.img;
+  if (kicker) kicker.textContent = card.kicker || 'PACIFIC VOID COMMAND';
+  if (title) title.textContent = card.title || '';
+  if (body) body.textContent = card.body || '';
+}
+
+function buildAttractSeq() {
+  const chars = [];
+  for (let i = 0; i < 3; i++) chars.push(ATTRACT_CHARS[(charRotate + i) % ATTRACT_CHARS.length]);
+  charRotate = (charRotate + 3) % ATTRACT_CHARS.length;
+  return [
+    ...ATTRACT_STORY,
+    ...chars,
+    { img: 'img/attract/attract_montage.jpg', title: '', body: '', kicker: 'MOON AXIS' },
+  ];
+}
+
+function startAttract() {
+  attractOn = true;
+  attractT = 0;
+  attractStep = 0;
+  attractSeq = buildAttractSeq();
+  show('title', false);
+  show('attract', true);
+  paintAttractCard(attractSeq[0]);
+}
+
+function stopAttract() {
+  attractOn = false;
+  attractT = 0;
+  attractStep = 0;
+  titleT = ATTRACT_IDLE - ATTRACT_REST;
+  show('attract', false);
+  if (mode === 'title') show('title', true);
+}
+
+Vox.onRadioCue((id) => startBriefStills(id));
+Vox.onRadioIdle(() => {
+  if (mode === 'brief' || play.isIntermission?.()) setBriefLocked(false);
+});
 
 function clearScene() {
   while (scene.children.length) scene.remove(scene.children[0]);
@@ -78,12 +212,16 @@ function enterTitle() {
   mode = 'title';
   titleT = 0;
   holdoff = 0.45;
+  attractOn = false;
+  hideStills();
   clearScene();
   document.body.classList.remove('playing');
   Vox.stopRadio();
+  Vox.flushCombat();
   const radioEl = document.getElementById('radio');
   if (radioEl) radioEl.classList.add('hidden');
   show('title', true);
+  show('attract', false);
   show('briefing', false);
   show('end', false);
   show('scores', false);
@@ -111,8 +249,11 @@ function enterBrief(stageIndex) {
   mode = 'brief';
   briefStage = stageIndex;
   holdoff = 0.4;
+  hideStills();
+  stopAttract();
   const s = play.STAGES[stageIndex];
   show('title', false);
+  show('attract', false);
   show('end', false);
   show('scores', false);
   show('briefing', true);
@@ -120,6 +261,7 @@ function enterBrief(stageIndex) {
   document.getElementById('brief-title').textContent = s.briefTitle;
   const body = typeof s.briefBody === 'function' ? s.briefBody({ forkDead: false, sichelAlive: true }) : s.briefBody;
   document.getElementById('brief-body').textContent = body;
+  setBriefLocked(true);
   Vox.preload();
   Vox.stopRadio();
   Vox.radio(s.radio({ forkDead: false, sichelAlive: true }));
@@ -131,9 +273,12 @@ function enterPlay(stageIndex = 0) {
   AudioFX.stopMusic();
   AudioFX.init();
   Vox.stopRadio();
+  Vox.flushCombat();
+  hideStills();
   clearScene();
   show('briefing', false);
   show('title', false);
+  show('attract', false);
   show('scores', false);
   play.enter(stageIndex);
 }
@@ -166,14 +311,15 @@ function bindTag(id) {
 }
 bindTag('tag-input');
 bindTag('tag-input-title');
-document.getElementById('btn-brief').addEventListener('click', () => {
+document.getElementById('btn-brief').addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
   if (mode === 'brief' && holdoff <= 0) enterPlay();
-  else if (mode === 'play') play.continueBrief();
+  else if (mode === 'play') play.continueBrief(true);
 });
-document.getElementById('briefing').addEventListener('click', (e) => {
-  if (e.target && e.target.id === 'btn-brief') return;
-  if (mode === 'brief' && holdoff <= 0) enterPlay();
-  else if (mode === 'play') play.continueBrief();
+document.getElementById('attract').addEventListener('click', (e) => {
+  e.preventDefault();
+  if (attractOn) stopAttract();
 });
 document.getElementById('btn-again').addEventListener('click', () => {
   enterTitle();
@@ -299,10 +445,24 @@ function frame() {
     camera.position.x = Math.sin(titleT * 0.15) * 0.4;
     camera.lookAt(0, -0.6, -8);
     if (holdoff > 0) holdoff = Math.max(0, holdoff - dt);
-    else if (input.start && titleT > 0.3) launchFromTitle();
+    if (attractOn) {
+      attractT += dt;
+      if (input.fire || input.start || input.pause) {
+        stopAttract();
+      } else if (attractT >= ATTRACT_HOLD) {
+        attractT = 0;
+        attractStep += 1;
+        if (attractStep >= attractSeq.length) stopAttract();
+        else paintAttractCard(attractSeq[attractStep]);
+      }
+    } else if (holdoff <= 0 && (input.start || input.fire) && titleT > 0.3) {
+      launchFromTitle();
+    } else if (titleT > ATTRACT_IDLE) {
+      startAttract();
+    }
   } else if (mode === 'brief') {
     holdoff = Math.max(0, holdoff - dt);
-    if (holdoff <= 0 && (input.fire || input.start)) enterPlay();
+    if (!briefLocked && holdoff <= 0 && (input.fire || input.start)) enterPlay();
   } else if (mode === 'play') {
     const over = play.update(dt, input);
     if (over) {

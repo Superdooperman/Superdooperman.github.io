@@ -52,17 +52,36 @@
       <p class="hint mobile-only">STICK AIM · FIRE · BOOST · ROLL · PAUSE FOR SETTINGS</p>
     </div>
 
+    <div id="attract" class="overlay hidden">
+      <div id="attract-card">
+        <img id="attract-img" alt="">
+        <div id="attract-copy">
+          <p id="attract-kicker" class="eyebrow"></p>
+          <h2 id="attract-title"></h2>
+          <p id="attract-body"></p>
+        </div>
+      </div>
+      <p id="attract-hint">PRESS FIRE</p>
+    </div>
+
     <div id="briefing" class="overlay panel hidden">
       <p class="eyebrow" id="brief-kicker">SORTIE 1 OF 7</p>
       <h2 id="brief-title">CISLUNAR SCRAMBLE</h2>
+      <div id="brief-stills" class="hidden">
+        <img id="brief-still" alt="">
+        <p id="brief-caption"></p>
+      </div>
       <p id="brief-body">Nachtschwalbe flight inbound. Clear the approach.</p>
-      <button id="btn-brief" type="button">FIRE TO CONTINUE</button>
+      <button id="btn-brief" type="button">SKIP</button>
     </div>
 
     <div id="banner" class="overlay hidden"><span id="banner-text"></span></div>
     <div id="radio" class="hidden">
-      <span id="radio-who">HALE</span>
-      <span id="radio-line"></span>
+      <img id="radio-port" alt="">
+      <div id="radio-text">
+        <span id="radio-who">HALE</span>
+        <span id="radio-line"></span>
+      </div>
     </div>
 
     <div id="pause" class="overlay panel hidden">

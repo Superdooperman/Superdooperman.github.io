@@ -110,7 +110,6 @@ const Input = {
       this._pauseTap = true;
     });
     document.getElementById('btn-start').addEventListener('click', () => { this.start = true; });
-    document.getElementById('btn-brief').addEventListener('click', () => { this.start = true; });
     document.getElementById('btn-again').addEventListener('click', () => { this.start = true; });
   },
 

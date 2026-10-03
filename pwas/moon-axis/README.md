@@ -32,7 +32,7 @@ Pulp alt-history (*Iron Sky* / *Wolfenstein* energy), not a history lesson. Fact
 | Call | WWII ghost | Side |
 |---|---|---|
 | F6F-V Voidcat | Hellcat | Player (Cat) |
-| P-38 Starfork | Lightning | Lt. Reyes, wingman |
+| P-38 Starfork | Lightning | Lt. Reyes (Fork), wing |
 | TBF Moonhog | Avenger | Escort bomber |
 | Nachtschwalbe | Bf 109 | Axis dart |
 | Würger-X | Fw 190 | Axis interceptor |
@@ -45,7 +45,9 @@ Pulp alt-history (*Iron Sky* / *Wolfenstein* energy), not a history lesson. Fact
 
 ## Branches
 
-- **Fork:** save him by killing the peel pair in Kesselgrube. Death plays `fork_05` and Hale’s “off the board” brief before the rail. Survival skips those lines.
+- **Fork:** Lt. Reyes, your wing. Save her by killing the peel pair in Kesselgrube. Death plays `fork_05` and Hale’s “off the board” brief before the rail. Survival skips those lines.
+- Briefings only skip via the **SKIP** button (FIRE/click mash will not). After the VO, **LAUNCH**.
+- Title attract: sit on the cabinet ~14s for story cards and character posters.
 - **Sichel:** after Mondsichel dies he ejects for ~2.5s. Finish him and Hale warns that the next wide wing is not him. Let him go and you get the alt taunts in the Staff.
 
 ## Play local

@@ -23,7 +23,7 @@ const LINES = {
   cat_win_02: "Out of the well. Somebody catch me.",
   cat_win_03: "Tell Hale I still got the hook.",
   cat_lose_01: "Rod's still up. Then so am I.",
-  cat_radio_01: "He peeled off. That's the job.",
+  cat_radio_01: "She peeled off. That's the job.",
   cat_radio_02: "Save the speech. I'm coming in on the hook anyway.",
   cat_radio_03: "Hook. I'm not done being a problem.",
   hale_bark_01: "Do not let them finish the rod.",
@@ -36,7 +36,7 @@ const LINES = {
   hale_bark_08: "Cut him off.",
   hale_bark_09: "Sichel burned over Selene. If something wide comes up the throat, it isn't him. Shoot it anyway.",
   hale_brief_01: "Cat. Selene's dark. That was the gun, not the hand. Far side is lighting up a second crater. Kesselgrube.",
-  hale_brief_02: "Fork's off the board. Don't sit on that channel. Stabzug is on the rail. Match speed. Kill the cradle.",
+  hale_brief_02: "Fork's off the board. Don't sit on that channel. She peeled a pair so the hogs could line up. Stabzug is on the rail. Match speed. Kill the cradle.",
   hale_brief_03: "The yard is slag. The rod didn't leave. The Staff. Mouth looks like a crater. It isn't. Launch.",
   fork_01: "Starfork, on your left. Try not to hog it.",
   fork_02: "Starfork's fueled. I got your left.",
@@ -94,6 +94,22 @@ function speakerOf(id) {
   return 'RADIO';
 }
 
+const PORT_KEY = {
+  CAT: 'cat', HALE: 'hale', FORK: 'fork', RABE: 'rabe', SICHEL: 'sichel', GEIST: 'geist', MONDSTAB: 'mond',
+};
+
+function isCloseCue(id) {
+  return /^(cat_hurt_|cat_kill_|fork_03|fork_05|sichel_|geist_|mond_|nacht_|wurger_|stuka_)/.test(id);
+}
+
+function portraitFor(id) {
+  const key = PORT_KEY[speakerOf(id)];
+  if (!key) return null;
+  return isCloseCue(id)
+    ? `img/portraits/port_${key}_close.png`
+    : `img/portraits/port_${key}.png`;
+}
+
 const Vox = (() => {
   let ctx = null;
   let master = null;
@@ -103,8 +119,12 @@ const Vox = (() => {
   let radioSrc = null;
   let radioQueue = [];
   let radioBusy = false;
+  let combatSrc = null;
+  let combatQueue = [];
   let subtitleTimer = 0;
   let preloadPromise = null;
+  let radioCueCb = null;
+  let radioIdleCb = null;
 
   function ensure() {
     if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -122,8 +142,21 @@ const Vox = (() => {
     if (!el) return;
     const who = document.getElementById('radio-who');
     const line = document.getElementById('radio-line');
+    const port = document.getElementById('radio-port');
     if (who) who.textContent = speakerOf(id);
     if (line) line.textContent = LINES[id] || id;
+    const src = portraitFor(id);
+    el.classList.toggle('no-port', !src);
+    el.classList.toggle('close', isCloseCue(id));
+    if (port) {
+      if (src) {
+        port.src = src;
+        port.alt = speakerOf(id);
+      } else {
+        port.removeAttribute('src');
+        port.alt = '';
+      }
+    }
     el.classList.remove('hidden');
     clearTimeout(subtitleTimer);
     const hold = durMs || (id.startsWith('hale_brief') ? 22000 : id.startsWith('rabe_radio') ? 10000 : 3200);
@@ -142,7 +175,7 @@ const Vox = (() => {
     return true;
   }
 
-  function playBuffer(id, { radio = false } = {}) {
+  function playBuffer(id, { radio = false, combat = false } = {}) {
     const buf = buffers.get(id);
     if (!buf) {
       subtitle(id);
@@ -156,9 +189,16 @@ const Vox = (() => {
     subtitle(id, buf.duration * 1000 + 400);
     if (radio) {
       radioSrc = src;
+      if (radioCueCb) radioCueCb(id);
       src.onended = () => {
         if (radioSrc === src) radioSrc = null;
         pumpRadio();
+      };
+    } else if (combat) {
+      combatSrc = src;
+      src.onended = () => {
+        if (combatSrc === src) combatSrc = null;
+        pumpCombat();
       };
     }
     return src;
@@ -169,41 +209,75 @@ const Vox = (() => {
     const next = radioQueue.shift();
     if (!next) {
       radioBusy = false;
+      if (radioIdleCb) radioIdleCb();
+      pumpCombat();
       return;
     }
     radioBusy = true;
     const src = playBuffer(next, { radio: true });
-    if (!src) {
-      setTimeout(pumpRadio, 700);
-    }
+    if (!src) setTimeout(pumpRadio, 700);
+  }
+
+  function pumpCombat() {
+    if (radioBusy || combatSrc) return;
+    const next = combatQueue.shift();
+    if (!next) return;
+    const src = playBuffer(next, { combat: true });
+    if (!src) pumpCombat();
+  }
+
+  function enqueueCombat(id, priority) {
+    if (priority) combatQueue.unshift(id);
+    else if (combatQueue.length < 2) combatQueue.push(id);
+    if (combatQueue.length > 2) combatQueue.length = 2;
   }
 
   const api = {
     lines: LINES,
     speakerOf,
+    portraitFor,
     setFlags(next) {
       flags = { ...flags, ...next };
     },
     flags() {
       return flags;
     },
+    duration(id) {
+      const buf = buffers.get(id);
+      return buf ? buf.duration : 0;
+    },
+    onRadioCue(fn) { radioCueCb = fn; },
+    onRadioIdle(fn) { radioIdleCb = fn; },
     preload() {
       ensure();
       if (preloadPromise) return preloadPromise;
-      preloadPromise = Promise.all(IDS.map(async (id) => {
-        try {
-          const res = await fetch(`./vox/${id}.mp3`);
-          if (!res.ok) return;
-          const raw = await res.arrayBuffer();
-          const buf = await ensure().decodeAudioData(raw.slice(0));
-          buffers.set(id, buf);
-        } catch (_) { /* missing cue stays silent */ }
-      }));
+      const ports = ['cat', 'hale', 'fork', 'rabe', 'sichel', 'geist', 'mond']
+        .flatMap((k) => [`img/portraits/port_${k}.png`, `img/portraits/port_${k}_close.png`]);
+      preloadPromise = Promise.all([
+        ...IDS.map(async (id) => {
+          try {
+            const res = await fetch(`./vox/${id}.mp3`);
+            if (!res.ok) return;
+            const raw = await res.arrayBuffer();
+            const buf = await ensure().decodeAudioData(raw.slice(0));
+            buffers.set(id, buf);
+          } catch (_) { /* missing cue stays silent */ }
+        }),
+        ...ports.map((src) => new Promise((resolve) => {
+          const im = new Image();
+          im.onload = im.onerror = resolve;
+          im.src = src;
+        })),
+      ]);
       return preloadPromise;
     },
-    play(id) {
+    play(id, opts = {}) {
       if (!allowed(id)) return;
-      playBuffer(id, { radio: false });
+      if (combatSrc || radioBusy) {
+        enqueueCombat(id, !!opts.priority);
+        return;
+      }
+      playBuffer(id, { combat: true });
     },
     bark(bank) {
       const ac = ensure();
@@ -225,7 +299,7 @@ const Vox = (() => {
       }
       if (!ids.length) return;
       const id = ids[(Math.random() * ids.length) | 0];
-      barkUntil = ac.currentTime + 1.65;
+      barkUntil = ac.currentTime + 2.2;
       this.play(id);
     },
     radio(ids) {
@@ -239,6 +313,13 @@ const Vox = (() => {
       if (radioSrc) {
         try { radioSrc.stop(); } catch (_) { /* already ended */ }
         radioSrc = null;
+      }
+    },
+    flushCombat() {
+      combatQueue = [];
+      if (combatSrc) {
+        try { combatSrc.stop(); } catch (_) { /* already ended */ }
+        combatSrc = null;
       }
     },
     busy() {
