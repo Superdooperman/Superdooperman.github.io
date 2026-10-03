@@ -125,6 +125,7 @@ const Vox = (() => {
   let preloadPromise = null;
   let radioCueCb = null;
   let radioIdleCb = null;
+  let muted = false;
 
   function ensure() {
     if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -272,6 +273,7 @@ const Vox = (() => {
       return preloadPromise;
     },
     play(id, opts = {}) {
+      if (muted) return;
       if (!allowed(id)) return;
       if (combatSrc || radioBusy) {
         enqueueCombat(id, !!opts.priority);
@@ -303,6 +305,7 @@ const Vox = (() => {
       this.play(id);
     },
     radio(ids) {
+      if (muted) return;
       const list = (Array.isArray(ids) ? ids : [ids]).filter(allowed);
       radioQueue.push(...list);
       pumpRadio();
@@ -321,6 +324,18 @@ const Vox = (() => {
         try { combatSrc.stop(); } catch (_) { /* already ended */ }
         combatSrc = null;
       }
+    },
+    live() {
+      muted = false;
+    },
+    silence() {
+      muted = true;
+      barkUntil = 0;
+      this.stopRadio();
+      this.flushCombat();
+      clearTimeout(subtitleTimer);
+      const el = document.getElementById('radio');
+      if (el) el.classList.add('hidden');
     },
     busy() {
       return radioBusy;
