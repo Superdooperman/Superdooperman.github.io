@@ -215,6 +215,7 @@ export default function createPlay(ctx) {
   }
 
   function openIntermission() {
+    AudioFX.stopStage();
     state.intermission = true;
     state.interHold = 0.45;
     state.awaitingExit = false;
@@ -923,12 +924,17 @@ export default function createPlay(ctx) {
   }
 
   function setPaused(on) {
-    state.paused = !!on;
+    const next = !!on;
+    const toggling = next !== state.paused;
+    state.paused = next;
     const el = document.getElementById('pause');
     if (el) el.classList.toggle('hidden', !state.paused);
     if (state.paused) {
       const bannerEl = document.getElementById('banner');
       if (bannerEl) bannerEl.classList.add('hidden');
+      if (toggling) AudioFX.pauseStage();
+    } else if (toggling && state.running && !state.over) {
+      AudioFX.resumeStage();
     }
   }
 
@@ -1110,6 +1116,7 @@ export default function createPlay(ctx) {
     state.over = { won, score: state.score, stage: state.stage, pending: true };
     syncFlags();
     document.body.classList.remove('playing');
+    AudioFX.stopStage();
     setPaused(false);
     document.getElementById('briefing').classList.add('hidden');
     const end = document.getElementById('end');
@@ -1174,6 +1181,7 @@ export default function createPlay(ctx) {
     if (!scene.children.includes(camera)) scene.add(camera);
     banner(STAGES[state.stage].name, 2000);
     Vox.bark('cat_launch');
+    AudioFX.startStage(state.stage);
     hud();
   }
 
