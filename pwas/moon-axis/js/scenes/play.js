@@ -141,8 +141,8 @@ export default function createPlay(ctx) {
   const tmp4 = new THREE.Vector3();
   const tmp5 = new THREE.Vector3();
   const PLAYER_R = 2.35;
-  const ROLL_IFRAME = 0.32;
-  const ROLL_CD = 1.6;
+  const ROLL_IFRAME = 0.42;
+  const ROLL_CD = 0.85;
   const BOOST_BURST = 1.4;
   const BOOST_CD = 3.5;
   const PEEL_WINDOW = 12;
@@ -843,15 +843,15 @@ export default function createPlay(ctx) {
     // bank out of the lane lets the bolt fly through empty space.
     const dir = cockpitPos(new THREE.Vector3()).sub(origin);
     if (opts.fan) dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), opts.fan);
-    const spread = opts.heavy ? 1.1 : (e.turret || e.boss || e.kind === 'core' ? 1.8 : 2.8);
+    const spread = opts.heavy ? 2.0 : (e.turret || e.boss || e.kind === 'core' ? 3.0 : 4.4);
     dir.x += (Math.random() - 0.5) * spread;
-    dir.y += (Math.random() - 0.5) * spread * 0.72;
+    dir.y += (Math.random() - 0.5) * spread * 0.75;
     dir.normalize();
     const heavy = !!(opts.heavy || e.turret || e.boss || e.kind === 'eisenwurm' || e.kind === 'core');
     const mesh = laserBolt(dir, { heavy });
     mesh.position.copy(origin);
     scene.add(mesh);
-    const speed = opts.slow ? 28 : (e.boss || e.kind === 'core' ? 38 : e.turret ? 34 : 36);
+    const speed = opts.slow ? 22 : (e.boss || e.kind === 'core' ? 30 : e.turret ? 26 : 28);
     state.ebullets.push({
       mesh,
       laser: true,
@@ -868,16 +868,16 @@ export default function createPlay(ctx) {
     e.gunPhase = e.gunPhase || 'quiet';
     if (kind === 'stabzugCar') {
       const slot = e.railIndex ?? 0;
-      const phase = (state.t + slot * 0.7) % 3.0;
-      if (phase < 0.28 && e.shootCd <= 0) {
+      const phase = (state.t + slot * 0.85) % 4.2;
+      if (phase < 0.18 && e.shootCd <= 0) {
         enemyShoot(e);
-        e.shootCd = 0.12;
+        e.shootCd = 0.16;
       }
       return;
     }
     if (e.gunPhase === 'quiet') {
       clearTint(e.mesh);
-      if (e.gunT > (kind === 'eisenwurm' ? 1.35 : 1.1)) {
+      if (e.gunT > (kind === 'eisenwurm' ? 2.05 : 1.75)) {
         e.gunPhase = 'wind';
         e.gunT = 0;
         tintGroup(e.mesh, 0xffee88);
@@ -1421,21 +1421,21 @@ export default function createPlay(ctx) {
     if (input.roll && state.rollT <= 0 && state.rollCd <= 0) {
       state.rollT = ROLL_IFRAME;
       state.rollCd = ROLL_CD;
-      const hop = (Math.abs(input.aimX) > 0.12 ? Math.sign(input.aimX) : (Math.random() < 0.5 ? 1 : -1)) * 6.2;
+      const hop = (Math.abs(input.aimX) > 0.12 ? Math.sign(input.aimX) : (Math.random() < 0.5 ? 1 : -1)) * 8.0;
       state.px = THREE.MathUtils.clamp(state.px + hop, -16, 16);
       AudioFX.roll();
     }
 
-    const steer = boosting ? 52 : 36;
+    const steer = boosting ? 86 : 68;
     state.px = THREE.MathUtils.clamp(state.px + input.aimX * steer * dt, -16, 16);
-    state.py = THREE.MathUtils.clamp(state.py + input.aimY * 28 * dt, -10, 10);
+    state.py = THREE.MathUtils.clamp(state.py + input.aimY * 50 * dt, -10, 10);
     const targetRoll = -input.aimX * 0.45 + (state.rollT > 0 ? Math.sin((1 - state.rollT / ROLL_IFRAME) * Math.PI * 2) * Math.PI * 2 : 0);
-    state.roll += (targetRoll - state.roll) * Math.min(1, dt * 6);
+    state.roll += (targetRoll - state.roll) * Math.min(1, dt * 10);
 
     state.kick = Math.max(0, state.kick - dt * 2.6);
     const sx = (Math.random() - 0.5) * state.shake * 0.55;
     const sy = (Math.random() - 0.5) * state.shake * 0.4;
-    camera.position.set(state.px * 0.24 + sx, state.py * 0.22 + 0.4 + sy, state.kick * 0.45);
+    camera.position.set(state.px * 0.34 + sx, state.py * 0.3 + 0.4 + sy, state.kick * 0.45);
     const lookX = state.px + input.aimX * 18;
     const lookY = state.py + input.aimY * 14;
     camera.lookAt(lookX, lookY, -40);
@@ -1647,19 +1647,19 @@ export default function createPlay(ctx) {
       worldPos(e, tmp);
       const z = tmp.z;
       const patterned = e.boss || e.kind === 'eisenwurm' || e.kind === 'stabzugCar' || (e.kind === 'core' && e.exposed) || (e.kind === 'mondsichel' && (e.boss || e.sichel || e.mode === 'holdwing'));
-      const canShoot = !e.ally && !e.debris && !e.ejecting && e.mode !== 'break' && e.mode !== 'egress' && e.mode !== 'debris' && z > -95 && z < 4;
+      const canShoot = !e.ally && !e.debris && !e.ejecting && e.mode !== 'break' && e.mode !== 'egress' && e.mode !== 'debris' && z > -68 && z < -6;
       if (canShoot) {
         if (patterned) {
           bossVolley(e);
         } else if (e.shootCd <= 0) {
-          if (e.dual) {
+          if (e.dual && Math.random() < 0.55) {
             enemyShoot(e, new THREE.Vector3(0, 3.8, 0));
             enemyShoot(e, new THREE.Vector3(0, -3.8, 0));
           } else {
             enemyShoot(e);
           }
-          const base = e.turret || e.coreOrb ? 0.9 : (e.kind === 'wuerger' || e.kind === 'silbergeist' ? 0.55 : 0.72);
-          e.shootCd = base + Math.random() * 0.22;
+          const base = e.turret || e.coreOrb ? 1.35 : (e.kind === 'wuerger' || e.kind === 'silbergeist' ? 0.95 : 1.2);
+          e.shootCd = base + Math.random() * 0.35;
         }
       }
     }
