@@ -99,11 +99,12 @@ const Input = {
       el.addEventListener('pointercancel', up);
       el.addEventListener('pointerleave', up);
     };
-    hold(document.getElementById('btn-fire'), (v) => { this.fire = v; });
-    hold(document.getElementById('btn-boost'), (v) => { this.boost = v; });
+    hold(document.getElementById('btn-fire'), (v) => { this.fire = v; if (v) Settings.flushRumble(); });
+    hold(document.getElementById('btn-boost'), (v) => { this.boost = v; if (v) Settings.flushRumble(); });
     document.getElementById('btn-roll').addEventListener('pointerdown', (e) => {
       e.preventDefault();
       this._rollTap = true;
+      Settings.flushRumble();
     });
     document.getElementById('btn-pause').addEventListener('pointerdown', (e) => {
       e.preventDefault();
@@ -130,6 +131,7 @@ const Input = {
     this._rollTap = false;
     this._pauseTap = false;
     this.start = false;
+    if (fire || boost || rollEdge) Settings.flushRumble();
     return { aimX, aimY, fire, boost, roll: rollEdge, pause: pauseEdge, start };
   },
 };

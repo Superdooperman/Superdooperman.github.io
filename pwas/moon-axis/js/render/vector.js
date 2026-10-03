@@ -336,6 +336,18 @@ export function foundryCore() {
   return linesFromPaths(paths, mat);
 }
 
+/** Small turret orb that rings the foundry core. */
+export function turretOrb() {
+  const mat = lineMat(COL.magenta, 0.95);
+  const paths = [
+    [[0, 1.1, 0], [0.85, 0, 0.85], [0, -1.1, 0], [-0.85, 0, 0.85], [0, 1.1, 0]],
+    [[0, 1.1, 0], [0.85, 0, -0.85], [0, -1.1, 0], [-0.85, 0, -0.85], [0, 1.1, 0]],
+    [[0.85, 0, 0.85], [0.85, 0, -0.85], [-0.85, 0, -0.85], [-0.85, 0, 0.85], [0.85, 0, 0.85]],
+    ring(0.45, 10, 'y'),
+  ];
+  return linesFromPaths(paths, mat);
+}
+
 /** Escape scatter. */
 export function debrisChunk() {
   const mat = lineMat(COL.amber, 0.7);

@@ -25,6 +25,7 @@
     <canvas id="game"></canvas>
     <div id="crt"></div>
     <div id="vignette"></div>
+    <div id="hurt"></div>
 
     <div id="hud" class="overlay">
       <div id="hud-top">
@@ -100,7 +101,7 @@
       <h2>HI SCORES</h2>
       <p id="scores-best" class="hi">HI 000000</p>
       <div id="scores-table" class="score-wrap"></div>
-      <label class="tag-row">ACE <input id="tag-input-title" maxlength="3" spellcheck="false" autocomplete="off" value="ACE"></label>
+      <div id="ace-reels-title" class="ace-reels" data-mode="title"></div>
       <button id="btn-scores-back" type="button">BACK</button>
     </div>
 
@@ -110,8 +111,9 @@
       <p id="end-body"></p>
       <p id="end-score" class="hi"></p>
       <div id="end-table" class="score-wrap"></div>
-      <label class="tag-row">ACE <input id="tag-input" maxlength="3" spellcheck="false" autocomplete="off" value="ACE"></label>
-      <button id="btn-again" type="button">FLY AGAIN</button>
+      <div id="ace-reels-end" class="ace-reels" data-mode="end"></div>
+      <button id="reel-confirm" type="button" class="hidden">CONFIRM</button>
+      <button id="btn-again" type="button" class="hidden">FLY AGAIN</button>
     </div>
 
     <div id="touch-controls">

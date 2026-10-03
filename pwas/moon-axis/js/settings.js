@@ -6,6 +6,7 @@ const KEYS = {
 const Settings = {
   invertY: localStorage.getItem(KEYS.invertY) === '1',
   haptics: localStorage.getItem(KEYS.haptics) !== '0',
+  _queued: null,
 
   setInvertY(v) {
     this.invertY = !!v;
@@ -20,6 +21,19 @@ const Settings = {
     try {
       if (navigator.vibrate) navigator.vibrate(msOrPattern);
     } catch (_) { /* iOS Safari has no Vibration API */ }
+  },
+  queueRumble(msOrPattern = 16) {
+    this._queued = msOrPattern;
+  },
+  flushRumble() {
+    if (this._queued == null) return;
+    const pat = this._queued;
+    this._queued = null;
+    this.rumble(pat);
+  },
+  hapticLabel() {
+    if (this.isIOS()) return this.haptics ? 'SHAKE  ON' : 'SHAKE  OFF';
+    return this.haptics ? 'HAPTICS  ON' : 'HAPTICS  OFF';
   },
   isStandalone() {
     return window.matchMedia('(display-mode: standalone)').matches
