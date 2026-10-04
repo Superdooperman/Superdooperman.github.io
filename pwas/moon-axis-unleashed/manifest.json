@@ -1,0 +1,24 @@
+{
+  "name": "Moon Axis Unleashed",
+  "short_name": "Axis Unleashed",
+  "description": "Cinematic chase-rail remake. Fly the F6F-V Voidcat. Do not let them finish the rod.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0c101c",
+  "theme_color": "#c45c26",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
