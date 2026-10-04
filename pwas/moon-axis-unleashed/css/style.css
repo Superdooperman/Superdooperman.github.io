@@ -732,3 +732,39 @@ body.touch.playing #banner {
 @media (orientation: landscape) {
   #rotate-hint { display: none !important; }
 }
+
+#cheat-flash {
+  position: absolute;
+  z-index: 19;
+  top: 14%;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  letter-spacing: 0.42em;
+  font-size: clamp(20px, 5vw, 36px);
+  color: #f6e6cc;
+  text-shadow: 0 0 16px #c45c26, 0 0 42px rgba(196, 92, 38, 0.55);
+}
+#cheats {
+  z-index: 18;
+  gap: 8px;
+  overflow: auto;
+  background: radial-gradient(ellipse at center, rgba(16, 8, 4, 0.92) 0%, rgba(0, 0, 0, 0.86) 70%);
+}
+#cheats h2 { text-shadow: 0 0 12px #c45c26; }
+#cheats button {
+  min-width: min(440px, 92vw);
+  font-size: 12px;
+  padding: 8px 14px;
+}
+#cheats button.sel {
+  border-color: #c45c26;
+  color: #f6e6cc;
+  box-shadow: 0 0 14px rgba(196, 92, 38, 0.55);
+}
+#cheats button.on {
+  background: #c45c26;
+  color: #0c101c;
+  text-shadow: none;
+}
+#cheats .hint { max-width: 480px; margin-top: 0; }
