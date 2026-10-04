@@ -210,6 +210,12 @@ function show(id, on) {
   document.getElementById(id).classList.toggle('hidden', !on);
 }
 
+function setScoring(on) {
+  document.body.classList.toggle('scoring', !!on);
+  const fire = document.getElementById('btn-fire');
+  if (fire) fire.textContent = on ? 'SET' : 'FIRE';
+}
+
 function enterTitle(opts = {}) {
   mode = 'title';
   titleT = 0;
@@ -218,6 +224,7 @@ function enterTitle(opts = {}) {
   hideStills();
   clearScene();
   document.body.classList.remove('playing');
+  setScoring(false);
   Vox.live();
   Vox.stopRadio();
   Vox.flushCombat();
@@ -340,30 +347,59 @@ function neighbor(i, d) {
 }
 
 function paintReelMount(el, st) {
-  if (!el) return;
+  if (!el || !st) return;
   el.classList.toggle('is-done', !!st.done);
-  const cells = st.idx.map((n, i) => {
-    const cls = [
-      'reel',
-      i === st.slot && !st.done ? 'active' : '',
-      st.locked[i] ? 'locked' : '',
-    ].filter(Boolean).join(' ');
-    const up = st.done ? '&nbsp;' : neighbor(n, -1);
-    const dn = st.done ? '&nbsp;' : neighbor(n, 1);
-    return `<button type="button" class="${cls}" data-slot="${i}" ${st.done ? 'disabled' : ''}>
-      <span class="up">${up}</span>
-      <span class="ch">${ALPHA[n]}</span>
-      <span class="dn">${dn}</span>
-    </button>`;
-  }).join('');
-  const nav = st.done
-    ? '<p class="hint">INITIALS LOCKED</p>'
-    : `<div class="reel-nav">
-      <button type="button" data-act="back">◀ BACK</button>
-      <button type="button" data-act="lock">SET LETTER</button>
-    </div>
-    <p class="hint">W/S ▲▼ LETTER · A/D ◀▶ WHEEL · FIRE SETS</p>`;
-  el.innerHTML = `<p class="reel-kicker">${st.done ? 'ACE LOCKED' : 'ACE'}</p><div class="reel-row">${cells}</div>${nav}`;
+  if (!el.querySelector('.reel-row')) {
+    el.innerHTML = `<p class="reel-kicker"></p>
+      <div class="reel-row">${[0, 1, 2].map((i) => `<div class="reel" data-slot="${i}">
+        <button type="button" class="up" data-spin="-1" tabindex="-1"></button>
+        <span class="ch"></span>
+        <button type="button" class="dn" data-spin="1" tabindex="-1"></button>
+      </div>`).join('')}</div>
+      <div class="reel-nav">
+        <button type="button" data-act="back">◀ BACK</button>
+        <button type="button" data-act="lock">SET LETTER</button>
+      </div>
+      <p class="hint reel-hint"></p>`;
+  }
+  const touch = document.body.classList.contains('touch');
+  el.querySelector('.reel-kicker').textContent = st.done ? 'ACE LOCKED' : 'ACE';
+  const hint = el.querySelector('.reel-hint');
+  if (hint) {
+    hint.textContent = st.done
+      ? 'INITIALS LOCKED'
+      : (touch
+        ? 'TAP ▲▼ OR SWIPE · STICK ALSO WORKS · FIRE SETS'
+        : 'W/S ▲▼ LETTER · A/D ◀▶ WHEEL · FIRE SETS');
+  }
+  const nav = el.querySelector('.reel-nav');
+  if (nav) nav.classList.toggle('hidden', !!st.done);
+  st.idx.forEach((n, i) => {
+    const reel = el.querySelector(`.reel[data-slot="${i}"]`);
+    if (!reel) return;
+    reel.classList.toggle('active', i === st.slot && !st.done);
+    reel.classList.toggle('locked', !!st.locked[i]);
+    const ch = reel.querySelector('.ch');
+    const up = reel.querySelector('.up');
+    const dn = reel.querySelector('.dn');
+    if (ch) ch.textContent = ALPHA[n];
+    if (up) {
+      up.textContent = st.done ? '' : neighbor(n, -1);
+      up.disabled = !!st.done || !!st.locked[i];
+    }
+    if (dn) {
+      dn.textContent = st.done ? '' : neighbor(n, 1);
+      dn.disabled = !!st.done || !!st.locked[i];
+    }
+  });
+}
+
+function selectReelSlot(st, i) {
+  if (!st || st.done) return;
+  if (i <= st.slot || st.locked[i] === false) {
+    for (let k = i; k < 3; k++) st.locked[k] = false;
+    st.slot = i;
+  }
 }
 
 function reelTag(st) {
@@ -402,29 +438,86 @@ function shiftReelSlot(st, dir) {
 }
 
 function bindReelMount(el, getSt, onPaint, onComplete) {
-  el.addEventListener('click', (e) => {
-    const st = getSt();
-    if (!st || st.done) return;
-    const slotBtn = e.target.closest('[data-slot]');
-    const act = e.target.closest('[data-act]');
-    if (slotBtn) {
-      const i = Number(slotBtn.getAttribute('data-slot'));
-      if (i <= st.slot || st.locked[i] === false) {
-        for (let k = i; k < 3; k++) st.locked[k] = false;
-        st.slot = i;
-      }
-      if (e.target.classList.contains('up')) cycleReel(st, -1);
-      if (e.target.classList.contains('dn')) cycleReel(st, 1);
-      onPaint();
-      return;
-    }
-    if (!act) return;
-    const a = act.getAttribute('data-act');
+  const drag = { on: false, y: 0, acc: 0, id: null };
+  let actLock = 0;
+
+  function runAct(st, a) {
+    if (Date.now() < actLock) return;
+    actLock = Date.now() + 350;
     if (a === 'back') backReel(st);
     if (a === 'lock') {
       if (lockReel(st) && onComplete) onComplete(st);
     }
     onPaint();
+  }
+
+  el.addEventListener('pointerdown', (e) => {
+    const st = getSt();
+    if (!st || st.done) return;
+    const act = e.target.closest('[data-act]');
+    if (act) {
+      e.preventDefault();
+      runAct(st, act.getAttribute('data-act'));
+      return;
+    }
+    const slotEl = e.target.closest('[data-slot]');
+    if (!slotEl) return;
+    const i = Number(slotEl.getAttribute('data-slot'));
+    selectReelSlot(st, i);
+    const spin = e.target.closest('[data-spin]');
+    if (spin) {
+      e.preventDefault();
+      cycleReel(st, Number(spin.getAttribute('data-spin')));
+      onPaint();
+      return;
+    }
+    drag.on = true;
+    drag.y = e.clientY;
+    drag.acc = 0;
+    drag.id = e.pointerId;
+    onPaint();
+    try { el.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ }
+  });
+
+  el.addEventListener('pointermove', (e) => {
+    if (!drag.on || e.pointerId !== drag.id) return;
+    const st = getSt();
+    if (!st || st.done) return;
+    e.preventDefault();
+    const dy = e.clientY - drag.y;
+    drag.y = e.clientY;
+    drag.acc += dy;
+    const step = 24;
+    let spun = false;
+    while (drag.acc <= -step) {
+      cycleReel(st, -1);
+      drag.acc += step;
+      spun = true;
+    }
+    while (drag.acc >= step) {
+      cycleReel(st, 1);
+      drag.acc -= step;
+      spun = true;
+    }
+    if (spun) onPaint();
+  });
+
+  const endDrag = (e) => {
+    if (drag.on && (e.pointerId == null || e.pointerId === drag.id)) {
+      drag.on = false;
+      drag.id = null;
+    }
+  };
+  el.addEventListener('pointerup', endDrag);
+  el.addEventListener('pointercancel', endDrag);
+
+  el.addEventListener('click', (e) => {
+    const st = getSt();
+    if (!st || st.done) return;
+    const act = e.target.closest('[data-act]');
+    if (!act) return;
+    e.preventDefault();
+    runAct(st, act.getAttribute('data-act'));
   });
 }
 
@@ -456,6 +549,7 @@ function confirmEndReels() {
   Scores.render(document.getElementById('end-table'), posted.row.t);
   paintHi();
   paintEndReels();
+  setScoring(false);
   holdoff = 6;
 }
 
@@ -469,6 +563,10 @@ bindReelMount(document.getElementById('ace-reels-title'), () => titleReel, () =>
   Scores.setTag(reelTag(titleReel));
 });
 document.getElementById('reel-confirm').addEventListener('click', (e) => {
+  e.preventDefault();
+  confirmEndReels();
+});
+document.getElementById('reel-confirm').addEventListener('pointerdown', (e) => {
   e.preventDefault();
   confirmEndReels();
 });
@@ -690,10 +788,12 @@ function frame() {
         holdoff = 0.35;
         endReel = makeReelState(Scores.tag());
         reelsEl.classList.remove('hidden');
+        setScoring(true);
         paintEndReels();
       } else {
         holdoff = 6;
         endReel = null;
+        setScoring(false);
         reelsEl.classList.add('hidden');
         reelsEl.innerHTML = '';
         Scores.render(document.getElementById('end-table'));

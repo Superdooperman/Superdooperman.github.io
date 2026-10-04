@@ -174,6 +174,20 @@ body.playing #title { display: none; }
 #hud-top { top: max(8px, env(safe-area-inset-top)); padding-right: 120px; }
 #hud-bottom { bottom: max(8px, env(safe-area-inset-bottom)); }
 
+body.touch.playing #hud-top {
+  top: max(6px, env(safe-area-inset-top));
+  padding: 4px 16px;
+  padding-right: 120px;
+  font-size: 11px;
+}
+body.touch.playing #hud-bottom {
+  bottom: auto;
+  top: max(26px, calc(env(safe-area-inset-top) + 20px));
+  padding: 0 16px 4px;
+  padding-right: 120px;
+  font-size: 11px;
+}
+
 #reticle {
   position: absolute;
   left: 50%;
@@ -532,6 +546,7 @@ body.standalone #btn-fs { display: none; }
   align-items: center;
   gap: 10px;
   margin: 10px 0;
+  touch-action: none;
 }
 .ace-reels .reel-kicker {
   letter-spacing: 0.28em;
@@ -543,18 +558,21 @@ body.standalone #btn-fs { display: none; }
   gap: 10px;
 }
 .reel {
-  width: 64px;
-  min-height: 92px;
+  width: 72px;
+  min-height: 118px;
   background: rgba(0, 20, 28, 0.75);
   border: 1px solid rgba(127, 233, 255, 0.35);
   color: #7fe9ff;
   font: inherit;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   cursor: pointer;
-  padding: 6px 0;
+  padding: 0;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 .reel.active {
   border-color: #c9a227;
@@ -562,15 +580,34 @@ body.standalone #btn-fs { display: none; }
 }
 .reel.locked { opacity: 0.7; }
 .reel .up, .reel .dn {
-  font-size: 11px;
+  pointer-events: auto;
+  width: 100%;
+  min-height: 36px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  font: inherit;
+  font-size: 16px;
   color: #9ad;
   letter-spacing: 0;
   line-height: 1;
+  text-shadow: none;
+  cursor: pointer;
+}
+.reel .up:active, .reel .dn:active {
+  background: rgba(127, 233, 255, 0.18);
+  color: #fff;
 }
 .reel .ch {
   font-size: 28px;
   letter-spacing: 0.08em;
   line-height: 1.2;
+  pointer-events: none;
+  padding: 4px 0;
+  text-align: center;
 }
 .reel-nav {
   display: flex;
@@ -619,16 +656,75 @@ body.standalone #btn-fs { display: none; }
 
 body.touch .desktop-only { display: none; }
 body.touch .mobile-only { display: block; }
-body.touch.playing #touch-controls { display: block; }
+body.touch.playing #touch-controls,
+body.touch.scoring #touch-controls { display: block; }
+body:not(.playing):not(.scoring) #touch-controls { display: none; }
+body.touch.scoring #btn-boost,
+body.touch.scoring #btn-roll { visibility: hidden; }
+
+/* Combat/brief radio sits in the bottom eighth, scaled to that band. */
+body.touch #radio {
+  left: 50%;
+  right: auto;
+  bottom: max(4px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(52vw, 420px);
+  max-height: 12.5vh;
+  padding: 3px 8px;
+  gap: 8px;
+  align-items: center;
+  background: rgba(0, 8, 12, 0.84);
+}
 body.touch.playing #radio {
-  bottom: max(148px, calc(env(safe-area-inset-bottom) + 132px));
+  width: min(46vw, 360px);
 }
 body.touch #radio-port {
-  width: 84px;
-  height: 84px;
-  flex-basis: 84px;
+  width: 10.5vh;
+  height: 10.5vh;
+  flex: 0 0 10.5vh;
+  max-width: 48px;
+  max-height: 48px;
 }
-body:not(.playing) #touch-controls { display: none; }
+body.touch #radio-who {
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  margin-bottom: 0;
+}
+body.touch #radio-line {
+  font-size: clamp(10px, 2.5vh, 13px);
+  line-height: 1.15;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+body.touch #briefing {
+  padding-bottom: calc(12.5vh + 20px);
+}
+body.touch.playing #banner {
+  align-items: flex-start;
+  padding-top: max(58px, calc(env(safe-area-inset-top) + 50px));
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent 60%);
+  font-size: clamp(14px, 3.2vh, 22px);
+}
+
+@media (orientation: landscape) and (max-height: 480px) {
+  body.touch #end {
+    padding: 8px 12px;
+    gap: 4px;
+    justify-content: flex-start;
+  }
+  body.touch #end h2 { font-size: clamp(16px, 4.6vh, 28px); }
+  body.touch #end-body { display: none; }
+  body.touch .score-table { font-size: 10px; }
+  body.touch .reel {
+    width: 56px;
+    min-height: 96px;
+  }
+  body.touch .reel .ch { font-size: 22px; }
+  body.touch .reel .up,
+  body.touch .reel .dn { min-height: 28px; font-size: 14px; }
+}
 
 @media (orientation: portrait) and (max-width: 900px) {
   body.touch #rotate-hint { display: flex; }
