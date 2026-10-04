@@ -1,4 +1,4 @@
-const CACHE = 'moon-axis-v13';
+const CACHE = 'moon-axis-v14';
 const ASSETS = [
   './',
   './index.html',
@@ -17,6 +17,15 @@ const ASSETS = [
   './js/scenes/play.js',
   './music/sortie1-cislunar.mp3',
   './music/sortie2-schrodinger.mp3',
+  './music/sortie3-trench.mp3',
+  './music/sortie3-boss.mp3',
+  './music/sortie3-eject.mp3',
+  './music/sortie3-sichel-down.mp3',
+  './music/sortie3-sichel-gone.mp3',
+  './music/sortie4-fork.mp3',
+  './music/sortie4-rescue.mp3',
+  './music/sortie4-fork-live.mp3',
+  './music/sortie4-fork-dead.mp3',
   'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
 ];
 
