@@ -2,8 +2,20 @@ import Settings from './settings.js';
 import Vox from './vox.js';
 
 const STAGE_TRACKS = {
-  0: './music/sortie1-cislunar.mp3',
-  1: './music/sortie2-schrodinger.mp3',
+  0: { src: './music/sortie1-cislunar.mp3', loop: true },
+  1: { src: './music/sortie2-schrodinger.mp3', loop: true },
+  2: { src: './music/sortie3-trench.mp3', loop: true },
+  3: { src: './music/sortie4-fork.mp3', loop: true },
+};
+
+const CUES = {
+  'sichel-boss': { src: './music/sortie3-boss.mp3', loop: true, fade: 0.55, vol: 0.4 },
+  'sichel-eject': { src: './music/sortie3-eject.mp3', loop: true, fade: 0.2, vol: 0.4 },
+  'sichel-down': { src: './music/sortie3-sichel-down.mp3', loop: false, vol: 0.42 },
+  'sichel-gone': { src: './music/sortie3-sichel-gone.mp3', loop: false, vol: 0.4 },
+  'fork-rescue': { src: './music/sortie4-rescue.mp3', loop: false, vol: 0.4 },
+  'fork-live': { src: './music/sortie4-fork-live.mp3', loop: true, fade: 0.35, vol: 0.4 },
+  'fork-dead': { src: './music/sortie4-fork-dead.mp3', loop: true, vol: 0.36 },
 };
 
 const AudioFX = (() => {
@@ -11,6 +23,59 @@ const AudioFX = (() => {
   let music = null;
   let stageEl = null;
   let stageUrl = null;
+  let fadeTimer = 0;
+  let targetVol = 0.38;
+
+  function playSpec(spec) {
+    if (music) {
+      clearInterval(music);
+      music = null;
+    }
+    ensure();
+    const url = spec.src;
+    const loop = spec.loop !== false;
+    const vol = spec.vol == null ? 0.38 : spec.vol;
+    const fade = spec.fade || 0;
+    targetVol = vol;
+    if (!stageEl) {
+      stageEl = new Audio();
+      stageEl.preload = 'auto';
+    }
+    if (fadeTimer) {
+      clearInterval(fadeTimer);
+      fadeTimer = 0;
+    }
+    if (stageUrl !== url) {
+      stageEl.pause();
+      stageEl.src = url;
+      stageUrl = url;
+    }
+    stageEl.loop = loop;
+    try { stageEl.currentTime = 0; } catch (_) { /* iOS may throw until playing */ }
+    if (fade > 0) {
+      stageEl.volume = 0.02;
+      const steps = 10;
+      let i = 0;
+      fadeTimer = setInterval(() => {
+        i += 1;
+        if (!stageEl) {
+          clearInterval(fadeTimer);
+          fadeTimer = 0;
+          return;
+        }
+        stageEl.volume = Math.min(targetVol, 0.02 + (i / steps) * targetVol);
+        if (i >= steps) {
+          clearInterval(fadeTimer);
+          fadeTimer = 0;
+          stageEl.volume = targetVol;
+        }
+      }, (fade * 1000) / steps);
+    } else {
+      stageEl.volume = vol;
+    }
+    const play = stageEl.play();
+    if (play && play.catch) play.catch(() => {});
+  }
 
   function ensure() {
     if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -182,29 +247,23 @@ const AudioFX = (() => {
       music = null;
     },
     startStage(index) {
-      this.stopMusic();
-      const url = STAGE_TRACKS[index];
-      if (!url) {
+      const spec = STAGE_TRACKS[index];
+      if (!spec) {
         this.stopStage();
         return;
       }
-      ensure();
-      if (!stageEl) {
-        stageEl = new Audio();
-        stageEl.loop = true;
-        stageEl.preload = 'auto';
-        stageEl.volume = 0.38;
-      }
-      if (stageUrl !== url) {
-        stageEl.pause();
-        stageEl.src = url;
-        stageUrl = url;
-      }
-      try { stageEl.currentTime = 0; } catch (_) { /* iOS may throw until playing */ }
-      const play = stageEl.play();
-      if (play && play.catch) play.catch(() => {});
+      playSpec(spec);
+    },
+    playCue(name) {
+      const spec = CUES[name];
+      if (!spec) return;
+      playSpec(spec);
     },
     stopStage() {
+      if (fadeTimer) {
+        clearInterval(fadeTimer);
+        fadeTimer = 0;
+      }
       if (!stageEl) return;
       stageEl.pause();
       try { stageEl.currentTime = 0; } catch (_) { /* ignore */ }

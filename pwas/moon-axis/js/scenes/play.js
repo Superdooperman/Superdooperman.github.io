@@ -216,7 +216,8 @@ export default function createPlay(ctx) {
   }
 
   function openIntermission() {
-    AudioFX.stopStage();
+    if (state.forkDead && state.stage === 4) AudioFX.playCue('fork-dead');
+    else AudioFX.stopStage();
     state.intermission = true;
     state.interHold = 0.45;
     state.awaitingExit = false;
@@ -532,6 +533,7 @@ export default function createPlay(ctx) {
         spawnEnemy('mondsichel', 0, 1, -70, {
           boss: true, vz: 8, hp: 42, r: 3.6, scale: 1.35, score: 5000, talkArmor: true,
         });
+        AudioFX.playCue('sichel-boss');
         Vox.play('cat_boss_01');
         Vox.play('sichel_02');
         lockGunsFor(Math.max(voLen('cat_boss_01'), voLen('sichel_02')) + 0.5);
@@ -575,6 +577,7 @@ export default function createPlay(ctx) {
         }
       }
       if (beat('peel', 22)) {
+        AudioFX.playCue('fork-rescue');
         Vox.play('fork_03');
         banner('PEEL THEM OFF HER', 2200);
         const p1 = spawnEnemy('wuerger', -7, 1, -70, { vz: 18, peel: true, hp: 4, passes: 2, r: 1.7 });
@@ -957,6 +960,7 @@ export default function createPlay(ctx) {
     Vox.play('fork_05', { priority: true });
     setTimeout(() => { if (state.running) Vox.play('hale_bark_03'); }, 900);
     banner('STARFORK DOWN', 2000);
+    AudioFX.playCue('fork-dead');
     if (e && !e.dead) {
       const burst = shatterBurst(COL.ally);
       worldPos(e, tmp);
@@ -987,6 +991,7 @@ export default function createPlay(ctx) {
       state.sichelEjecting = false;
       syncFlags();
       state.bossKilled = true;
+      AudioFX.playCue('sichel-down');
     } else if (e.boss && e.kind === 'mondsichel' && state.stage === 2) {
       state.boss = null;
       startSichelEject(tmp);
@@ -1055,6 +1060,7 @@ export default function createPlay(ctx) {
       ej.mesh.position.copy(pos);
     }
     banner('SICHEL EJECTING', 1600);
+    AudioFX.playCue('sichel-eject');
     Vox.play('sichel_01');
   }
 
@@ -1069,6 +1075,7 @@ export default function createPlay(ctx) {
       dropEnemyMesh(ej);
       ej.dead = true;
       state.bossKilled = true;
+      AudioFX.playCue('sichel-gone');
       Vox.play('sichel_03');
     }
   }
@@ -1494,6 +1501,7 @@ export default function createPlay(ctx) {
         fork.vz = 10;
         state.peelUntil = 0;
         releaseHogs();
+        AudioFX.playCue('fork-live');
       } else if (state.stageT > state.peelUntil && peelAlive && fork) {
         killFork(fork);
         state.peelUntil = 0;
