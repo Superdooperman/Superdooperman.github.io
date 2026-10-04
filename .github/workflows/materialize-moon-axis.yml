@@ -1,0 +1,32 @@
+name: Materialize Moon Axis assets
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode staged assets
+        run: |
+          python3 - <<'PY'
+          import base64, gzip
+          from pathlib import Path
+          play = Path('pwas/moon-axis-unleashed/js/scenes/play.js')
+          staged = Path('pwas/moon-axis-unleashed/js/scenes/play.js.gz.b64')
+          if not play.exists():
+              play.write_bytes(gzip.decompress(base64.b64decode(staged.read_bytes())))
+          for name in ('icon-192.png', 'icon-512.png'):
+              p = Path('pwas/moon-axis-unleashed/icons') / name
+              b = p.read_bytes()
+              if not b.startswith(b'\x89PNG\r\n\x1a\n'):
+                  p.write_bytes(base64.b64decode(b))
+          PY
+      - name: Commit materialized assets
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add pwas/moon-axis-unleashed/js/scenes/play.js pwas/moon-axis-unleashed/icons
+          git diff --cached --quiet || (git commit -m 'Add Moon Axis Unleashed assets' && git push)
