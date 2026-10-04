@@ -308,18 +308,131 @@ export function updateLaser(group, dist) {
   if (group.userData.face) group.userData.face.material.opacity = 0.35 + t * 0.65;
 }
 
-/** Twin rails + ties. Local y = 0 is the bed. */
+// Period 48 so the tiled rail wrap (env.z += 48 → 0) stays phase-continuous.
+const SNAKE_PERIOD = 48;
+const SNAKE_K1 = (Math.PI * 2) / SNAKE_PERIOD;
+const SNAKE_K2 = (Math.PI * 4) / SNAKE_PERIOD;
+const SNAKE_W1 = 0.72;
+const SNAKE_W2 = 0.33;
+const SNAKE_A1 = 5.8;
+const SNAKE_A2 = 1.6;
+
+/** World-X of the Stabzug snake at depth z, time t. */
+export function snakeX(z, t) {
+  return Math.sin(z * SNAKE_K1 + t * SNAKE_W1) * SNAKE_A1
+    + Math.sin(z * SNAKE_K2 - t * SNAKE_W2) * SNAKE_A2;
+}
+
+/** dX/dZ of the snake — yaw/bank the consist along the tangent. */
+export function snakeDX(z, t) {
+  return Math.cos(z * SNAKE_K1 + t * SNAKE_W1) * SNAKE_A1 * SNAKE_K1
+    + Math.cos(z * SNAKE_K2 - t * SNAKE_W2) * SNAKE_A2 * SNAKE_K2;
+}
+
+function makeRailLine(n, mat) {
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3));
+  const line = new THREE.Line(geo, mat);
+  line.frustumCulled = false;
+  return line;
+}
+
+/** Twin rails + ties, sampled as a slithering sine (updated each frame). */
 export function railTrack() {
   const mat = lineMat(COL.amber, 0.55);
-  const paths = [
-    [[-3.2, 0, -24], [-3.2, 0, 24]],
-    [[3.2, 0, -24], [3.2, 0, 24]],
-  ];
-  for (let z = -24; z <= 24; z += 4) {
-    paths.push([[-3.2, 0, z], [3.2, 0, z]]);
-    paths.push([[-3.6, -0.4, z], [-3.2, 0, z], [3.2, 0, z], [3.6, -0.4, z]]);
+  const step = 1.2;
+  const z0 = -24;
+  const z1 = 24;
+  const n = Math.floor((z1 - z0) / step) + 1;
+  const group = new THREE.Group();
+  const left = makeRailLine(n, mat);
+  const right = makeRailLine(n, mat);
+  group.add(left, right);
+  const ties = [];
+  for (let i = 0; i < n; i += 2) {
+    const tie = makeRailLine(4, mat);
+    group.add(tie);
+    ties.push(tie);
   }
-  return linesFromPaths(paths, mat);
+  group.userData.rail = { n, step, z0, gauge: 3.2, left, right, ties };
+  return group;
+}
+
+export function updateRailTrack(group, t, envZ) {
+  const d = group.userData.rail;
+  if (!d) return;
+  const { n, step, z0, gauge, left, right, ties } = d;
+  const lp = left.geometry.attributes.position.array;
+  const rp = right.geometry.attributes.position.array;
+  const baseZ = envZ + group.position.z;
+  for (let i = 0; i < n; i++) {
+    const lz = z0 + i * step;
+    const wz = baseZ + lz;
+    const x = snakeX(wz, t);
+    const dx = snakeDX(wz, t);
+    const len = Math.hypot(dx, 1) || 1;
+    const nx = -1 / len;
+    const nz = dx / len;
+    const i3 = i * 3;
+    lp[i3] = x + nx * gauge;
+    lp[i3 + 1] = 0;
+    lp[i3 + 2] = lz + nz * gauge;
+    rp[i3] = x - nx * gauge;
+    rp[i3 + 1] = 0;
+    rp[i3 + 2] = lz - nz * gauge;
+  }
+  left.geometry.attributes.position.needsUpdate = true;
+  right.geometry.attributes.position.needsUpdate = true;
+  left.geometry.computeBoundingSphere();
+  right.geometry.computeBoundingSphere();
+  for (let k = 0; k < ties.length; k++) {
+    const i = Math.min(n - 1, k * 2);
+    const arr = ties[k].geometry.attributes.position.array;
+    const lx = lp[i * 3];
+    const lz = lp[i * 3 + 2];
+    const rx = rp[i * 3];
+    const rz = rp[i * 3 + 2];
+    const dx = rx - lx;
+    const dz = rz - lz;
+    arr[0] = lx - dx * 0.08;
+    arr[1] = -0.4;
+    arr[2] = lz - dz * 0.08;
+    arr[3] = lx;
+    arr[4] = 0;
+    arr[5] = lz;
+    arr[6] = rx;
+    arr[7] = 0;
+    arr[8] = rz;
+    arr[9] = rx + dx * 0.08;
+    arr[10] = -0.4;
+    arr[11] = rz + dz * 0.08;
+    ties[k].geometry.attributes.position.needsUpdate = true;
+  }
+}
+
+export function trainSpine(count) {
+  const mat = lineMat(COL.magenta, 0.7);
+  const line = makeRailLine(Math.max(2, count), mat);
+  line.userData.spineN = Math.max(2, count);
+  return line;
+}
+
+export function updateTrainSpine(line, points) {
+  if (!line || !points.length) {
+    if (line) line.visible = false;
+    return;
+  }
+  line.visible = true;
+  const n = line.userData.spineN || points.length;
+  const arr = line.geometry.attributes.position.array;
+  for (let i = 0; i < n; i++) {
+    const p = points[Math.min(i, points.length - 1)];
+    arr[i * 3] = p.x;
+    arr[i * 3 + 1] = p.y;
+    arr[i * 3 + 2] = p.z;
+  }
+  line.geometry.attributes.position.needsUpdate = true;
+  line.geometry.computeBoundingSphere();
 }
 
 /** Interior ribs of the Staff. Amber foundry light. */

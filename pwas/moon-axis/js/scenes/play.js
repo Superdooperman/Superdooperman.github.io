@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { COL, lineMat, starfield, shatterBurst, updateShatter, moonWire, trenchFrame, flakTower, diamondPylon, craterFloor, tracerBolt, tracerTrail, updateTrail, laserBolt, updateLaser, railTrack, staffRibs, foundryCore, debrisChunk, fallingPanel, turretOrb } from '../render/vector.js';
+import { COL, lineMat, starfield, shatterBurst, updateShatter, moonWire, trenchFrame, flakTower, diamondPylon, craterFloor, tracerBolt, tracerTrail, updateTrail, laserBolt, updateLaser, railTrack, updateRailTrack, snakeX, snakeDX, trainSpine, updateTrainSpine, staffRibs, foundryCore, debrisChunk, fallingPanel, turretOrb } from '../render/vector.js';
 import { BUILDERS } from '../ships/catalog.js';
 import AudioFX from '../audio.js';
 import Vox from '../vox.js';
@@ -133,6 +133,7 @@ export default function createPlay(ctx) {
     gunLock: 0,
     cinematic: false,
     cineT: 0,
+    trainSpine: null,
   };
 
   const tmp = new THREE.Vector3();
@@ -269,6 +270,7 @@ export default function createPlay(ctx) {
         const t = railTrack();
         t.position.set(0, -8, -i * 48);
         state.env.add(t);
+        updateRailTrack(t, state.t, state.env.position.z);
       }
     }
     if (kind === 'staff' || kind === 'escape') {
@@ -605,8 +607,8 @@ export default function createPlay(ctx) {
           spawnEnemy('stabzugCar', 0, -7.2, -70 - i * 10, {
             turret: true,
             mode: 'rail',
-            holdZ: -36 - i * 7,
-            lane: (i % 2 === 0 ? -1.2 : 1.2),
+            holdZ: -34 - i * 8,
+            lane: 0,
             hp: 6,
             r: 2.1,
             score: 350,
@@ -617,7 +619,7 @@ export default function createPlay(ctx) {
         spawnEnemy('eisenwurm', 0, -6.6, -130, {
           boss: true,
           mode: 'rail',
-          holdZ: -50,
+          holdZ: -78,
           lane: 0,
           hp: 42,
           r: 3.0,
@@ -626,6 +628,9 @@ export default function createPlay(ctx) {
           exposed: false,
           talkArmor: true,
         });
+        dropTrainSpine();
+        state.trainSpine = trainSpine(28);
+        scene.add(state.trainSpine);
         for (let i = 0; i < 4; i++) {
           spawnEnemy('orb', 0, 0, -80, {
             trainOrb: true,
@@ -1151,10 +1156,17 @@ export default function createPlay(ctx) {
     }
   }
 
+  function dropTrainSpine() {
+    if (!state.trainSpine) return;
+    scene.remove(state.trainSpine);
+    state.trainSpine = null;
+  }
+
   function clearCombat() {
     for (const e of state.enemies) dropEnemyMesh(e);
     for (const b of state.bullets) dropBolt(b);
     for (const b of state.ebullets) dropBolt(b);
+    dropTrainSpine();
     state.enemies = [];
     state.bullets = [];
     state.ebullets = [];
@@ -1335,6 +1347,7 @@ export default function createPlay(ctx) {
     for (const b of state.bullets) dropBolt(b);
     for (const b of state.ebullets) dropBolt(b);
     for (const f of state.fx) scene.remove(f);
+    dropTrainSpine();
     Object.assign(state, {
       running: true,
       paused: false,
@@ -1475,10 +1488,7 @@ export default function createPlay(ctx) {
       state.env.position.z += speed * dt;
       if (state.env.position.z > 48) state.env.position.z = 0;
       if (bg === 'rail') {
-        state.env.children.forEach((c, i) => {
-          c.position.x = Math.sin(state.t * 0.62 + i * 0.45) * 8.4;
-          c.rotation.y = Math.cos(state.t * 0.62 + i * 0.45) * 0.22;
-        });
+        for (const c of state.env.children) updateRailTrack(c, state.t, state.env.position.z);
       }
     } else if (bg === 'escape') {
       state.env.position.z += speed * dt * 1.85;
@@ -1531,11 +1541,13 @@ export default function createPlay(ctx) {
       e.phase += dt;
       if (e.mode === 'rail') {
         const hold = e.holdZ ?? -48;
-        const wind = Math.sin(state.t * 0.62) * 9.0;
         e.mesh.position.z += (hold - e.mesh.position.z) * Math.min(1, dt * 1.5);
-        e.mesh.position.x = (e.lane ?? 0) + wind;
-        e.mesh.rotation.y += dt * 0.12;
-        e.mesh.rotation.z = -Math.cos(state.t * 0.62) * 0.2;
+        const z = e.mesh.position.z;
+        const dx = snakeDX(z, state.t);
+        e.mesh.position.x = snakeX(z, state.t) + (e.lane ?? 0);
+        e.mesh.rotation.y = Math.atan2(dx, 1);
+        e.mesh.rotation.z = THREE.MathUtils.clamp(-dx * 3.2, -0.5, 0.5);
+        e.mesh.rotation.x = 0;
       } else if (e.mode === 'holdwing') {
         const hold = e.holdZ ?? -50;
         e.mesh.position.z += (hold - e.mesh.position.z) * Math.min(1, dt * 0.55);
@@ -1682,6 +1694,28 @@ export default function createPlay(ctx) {
           const base = e.turret || e.coreOrb ? 1.35 : (e.kind === 'wuerger' || e.kind === 'silbergeist' ? 0.95 : 1.2);
           e.shootCd = base + Math.random() * 0.35;
         }
+      }
+    }
+
+    if (state.trainSpine) {
+      const cars = state.enemies
+        .filter((e) => e.mode === 'rail' && !e.dead)
+        .sort((a, b) => a.mesh.position.z - b.mesh.position.z);
+      if (cars.length >= 2) {
+        const z0 = cars[0].mesh.position.z;
+        const z1 = cars[cars.length - 1].mesh.position.z;
+        const y0 = cars[0].mesh.position.y;
+        const y1 = cars[cars.length - 1].mesh.position.y;
+        const n = state.trainSpine.userData.spineN || 28;
+        const pts = [];
+        for (let i = 0; i < n; i++) {
+          const u = n <= 1 ? 0 : i / (n - 1);
+          const z = z0 + (z1 - z0) * u;
+          pts.push({ x: snakeX(z, state.t), y: y0 + (y1 - y0) * u, z });
+        }
+        updateTrainSpine(state.trainSpine, pts);
+      } else {
+        updateTrainSpine(state.trainSpine, []);
       }
     }
 

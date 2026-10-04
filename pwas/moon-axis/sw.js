@@ -1,4 +1,4 @@
-const CACHE = 'moon-axis-v14';
+const CACHE = 'moon-axis-v15';
 const ASSETS = [
   './',
   './index.html',
