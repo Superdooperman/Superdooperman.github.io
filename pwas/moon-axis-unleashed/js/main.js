@@ -7,6 +7,7 @@ import Scores from './scores.js';
 import { voidcat, starfork } from './ships/catalog.js';
 import { starfield, rigLights } from './render/vector.js';
 import createPlay from './scenes/play.js';
+import Cheats from './cheats.js';
 
 const canvas = document.getElementById('game');
 let renderer;
@@ -53,6 +54,14 @@ try {
 
 Input.init();
 const play = createPlay({ scene, camera, renderer });
+Cheats.attach({
+  stages: play.STAGES,
+  hold(on) { play.setCheatHold(on); },
+  warp(index) {
+    if (mode === 'play') play.enter(index);
+    else enterPlay(index);
+  },
+});
 
 function paintHi() {
   document.getElementById('title-hi').textContent = `HI SCORE ${Scores.pad(Scores.best())}`;
@@ -745,6 +754,10 @@ function frame() {
   requestAnimationFrame(frame);
   const dt = Math.min(0.05, clock.getDelta());
   const input = Input.sample();
+  if (Cheats.isOpen()) {
+    renderer.render(scene, camera);
+    return;
+  }
   titleT += dt;
 
   if (mode === 'title') {
