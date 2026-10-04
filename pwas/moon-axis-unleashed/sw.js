@@ -1,4 +1,4 @@
-const CACHE = 'moon-axis-unleashed-v1';
+const CACHE = 'moon-axis-unleashed-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -15,6 +15,7 @@ const ASSETS = [
   './js/render/vector.js',
   './js/ships/catalog.js',
   './js/scenes/play.js',
+  './js/cheats.js',
   '../moon-axis/music/sortie1-cislunar.mp3',
   '../moon-axis/music/sortie2-schrodinger.mp3',
   '../moon-axis/music/sortie3-trench.mp3',
