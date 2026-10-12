@@ -1,20 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Superdoop's Projects</title>
-    <style>
-        body { font-family: -apple-system, sans-serif; background: #f5f5f7; color: #1d1d1f; margin: 0; padding: 60px 20px; text-align: center; }
-        h1 { font-size: 2.5em; margin-bottom: 20px; }
-        p { font-size: 1.2em; color: #555; max-width: 600px; margin: 0 auto 40px; }
-        .btn { display: inline-block; background: #0071e3; color: white; padding: 14px 32px; border-radius: 50px; text-decoration: none; font-size: 1.1em; font-weight: 600; }
-        .btn:hover { background: #0066cc; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Superdoop Arcade &amp; Tools</title>
+<meta name="description" content="Tiny apps. Big fun. No installs, no accounts, they even work offline.">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Superdoop">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{--bg:#0a0a0a;--bg2:#141414;--txt:#fff;--mut:#b8b8b8;--acc:#d6322e;--acc2:#ff4a44;--cy:#ff6a64;--glass:#141414;--line:rgba(255,255,255,.12)}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--txt);line-height:1.55;min-height:100vh;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-2;background:radial-gradient(60% 40% at 50% 0%,rgba(214,50,46,.16),transparent 70%)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+a{color:var(--cy)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:3px;border-radius:12px}
+.skip{position:absolute;left:-999px}.skip:focus{left:12px;top:12px;background:#000;padding:8px 12px;z-index:9}
+.wrap{max-width:1180px;margin:0 auto;padding:0 18px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0;flex-wrap:wrap}
+.logo{font-weight:800;letter-spacing:.02em;text-decoration:none;color:var(--txt);font-size:1.05rem}
+.logo{display:inline-flex;align-items:center;gap:10px}.logo img{height:40px;width:auto;display:block}.logo span{color:var(--acc)}
+.nav{display:flex;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--glass);color:var(--txt);text-decoration:none;font-weight:600;font-size:.9rem;}
+.btn:hover{border-color:var(--acc);box-shadow:0 0 16px rgba(214,50,46,.55)}
+.btn.primary{background:var(--acc);color:#fff;border:0}.btn.primary:hover{background:var(--acc2)}
+.hero{text-align:center;padding:36px 0 22px}
+.hero h1{font-size:clamp(2.1rem,7vw,4rem);line-height:1.05;margin:0 0 14px;font-weight:850;letter-spacing:-.02em}
+.hero h1 .g{color:var(--acc)}.hero-mark{display:block;margin:0 auto 18px;max-width:min(520px,86vw);height:auto}.hero-mark.box{max-width:min(440px,80vw);margin-bottom:14px;border-radius:6px}
+.hero p{color:var(--mut);font-size:clamp(1rem,2.6vw,1.2rem);max-width:620px;margin:0 auto}
+.glass{background:var(--glass);border:1px solid var(--line);border-radius:20px;}
+.featured{display:grid;gap:20px;padding:24px;margin:22px 0 10px;position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(214,50,46,.20),transparent 60%),var(--bg2);border-color:rgba(214,50,46,.5)}
+.featured .icon{font-size:56px;width:92px;height:92px}
+.featured h2{margin:6px 0;font-size:clamp(1.6rem,5vw,2.4rem)}
+.kicker{font-size:.75rem;text-transform:uppercase;letter-spacing:.18em;color:var(--acc);font-weight:700}
+.featured .hook{font-size:1.1rem;color:var(--txt);margin:0 0 6px}
+.featured .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.featured .btn.primary{font-size:1.05rem;padding:13px 24px}
+@media(min-width:760px){.featured{grid-template-columns:auto 1fr;align-items:center;padding:36px}}
+section h2.row{font-size:1.35rem;margin:34px 0 14px;display:flex;align-items:center;gap:10px}
+section h2.row::after{content:"";flex:1;height:1px;background:var(--line)}
+.grid{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:600px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:980px){.grid{grid-template-columns:repeat(3,1fr)}}
+.card{display:flex;flex-direction:column;gap:8px;padding:20px;text-decoration:none;color:inherit;transition:transform .2s,border-color .2s;position:relative}
+.card:hover{transform:translateY(-3px);border-color:var(--acc);box-shadow:0 0 22px rgba(214,50,46,.35)}
+.icon{width:58px;height:58px;border-radius:16px;display:grid;place-items:center;font-size:30px;background:#1e1e1e;border-left:3px solid var(--acc);box-shadow:inset 0 0 0 1px var(--line)}
+.name{font-weight:750;font-size:1.2rem;margin-top:4px}
+.hook{color:var(--txt);font-weight:500;margin:0}
+.desc{color:var(--mut);font-size:.93rem;margin:0}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:8px}
+.chip{font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--txt)}
+.chip.game{background:rgba(214,50,46,.25)}.chip.tool{background:rgba(255,255,255,.08)}.chip.off{background:rgba(255,255,255,.04)}
+.badge{position:absolute;top:14px;right:14px;font-size:.68rem;font-weight:700;padding:4px 8px;border-radius:8px;background:rgba(0,0,0,.45);border:1px solid var(--line);color:#fff}
+.install{margin:40px 0 0;padding:22px;display:grid;gap:14px}
+.install h2{margin:0;font-size:1.25rem}
+.install ol{margin:0;padding-left:20px;color:var(--mut)}
+.install b{color:var(--txt)}
+@media(min-width:760px){.install{grid-template-columns:1fr 1fr 1fr}.install h2{grid-column:1/-1}}
+.signup{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:40px 0 0;padding:22px;text-align:center}
+.signup h2{width:100%;margin:0 0 4px;font-size:1.25rem}
+.signup input{flex:1 1 220px;max-width:320px;padding:11px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--txt);font:inherit}
+footer{padding:36px 0 50px;text-align:center;color:var(--mut);font-size:.9rem}
+footer .links{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.soon{opacity:.8;cursor:default}
+</style>
 </head>
 <body>
-    <h1>Welcome</h1>
-    <p>This is my main landing page. I'll add more stuff here later.</p>
-    <a href="/pwas/" class="btn">View My PWAs</a>
+<a class="skip" href="#main">Skip to apps</a>
+<div class="wrap">
+<header class="top">
+  <a class="logo" href="./"><img src="logo-inkblob.svg" alt="Superdoop"> <span>Arcade</span>&nbsp;&amp; Tools</a>
+  <nav class="nav" aria-label="Support">
+    <a class="btn" href="pwas/">📱 My PWA Apps</a>
+    <a class="btn" href="#" data-placeholder="tip-jar">🪙 Keep the arcade free, toss a coin in the machine</a>
+    <a class="btn" href="#signup">✉️ Get new apps first</a>
+  </nav>
+</header>
+
+<main id="main">
+<section class="hero">
+  <h1><img class="hero-mark" src="logo-inkblob.svg" alt="Superdoop"> Arcade &amp; Tools</h1>
+  <p>Tiny apps. Big fun. No installs, no accounts, they even work offline.</p>
+</section>
+
+<a class="glass featured card" href="pwas/moon-axis/" aria-label="Moon Axis, featured game. Play now">
+  <span class="badge">📶 Offline · Add to Home</span>
+  <div class="icon" aria-hidden="true">✈️</div>
+  <div>
+    <div class="kicker">Featured game</div>
+    <h2>Moon Axis</h2>
+    <p class="hook">A 1983-style vector dogfight, with seven sorties against the Moon Axis.</p>
+    <p class="desc">1983-style vector ace: seven sorties, Hellcats of the Void. Fly the F6F-V Voidcat against the Moon Axis. Works offline; add to home screen.</p>
+    <div class="chips"><span class="chip game">Game</span><span class="chip off">Offline</span></div>
+    <div class="acts"><span class="btn primary">▶ Play now</span></div>
+  </div>
+</a>
+
+<section aria-labelledby="arcade">
+<h2 class="row" id="arcade">🕹️ Arcade</h2>
+<div class="grid">
+  <a href="pwas/moon-axis-unleashed/" class="glass card"><span class="badge">📶 Offline · Add to Home</span><div class="icon" aria-hidden="true">🔥</div><div class="name">Moon Axis Unleashed</div><p class="hook">The same war, rebuilt as a chase-rail thrill ride.</p><p class="desc">Same seven sorties and voice lines, chase-rail remake. Add to home screen as its own app.</p><div class="chips"><span class="chip game">Game</span><span class="chip off">Offline</span></div></a>
+  <a href="pwas/choplifter/" class="glass card"><span class="badge">📶 Offline · Add to Home</span><div class="icon" aria-hidden="true">🚁</div><div class="name">Choplifter</div><p class="hook">The Apple II rescue classic, back in your pocket.</p><p class="desc">Rescue hostages in a faithful Apple II recreation. Works offline; add to home screen.</p><div class="chips"><span class="chip game">Game</span><span class="chip off">Offline</span></div></a>
+  <a href="pwas/night-lark/" class="glass card"><span class="badge">📶 Offline · Add to Home</span><div class="icon" aria-hidden="true">🌙</div><div class="name">Night Lark</div><p class="hook">Run the rooftops after dark and beat your own best.</p><p class="desc">A night run across the roofs. Your best stays on this device.</p><div class="chips"><span class="chip game">Game</span><span class="chip off">Offline</span></div></a>
+  <a href="pwas/stick-shift/" class="glass card"><span class="badge">📶 Offline · Add to Home</span><div class="icon" aria-hidden="true">⚙️</div><div class="name">Stick Shift Simulator</div><p class="hook">Learn to drive stick without burning a real clutch.</p><p class="desc">Practice a 6-speed H-pattern manual: clutch bite, stalling, grinding, hills, and rev-matching.</p><div class="chips"><span class="chip game">Game</span><span class="chip off">Offline</span></div></a>
+</div>
+</section>
+
+<section aria-labelledby="tools">
+<h2 class="row" id="tools">🧰 Tools</h2>
+<div class="grid">
+  <a href="pwas/TimeTracker.html" class="glass card"><span class="badge">📶 Offline · Add to Home</span><div class="icon" aria-hidden="true">⏱️</div><div class="name">Time Tracker</div><p class="hook">Clock your hours without signing up for anything.</p><p class="desc">Track your work sessions, tasks, and total time. Simple, clean, and works offline.</p><div class="chips"><span class="chip tool">Tool</span><span class="chip off">Offline</span></div></a>
+  <a href="pwas/x-pulse.html" class="glass card"><span class="badge">📶 Offline · Add to Home</span><div class="icon" aria-hidden="true">📰</div><div class="name">News X-Pulse</div><p class="hook">Today's headlines, cut down to just the pulse.</p><p class="desc">A multi row ticker of latest news on X</p><div class="chips"><span class="chip tool">Tool</span></div></a>
+  <a href="pwas/dazed-map/" class="glass card"><span class="badge">📶 Offline · Add to Home</span><div class="icon" aria-hidden="true">🗺️</div><div class="name">Dazed &amp; Confused Map</div><p class="hook">Cruise the Austin spots where the 1993 classic was filmed. Alright, alright, alright.</p><p class="desc">Austin filming locations from the 1993 movie. Desktop sidebar or a scaling mobile map.</p><div class="chips"><span class="chip tool">Tool</span></div></a>
+  <a href="pwas/Video-downloader.html" class="glass card"><span class="badge">📶 Offline · Add to Home</span><div class="icon" aria-hidden="true">📼</div><div class="name">Video Downloader</div><p class="desc">Paste in a video link to download.</p><div class="chips"><span class="chip tool">Tool</span></div></a>
+  <a href="pwas/AppLog.html" class="glass card"><span class="badge">📶 Offline · Add to Home</span><div class="icon" aria-hidden="true">📱</div><div class="name">AppLog</div><p class="desc">Catalog to Identify Installed Apps</p><div class="chips"><span class="chip tool">Tool</span></div></a>
+  <!-- Future PWAs go here – copy a card block above -->
+</div>
+</section>
+
+<section class="glass install" aria-labelledby="inst">
+  <h2 id="inst">📲 Add any app to your home screen</h2>
+  <div><b>iPhone / iPad (Safari)</b><ol><li>Open the app</li><li>Tap Share ⬆️</li><li>Tap <b>Add to Home Screen</b></li></ol></div>
+  <div><b>Android (Chrome)</b><ol><li>Open the app</li><li>Tap the ⋮ menu</li><li>Tap <b>Install app</b> or <b>Add to Home screen</b></li></ol></div>
+  <div><b>Desktop (Chrome / Edge)</b><ol><li>Open the app</li><li>Click the install icon in the address bar</li><li>It then launches like a native app, even offline</li></ol></div>
+</section>
+
+<form class="glass signup" id="signup" action="#" method="post" data-placeholder="newsletter">
+  <h2>✉️ Get new apps first</h2>
+  <label for="em" class="skip">Email address</label>
+  <input id="em" type="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+  <button class="btn primary" type="submit">Notify me</button>
+</form>
+</main>
+
+<footer>
+  <div class="links">
+    <a class="btn" href="#" data-placeholder="tip-jar">🪙 Keep the arcade free, toss a coin in the machine</a>
+    <a class="btn" href="#signup">✉️ Get new apps first</a>
+    <a class="btn" href="#" data-placeholder="redbubble">🛍️ Superdooperman on Redbubble</a>
+    <span class="btn soon" aria-disabled="true">🐓 Radioactive Rooster, coming soon</span>
+  </div>
+  Hosted on GitHub Pages • All apps work offline
+</footer>
+</div>
 </body>
 </html>
