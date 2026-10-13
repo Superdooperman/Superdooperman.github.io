@@ -1,4 +1,4 @@
-const CACHE = "night-lark-v2";
+const CACHE = "night-lark-v3";
 const CORE = [
   "./",
   "./index.html",
@@ -27,7 +27,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))))
+      .then((keys) => Promise.all(keys.filter((key) => key.startsWith("night-lark-") && key !== CACHE).map((key) => caches.delete(key))))
       .then(() => self.clients.claim()),
   );
 });

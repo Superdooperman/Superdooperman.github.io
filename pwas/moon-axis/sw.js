@@ -1,4 +1,4 @@
-const CACHE = 'moon-axis-v17';
+const CACHE = 'moon-axis-v18';
 const ASSETS = [
   './',
   './index.html',
@@ -37,7 +37,7 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k.startsWith('moon-axis-') && k !== CACHE).map((k) => caches.delete(k)))
+      Promise.all(keys.filter((k) => /^moon-axis-v\d+$/.test(k) && k !== CACHE).map((k) => caches.delete(k)))
     )
   );
   self.clients.claim();
