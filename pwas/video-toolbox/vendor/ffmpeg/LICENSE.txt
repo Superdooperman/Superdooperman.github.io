@@ -1,0 +1,4 @@
+@ffmpeg/ffmpeg 0.12.15 (dist/esm), MIT License, Copyright (c) 2019 Jerome Wu.
+https://github.com/ffmpegwasm/ffmpeg.wasm
+The ffmpeg core (@ffmpeg/core 0.12.10, GPL-2.0-or-later) is not stored in this repo; it is loaded from cdn.jsdelivr.net on first use and cached by the browser.
+LilitaOne-Regular.ttf: SIL Open Font License 1.1, see ../../fonts/OFL.txt (used for burned-in captions).

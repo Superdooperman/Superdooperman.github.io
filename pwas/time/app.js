@@ -224,6 +224,7 @@
     if (set.notify && 'Notification' in window && Notification.permission !== 'granted') { const p = await Notification.requestPermission(); if (p !== 'granted') { set.notify = false; e.target.checked = false; alert('Notifications are blocked for this site in your browser settings.'); } }
     LS.set('pomoSettings', set);
   };
+  $('sSpin').value = set.spin || (reduced ? 'tick' : 'smooth'); $('sSpin').onchange = (e) => { set.spin = e.target.value; LS.set('pomoSettings', set); };
   $('sVol').oninput = (e) => { set.volume = Number(e.target.value); LS.set('pomoSettings', set); };
   $('testSnd').onclick = () => { unlockAudio(); const m = set.muted; set.muted = false; crow(); set.muted = m; };
 
@@ -259,7 +260,9 @@
     const mode = running() ? 'run' : (pomo.pausedRemaining != null ? 'paused' : 'idle');
     egg.update(now, mode);
     const lowFrac = rem / total, focusRun = pomo.phase === 'focus' && (running() || pomo.pausedRemaining != null);
-    egg.draw({ t, crack: focusRun && lowFrac < 0.35 ? (0.35 - lowFrac) / 0.35 : (done ? 1 : 0), open: done, popped: done });
+    const spin = set.spin || (reduced ? 'tick' : 'smooth'), remR = spin === 'tick' ? Math.ceil(rem / 1000) * 1000 : rem;
+    const rot = spin === 'off' || done ? 0 : -2 * Math.PI * ((remR % 60000) / 60000);  // one full turn per minute of countdown
+    egg.draw({ rot, t, crack: focusRun && lowFrac < 0.35 ? (0.35 - lowFrac) / 0.35 : (done ? 1 : 0), open: done, popped: done });
     const wob = reduced ? 0 : (done ? Math.sin(t * 30) * 4 : (running() && rem < 60000 ? Math.sin(t * (rem < 10000 ? 28 : 14)) * (rem < 10000 ? 5 : 2.5) : 0));
     $('egg').style.transform = `rotate(${wob}deg)`;
     // buddy rooster

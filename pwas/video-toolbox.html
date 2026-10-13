@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Video Toolbox · Superdooper Arcade</title>
+<meta name="theme-color" content="#08080a">
+<meta name="description" content="Trim, compress, convert, extract audio and join your own video clips, right in the browser. Nothing is uploaded.">
+<link rel="manifest" href="video-toolbox-manifest.json">
+<link rel="icon" href="video-toolbox/icon-192.png">
+<link rel="apple-touch-icon" href="video-toolbox/icon-192.png">
+<link rel="stylesheet" href="inkblob.css">
+<link rel="stylesheet" href="time/time.css">
+<link rel="stylesheet" href="video-toolbox/vt.css">
+<script src="sw-register.js" defer></script>
+</head>
+<body class="ink-grain">
+<div class="wrap">
+  <header class="top">
+    <a class="btn" href="./">← Arcade</a>
+    <h1 class="ink-title tt-title">VIDEO TOOLBOX</h1>
+    <span class="engine" id="engine" title="Video engine status">engine: not loaded</span>
+  </header>
+
+  <label class="drop" id="drop">
+    <input type="file" id="file" accept="video/*,audio/*,.mkv,.mov" multiple hidden>
+    <b>Drop your clip here</b><span>or tap to pick a file. It never leaves your device.</span>
+  </label>
+
+  <div id="work" hidden>
+    <div class="card player">
+      <video id="video" controls playsinline preload="metadata"></video>
+      <div class="finfo" id="finfo"></div>
+    </div>
+    <nav class="tabs" id="tools">
+      <button data-t="trim" class="on">✂ Trim</button><button data-t="audio">♪ Audio</button><button data-t="compress">⇲ Compress</button><button data-t="convert">⇄ Convert</button><button data-t="flatten">▤ Join / Caption</button>
+    </nav>
+
+    <section class="tool on card" data-t="trim">
+      <div class="trimbar"><div class="sel" id="trimSel"></div></div>
+      <div class="grid2">
+        <label>Start <input class="ink-input" id="tIn" value="0:00.0"></label>
+        <label>End <input class="ink-input" id="tOut" value="0:00.0"></label>
+      </div>
+      <div class="ctrls left">
+        <button class="btn2 sm" id="setIn">[ Set start = playhead</button><button class="btn2 sm" id="setOut">Set end = playhead ]</button>
+        <button class="btn2 sm" id="stepB">◂ frame</button><button class="btn2 sm" id="stepF">frame ▸</button>
+      </div>
+      <label class="chk"><input type="checkbox" id="tPrecise"> Precise cut (re-encode, slower). Off = instant copy, snaps to keyframes.</label>
+    </section>
+    <section class="tool card" data-t="audio">
+      <label>Format <select id="aFmt"><option value="mp3">MP3 (192 kbps)</option><option value="m4a">M4A / AAC</option><option value="wav">WAV (lossless)</option></select></label>
+    </section>
+    <section class="tool card" data-t="compress">
+      <div class="presets" id="cPreset">
+        <button data-p="small">Small<br><small>480p · CRF 30</small></button><button data-p="balanced" class="on">Balanced<br><small>720p · CRF 26</small></button><button data-p="high">High<br><small>1080p · CRF 22</small></button>
+      </div>
+      <p class="small" id="cEst"></p>
+    </section>
+    <section class="tool card" data-t="convert">
+      <label>To <select id="vFmt"><option value="mp4">MP4 (H.264 + AAC), plays everywhere</option><option value="webm">WebM (VP8 + Opus)</option><option value="gif">GIF (first 10 s, 480 px, 12 fps)</option></select></label>
+    </section>
+    <section class="tool card" data-t="flatten">
+      <p class="small">Join: pick several clips (above) and they're stitched in order into one MP4. Caption: burn text into the picture.</p>
+      <ol id="clipList" class="cliplist"></ol>
+      <label>Caption (optional) <input class="ink-input" id="capText" maxlength="80" placeholder="e.g. QooCam test run, Oct 2026"></label>
+      <label>Position <select id="capPos"><option value="bottom">Bottom</option><option value="top">Top</option></select></label>
+    </section>
+
+    <div class="ctrls">
+      <button class="ink-btn" id="runBtn">▶ RUN</button>
+      <button class="btn2" id="cancelBtn" hidden>■ Cancel</button>
+    </div>
+    <div class="prog" id="prog" hidden><div id="progBar"></div><span id="progTxt"></span></div>
+    <details class="card adv"><summary>Advanced: the exact ffmpeg command</summary><pre id="cmd"></pre><pre id="log"></pre></details>
+
+    <div class="card out" id="out" hidden>
+      <h3>Result</h3>
+      <video id="outVideo" controls playsinline hidden></video><audio id="outAudio" controls hidden></audio><img id="outImg" alt="Result GIF" hidden>
+      <p class="small" id="outInfo"></p>
+      <div class="ctrls left"><button class="ink-btn" id="saveBtn">⬇ SAVE</button><button class="btn2" id="useBtn">Use result as input</button></div>
+    </div>
+  </div>
+
+  <p class="small foot">Runs ffmpeg in your browser (ffmpeg.wasm). First run downloads the ~32 MB engine once; after that it works offline.
+  Only edit files you own or have rights to. This tool doesn't download from websites. Very large files (over ~1.5 GB) may run out of browser memory.
+  <a href="archive/">Tinkerer's Archive</a> · <a href="video-toolbox/vendor/ffmpeg/LICENSE.txt">licenses</a></p>
+</div>
+<script type="module" src="video-toolbox/app.js"></script>
+</body>
+</html>
