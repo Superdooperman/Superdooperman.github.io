@@ -1,0 +1,29 @@
+/* Superdoop "Ink Blob" theme: red / black / white.
+   Usage: <link rel="stylesheet" href="/pwas/inkblob.css"> then add class="ink" to <body>
+   (or "ink ink-dark" for white-on-black). Display text: .ink-title */
+:root{
+  --ink-red:#e10600; --ink-red-dark:#7a0a12; --ink-black:#111; --ink-white:#fff;
+  --ink-paper:#fff7f2; --ink-muted:#6b6b6b; --ink-outline:4px;
+  --ink-display:"Lilita One","Baloo 2","Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif;
+  --ink-body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+.ink{background:var(--ink-paper);color:var(--ink-black);font-family:var(--ink-body)}
+.ink-dark{background:var(--ink-black);color:var(--ink-white)}
+/* Slanted, rounded red letters with a thick black outline */
+.ink-title{font-family:var(--ink-display);font-weight:900;color:var(--ink-red);
+  transform:skewX(-10deg);display:inline-block;letter-spacing:.02em;line-height:1;
+  -webkit-text-stroke:var(--ink-outline) var(--ink-black);paint-order:stroke fill;
+  text-shadow:4px 4px 0 var(--ink-black)}
+.ink-dark .ink-title{color:var(--ink-white);-webkit-text-stroke-color:var(--ink-red);text-shadow:4px 4px 0 var(--ink-red)}
+.ink-btn{display:inline-block;font-family:var(--ink-display);font-weight:900;letter-spacing:.06em;
+  padding:.6em 1.4em;border:3px solid var(--ink-black);border-radius:999px;background:var(--ink-red);
+  color:var(--ink-white);text-decoration:none;cursor:pointer;box-shadow:0 5px 0 var(--ink-black);transform:skewX(-6deg)}
+.ink-btn:active{transform:skewX(-6deg) translateY(4px);box-shadow:0 1px 0 var(--ink-black)}
+.ink-btn.alt{background:var(--ink-white);color:var(--ink-black)}
+.ink-card{background:var(--ink-white);color:var(--ink-black);border:3px solid var(--ink-black);
+  border-radius:18px 22px 16px 24px;box-shadow:6px 6px 0 var(--ink-black);padding:16px 20px}
+.ink-dark .ink-card{background:#1b1b1b;color:var(--ink-white);border-color:var(--ink-red);box-shadow:6px 6px 0 var(--ink-red)}
+.ink-input{font:inherit;padding:.5em .8em;border:3px solid var(--ink-black);border-radius:12px;background:var(--ink-white);color:var(--ink-black)}
+.ink-input:focus{outline:3px solid var(--ink-red);outline-offset:2px}
+.ink-badge{display:inline-block;padding:.15em .6em;border:2px solid var(--ink-black);border-radius:999px;background:var(--ink-red);color:var(--ink-white);font-size:.75em;font-weight:800;text-transform:uppercase;letter-spacing:.1em}
+@media (prefers-reduced-motion:reduce){.ink-btn,.ink-btn:active{transform:none}}
