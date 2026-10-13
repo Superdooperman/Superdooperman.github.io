@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 840" width="600" height="840"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22101f"/><stop offset="1" stop-color="#000"/></linearGradient></defs>
+<rect width="600" height="840" fill="url(#bg)"/><rect x="18" y="18" width="564" height="804" fill="none" stroke="#ff4fa0" stroke-width="6"/>
+<text x="300" y="100" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="26" letter-spacing="8" fill="#ff4fa0">SUPERDOOP APP</text>
+<rect x="130" y="290" width="340" height="190" rx="18" fill="#ff4fa0"/><circle cx="220" cy="385" r="45" fill="#ffffff"/><circle cx="380" cy="385" r="45" fill="#ffffff"/><rect x="220" y="420" width="160" height="40" fill="url(#bg)"/>
+<text x="300" y="680" text-anchor="middle" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="60" fill="#ffffff" textLength="530" lengthAdjust="spacingAndGlyphs">VIDEO DOWNLOADER</text>
+<text x="300" y="735" text-anchor="middle" font-family="Arial,sans-serif" font-size="28" fill="#ddd">+ Link Retriever</text></svg>

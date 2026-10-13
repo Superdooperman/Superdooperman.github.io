@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 840" width="600" height="840"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d2b22"/><stop offset="1" stop-color="#000"/></linearGradient></defs>
+<rect width="600" height="840" fill="url(#bg)"/><rect x="18" y="18" width="564" height="804" fill="none" stroke="#2ecc71" stroke-width="6"/>
+<text x="300" y="100" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="26" letter-spacing="8" fill="#2ecc71">SUPERDOOP APP</text>
+<circle cx="300" cy="380" r="160" fill="none" stroke="#2ecc71" stroke-width="28"/><path d="M300 380 V280 M300 380 L370 420" stroke="#ffffff" stroke-width="20" stroke-linecap="round"/>
+<text x="300" y="680" text-anchor="middle" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="72" fill="#ffffff">TIMETRACK</text>
+<text x="300" y="735" text-anchor="middle" font-family="Arial,sans-serif" font-size="28" fill="#ddd">Time tracker</text></svg>
