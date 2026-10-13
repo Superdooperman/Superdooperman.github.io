@@ -2,12 +2,12 @@
 // Games with their own sw.js (moon-axis/, phish-desk/, ...) register a narrower
 // scope, so they are controlled by their own worker, not this one.
 // VERSION is set by scripts/bump-sw.sh (content hash of shared files); run it before every push.
-const VERSION = '20261013-1731c4e52f';
+const VERSION = '20261013-e77c39e0b9';
 const PREFIX = 'pwas-shared-';
 const CACHE = PREFIX + VERSION;
 const PRECACHE = [
   './', './index.html', './inkblob.css', './sw-register.js', './manifest.webmanifest',
-  './fonts/LilitaOne-Regular.woff2', './fonts/OFL.txt',
+  './fonts/LilitaOne-Regular.woff2', './boxart/moon-axis-poster.webp', './fonts/OFL.txt',
   './games/shelf.css', './brand/superdoop-arcade.svg',
   './TimeTracker.html', './time-manifest.json',
   './Video-downloader.html', './video-manifest.json',
