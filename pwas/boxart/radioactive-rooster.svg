@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 840" width="600" height="840">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#14210a"/>
+      <stop offset="1" stop-color="#050805"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="840" fill="url(#bg)"/>
+  <rect x="18" y="18" width="564" height="804" fill="none" stroke="#c6f135" stroke-width="6"/>
+  <text x="300" y="100" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="26" letter-spacing="6" fill="#c6f135">SUPERDOOPER GAME</text>
+  <circle cx="300" cy="300" r="92" fill="#f4e04a"/>
+  <circle cx="268" cy="278" r="22" fill="#fff"/>
+  <circle cx="338" cy="286" r="22" fill="#fff"/>
+  <circle cx="274" cy="274" r="8" fill="#111"/>
+  <circle cx="330" cy="292" r="8" fill="#111"/>
+  <path d="M300 318 L276 360 L324 352 Z" fill="#e23b2b"/>
+  <path d="M250 250 L210 210" stroke="#c6f135" stroke-width="8"/>
+  <path d="M360 246 L410 200" stroke="#c6f135" stroke-width="8"/>
+  <path d="M228 214 L198 198" stroke="#c6f135" stroke-width="6"/>
+  <path d="M392 206 L430 186" stroke="#c6f135" stroke-width="6"/>
+  <text x="300" y="620" text-anchor="middle" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="52" fill="#f4e04a">RADIOACTIVE</text>
+  <text x="300" y="690" text-anchor="middle" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="64" fill="#c6f135">ROOSTER</text>
+  <text x="300" y="748" text-anchor="middle" font-family="Arial,sans-serif" font-size="26" fill="#ddd">YOLK OF MIDNIGHT</text>
+</svg>

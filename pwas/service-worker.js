@@ -2,7 +2,7 @@
 // Games with their own sw.js (moon-axis/, phish-desk/, ...) register a narrower
 // scope, so they are controlled by their own worker, not this one.
 // VERSION is set by scripts/bump-sw.sh (content hash of shared files); run it before every push.
-const VERSION = '20261013-9c5278df7d';
+const VERSION = '20261013-b0d280d45e';
 const PREFIX = 'pwas-shared-';
 const CACHE = PREFIX + VERSION;
 const CORE_CACHE = 'pwas-ffmpeg-core-0.12.10';
@@ -17,10 +17,10 @@ const PRECACHE = [
   './video-toolbox/vendor/ffmpeg/index.js', './video-toolbox/vendor/ffmpeg/classes.js', './video-toolbox/vendor/ffmpeg/const.js',
   './video-toolbox/vendor/ffmpeg/errors.js', './video-toolbox/vendor/ffmpeg/types.js', './video-toolbox/vendor/ffmpeg/utils.js', './video-toolbox/vendor/ffmpeg/worker.js',
   './AppLog.html',
-  './games/applog.html', './games/choplifter.html', './games/dazed-map.html', './games/moon-axis-unleashed.html', './games/moon-axis.html', './games/night-lark.html', './games/phish-desk.html', './games/stick-shift.html', './games/time-tracker.html', './games/video-toolbox.html', './archive/', './archive/archive.json', './archive/archive.css', './archive/thumbs/x-pulse.webp', './archive/thumbs/video-downloader.webp', './boxart/rooster-timer.svg', './boxart/video-toolbox.svg'
+  './games/applog.html', './games/choplifter.html', './games/dazed-map.html', './games/moon-axis-unleashed.html', './games/moon-axis.html', './games/night-lark.html', './games/radioactive-rooster.html', './boxart/radioactive-rooster.svg', './games/phish-desk.html', './games/stick-shift.html', './games/time-tracker.html', './games/video-toolbox.html', './archive/', './archive/archive.json', './archive/archive.css', './archive/thumbs/x-pulse.webp', './archive/thumbs/video-downloader.webp', './boxart/rooster-timer.svg', './boxart/video-toolbox.svg'
 ];
 // Folders that own their own service worker: never touch their requests.
-const OWN_SW = ['/moon-axis/', '/moon-axis-unleashed/', '/phish-desk/', '/choplifter/', '/night-lark/', '/stick-shift/', '/dazed-map/'];
+const OWN_SW = ['/moon-axis/', '/moon-axis-unleashed/', '/phish-desk/', '/choplifter/', '/night-lark/', '/stick-shift/', '/dazed-map/', '/radioactive-rooster/'];
 
 self.addEventListener('install', (e) => {
   // Precache individually so one missing file doesn't abort the install.
