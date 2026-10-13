@@ -1,0 +1,25 @@
+[
+  {
+    "id": "x-pulse",
+    "name": "X Pulse",
+    "path": "x-pulse/",
+    "thumb": "thumbs/x-pulse.webp",
+    "active": "2026",
+    "status": "Retired",
+    "why": "Built to skim X headlines at work. The feed was hand-picked sample posts, and live X data now needs a paid API plus a server, so this static site can't run it. Nitter-style mirrors are gone too.",
+    "learned": "Category filters and a fast headline layout. Keep the UI; the data source has to be one you're allowed to use.",
+    "source": "https://github.com/Superdooperman/Superdooperman.github.io/blob/1ca25a8/pwas/x-pulse.html"
+  },
+  {
+    "id": "video-downloader",
+    "name": "Video Downloader + Link Retriever",
+    "path": null,
+    "thumb": "thumbs/video-downloader.webp",
+    "active": "2025–2026",
+    "status": "Superseded",
+    "supersededBy": { "name": "Video Toolbox", "path": "../video-toolbox.html" },
+    "why": "Browsers block cross-site downloads (CORS), so it failed on most sites, and pulling video off other sites runs into terms-of-service and copyright problems. Replaced by Video Toolbox, which edits your own files.",
+    "learned": "Fetch streams, Blob URLs and progress bars. Those ideas live on in Video Toolbox's progress and save flow.",
+    "source": "https://github.com/Superdooperman/Superdooperman.github.io/blob/1ca25a8/pwas/Video-downloader.html"
+  }
+]

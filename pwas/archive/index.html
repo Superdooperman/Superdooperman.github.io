@@ -1,0 +1,17 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Tinkerer's Archive · Superdooper Arcade</title><meta name="theme-color" content="#08080a"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="../inkblob.css"><link rel="stylesheet" href="../games/shelf.css"><link rel="stylesheet" href="archive.css"><script src="../sw-register.js" defer></script></head>
+<body class="ink-grain"><div class="wrap">
+<header class="top"><a class="btn" href="../">← Back to Superdooper Arcade</a></header>
+<h1 class="shelf-title arch-title">TINKERER'S ARCHIVE <span class="stamp">RETIRED</span></h1>
+<p class="sub">Experiments that ran their course. Kept for the lessons, not for daily use.</p>
+<main id="cards" class="arch-grid"><noscript>Turn on JavaScript to see the archive.</noscript></main>
+<footer><a href="/">Superdoop home</a></footer></div>
+<script>
+const esc=(s)=>String(s??'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+fetch('archive.json').then(r=>r.json()).then(list=>{
+  document.getElementById('cards').innerHTML=list.map(a=>`<article class="arch-card">
+    <div class="thumb"><img src="${esc(a.thumb)}" alt="${esc(a.name)} screenshot" loading="lazy"><span class="stamp">${esc(a.status)}</span></div>
+    <div class="body"><h2>${esc(a.name)}</h2><p class="meta">Active ${esc(a.active)}${a.supersededBy?` · superseded by <a href="${esc(a.supersededBy.path)}">${esc(a.supersededBy.name)}</a>`:''}</p>
+    <p><b>Why retired:</b> ${esc(a.why)}</p><p><b>What I learned:</b> ${esc(a.learned)}</p>
+    <div class="btns">${a.path?`<a class="btn" href="${esc(a.path)}">Open anyway (may not work)</a>`:''}${a.supersededBy?`<a class="btn" href="${esc(a.supersededBy.path)}">Open ${esc(a.supersededBy.name)}</a>`:''}<a class="btn ghost" href="${esc(a.source)}" rel="noopener">View source</a></div></div></article>`).join('');
+}).catch(()=>{document.getElementById('cards').textContent='Could not load the archive list.';});
+</script></body></html>
