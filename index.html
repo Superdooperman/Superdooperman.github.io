@@ -71,84 +71,42 @@ section h2.row::after{content:"";flex:1;height:1px;background:var(--line)}
 footer{padding:36px 0 50px;text-align:center;color:var(--mut);font-size:.9rem}
 footer .links{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
 .soon{opacity:.8;cursor:default}
+
+.hub{display:grid;gap:18px;grid-template-columns:1fr;margin-top:10px}
+@media(min-width:760px){.hub{grid-template-columns:repeat(2,1fr)}.hub .big{grid-column:1/-1}}
+.hub .card{padding:26px;min-height:170px}.hub .big{min-height:240px;background:linear-gradient(135deg,rgba(214,50,46,.28),transparent 65%),var(--bg2);border-color:rgba(214,50,46,.55)}
+.hub .big .name{font-size:clamp(1.6rem,4vw,2.4rem)}.hub .k{font-size:2.2rem}
+.cta{margin-top:auto;font-weight:800;color:var(--acc2)}
 </style>
 </head>
 <body>
-<a class="skip" href="#main">Skip to apps</a>
+<a class="skip" href="#main">Skip to content</a>
 <div class="wrap">
 <header class="top">
-  <a class="logo" href="./"><img src="logo-inkblob.svg" alt="Superdoop"> <span>Arcade</span>&nbsp;&amp; Tools</a>
-  <nav class="nav" aria-label="Support">
-    <a class="btn" href="pwas/">📱 My PWA Apps</a>
-    <a class="btn" href="#" data-placeholder="tip-jar">🪙 Keep the arcade free, toss a coin in the machine</a>
-    <a class="btn" href="#signup">✉️ Get new apps first</a>
+  <a class="logo" href="./"><img src="logo-inkblob.svg" alt="Superdoop"></a>
+  <nav class="nav" aria-label="Main">
+    <a class="btn" href="pwas/">🕹️ Games &amp; Apps</a>
+    <a class="btn" href="https://www.redbubble.com/people/superdooperman/shop?asc=u" target="_blank" rel="noopener">🛍️ Shop</a>
   </nav>
 </header>
-
 <main id="main">
 <section class="hero">
-  <h1><img class="hero-mark" src="logo-inkblob.svg" alt="Superdoop"> Arcade &amp; Tools</h1>
-  <p>Tiny apps. Big fun. No installs, no accounts, they even work offline.</p>
+  <h1><img class="hero-mark" src="logo-inkblob.svg" alt="Superdoop"></h1>
+  <p>Games, apps, comics, music, and art.</p>
 </section>
-
-<a class="glass featured card" href="pwas/moon-axis/" aria-label="Moon Axis, featured game. Play now">
-  <span class="badge">📶 Offline · Add to Home</span>
-  <div class="icon" aria-hidden="true">✈️</div>
-  <div>
-    <div class="kicker">Featured game</div>
-    <h2>Moon Axis</h2>
-    <p class="hook">A 1983-style vector dogfight, with seven sorties against the Moon Axis.</p>
-    <p class="desc">1983-style vector ace: seven sorties, Hellcats of the Void. Fly the F6F-V Voidcat against the Moon Axis. Works offline; add to home screen.</p>
-    <div class="chips"><span class="chip game">Game</span><span class="chip off">Offline</span></div>
-    <div class="acts"><span class="btn primary">▶ Play now</span></div>
-  </div>
-</a>
-
-<section aria-labelledby="arcade">
-<h2 class="row" id="arcade">🕹️ Arcade</h2>
-<div class="grid">
-  <a href="pwas/moon-axis-unleashed/" class="glass card"><span class="badge">📶 Offline · Add to Home</span><div class="icon" aria-hidden="true">🔥</div><div class="name">Moon Axis Unleashed</div><p class="hook">The same war, rebuilt as a chase-rail thrill ride.</p><p class="desc">Same seven sorties and voice lines, chase-rail remake. Add to home screen as its own app.</p><div class="chips"><span class="chip game">Game</span><span class="chip off">Offline</span></div></a>
-  <a href="pwas/choplifter/" class="glass card"><span class="badge">📶 Offline · Add to Home</span><div class="icon" aria-hidden="true">🚁</div><div class="name">Choplifter</div><p class="hook">The Apple II rescue classic, back in your pocket.</p><p class="desc">Rescue hostages in a faithful Apple II recreation. Works offline; add to home screen.</p><div class="chips"><span class="chip game">Game</span><span class="chip off">Offline</span></div></a>
-  <a href="pwas/night-lark/" class="glass card"><span class="badge">📶 Offline · Add to Home</span><div class="icon" aria-hidden="true">🌙</div><div class="name">Night Lark</div><p class="hook">Run the rooftops after dark and beat your own best.</p><p class="desc">A night run across the roofs. Your best stays on this device.</p><div class="chips"><span class="chip game">Game</span><span class="chip off">Offline</span></div></a>
-  <a href="pwas/stick-shift/" class="glass card"><span class="badge">📶 Offline · Add to Home</span><div class="icon" aria-hidden="true">⚙️</div><div class="name">Stick Shift Simulator</div><p class="hook">Learn to drive stick without burning a real clutch.</p><p class="desc">Practice a 6-speed H-pattern manual: clutch bite, stalling, grinding, hills, and rev-matching.</p><div class="chips"><span class="chip game">Game</span><span class="chip off">Offline</span></div></a>
-</div>
+<section class="hub" aria-label="Superdoop sections">
+  <a class="glass card big" href="pwas/"><span class="k">🕹️</span><div class="name">Games &amp; Apps</div><p class="desc">Browser games and small web apps. Many work offline and can be added to your home screen.</p><span class="cta">Browse the shelf →</span></a>
+  <div class="glass card soon" aria-disabled="true"><span class="k">🐓</span><div class="name">Comics</div><p class="desc">Radioactive Rooster.</p><span class="cta">Coming soon</span></div>
+  <a class="glass card" href="https://suno.com/playlist/22a46bb9-8f92-4e54-aa71-5a254d1f896c" target="_blank" rel="noopener"><span class="k">🎵</span><div class="name">Music</div><p class="desc">Eternal Log P(r)ose: Songs of the Grand Line.</p><span class="cta">Listen on Suno →</span></a>
+  <div class="glass card soon" aria-disabled="true"><span class="k">🎨</span><div class="name">Art &amp; Design</div><p class="desc">Art and design work.</p><span class="cta">Coming soon</span></div>
+  <a class="glass card" href="https://www.redbubble.com/people/superdooperman/shop?asc=u" target="_blank" rel="noopener"><span class="k">🛍️</span><div class="name">Shop</div><p class="desc">Superdooperman on Redbubble.</p><span class="cta">Visit the shop →</span></a>
 </section>
-
-<section aria-labelledby="tools">
-<h2 class="row" id="tools">🧰 Tools</h2>
-<div class="grid">
-  <a href="pwas/TimeTracker.html" class="glass card"><span class="badge">📶 Offline · Add to Home</span><div class="icon" aria-hidden="true">⏱️</div><div class="name">Time Tracker</div><p class="hook">Clock your hours without signing up for anything.</p><p class="desc">Track your work sessions, tasks, and total time. Simple, clean, and works offline.</p><div class="chips"><span class="chip tool">Tool</span><span class="chip off">Offline</span></div></a>
-  <a href="pwas/x-pulse.html" class="glass card"><span class="badge">📶 Offline · Add to Home</span><div class="icon" aria-hidden="true">📰</div><div class="name">News X-Pulse</div><p class="hook">Today's headlines, cut down to just the pulse.</p><p class="desc">A multi row ticker of latest news on X</p><div class="chips"><span class="chip tool">Tool</span></div></a>
-  <a href="pwas/dazed-map/" class="glass card"><span class="badge">📶 Offline · Add to Home</span><div class="icon" aria-hidden="true">🗺️</div><div class="name">Dazed &amp; Confused Map</div><p class="hook">Cruise the Austin spots where the 1993 classic was filmed. Alright, alright, alright.</p><p class="desc">Austin filming locations from the 1993 movie. Desktop sidebar or a scaling mobile map.</p><div class="chips"><span class="chip tool">Tool</span></div></a>
-  <a href="pwas/Video-downloader.html" class="glass card"><span class="badge">📶 Offline · Add to Home</span><div class="icon" aria-hidden="true">📼</div><div class="name">Video Downloader</div><p class="desc">Paste in a video link to download.</p><div class="chips"><span class="chip tool">Tool</span></div></a>
-  <a href="pwas/AppLog.html" class="glass card"><span class="badge">📶 Offline · Add to Home</span><div class="icon" aria-hidden="true">📱</div><div class="name">AppLog</div><p class="desc">Catalog to Identify Installed Apps</p><div class="chips"><span class="chip tool">Tool</span></div></a>
-  <!-- Future PWAs go here – copy a card block above -->
-</div>
-</section>
-
-<section class="glass install" aria-labelledby="inst">
-  <h2 id="inst">📲 Add any app to your home screen</h2>
-  <div><b>iPhone / iPad (Safari)</b><ol><li>Open the app</li><li>Tap Share ⬆️</li><li>Tap <b>Add to Home Screen</b></li></ol></div>
-  <div><b>Android (Chrome)</b><ol><li>Open the app</li><li>Tap the ⋮ menu</li><li>Tap <b>Install app</b> or <b>Add to Home screen</b></li></ol></div>
-  <div><b>Desktop (Chrome / Edge)</b><ol><li>Open the app</li><li>Click the install icon in the address bar</li><li>It then launches like a native app, even offline</li></ol></div>
-</section>
-
-<form class="glass signup" id="signup" action="#" method="post" data-placeholder="newsletter">
-  <h2>✉️ Get new apps first</h2>
-  <label for="em" class="skip">Email address</label>
-  <input id="em" type="email" name="email" placeholder="you@example.com" autocomplete="email" required>
-  <button class="btn primary" type="submit">Notify me</button>
-</form>
 </main>
-
 <footer>
   <div class="links">
-    <a class="btn" href="#" data-placeholder="tip-jar">🪙 Keep the arcade free, toss a coin in the machine</a>
-    <a class="btn" href="#signup">✉️ Get new apps first</a>
-    <a class="btn" href="https://www.redbubble.com/people/superdooperman/shop?asc=u" target="_blank" rel="noopener">🛍️ Superdooperman on Redbubble</a>
-    <span class="btn soon" aria-disabled="true">🐓 Radioactive Rooster, coming soon</span>
+    <a class="btn" href="#" data-placeholder="tip-jar">🪙 Tip jar</a>
   </div>
-  Hosted on GitHub Pages • All apps work offline
+  Hosted on GitHub Pages
 </footer>
 </div>
 </body>
