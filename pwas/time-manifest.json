@@ -1,25 +1,42 @@
 {
-  "name": "TimeTrack",
-  "short_name": "TimeTrack",
-  "description": "Offline time tracker with sessions and history",
+  "name": "Rooster Timer",
+  "short_name": "Rooster",
+  "description": "Pomodoro egg timer + time tracker starring Radioactive Rooster. Works offline.",
   "start_url": "/pwas/TimeTracker.html",
   "scope": "/pwas/",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "theme_color": "#007bff",
-  "background_color": "#f8f9fa",
-  "categories": ["productivity"],
+  "orientation": "any",
+  "theme_color": "#08080a",
+  "background_color": "#08080a",
+  "categories": [
+    "productivity"
+  ],
   "icons": [
     {
-      "src": "https://via.placeholder.com/192/007bff/ffffff?text=⏱️",
+      "src": "time/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://via.placeholder.com/512/007bff/ffffff?text=⏱️",
+      "src": "time/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "time/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Focus",
+      "url": "/pwas/TimeTracker.html?pomo=start"
+    },
+    {
+      "name": "Task Tracker",
+      "url": "/pwas/TimeTracker.html?tab=track"
     }
   ]
 }

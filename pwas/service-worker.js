@@ -2,14 +2,15 @@
 // Games with their own sw.js (moon-axis/, phish-desk/, ...) register a narrower
 // scope, so they are controlled by their own worker, not this one.
 // VERSION is set by scripts/bump-sw.sh (content hash of shared files); run it before every push.
-const VERSION = '20261013-6cb79c63bf';
+const VERSION = '20261013-0c3a7e35d4';
 const PREFIX = 'pwas-shared-';
 const CACHE = PREFIX + VERSION;
 const PRECACHE = [
   './', './index.html', './inkblob.css', './sw-register.js', './manifest.webmanifest',
   './fonts/LilitaOne-Regular.woff2', './boxart/moon-axis-cover.webp', './boxart/moon-axis-unleashed-cover.webp', './fonts/OFL.txt',
   './games/shelf.css', './brand/superdoop-arcade.svg',
-  './TimeTracker.html', './time-manifest.json',
+  './TimeTracker.html', './time-manifest.json', './time/app.js', './time/egg.js', './time/rooster.js', './time/time.css',
+  './time/icon-192.png', './time/icon-512.png', './time/rooster-sprites.png',
   './Video-downloader.html', './video-manifest.json',
   './x-pulse.html', './AppLog.html',
   './games/applog.html', './games/choplifter.html', './games/dazed-map.html', './games/moon-axis-unleashed.html', './games/moon-axis.html', './games/night-lark.html', './games/phish-desk.html', './games/stick-shift.html', './games/time-tracker.html', './games/video-downloader.html', './games/x-pulse.html'
