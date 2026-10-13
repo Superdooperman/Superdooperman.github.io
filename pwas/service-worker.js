@@ -7,7 +7,7 @@ const PREFIX = 'pwas-shared-';
 const CACHE = PREFIX + VERSION;
 const PRECACHE = [
   './', './index.html', './inkblob.css', './sw-register.js', './manifest.webmanifest',
-  './fonts/LilitaOne-Regular.woff2', './boxart/moon-axis-poster.webp', './fonts/OFL.txt',
+  './fonts/LilitaOne-Regular.woff2', './boxart/moon-axis-cover.webp', './boxart/moon-axis-unleashed-cover.webp', './fonts/OFL.txt',
   './games/shelf.css', './brand/superdoop-arcade.svg',
   './TimeTracker.html', './time-manifest.json',
   './Video-downloader.html', './video-manifest.json',
