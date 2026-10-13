@@ -1,7 +1,7 @@
 {
-  "name": "Superdooper",
-  "short_name": "Superdooper",
-  "description": "Superdooper: games and tools that run in your browser.",
+  "name": "Superdooper Arcade",
+  "short_name": "Superdoop",
+  "description": "Superdooper Arcade: games and tools that run in your browser.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

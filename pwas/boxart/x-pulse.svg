@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 840" width="600" height="840"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#111111"/><stop offset="1" stop-color="#000"/></linearGradient></defs>
 <rect width="600" height="840" fill="url(#bg)"/><rect x="18" y="18" width="564" height="804" fill="none" stroke="#ffffff" stroke-width="6"/>
-<text x="300" y="100" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="26" letter-spacing="8" fill="#ffffff">SUPERDOOP APP</text>
+<text x="300" y="100" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="26" letter-spacing="8" fill="#ffffff">SUPERDOOPER APP</text>
 <rect x="90" y="280" width="420" height="34" rx="17" fill="#ffffff"/><rect x="90" y="350" width="360" height="34" rx="17" fill="#e01e2b"/><rect x="90" y="420" width="300" height="34" rx="17" fill="#ffffff"/><rect x="90" y="490" width="240" height="34" rx="17" fill="#e01e2b"/>
 <text x="300" y="680" text-anchor="middle" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="72" fill="#e01e2b">X PULSE</text>
 <text x="300" y="735" text-anchor="middle" font-family="Arial,sans-serif" font-size="28" fill="#ddd">Latest News</text></svg>
