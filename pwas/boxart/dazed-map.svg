@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 840" width="600" height="840"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b2a10"/><stop offset="1" stop-color="#000"/></linearGradient></defs>
 <rect width="600" height="840" fill="url(#bg)"/><rect x="18" y="18" width="564" height="804" fill="none" stroke="#ff9f1c" stroke-width="6"/>
-<text x="300" y="100" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="26" letter-spacing="8" fill="#ff9f1c">SUPERDOOP APP</text>
+<text x="300" y="100" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="26" letter-spacing="8" fill="#ff9f1c">SUPERDOOPER APP</text>
 <path d="M300 560 C200 420 180 380 180 320 a120 120 0 0 1 240 0 c0 60 -20 100 -120 240Z" fill="#ff9f1c"/><circle cx="300" cy="320" r="45" fill="#fff3c4"/>
 <text x="300" y="680" text-anchor="middle" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="60" fill="#fff3c4" textLength="530" lengthAdjust="spacingAndGlyphs">DAZED &amp; CONFUSED</text>
 <text x="300" y="735" text-anchor="middle" font-family="Arial,sans-serif" font-size="28" fill="#ddd">Austin Film Map</text></svg>

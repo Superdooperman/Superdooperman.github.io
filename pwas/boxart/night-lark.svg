@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 840" width="600" height="840"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#060a1f"/><stop offset="1" stop-color="#000"/></linearGradient></defs>
 <rect width="600" height="840" fill="url(#bg)"/><rect x="18" y="18" width="564" height="804" fill="none" stroke="#7a5cff" stroke-width="6"/>
-<text x="300" y="100" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="26" letter-spacing="8" fill="#7a5cff">SUPERDOOP GAME</text>
+<text x="300" y="100" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="26" letter-spacing="8" fill="#7a5cff">SUPERDOOPER GAME</text>
 <circle cx="420" cy="230" r="70" fill="#f5e663"/><circle cx="450" cy="210" r="62" fill="url(#bg)"/><circle cx="120" cy="180" r="5" fill="#f5e663"/><circle cx="200" cy="260" r="5" fill="#f5e663"/><circle cx="330" cy="150" r="5" fill="#f5e663"/><circle cx="150" cy="420" r="5" fill="#f5e663"/><circle cx="480" cy="430" r="5" fill="#f5e663"/><path d="M130 520 Q230 420 300 500 Q370 420 470 520 Q370 470 300 540 Q230 470 130 520Z" fill="#7a5cff"/>
 <text x="300" y="680" text-anchor="middle" font-family="Arial Black,Impact,sans-serif" font-weight="900" font-size="72" fill="#f5e663">NIGHT LARK</text>
 <text x="300" y="735" text-anchor="middle" font-family="Arial,sans-serif" font-size="28" fill="#ddd"></text></svg>
