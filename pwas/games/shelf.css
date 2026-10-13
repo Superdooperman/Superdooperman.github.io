@@ -30,3 +30,17 @@ background:repeating-linear-gradient(to bottom,transparent 0,transparent 318px,#
 .controls{background:#121212;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:16px 20px;max-width:60ch}.controls h2{margin:0 0 8px;font-size:1.1rem}
 .controls dt{font-weight:800;color:#ff6a64}.controls dd{margin:0 0 8px;color:#ccc}
 footer{text-align:center;color:#888;padding:20px 0 40px;font-size:.9rem}
+/* ---- Ink Blob theme (Superdooper) ---- */
+body{background:radial-gradient(ellipse at top,#2a0306 0,#111 55%) fixed;font-family:var(--ink-body)}
+.top .ink-logo{font-size:clamp(1.5rem,4.5vw,2.4rem)}
+h1.shelf-title,.detail h1{font-family:var(--ink-display);font-weight:400;color:var(--ink-red);transform:skewX(-8deg);
+  -webkit-text-stroke:5px var(--ink-black);paint-order:stroke fill;text-shadow:4px 4px 0 var(--ink-white);letter-spacing:.03em;display:table;transform-origin:left}
+.btn{font-family:var(--ink-display);letter-spacing:.04em;background:var(--ink-white);color:var(--ink-black);border:3px solid var(--ink-black);box-shadow:0 4px 0 var(--ink-red);transform:skewX(-6deg)}
+.label{font-family:var(--ink-display);font-weight:400;letter-spacing:.03em}
+.play{font-family:var(--ink-display);font-weight:400;background:var(--ink-red);border:4px solid var(--ink-black);
+  border-radius:999px;box-shadow:0 6px 0 var(--ink-black),0 0 0 3px var(--ink-white);transform:skewX(-6deg)}
+.controls{border:3px solid var(--ink-red);border-radius:18px 22px 16px 24px;box-shadow:6px 6px 0 var(--ink-red)}
+.controls h2{font-family:var(--ink-display);font-weight:400;color:var(--ink-red)}
+.tag{color:#ff8a84}
+h1.shelf-title:has(.ink-logo){-webkit-text-stroke:0;text-shadow:none;transform:none;font-size:clamp(2rem,7vw,3.6rem);margin:0 0 10px}
+.top:not(:has(.ink-logo)){justify-content:flex-end}
