@@ -6,7 +6,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 SW=pwas/service-worker.js
 # Every same-folder shared file under pwas/ except per-game folders that own an sw.js.
-mapfile -t FILES < <(cd pwas && find . -type f \( -name '*.html' -o -name '*.css' -o -name '*.js' -o -name '*.json' -o -name '*.webmanifest' -o -name '*.svg' -o -name '*.woff2' -o -name '*.txt' \) \
+mapfile -t FILES < <(cd pwas && find . -type f \( -name '*.html' -o -name '*.css' -o -name '*.js' -o -name '*.json' -o -name '*.webmanifest' -o -name '*.svg' -o -name '*.woff2' -o -name '*.webp' -o -name '*.png' -o -name '*.jpg' -o -name '*.txt' \) \
   | while read -r f; do d=${f#./}; top=${d%%/*}; [[ "$d" != */* || ! -f "$top/sw.js" ]] && [[ "$d" != service-worker.js ]] && echo "$d"; done | sort)
 HASH=$(cd pwas && cat "${FILES[@]}" | sha256sum | cut -c1-10)
 NEW="$(date +%Y%m%d)-$HASH"
