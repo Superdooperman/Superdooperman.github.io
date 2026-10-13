@@ -1,12 +1,13 @@
 // Shared service worker for the /pwas/ shelf + tools.
 // Games with their own sw.js (moon-axis/, phish-desk/, ...) register a narrower
 // scope, so they are controlled by their own worker, not this one.
-// Bump VERSION on every deploy that changes shared files.
-const VERSION = '2026-10-13.1';
+// VERSION is set by scripts/bump-sw.sh (content hash of shared files); run it before every push.
+const VERSION = '20261013-20adb2be17';
 const PREFIX = 'pwas-shared-';
 const CACHE = PREFIX + VERSION;
 const PRECACHE = [
-  './', './index.html', './inkblob.css', './sw-register.js',
+  './', './index.html', './inkblob.css', './sw-register.js', './manifest.webmanifest',
+  './fonts/LilitaOne-Regular.woff2', './fonts/OFL.txt',
   './games/shelf.css', './brand/superdoop-arcade.svg',
   './TimeTracker.html', './time-manifest.json',
   './Video-downloader.html', './video-manifest.json',
