@@ -1,6 +1,6 @@
 // Phish Desk service worker. Scope = its own folder. Cache name is content-hashed per build.
-const CACHE = 'phish-desk-v1.0.0-1a16afe884';
-const FILES = ["./","./assets/index-D3Lpbvjf.js","./icons/apple-touch-icon.png","./icons/icon-192.png","./icons/icon-512.png","./icons/maskable-192.png","./icons/maskable-512.png","./index.html","./manifest.json"];
+const CACHE = 'phish-desk-v1.0.1-bfbd495246';
+const FILES = ["./","./assets/index-BHTGVPyo.js","./icons/apple-touch-icon.png","./icons/icon-192.png","./icons/icon-512.png","./icons/maskable-192.png","./icons/maskable-512.png","./index.html","./manifest.json"];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)));
 });
