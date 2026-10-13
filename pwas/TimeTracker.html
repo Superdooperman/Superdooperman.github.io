@@ -1,397 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TimeTrack</title>
-  
-  <!-- Fixed manifest link for subfolder -->
-  <link rel="manifest" href="time-manifest.json">
-
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-    :root { --bg: #f8f9fa; --card: white; --text: #222; --primary: #007bff; }
-    [data-theme="dark"] { --bg: #121212; --card: #1e1e1e; --text: #eee; --primary: #4da3ff; }
-    body { font-family: 'Inter', -apple-system, sans-serif; margin: 0; padding: 0; background: var(--bg); color: var(--text); transition: background 0.3s; }
-    .header { background: var(--card); padding: 16px 20px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
-    h1 { margin: 0; font-size: 22px; font-weight: 600; }
-    .header-btn { background: none; border: none; font-size: 20px; padding: 8px; color: #666; }
-
-    .timer-area { background: var(--card); margin: 16px; border-radius: 16px; padding: 24px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .timer { font-size: 48px; font-weight: 600; letter-spacing: 2px; margin: 12px 0; color: var(--primary); }
-    .stop-btn { background: #ff3b30; color: white; border: none; padding: 14px 32px; font-size: 18px; border-radius: 50px; width: 100%; }
-
-    .total-bar { background: var(--card); margin: 16px; padding: 16px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    .total-time { font-size: 28px; font-weight: 600; color: var(--primary); }
-
-    .tasks { padding: 0 16px 120px; }
-    .task-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-    .task-btn { background: var(--card); border: 2px solid #ddd; border-radius: 12px; padding: 16px 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: relative; cursor: pointer; }
-    .task-btn.running { border-color: var(--primary); background: rgba(0,123,255,0.1); }
-    .task-name-small { font-size: 15px; font-weight: 500; }
-    .task-time { font-size: 13px; color: var(--primary); margin-top: 4px; }
-    .delete-btn { position: absolute; top: 6px; right: 6px; background: #ff3b30; color: white; border: none; width: 22px; height: 22px; border-radius: 50%; font-size: 14px; display: none; }
-    .task-btn.edit-mode .delete-btn { display: block; }
-
-    .new-btn { position: fixed; bottom: 100px; left: 20px; right: 20px; background: var(--primary); color: white; border: none; border-radius: 50px; padding: 16px; font-size: 17px; font-weight: 600; box-shadow: 0 6px 20px rgba(0,123,255,0.3); z-index: 100; }
-
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; }
-    .modal-content { background: var(--card); width: 90%; max-width: 340px; border-radius: 16px; padding: 24px; color: var(--text); }
-
-    /* History */
-    .history-screen { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 300; overflow-y: auto; }
-    .history-header { padding: 16px 20px; background: var(--card); border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; }
-    .chart-container { margin: 16px; padding: 16px; background: var(--card); border-radius: 12px; }
-    canvas { width: 100% !important; height: 300px !important; }
-  </style>
-  <script src="sw-register.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rooster Timer · Superdooper Arcade</title>
+<meta name="theme-color" content="#08080a">
+<link rel="manifest" href="time-manifest.json">
+<link rel="icon" href="time/icon-192.png">
+<link rel="apple-touch-icon" href="time/icon-192.png">
+<link rel="stylesheet" href="inkblob.css">
+<link rel="stylesheet" href="time/time.css">
+<script src="sw-register.js" defer></script>
 </head>
-<body data-theme="light">
-
-  <div class="header">
-    <h1>⏱️ TimeTrack</h1>
-    <div>
-      <button class="header-btn" id="themeBtn">🌙</button>
-      <button class="header-btn" id="editBtn">✏️</button>
+<body class="ink-grain">
+<div class="wrap">
+  <header class="top">
+    <a class="btn" href="./">← Arcade</a>
+    <h1 class="ink-title tt-title">ROOSTER TIMER</h1>
+    <div class="top-r">
+      <button class="icon" id="muteBtn" title="Sound (M)" aria-label="Toggle sound">🔊</button>
+      <button class="icon" id="setBtn" title="Settings" aria-label="Settings">⚙</button>
     </div>
-  </div>
+  </header>
 
-  <!-- Current Timer -->
-  <div id="timerArea" class="timer-area" style="display: none;">
-    <div class="task-name" id="currentTaskName"></div>
-    <div class="timer" id="liveTimer">00:00:00</div>
-    <button id="stopBtn" class="stop-btn">Stop Timer</button>
-  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="pomo" class="on">🥚 Pomodoro</button>
+    <button role="tab" data-tab="track">⏱ Tracker</button>
+    <button role="tab" data-tab="hist">📊 History</button>
+  </nav>
 
-  <!-- Total -->
-  <div class="total-bar">
-    <div style="font-size:14px;color:#666;">Total Time Tracked</div>
-    <div class="total-time" id="totalTime">0h 0m 0s</div>
-    <button id="historyBtn" style="margin-top:12px;background:none;border:1px solid #007bff;color:#007bff;padding:8px 20px;border-radius:50px;font-size:15px;">View Breakdown & History</button>
-  </div>
-
-  <!-- Tasks -->
-  <div class="tasks">
-    <div class="section-title" style="display:flex;justify-content:space-between;">
-      <span>Tasks (sorted by time)</span>
-      <span id="sortInfo" style="font-size:13px;color:#666;">Most used first</span>
+  <!-- POMODORO -->
+  <section id="tab-pomo" class="tab on">
+    <div class="phase-pills" id="phasePills">
+      <button data-ph="focus" class="on">Focus</button><button data-ph="short">Short break</button><button data-ph="long">Long break</button>
     </div>
+    <div class="stage">
+      <div class="ring" id="ring">
+        <canvas id="egg" class="px" aria-hidden="true"></canvas>
+        <div class="bubble" id="bubble" hidden>PAH KAW!</div>
+      </div>
+      <canvas id="buddy" class="px buddy" width="32" height="32" aria-hidden="true"></canvas>
+    </div>
+    <div class="clock ink-title" id="clock" aria-live="off">25:00</div>
+    <div class="phase-label" id="phaseLabel">Focus · egg 1 of 4</div>
+    <div class="ctrls">
+      <button class="ink-btn" id="startBtn">▶ START</button>
+      <button class="btn2" id="skipBtn" title="Skip (S)">⏭ Skip</button>
+      <button class="btn2" id="resetBtn" title="Reset (R)">↺ Reset</button>
+    </div>
+    <label class="taskpick">Logging to
+      <select id="pomoTask"></select>
+    </label>
+    <div class="stats">
+      <div><b id="stToday">0</b><span>eggs today</span></div>
+      <div><b id="stStreak">0</b><span>day streak</span></div>
+      <div><b id="stTotal">0</b><span>eggs ever</span></div>
+    </div>
+    <div class="nest" id="nest" aria-label="Today's eggs"></div>
+    <p class="hint">Space start/pause · S skip · R reset · M mute</p>
+  </section>
+
+  <!-- TRACKER -->
+  <section id="tab-track" class="tab">
+    <div id="timerArea" class="card live" hidden>
+      <div class="task-name" id="currentTaskName"></div>
+      <div class="timer ink-title" id="liveTimer">00:00:00</div>
+      <button id="stopBtn" class="ink-btn">■ STOP</button>
+    </div>
+    <div class="card total">
+      <span>Total time tracked</span>
+      <div class="total-time" id="totalTime">0h 0m 0s</div>
+    </div>
+    <div class="row-h"><span>Tasks · most used first</span><button class="btn2 sm" id="editBtn">✏️ Edit</button></div>
     <div id="taskGrid" class="task-grid"></div>
+    <button id="newTaskBtn" class="ink-btn wide">+ NEW TASK &amp; START</button>
+  </section>
+
+  <!-- HISTORY -->
+  <section id="tab-hist" class="tab">
+    <div class="card"><canvas id="barChart" width="640" height="300"></canvas></div>
+    <h3>Sessions (newest first)</h3>
+    <div id="historyList"></div>
+    <div class="ctrls">
+      <button class="btn2" id="exportBtn">⬇ Export JSON</button>
+      <button class="btn2" id="importBtn">⬆ Import JSON</button>
+      <input type="file" id="importFile" accept="application/json,.json" hidden>
+    </div>
+  </section>
+</div>
+
+<!-- Modals -->
+<div id="newModal" class="modal"><div class="modal-content card">
+  <h2>New task</h2>
+  <input type="text" id="taskInput" class="ink-input" placeholder="Task name" autocomplete="off" maxlength="60">
+  <div class="mbtns"><button class="btn2" data-close>Cancel</button><button class="ink-btn" id="newOk">Start</button></div>
+</div></div>
+<div id="editModal" class="modal"><div class="modal-content card">
+  <h2>Rename task</h2>
+  <input type="text" id="editInput" class="ink-input" autocomplete="off" maxlength="60">
+  <div class="mbtns"><button class="btn2" data-close>Cancel</button><button class="ink-btn" id="editOk">Save</button></div>
+</div></div>
+<div id="setModal" class="modal"><div class="modal-content card">
+  <h2>Settings</h2>
+  <div class="grid2">
+    <label>Focus (min)<input type="number" class="ink-input" id="sFocus" min="1" max="180"></label>
+    <label>Short break<input type="number" class="ink-input" id="sShort" min="1" max="60"></label>
+    <label>Long break<input type="number" class="ink-input" id="sLong" min="1" max="90"></label>
+    <label>Long break every<input type="number" class="ink-input" id="sEvery" min="2" max="12"></label>
   </div>
+  <label class="chk"><input type="checkbox" id="sAuto"> Auto-start next phase</label>
+  <label class="chk"><input type="checkbox" id="sNotify"> Notifications when a phase ends</label>
+  <label class="chk"><input type="checkbox" id="sWake"> Keep screen awake while running</label>
+  <label>Volume <input type="range" id="sVol" min="0" max="1" step="0.05"></label>
+  <p class="small" id="spriteInfo"></p>
+  <div class="mbtns"><button class="btn2" id="testSnd">🐓 Test crow</button><button class="ink-btn" data-close>Done</button></div>
+</div></div>
 
-  <button id="newTaskBtn" class="new-btn">+ New Task & Start</button>
-
-  <!-- Modals -->
-  <div id="newModal" class="modal"><div class="modal-content">
-    <h2>New Task</h2>
-    <input type="text" id="taskInput" placeholder="Task name" autocomplete="off">
-    <div class="modal-btns" style="display:flex;gap:12px;margin-top:20px;">
-      <button onclick="hideNewModal()" style="flex:1;background:#eee;color:#222;padding:14px;border-radius:8px;">Cancel</button>
-      <button onclick="createAndStartTask()" style="flex:1;background:#007bff;color:white;padding:14px;border-radius:8px;">Start</button>
-    </div>
-  </div></div>
-
-  <div id="editModal" class="modal"><div class="modal-content">
-    <h2>Edit Task Name</h2>
-    <input type="text" id="editInput" autocomplete="off">
-    <div class="modal-btns" style="display:flex;gap:12px;margin-top:20px;">
-      <button onclick="hideEditModal()" style="flex:1;background:#eee;color:#222;padding:14px;border-radius:8px;">Cancel</button>
-      <button onclick="saveEditedName()" style="flex:1;background:#007bff;color:white;padding:14px;border-radius:8px;">Save</button>
-    </div>
-  </div></div>
-
-  <!-- History Screen -->
-  <div id="historyScreen" class="history-screen">
-    <div class="history-header">
-      <h2>Breakdown & History</h2>
-      <button onclick="closeHistory()" style="background:none;border:none;font-size:24px;">✕</button>
-    </div>
-    <div class="chart-container">
-      <canvas id="barChart" width="300" height="300"></canvas>
-    </div>
-    <div style="padding:16px;">
-      <h3>Session History (Newest First)</h3>
-      <div id="historyList"></div>
-      <button onclick="exportData()" style="width:100%;margin-top:20px;padding:14px;background:#007bff;color:white;border:none;border-radius:8px;">Export All Data (Copy to Clipboard)</button>
-    </div>
-  </div>
-
-  <script>
-    let tasks = JSON.parse(localStorage.getItem('timeTasks')) || [];
-    let sessions = JSON.parse(localStorage.getItem('timeSessions')) || [];
-    let currentSession = null;
-    let timerInterval = null;
-    let startTime = null;
-    let isEditMode = false;
-    let editingTaskId = null;
-    let isDark = localStorage.getItem('darkMode') === 'true';
-
-    // DOM elements
-    let taskGrid, timerArea, currentTaskNameEl, liveTimerEl, stopBtn, newTaskBtn,
-        newModal, editModal, taskInput, editInput, totalTimeEl, historyBtn,
-        historyScreen, historyList, editBtn, themeBtn;
-
-    function saveData() {
-      localStorage.setItem('timeTasks', JSON.stringify(tasks));
-      localStorage.setItem('timeSessions', JSON.stringify(sessions));
-    }
-
-    function formatDuration(seconds) {
-      const h = Math.floor(seconds / 3600);
-      const m = Math.floor((seconds % 3600) / 60);
-      const s = seconds % 60;
-      return `${h}h ${m}m ${s}s`;
-    }
-
-    function formatLiveTimer(ms) {
-      const totalSec = Math.floor(ms / 1000);
-      const h = Math.floor(totalSec / 3600).toString().padStart(2,'0');
-      const m = Math.floor((totalSec % 3600) / 60).toString().padStart(2,'0');
-      const s = (totalSec % 60).toString().padStart(2,'0');
-      return `${h}:${m}:${s}`;
-    }
-
-    function calculateTotalTime() {
-      const totalSec = tasks.reduce((sum, t) => sum + (t.totalSeconds || 0), 0);
-      totalTimeEl.textContent = formatDuration(totalSec);
-    }
-
-    function sortTasks() {
-      tasks.sort((a, b) => (b.totalSeconds || 0) - (a.totalSeconds || 0));
-    }
-
-    function renderTasks() {
-      sortTasks();
-      taskGrid.innerHTML = '';
-      tasks.forEach(task => {
-        const isRunning = currentSession && currentSession.taskId === task.id;
-        const btn = document.createElement('div');
-        btn.className = `task-btn ${isRunning ? 'running' : ''} ${isEditMode ? 'edit-mode' : ''}`;
-        btn.innerHTML = `
-          <div class="task-name-small">${task.name}</div>
-          <div class="task-time">${formatDuration(task.totalSeconds || 0)}</div>
-          <button class="delete-btn" onclick="deleteTask(${task.id}); event.stopImmediatePropagation();">×</button>
-        `;
-        btn.onclick = (e) => {
-          if (isEditMode) editTaskName(task.id);
-          else toggleTask(task.id);
-        };
-        taskGrid.appendChild(btn);
-      });
-    }
-
-    function toggleTask(taskId) {
-      if (isEditMode) return;
-      const task = tasks.find(t => t.id === taskId);
-      if (!task) return;
-
-      if (currentSession && currentSession.taskId === taskId) {
-        stopCurrentTimer();
-      } else {
-        if (currentSession) stopCurrentTimer();
-        currentSession = { taskId: task.id, startTime: Date.now() };
-        startTime = Date.now();
-        timerArea.style.display = 'block';
-        currentTaskNameEl.textContent = task.name;
-        startLiveTimer();
-        renderTasks();
-      }
-    }
-
-    function startLiveTimer() {
-      if (timerInterval) clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        liveTimerEl.textContent = formatLiveTimer(Date.now() - startTime);
-      }, 1000);
-    }
-
-    function stopCurrentTimer() {
-      if (!currentSession) return;
-      const elapsed = Math.floor((Date.now() - currentSession.startTime) / 1000);
-      const task = tasks.find(t => t.id === currentSession.taskId);
-      if (task) task.totalSeconds = (task.totalSeconds || 0) + elapsed;
-
-      sessions.unshift({
-        taskId: currentSession.taskId,
-        taskName: task ? task.name : 'Unknown',
-        start: currentSession.startTime,
-        duration: elapsed
-      });
-
-      clearInterval(timerInterval);
-      currentSession = null;
-      timerArea.style.display = 'none';
-      saveData();
-      renderTasks();
-      calculateTotalTime();
-    }
-
-    function createAndStartTask() {
-      const name = taskInput.value.trim();
-      if (!name) return;
-      const newTask = { id: Date.now(), name, totalSeconds: 0 };
-      tasks.unshift(newTask);
-      hideNewModal();
-      currentSession = { taskId: newTask.id, startTime: Date.now() };
-      startTime = Date.now();
-      timerArea.style.display = 'block';
-      currentTaskNameEl.textContent = newTask.name;
-      startLiveTimer();
-      saveData();
-      renderTasks();
-      calculateTotalTime();
-    }
-
-    function deleteTask(taskId) {
-      if (!confirm("Delete task and all time?")) return;
-      tasks = tasks.filter(t => t.id !== taskId);
-      sessions = sessions.filter(s => s.taskId !== taskId);
-      if (currentSession && currentSession.taskId === taskId) stopCurrentTimer();
-      saveData();
-      renderTasks();
-      calculateTotalTime();
-    }
-
-    function editTaskName(taskId) {
-      const task = tasks.find(t => t.id === taskId);
-      if (!task) return;
-      editingTaskId = taskId;
-      editInput.value = task.name;
-      editModal.style.display = 'flex';
-      setTimeout(() => editInput.focus(), 100);
-    }
-
-    function saveEditedName() {
-      const newName = editInput.value.trim();
-      if (newName && editingTaskId) {
-        const task = tasks.find(t => t.id === editingTaskId);
-        if (task) task.name = newName;
-        sessions.forEach(s => { if (s.taskId === editingTaskId) s.taskName = newName; });
-        saveData();
-        renderTasks();
-      }
-      hideEditModal();
-    }
-
-    function hideEditModal() { editModal.style.display = 'none'; editingTaskId = null; }
-    function hideNewModal() { newModal.style.display = 'none'; }
-
-    function toggleEditMode() {
-      isEditMode = !isEditMode;
-      editBtn.textContent = isEditMode ? 'Done' : '✏️';
-      renderTasks();
-    }
-
-    function toggleDarkMode() {
-      isDark = !isDark;
-      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-      themeBtn.textContent = isDark ? '☀️' : '🌙';
-      localStorage.setItem('darkMode', isDark);
-    }
-
-    function drawBarChart() {
-      const canvas = document.getElementById('barChart');
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      const maxTime = Math.max(...tasks.map(t => t.totalSeconds || 0), 1);
-      const barHeight = 35;
-      const spacing = 50;
-      const startY = 40;
-
-      tasks.forEach((task, i) => {
-        const time = task.totalSeconds || 0;
-        const width = (time / maxTime) * (canvas.width - 120);
-        const y = startY + i * spacing;
-
-        ctx.fillStyle = '#007bff';
-        ctx.fillRect(100, y, width, barHeight - 10);
-
-        ctx.fillStyle = isDark ? '#eee' : '#222';
-        ctx.font = '14px Inter';
-        ctx.textAlign = 'right';
-        ctx.fillText(task.name, 90, y + 20);
-
-        ctx.textAlign = 'left';
-        ctx.fillText(formatDuration(time), 110 + width + 10, y + 20);
-      });
-    }
-
-    function showHistory() {
-      historyList.innerHTML = '';
-      drawBarChart();
-
-      sessions.forEach(s => {
-        const item = document.createElement('div');
-        item.style = 'background:var(--card);padding:14px;margin-bottom:12px;border-radius:12px;border:1px solid #eee;';
-        const date = new Date(s.start).toLocaleString();
-        item.innerHTML = `
-          <div style="display:flex;justify-content:space-between;">
-            <strong>${s.taskName}</strong>
-            <span style="color:#007bff;">${formatDuration(s.duration)}</span>
-          </div>
-          <small style="color:#888;">${date}</small>
-        `;
-        historyList.appendChild(item);
-      });
-
-      if (sessions.length === 0) {
-        historyList.innerHTML = '<p style="text-align:center;color:#999;padding:40px;">No sessions recorded yet.</p>';
-      }
-
-      historyScreen.style.display = 'block';
-    }
-
-    function closeHistory() {
-      historyScreen.style.display = 'none';
-    }
-
-    function exportData() {
-      const data = { tasks, sessions, exportDate: new Date().toISOString() };
-      navigator.clipboard.writeText(JSON.stringify(data, null, 2)).then(() => {
-        alert("Data copied to clipboard! Paste it somewhere safe.");
-      });
-    }
-
-    function init() {
-      // Get DOM elements safely
-      taskGrid = document.getElementById('taskGrid');
-      timerArea = document.getElementById('timerArea');
-      currentTaskNameEl = document.getElementById('currentTaskName');
-      liveTimerEl = document.getElementById('liveTimer');
-      stopBtn = document.getElementById('stopBtn');
-      newTaskBtn = document.getElementById('newTaskBtn');
-      newModal = document.getElementById('newModal');
-      editModal = document.getElementById('editModal');
-      taskInput = document.getElementById('taskInput');
-      editInput = document.getElementById('editInput');
-      totalTimeEl = document.getElementById('totalTime');
-      historyBtn = document.getElementById('historyBtn');
-      historyScreen = document.getElementById('historyScreen');
-      historyList = document.getElementById('historyList');
-      editBtn = document.getElementById('editBtn');
-      themeBtn = document.getElementById('themeBtn');
-
-      if (!newTaskBtn) return;
-
-      if (isDark) document.documentElement.setAttribute('data-theme', 'dark');
-      if (themeBtn) themeBtn.textContent = isDark ? '☀️' : '🌙';
-
-      renderTasks();
-      calculateTotalTime();
-
-      // Attach buttons
-      if (newTaskBtn) newTaskBtn.onclick = () => { newModal.style.display = 'flex'; taskInput.focus(); };
-      if (stopBtn) stopBtn.onclick = stopCurrentTimer;
-      if (historyBtn) historyBtn.onclick = showHistory;
-      if (editBtn) editBtn.onclick = toggleEditMode;
-      if (themeBtn) themeBtn.onclick = toggleDarkMode;
-
-      if (taskInput) taskInput.addEventListener('keypress', e => { if (e.key === 'Enter') createAndStartTask(); });
-      if (editInput) editInput.addEventListener('keypress', e => { if (e.key === 'Enter') saveEditedName(); });
-
-      console.log("✅ TimeTracker initialized - buttons should work now");
-    }
-
-    window.addEventListener('load', init);
-  </script>
+<script src="time/rooster.js"></script>
+<script src="time/egg.js"></script>
+<script src="time/app.js"></script>
+</body>
+</html>
