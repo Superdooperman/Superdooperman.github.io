@@ -30,17 +30,22 @@ background:repeating-linear-gradient(to bottom,transparent 0,transparent 318px,#
 .controls{background:#121212;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:16px 20px;max-width:60ch}.controls h2{margin:0 0 8px;font-size:1.1rem}
 .controls dt{font-weight:800;color:#ff6a64}.controls dd{margin:0 0 8px;color:#ccc}
 footer{text-align:center;color:#888;padding:20px 0 40px;font-size:.9rem}
-/* ---- Ink Blob theme (Superdooper) ---- */
-body{background:radial-gradient(ellipse at top,#2a0306 0,#111 55%) fixed;font-family:var(--ink-body)}
-.top .ink-logo{font-size:clamp(1.5rem,4.5vw,2.4rem)}
-h1.shelf-title,.detail h1{font-family:var(--ink-display);font-weight:400;color:var(--ink-red);transform:skewX(-8deg);
-  -webkit-text-stroke:5px var(--ink-black);paint-order:stroke fill;text-shadow:4px 4px 0 var(--ink-white);letter-spacing:.03em;display:table;transform-origin:left}
-.btn{font-family:var(--ink-display);letter-spacing:.04em;background:var(--ink-white);color:var(--ink-black);border:3px solid var(--ink-black);box-shadow:0 4px 0 var(--ink-red);transform:skewX(-6deg)}
-.label{font-family:var(--ink-display);font-weight:400;letter-spacing:.03em}
-.play{font-family:var(--ink-display);font-weight:400;background:var(--ink-red);border:4px solid var(--ink-black);
-  border-radius:999px;box-shadow:0 6px 0 var(--ink-black),0 0 0 3px var(--ink-white);transform:skewX(-6deg)}
-.controls{border:3px solid var(--ink-red);border-radius:18px 22px 16px 24px;box-shadow:6px 6px 0 var(--ink-red)}
-.controls h2{font-family:var(--ink-display);font-weight:400;color:var(--ink-red)}
-.tag{color:#ff8a84}
-h1.shelf-title:has(.ink-logo){-webkit-text-stroke:0;text-shadow:none;transform:none;font-size:clamp(2rem,7vw,3.6rem);margin:0 0 10px}
+/* ---- Ink Blob theme (Superdooper, dark arcade) ---- */
+body{background:radial-gradient(ellipse at top,#1a0204 0,#08080a 60%) fixed;font-family:var(--ink-body)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;
+  background:repeating-linear-gradient(to bottom,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)}
+.wrap{border-top:3px solid var(--ink-red);box-shadow:0 -10px 30px -12px rgba(225,6,0,.7)}
+.top .ink-logo{font-size:clamp(1.4rem,4vw,2.1rem)}
+h1.shelf-title,.detail h1{font-family:var(--ink-display);font-weight:400;color:var(--ink-white);transform:skewX(-8deg);
+  transform-origin:left;text-shadow:4px 4px 0 #000,6px 6px 0 #000,0 0 18px rgba(225,6,0,.5);letter-spacing:.03em;display:table}
+h1.shelf-title:has(.ink-logo){text-shadow:none;transform:none;font-size:clamp(2.2rem,7vw,3.8rem);margin:6px 0 10px}
+.btn{font-family:var(--ink-display);letter-spacing:.04em;background:#141414;color:var(--ink-white);border:2px solid var(--ink-red);
+  box-shadow:0 0 12px rgba(225,6,0,.35)}
+.btn:hover{background:var(--ink-red)}
+.label{font-family:var(--ink-display);font-weight:400;letter-spacing:.03em;text-shadow:2px 2px 0 #000}
+.play{font-family:var(--ink-display);font-weight:400;background:var(--ink-red);border:3px solid #000;border-radius:999px;
+  box-shadow:0 6px 0 #5a0008,0 0 28px rgba(225,6,0,.6);text-shadow:2px 2px 0 #000}
+.controls{background:#101010;border:2px solid var(--ink-red);border-radius:16px;box-shadow:0 0 22px -6px rgba(225,6,0,.6)}
+.controls h2{font-family:var(--ink-display);font-weight:400;color:var(--ink-white);text-shadow:2px 2px 0 #000}
+.tag{color:#ff5a52}
 .top:not(:has(.ink-logo)){justify-content:flex-end}
