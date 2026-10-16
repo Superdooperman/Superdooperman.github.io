@@ -1,0 +1,72 @@
+// Radioactive Rooster BETA service worker. Own prefix "rr-beta-" so it never touches other games.
+const VERSION = "1";
+const CORE_CACHE = `rr-beta-core-v${VERSION}`;
+const PIXEL_CACHE = `rr-beta-pixel-v${VERSION}`;
+const FANCY_CACHE = `rr-beta-fancy-v${VERSION}`;
+const KEEP = [CORE_CACHE, PIXEL_CACHE, FANCY_CACHE];
+const CORE = [
+  "./",
+  "./index.html",
+  "./css/style.css",
+  "./js/main.js",
+  "./js/logic.js",
+  "./js/art.js",
+  "./js/audio.js",
+  "./data/script.js",
+  "./art/manifest.json",
+];
+
+async function precachePixel() {
+  const cache = await caches.open(PIXEL_CACHE);
+  try {
+    const manifest = await (await fetch("./art/manifest.json", { cache: "no-cache" })).json();
+    await Promise.all(Object.keys(manifest.assets).map(async (id) => {
+      const url = `./art/pixel/${id}.png`;
+      try {
+        const res = await fetch(url, { cache: "no-cache" });
+        if (res.ok) await cache.put(url, res);
+      } catch {}
+    }));
+  } catch {}
+}
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CORE_CACHE)
+      .then((cache) => cache.addAll(CORE))
+      .then(precachePixel)
+      .then(() => self.skipWaiting()),
+  );
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith("rr-beta-") && !KEEP.includes(k)).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim()),
+  );
+});
+
+function cacheFor(url) {
+  if (url.pathname.includes("/art/fancy/")) return FANCY_CACHE;
+  if (url.pathname.includes("/art/")) return PIXEL_CACHE;
+  return CORE_CACHE;
+}
+
+self.addEventListener("fetch", (event) => {
+  const req = event.request;
+  if (req.method !== "GET") return;
+  const url = new URL(req.url);
+  if (url.origin !== location.origin) return;
+  const name = cacheFor(url);
+  // Stale-while-revalidate. Only successful responses are cached, never 404s.
+  event.respondWith(
+    caches.open(name).then((cache) => cache.match(req).then((hit) => {
+      const fresh = fetch(req).then((res) => {
+        if (res.ok && res.type === "basic") cache.put(req, res.clone());
+        return res;
+      }).catch(() => hit || new Response("", { status: 504 }));
+      return hit || fresh;
+    })),
+  );
+});

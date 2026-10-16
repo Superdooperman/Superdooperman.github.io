@@ -1,0 +1,1 @@
+Drop fancy (high-res) art here with the same relative names as art/pixel/ (e.g. bg/hq.png, portrait/gobbler.png). PNG or WebP, same aspect ratio as the logical size in art/manifest.json (4x recommended). Missing files fall back to pixel art. See ../../ART-SPEC.md.

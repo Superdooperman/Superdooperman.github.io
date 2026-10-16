@@ -1,0 +1,341 @@
+:root {
+  --ink: #1a120c;
+  --cream: #f4e6c8;
+  --yolk: #f0c14a;
+  --comb: #c4232a;
+  --green: #1e7a3a;
+  --night: #140c18;
+  --wood: #2a1810;
+  --line: #3a2418;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at 20% 0%, #2a1840 0%, transparent 40%),
+    var(--night);
+  color: var(--cream);
+  font-family: Georgia, "Palatino Linotype", Palatino, serif;
+}
+
+button, input { font: inherit; color: inherit; }
+
+button {
+  cursor: pointer;
+  border: 2px solid var(--ink);
+  background: #2a2030;
+  color: var(--cream);
+  border-radius: 4px;
+}
+
+button:hover { filter: brightness(1.15); }
+
+button:focus-visible {
+  outline: 3px solid var(--yolk);
+  outline-offset: 2px;
+}
+
+.cabinet {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 12px 12px 28px;
+}
+
+.top {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.brand {
+  font-family: "Arial Black", Impact, sans-serif;
+  letter-spacing: 0.06em;
+  color: var(--yolk);
+}
+
+.room { opacity: 0.8; flex: 1; }
+
+.top button, .ghost { margin-left: auto; padding: 4px 10px; }
+
+.stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #120a16;
+  border: 4px solid var(--line);
+  box-shadow: 0 16px 40px #000;
+  overflow: hidden;
+}
+
+.plate {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #120a16;
+}
+
+.pose, .crow-flash {
+  position: absolute;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 0 rgba(0, 0, 0, 0.35));
+}
+
+.crow-flash {
+  left: 18%;
+  bottom: 0;
+  width: 34%;
+  z-index: 4;
+}
+
+.spot {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 6px;
+}
+
+.spot:hover,
+.spot:focus-visible {
+  background: rgba(240, 193, 74, 0.28);
+  outline: 2px solid rgba(240, 193, 74, 0.95);
+}
+
+.spotted { outline: 1px dashed rgba(240, 193, 74, 0.75); }
+
+.bust, .speaker {
+  position: absolute;
+  z-index: 3;
+  background: var(--cream);
+  border: 3px solid var(--ink);
+  box-shadow: 4px 4px 0 #000;
+}
+
+.bust {
+  top: 8px;
+  left: 8px;
+  width: 18%;
+  max-width: 140px;
+}
+
+.speaker {
+  left: 8px;
+  bottom: 8px;
+  width: 24%;
+  max-width: 190px;
+}
+
+.bust img, .speaker img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background: var(--cream);
+}
+
+.who {
+  font-family: "Arial Black", Impact, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: var(--ink);
+  padding: 2px 4px 4px;
+}
+
+.pah {
+  position: absolute;
+  inset: 8% 4% auto;
+  z-index: 5;
+  text-align: center;
+  font-family: "Arial Black", Impact, sans-serif;
+  font-size: clamp(48px, 9vw, 104px);
+  line-height: 0.9;
+  color: var(--comb);
+  letter-spacing: 0.02em;
+  transform: rotate(-6deg);
+  text-shadow:
+    3px 3px 0 var(--cream),
+    -2px 0 0 var(--ink),
+    0 4px 0 #000;
+  pointer-events: none;
+  animation: pop 0.35s ease-out;
+}
+
+@keyframes pop {
+  from { transform: rotate(-12deg) scale(0.4); }
+  to { transform: rotate(-6deg) scale(1); }
+}
+
+.caption {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  min-height: 4.6em;
+  text-align: left;
+  background: var(--cream);
+  color: var(--ink);
+  border-width: 3px;
+  padding: 10px 12px;
+  line-height: 1.35;
+}
+
+.choices {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.choice {
+  text-align: left;
+  background: #3a1830;
+  border-color: var(--comb);
+  padding: 8px 10px;
+}
+
+.verbs, .exits, .inv, .title-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.verbs button, .exits button, .title-actions button, .end-btn, .menu button {
+  padding: 8px 12px;
+}
+
+.verbs button[aria-pressed="true"],
+button.on {
+  background: var(--yolk);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.exits button { background: #241820; }
+
+.pending {
+  min-height: 1.3em;
+  margin-top: 6px;
+  color: var(--yolk);
+}
+
+.inv {
+  min-height: 84px;
+  padding: 8px;
+  background: #1b1218;
+  border: 2px solid var(--line);
+}
+
+.item {
+  width: 92px;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 6px;
+  background: #2a2030;
+}
+
+.item img { width: 48px; height: 48px; }
+
+.item span {
+  font-size: 12px;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.item.held {
+  background: var(--yolk);
+  color: var(--ink);
+}
+
+.empty { opacity: 0.7; align-self: center; }
+
+.menu {
+  margin-top: 10px;
+  padding: 12px;
+  background: #241820;
+  border: 2px solid var(--yolk);
+}
+
+.menu h2 { margin: 0 0 8px; font-size: 1.1rem; }
+
+.slot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.slot span { flex: 1; min-width: 180px; }
+
+.end-btn { margin-top: 8px; background: var(--comb); }
+
+.title-screen {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px 12px 40px;
+}
+
+.title-frame {
+  position: relative;
+  border: 4px solid var(--line);
+  box-shadow: 0 16px 40px #000;
+  background: #120a16;
+}
+
+.title-frame img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.title-copy {
+  text-align: center;
+  padding: 12px 8px 0;
+}
+
+.title-copy h1 {
+  margin: 0;
+  font-family: "Arial Black", Impact, sans-serif;
+  font-size: clamp(28px, 5vw, 64px);
+  letter-spacing: 0.04em;
+  color: var(--yolk);
+}
+
+.sub {
+  margin: 4px 0 0;
+  font-size: clamp(16px, 2vw, 24px);
+  text-shadow: 2px 2px 0 #000;
+}
+
+.logline, .how {
+  max-width: 46rem;
+}
+
+.logline { font-size: 1.15rem; }
+
+.how { opacity: 0.8; }
+
+@media (max-width: 720px) {
+  .bust { width: 28%; }
+  .speaker { width: 38%; }
+  .pah { font-size: 42px; }
+  .caption { min-height: 6em; }
+}
+
+/* Dual art mode */
+img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-edges; }
+.art-fancy img:not(.px) { image-rendering: auto; } /* pixel fallbacks stay crisp */
+.beta {
+  display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 3px;
+  background: var(--comb); color: #fff; font: 700 12px/1.4 "Arial Black", Impact, sans-serif;
+  letter-spacing: 0.08em; vertical-align: middle;
+}
+.title-copy .beta { font-size: 16px; }
+.art-toggle { margin-left: 0; }
+.plate { object-fit: fill; }
