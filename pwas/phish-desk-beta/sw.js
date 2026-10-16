@@ -1,6 +1,6 @@
 // Lamprey: In Too Deep service worker. Scope = its own folder. Cache name is content-hashed per build.
-const CACHE = 'lamprey-itd-beta-v1.0.1-e0ae166cb2';
-const FILES = ["./","./assets/index-DhxHMpRh.js","./icons/apple-touch-icon.png","./icons/icon-192.png","./icons/icon-512.png","./icons/maskable-192.png","./icons/maskable-512.png","./index.html","./manifest.json"];
+const CACHE = 'lamprey-itd-beta-v1.0.1-5547490cc9';
+const FILES = ["./","./assets/index-BKm2LTga.js","./icons/apple-touch-icon.png","./icons/icon-192.png","./icons/icon-512.png","./icons/maskable-192.png","./icons/maskable-512.png","./index.html","./manifest.json"];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)));
 });
