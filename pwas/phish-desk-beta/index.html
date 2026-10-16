@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<title>Lamprey: In Too Deep</title>
+<meta name="theme-color" content="#d6322e" />
+<link rel="manifest" href="./manifest.json" />
+<link rel="icon" href="./icons/icon-192.png" />
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+<style>
+  html,body{margin:0;height:100%;height:100dvh;background:#0d0d13;overflow:hidden;overscroll-behavior:none}
+  body{display:flex;align-items:center;justify-content:center;box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+  canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block;touch-action:none}
+  #rotate{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top) + 12px);display:none;justify-content:center;pointer-events:auto;z-index:2}
+  #rotate div{background:#d6322e;color:#fff;font:700 15px/1.3 system-ui,sans-serif;padding:10px 14px;border:3px solid #0d0d13;box-shadow:0 0 0 2px #fff;max-width:80vw;text-align:center}
+</style>
+  <script type="module" crossorigin src="./assets/index-DhxHMpRh.js"></script>
+</head>
+<body>
+<div id="rotate"><div>&#x21bb; Rotate your phone to landscape for the full desk.<br><small>Tap to dismiss</small></div></div>
+<canvas id="c"></canvas>
+</body>
+</html>
