@@ -1,0 +1,474 @@
+{
+ "version": 1,
+ "logical": {
+  "w": 320,
+  "h": 180
+ },
+ "sets": [
+  "pixel",
+  "fancy"
+ ],
+ "ext": [
+  "png",
+  "webp"
+ ],
+ "notes": "Files live at art/<set>/<id>.png (fancy may also be .webp). size = logical px; a file may be any whole multiple at the same aspect. Missing fancy -> pixel -> art/placeholders/<legacy>.",
+ "assets": {
+  "bg/title": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-title.jpg"
+  },
+  "bg/hq": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-hq.jpg"
+  },
+  "bg/fence": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-fence.jpg"
+  },
+  "bg/henhouse": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-henhouse.jpg"
+  },
+  "bg/barn": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-barn.jpg"
+  },
+  "bg/store": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-store.jpg"
+  },
+  "bg/wkuk": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-wkuk.jpg"
+  },
+  "bg/gate": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-gate.jpg"
+  },
+  "bg/midway": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-midway.jpg"
+  },
+  "bg/pavilion": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-pavilion.jpg"
+  },
+  "portrait/rooster-talk": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-rooster.png"
+  },
+  "portrait/rooster-smitten": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-rooster-smitten.png"
+  },
+  "portrait/rooster-embarrassed": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-rooster-embarrassed.png"
+  },
+  "portrait/rooster-crow": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-rooster-crow.png"
+  },
+  "portrait/gobbler": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-gobbler.png"
+  },
+  "portrait/henny": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-henny.jpg"
+  },
+  "portrait/peck": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-peck.jpg"
+  },
+  "portrait/deejay": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-deejay.jpg"
+  },
+  "portrait/guard": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-guard.jpg"
+  },
+  "portrait/barker": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-barker.jpg"
+  },
+  "portrait/clerk": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-clerk.jpg"
+  },
+  "sprite/rooster-squat": {
+   "kind": "sprite",
+   "size": [
+    48,
+    48
+   ],
+   "anchor": [
+    24,
+    48
+   ],
+   "frames": 1,
+   "grid": [
+    1,
+    1
+   ],
+   "fps": 0,
+   "legacy": "sprite-squat.png"
+  },
+  "sprite/rooster-crow": {
+   "kind": "sprite",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    32,
+    64
+   ],
+   "frames": 1,
+   "grid": [
+    1,
+    1
+   ],
+   "fps": 0,
+   "legacy": "sprite-crow.png"
+  },
+  "item/geiger": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-geiger.svg"
+  },
+  "item/bulb": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-bulb.svg"
+  },
+  "item/photo": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-photo.svg"
+  },
+  "item/spoon": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-spoon.svg"
+  },
+  "item/stub": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-stub.svg"
+  },
+  "item/grub": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-grub.svg"
+  },
+  "item/ribbon": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-ribbon.svg"
+  },
+  "item/sauce": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-sauce.svg"
+  },
+  "item/mirror": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-mirror.svg"
+  },
+  "item/bill": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-bill.svg"
+  },
+  "item/speaker": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-speaker.svg"
+  },
+  "item/map": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-map.svg"
+  },
+  "item/pass": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-pass.svg"
+  },
+  "item/basket": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-basket.svg"
+  }
+ }
+}

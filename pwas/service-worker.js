@@ -2,7 +2,7 @@
 // Games with their own sw.js (moon-axis/, phish-desk/, ...) register a narrower
 // scope, so they are controlled by their own worker, not this one.
 // VERSION is set by scripts/bump-sw.sh (content hash of shared files); run it before every push.
-const VERSION = '20261016-c857c6b3ec';
+const VERSION = '20261016-d980fc4620';
 const PREFIX = 'pwas-shared-';
 const CACHE = PREFIX + VERSION;
 const CORE_CACHE = 'pwas-ffmpeg-core-0.12.10';
@@ -20,7 +20,7 @@ const PRECACHE = [
   './games/applog.html', './games/choplifter.html', './games/dazed-map.html', './games/moon-axis-unleashed.html', './games/moon-axis.html', './games/night-lark.html', './games/radioactive-rooster.html', './boxart/radioactive-rooster.svg', './games/phish-desk.html', './games/stick-shift.html', './games/time-tracker.html', './games/video-toolbox.html', './archive/', './archive/archive.json', './archive/archive.css', './archive/thumbs/x-pulse.webp', './archive/thumbs/video-downloader.webp', './boxart/rooster-timer.svg', './boxart/video-toolbox.svg'
 ];
 // Folders that own their own service worker: never touch their requests.
-const OWN_SW = ['/moon-axis/', '/moon-axis-beta/', '/phish-desk-beta/', '/moon-axis-unleashed/', '/phish-desk/', '/choplifter/', '/night-lark/', '/stick-shift/', '/dazed-map/', '/radioactive-rooster/'];
+const OWN_SW = ['/moon-axis/', '/moon-axis-beta/', '/phish-desk-beta/', '/moon-axis-unleashed/', '/phish-desk/', '/choplifter/', '/night-lark/', '/stick-shift/', '/dazed-map/', '/radioactive-rooster/', '/radioactive-rooster-beta/'];
 
 self.addEventListener('install', (e) => {
   // Precache individually so one missing file doesn't abort the install.
