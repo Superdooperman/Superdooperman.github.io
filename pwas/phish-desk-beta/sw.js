@@ -1,6 +1,6 @@
 // Lamprey: In Too Deep service worker. Scope = its own folder. Cache name is content-hashed per build.
-const CACHE = 'lamprey-itd-beta-v2.0.0-7c55dce59a';
-const FILES = ["./","./assets/index-BNPRdZc2.js","./icons/apple-touch-icon.png","./icons/icon-192.png","./icons/icon-512.png","./icons/maskable-192.png","./icons/maskable-512.png","./index.html","./manifest.json"];
+const CACHE = 'lamprey-itd-beta-v2.0.0-e37e6d1371';
+const FILES = ["./","./assets/index-Bjw69P2P.js","./icons/apple-touch-icon.png","./icons/icon-192.png","./icons/icon-512.png","./icons/maskable-192.png","./icons/maskable-512.png","./index.html","./manifest.json"];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)));
 });
@@ -14,8 +14,10 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
+  // Navigations: network-first AND revalidate past the browser HTTP cache (GitHub Pages sends max-age=600),
+  // otherwise a fresh deploy can be hidden for up to 10 minutes.
   if (req.mode === 'navigate') { // network-first for the page so new versions are found
-    e.respondWith(fetch(req).then((r) => { const cp = r.clone(); caches.open(CACHE).then((c) => c.put('./', cp)); return r; })
+    e.respondWith(fetch(req, { cache: 'no-cache' }).then((r) => { const cp = r.clone(); caches.open(CACHE).then((c) => c.put('./', cp)); return r; })
       .catch(() => caches.match('./', { ignoreSearch: true })));
     return;
   }
