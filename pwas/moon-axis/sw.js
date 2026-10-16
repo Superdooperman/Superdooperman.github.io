@@ -1,4 +1,7 @@
-const CACHE = 'moon-axis-v18';
+// Bump VERSION (only place) to roll the cache.
+const VERSION = 19;
+const CACHE = `moon-axis-v${VERSION}`;
+const OWN = /^moon-axis-v\d+$/; // never touch moon-axis-unleashed-*, mxbeta-*, or anything else
 const ASSETS = [
   './',
   './index.html',
@@ -26,7 +29,7 @@ const ASSETS = [
   './music/sortie4-rescue.mp3',
   './music/sortie4-fork-live.mp3',
   './music/sortie4-fork-dead.mp3',
-  'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
+  './vendor/three.module.js',
 ];
 
 self.addEventListener('install', (e) => {
@@ -37,20 +40,30 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => /^moon-axis-v\d+$/.test(k) && k !== CACHE).map((k) => caches.delete(k)))
+      Promise.all(keys.filter((k) => OWN.test(k) && k !== CACHE).map((k) => caches.delete(k)))
     )
   );
   self.clients.claim();
 });
 
+const RUNTIME = /\/(img|vox)\//;
 self.addEventListener('fetch', (e) => {
-  e.respondWith(
-    fetch(e.request)
-      .then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE).then((c) => c.put(e.request, copy));
-        return res;
-      })
-      .catch(() => caches.match(e.request))
-  );
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return; // never cache cross-origin
+  const put = (res) => {
+    if (res && res.ok && res.type === 'basic') {
+      const copy = res.clone();
+      caches.open(CACHE).then((c) => c.put(req, copy));
+    }
+    return res;
+  };
+  if (RUNTIME.test(url.pathname)) {
+    // Cache-first for big immutable media (img/vox), filled at runtime.
+    e.respondWith(caches.match(req).then((hit) => hit || fetch(req).then(put)));
+    return;
+  }
+  // Network-first for code/HTML so updates land; cache fallback offline.
+  e.respondWith(fetch(req).then(put).catch(() => caches.match(req)));
 });

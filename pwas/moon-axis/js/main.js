@@ -78,37 +78,37 @@ const ATTRACT_HOLD = 6;
 const ATTRACT_REST = 8;
 
 const ATTRACT_STORY = [
-  { img: 'img/attract/attract_01_void.jpg', title: 'THE PACIFIC VOID, 1947.', body: 'THE WAR DID NOT STOP AT THE SEA.\nIT WENT UP.' },
-  { img: 'img/attract/attract_02_selene.jpg', title: 'MONDSTAB HOLDS THE FAR SIDE.', body: 'FESTUNG SELENE.\nA GUN CUT FROM THE MOON ITSELF.' },
-  { img: 'img/attract/attract_03_rail.jpg', title: 'ONE ROD HAS ALREADY FIRED.', body: 'A SECOND IS ON THE RAIL.\nTHE YARD THAT FEEDS IT IS MOVING.' },
-  { img: 'img/attract/attract_04_doors.jpg', title: 'YOU ARE CAT.', body: 'F6F-V VOIDCAT.\nHALE HAS THE DECK. FORK HAS YOUR WING.\nOPEN THE DOORS.\nBE WARY OF A CHANNEL THAT GOES QUIET.' },
+  { img: 'img/attract/attract_01_void.webp', title: 'THE PACIFIC VOID, 1947.', body: 'THE WAR DID NOT STOP AT THE SEA.\nIT WENT UP.' },
+  { img: 'img/attract/attract_02_selene.webp', title: 'MONDSTAB HOLDS THE FAR SIDE.', body: 'FESTUNG SELENE.\nA GUN CUT FROM THE MOON ITSELF.' },
+  { img: 'img/attract/attract_03_rail.webp', title: 'ONE ROD HAS ALREADY FIRED.', body: 'A SECOND IS ON THE RAIL.\nTHE YARD THAT FEEDS IT IS MOVING.' },
+  { img: 'img/attract/attract_04_doors.webp', title: 'YOU ARE CAT.', body: 'F6F-V VOIDCAT.\nHALE HAS THE DECK. FORK HAS YOUR WING.\nOPEN THE DOORS.\nBE WARY OF A CHANNEL THAT GOES QUIET.' },
 ];
 const ATTRACT_CHARS = [
-  { kind: 'char', img: 'img/charcards/charcard_catshadow.jpg', title: 'CAT', body: 'Voidcat. The seat you are in.\nPacific Void Command. No face on the wire, on purpose.\nFlies the F6F-V. Guns, a fusion ring, and a mouth he should use less.\nIf the channel is quiet, he is still up.' },
-  { kind: 'char', img: 'img/charcards/charcard_hale.jpg', title: 'HALE', body: 'Captain. Flag bridge, carrier in orbit.\nGives the order and does not decorate it.\nThree things, then launch. He counts you home on the hook.' },
-  { kind: 'char', img: 'img/charcards/charcard_fork.jpg', title: 'FORK', body: 'Lieutenant Reyes. Callsign Fork.\nYour wing. Twin-boom fighter, cyan mark on the helmet.\nShe peels targets off you and does not ask you to thank her.\nIf her channel goes quiet, do not sit on it.' },
-  { kind: 'char', img: 'img/charcards/charcard_sichel.jpg', title: 'SICHEL', body: 'Mondsichel. Flying wing.\nThe rival. Wide turn, long gun, red crescent.\nHe talks like the fight is a courtesy.\nDo not chase him off the brief.' },
-  { kind: 'char', img: 'img/charcards/charcard_geist.jpg', title: 'GEIST', body: 'Silbergeist. Twin nacelle.\nHe does not fly the patrol. He comes down for the rod.\nSilver helmet, two engines, mean on the wire.\nIf the cradle is still alive, he is already in the dark.' },
-  { kind: 'char', img: 'img/charcards/charcard_rabe.jpg', title: 'RABE', body: 'Oberst. Festung Selene.\nThe man at the foundry console, not the man in the dart.\nCalm. The gun is his. The moon is the barrel.\nHe will still be talking when the well starts to close.' },
-  { kind: 'char', img: 'img/charcards/charcard_mond.jpg', title: 'MONDSTAB', body: 'Dart pilot. The ones in the trench.\nRed crescent, short life, shorter temper.\nThey are the noise on the channel.\nThe aces are the ones who do not yell.' },
+  { kind: 'char', img: 'img/charcards/charcard_catshadow.webp', title: 'CAT', body: 'Voidcat. The seat you are in.\nPacific Void Command. No face on the wire, on purpose.\nFlies the F6F-V. Guns, a fusion ring, and a mouth he should use less.\nIf the channel is quiet, he is still up.' },
+  { kind: 'char', img: 'img/charcards/charcard_hale.webp', title: 'HALE', body: 'Captain. Flag bridge, carrier in orbit.\nGives the order and does not decorate it.\nThree things, then launch. He counts you home on the hook.' },
+  { kind: 'char', img: 'img/charcards/charcard_fork.webp', title: 'FORK', body: 'Lieutenant Reyes. Callsign Fork.\nYour wing. Twin-boom fighter, cyan mark on the helmet.\nShe peels targets off you and does not ask you to thank her.\nIf her channel goes quiet, do not sit on it.' },
+  { kind: 'char', img: 'img/charcards/charcard_sichel.webp', title: 'SICHEL', body: 'Mondsichel. Flying wing.\nThe rival. Wide turn, long gun, red crescent.\nHe talks like the fight is a courtesy.\nDo not chase him off the brief.' },
+  { kind: 'char', img: 'img/charcards/charcard_geist.webp', title: 'GEIST', body: 'Silbergeist. Twin nacelle.\nHe does not fly the patrol. He comes down for the rod.\nSilver helmet, two engines, mean on the wire.\nIf the cradle is still alive, he is already in the dark.' },
+  { kind: 'char', img: 'img/charcards/charcard_rabe.webp', title: 'RABE', body: 'Oberst. Festung Selene.\nThe man at the foundry console, not the man in the dart.\nCalm. The gun is his. The moon is the barrel.\nHe will still be talking when the well starts to close.' },
+  { kind: 'char', img: 'img/charcards/charcard_mond.webp', title: 'MONDSTAB', body: 'Dart pilot. The ones in the trench.\nRed crescent, short life, shorter temper.\nThey are the noise on the channel.\nThe aces are the ones who do not yell.' },
 ];
 const BRIEF_STILLS = {
   hale_brief_01: [
-    { src: 'img/briefings/brief01_01_kesselgrube.jpg', cap: 'Far side is lighting up a second crater. Kesselgrube.' },
-    { src: 'img/briefings/brief01_02_second_rod.jpg', cap: "They're loading another rod." },
-    { src: 'img/briefings/brief01_03_doors.jpg', cap: 'Moonhogs will follow once you open the doors.' },
+    { src: 'img/briefings/brief01_01_kesselgrube.webp', cap: 'Far side is lighting up a second crater. Kesselgrube.' },
+    { src: 'img/briefings/brief01_02_second_rod.webp', cap: "They're loading another rod." },
+    { src: 'img/briefings/brief01_03_doors.webp', cap: 'Moonhogs will follow once you open the doors.' },
   ],
   hale_brief_02: [
-    { src: 'img/briefings/brief02_01_stabzug.jpg', cap: 'Stabzug is on the rail.' },
-    { src: 'img/briefings/brief02_02_cradle.jpg', cap: 'Meteor-iron flatcars, a cradle.' },
-    { src: 'img/briefings/brief02_03_aa_tail.jpg', cap: 'AA cars on the tail.' },
-    { src: 'img/briefings/brief02_04_geist.jpg', cap: "If a twin-engine ghost drops in, that's Geist." },
+    { src: 'img/briefings/brief02_01_stabzug.webp', cap: 'Stabzug is on the rail.' },
+    { src: 'img/briefings/brief02_02_cradle.webp', cap: 'Meteor-iron flatcars, a cradle.' },
+    { src: 'img/briefings/brief02_03_aa_tail.webp', cap: 'AA cars on the tail.' },
+    { src: 'img/briefings/brief02_04_geist.webp', cap: "If a twin-engine ghost drops in, that's Geist." },
   ],
   hale_brief_03: [
-    { src: 'img/briefings/brief03_01_rod_stayed.jpg', cap: "The yard is slag. The rod didn't leave." },
-    { src: 'img/briefings/brief03_02_mouth.jpg', cap: "Mouth looks like a crater. It isn't." },
-    { src: 'img/briefings/brief03_03_foundry.jpg', cap: 'You fly in, you kill the foundry, you fly out.' },
-    { src: 'img/briefings/brief03_04_sichel.jpg', cap: 'If Sichel is on the channel, do not chase him.' },
+    { src: 'img/briefings/brief03_01_rod_stayed.webp', cap: "The yard is slag. The rod didn't leave." },
+    { src: 'img/briefings/brief03_02_mouth.webp', cap: "Mouth looks like a crater. It isn't." },
+    { src: 'img/briefings/brief03_03_foundry.webp', cap: 'You fly in, you kill the foundry, you fly out.' },
+    { src: 'img/briefings/brief03_04_sichel.webp', cap: 'If Sichel is on the channel, do not chase him.' },
   ],
 };
 
@@ -174,7 +174,7 @@ function buildAttractSeq() {
   return [
     ...ATTRACT_STORY,
     ...chars,
-    { img: 'img/attract/attract_montage.jpg', title: '', body: '', kicker: 'MOON AXIS' },
+    { img: 'img/attract/attract_montage.webp', title: '', body: '', kicker: 'MOON AXIS' },
   ];
 }
 
@@ -642,6 +642,8 @@ function syncSettingsUI() {
   const hap = document.getElementById('opt-haptics');
   inv.textContent = Settings.invertY ? 'INVERT Y  ON' : 'INVERT Y  OFF';
   inv.classList.toggle('on', Settings.invertY);
+  const invT = document.getElementById('opt-invert-title');
+  if (invT) { invT.textContent = inv.textContent; invT.classList.toggle('on', Settings.invertY); }
   hap.textContent = Settings.hapticLabel();
   hap.classList.toggle('on', Settings.haptics);
   const hint = document.getElementById('fs-hint');
@@ -718,6 +720,12 @@ document.getElementById('btn-resume').addEventListener('click', (e) => {
 });
 document.getElementById('opt-invert').addEventListener('click', (e) => {
   e.preventDefault();
+  Settings.setInvertY(!Settings.invertY);
+  syncSettingsUI();
+});
+document.getElementById('opt-invert-title').addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
   Settings.setInvertY(!Settings.invertY);
   syncSettingsUI();
 });

@@ -106,8 +106,8 @@ function portraitFor(id) {
   const key = PORT_KEY[speakerOf(id)];
   if (!key) return null;
   return isCloseCue(id)
-    ? `img/portraits/port_${key}_close.png`
-    : `img/portraits/port_${key}.png`;
+    ? `img/portraits/port_${key}_close.webp`
+    : `img/portraits/port_${key}.webp`;
 }
 
 const Vox = (() => {
@@ -253,7 +253,7 @@ const Vox = (() => {
       ensure();
       if (preloadPromise) return preloadPromise;
       const ports = ['cat', 'hale', 'fork', 'rabe', 'sichel', 'geist', 'mond']
-        .flatMap((k) => [`img/portraits/port_${k}.png`, `img/portraits/port_${k}_close.png`]);
+        .flatMap((k) => [`img/portraits/port_${k}.webp`, `img/portraits/port_${k}_close.webp`]);
       preloadPromise = Promise.all([
         ...IDS.map(async (id) => {
           try {

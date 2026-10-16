@@ -1,6 +1,6 @@
 // Bump VERSION (only place) to roll the cache.
 // Prefix deliberately NOT 'moon-axis-': the live moon-axis sw deletes every 'moon-axis-*' cache.
-const VERSION = 18;
+const VERSION = 19;
 const PREFIX = 'mxbeta-';
 const CACHE = `${PREFIX}v${VERSION}`;
 const ASSETS = [
