@@ -8,7 +8,7 @@ const CACHE = PREFIX + VERSION;
 const CORE_CACHE = 'pwas-ffmpeg-core-0.12.10';
 const PRECACHE = [
   './', './index.html', './inkblob.css', './sw-register.js', './manifest.webmanifest',
-  './fonts/LilitaOne-Regular.woff2', './boxart/moon-axis-cover.webp', './boxart/moon-axis-unleashed-cover.webp', './boxart/lamprey-cover.webp', './boxart/rooster-timer-cover.webp', './fonts/OFL.txt',
+  './fonts/LilitaOne-Regular.woff2', './boxart/moon-axis-cover.webp', './boxart/moon-axis-unleashed-cover.webp', './boxart/lamprey-cover.webp', './boxart/rooster-timer-cover.webp', './boxart/radioactive-rooster-cover.webp', './fonts/OFL.txt',
   './games/shelf.css', './brand/superdoop-arcade.svg',
   './TimeTracker.html', './time-manifest.json', './time/app.js', './time/egg.js', './time/rooster.js', './time/time.css',
   './time/icon-192.png', './time/icon-512.png', './time/rooster-sprites.png',
