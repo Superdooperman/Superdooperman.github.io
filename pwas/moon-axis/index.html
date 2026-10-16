@@ -15,7 +15,7 @@
   <script type="importmap">
   {
     "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
+      "three": "./vendor/three.module.js"
     }
   }
   </script>
@@ -26,6 +26,7 @@
     <div id="crt"></div>
     <div id="vignette"></div>
     <div id="hurt"></div>
+    <div id="dodge"></div>
 
     <div id="hud" class="overlay">
       <div id="hud-top">
@@ -49,6 +50,7 @@
       <p id="title-hi" class="hi">HI SCORE 000000</p>
       <button id="btn-start" type="button">PRESS FIRE TO LAUNCH</button>
       <button id="btn-scores" type="button" class="opt">HI SCORES</button>
+      <button id="opt-invert-title" type="button" class="opt">INVERT Y  OFF</button>
       <p class="hint desktop-only">MOUSE AIM · WASD TRIM · CLICK/SPACE FIRE · SHIFT BOOST · E / RMB ROLL · P PAUSE</p>
       <p class="hint mobile-only">STICK AIM · FIRE · BOOST · ROLL · PAUSE FOR SETTINGS</p>
     </div>
@@ -140,7 +142,7 @@
   <script type="module" src="js/main.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
+      navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {});
     }
   </script>
 </body>

@@ -175,6 +175,7 @@ const AudioFX = (() => {
   }
 
   return {
+    beep,
     init() {
       ensure();
       Vox.preload();

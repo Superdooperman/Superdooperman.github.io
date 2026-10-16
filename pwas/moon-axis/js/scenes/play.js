@@ -142,11 +142,15 @@ export default function createPlay(ctx) {
   const tmp4 = new THREE.Vector3();
   const tmp5 = new THREE.Vector3();
   const PLAYER_R = 2.35;
-  const ROLL_IFRAME = 0.42;
-  const ROLL_CD = 0.85;
+  const ROLL_IFRAME = 0.6;
+  const ROLL_CD = 0.9;
+  // Tuning (Vegapunk quick wins): was 0.7s invuln, 2.2 bolt radius, full fire rate on sortie 1.
+  const HIT_INVULN = 1.5;
+  const BOLT_R = 1.6;
+  const SORTIE1_FIRE_SCALE = 1.5;
   const BOOST_BURST = 1.4;
   const BOOST_CD = 3.5;
-  const PEEL_WINDOW = 12;
+  const PEEL_WINDOW = 16; // was 12; peel Würgers now jink hard, so give a bit more time
 
   function segmentHitsSphere(a, b, center, radius) {
     tmp3.copy(b).sub(a);
@@ -563,16 +567,21 @@ export default function createPlay(ctx) {
           [0, -9, -130],
           [-13, -9, -168], [13, -9, -174],
         ];
-        for (const [x, y, z] of doors) spawnEnemy('tower', x, y, z, { turret: true, hp: 5, r: 2.4 });
-        spawnEnemy('diamond', 0, 2, -110, { turret: true, dual: true, hp: 5, r: 2.2 });
+        // Staggered: near doors first, far doors + diamond later (was all at 0.2s).
+        for (const [x, y, z] of doors.slice(0, 4)) spawnEnemy('tower', x, y, z, { turret: true, hp: 5, r: 2.4 });
       }
-      for (const at of [5, 14, 24, 34]) {
+      if (beat('doors2', 10)) {
+        for (const [x, y, z] of [[0, -9, -130], [-13, -9, -168], [13, -9, -174]]) spawnEnemy('tower', x, y, z, { turret: true, hp: 5, r: 2.4 });
+      }
+      if (beat('kdiamond', 15)) spawnEnemy('diamond', 0, 2, -110, { turret: true, dual: true, hp: 5, r: 2.2 });
+      for (const at of [5, 16, 34]) {
         if (beat('kst' + at, at)) {
           spawnEnemy('stuka', at % 10 < 6 ? -8 : 8, 10, -80, { dive: true, vz: 16, vy: -6 });
           AudioFX.siren();
         }
       }
-      for (const at of [6, 12, 18, 28, 38]) {
+      // Quiet window ~19-30s around the Fork peel.
+      for (const at of [7, 13, 32, 39]) {
         if (beat('kn' + at, at)) {
           spawnEnemy('nachtschwalbe', at % 4 === 0 ? -9 : 8, 3, -90);
           spawnEnemy('wuerger', at % 4 === 0 ? 6 : -5, 0, -102, { vz: 22 });
@@ -853,7 +862,7 @@ export default function createPlay(ctx) {
     // bank out of the lane lets the bolt fly through empty space.
     const dir = cockpitPos(new THREE.Vector3()).sub(origin);
     if (opts.fan) dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), opts.fan);
-    const spread = opts.heavy ? 2.0 : (e.turret || e.boss || e.kind === 'core' ? 3.0 : 4.4);
+    const spread = (opts.heavy ? 2.0 : (e.turret || e.boss || e.kind === 'core' ? 3.0 : 4.4)) * (state.stage === 0 ? 1.35 : 1.15);
     dir.x += (Math.random() - 0.5) * spread;
     dir.y += (Math.random() - 0.5) * spread * 0.75;
     dir.normalize();
@@ -868,7 +877,7 @@ export default function createPlay(ctx) {
       vel: dir.multiplyScalar(speed),
       life: 2.8,
       prev: origin.clone(),
-      r: opts.slow ? 2.8 : 2.2,
+      r: opts.slow ? 2.3 : BOLT_R,
     });
   }
 
@@ -1085,11 +1094,71 @@ export default function createPlay(ctx) {
     }
   }
 
+  function rollDodgeFlash() {
+    const now = performance.now();
+    if (now - (rollDodgeFlash._t || 0) < 250) return;
+    rollDodgeFlash._t = now;
+    banner('WHOOSH', 500);
+    const el = document.getElementById('dodge');
+    if (el) { el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); }
+    try { AudioFX.beep?.(1200, 0.06, 'triangle', 0.04); } catch (_) {}
+  }
+
+  // Peel Würgers (sortie 4): wild but fair. Movement only; their firing is untouched.
+  // - random lateral/vertical juke targets every 0.45-0.9s, eased (no teleports)
+  // - barrel-roll weave (visual roll + small corkscrew offset)
+  // - short forward/back speed bursts
+  // - if you hold them near the reticle ~0.35s they break hard sideways (1.6s cooldown)
+  const peelNdc = new THREE.Vector3();
+  function peelJink(e, dt) {
+    e.jT = (e.jT ?? 0) - dt;
+    e.jEvadeCd = Math.max(0, (e.jEvadeCd ?? 0) - dt);
+    if (e.jT <= 0) {
+      e.jT = 0.45 + Math.random() * 0.45;
+      e.jTx = (Math.random() * 2 - 1) * 9;
+      e.jTy = (Math.random() * 2 - 1) * 5;
+      e.jBurst = Math.random() < 0.35 ? (Math.random() < 0.5 ? 1.6 : -0.6) : 0;
+      if (Math.random() < 0.3) e.jRollV = (Math.random() < 0.5 ? -1 : 1) * Math.PI * 2 / 0.6;
+    }
+    // Lined up behind them? Project to screen; reticle is screen centre.
+    worldPos(e, peelNdc).project(camera);
+    const onReticle = peelNdc.z < 1 && Math.hypot(peelNdc.x, peelNdc.y) < 0.14;
+    e.jLock = onReticle ? (e.jLock || 0) + dt : 0;
+    if (e.jLock > 0.35 && e.jEvadeCd <= 0) {
+      const sign = peelNdc.x >= 0 ? 1 : -1;
+      e.jTx = sign * (10 + Math.random() * 4);
+      e.jTy = (Math.random() < 0.5 ? -1 : 1) * (3 + Math.random() * 3);
+      e.jVx = sign * 16;
+      e.jRollV = sign * Math.PI * 2 / 0.5;
+      e.jEvadeCd = 1.6;
+      e.jLock = 0;
+      e.jT = 0.7;
+    }
+    e.jVx = THREE.MathUtils.lerp(e.jVx || 0, e.jTx, Math.min(1, dt * 2.8));
+    e.jVy = THREE.MathUtils.lerp(e.jVy || 0, e.jTy, Math.min(1, dt * 2.8));
+    const pos = e.mesh.position;
+    pos.x += e.jVx * dt;
+    pos.y += e.jVy * dt;
+    pos.z += (e.jBurst || 0) * Math.abs(e.vz) * dt;
+    // Keep them on screen-ish so the window stays winnable.
+    if (pos.x > 12) { pos.x = 12; e.jTx = -Math.abs(e.jTx); }
+    if (pos.x < -12) { pos.x = -12; e.jTx = Math.abs(e.jTx); }
+    if (pos.y > 7) { pos.y = 7; e.jTy = -Math.abs(e.jTy); }
+    if (pos.y < -5) { pos.y = -5; e.jTy = Math.abs(e.jTy); }
+    if (e.jRollV) {
+      e.jRoll = (e.jRoll || 0) + e.jRollV * dt;
+      if (Math.abs(e.jRoll) >= Math.PI * 2) { e.jRoll = 0; e.jRollV = 0; }
+    }
+    pos.x += Math.sin((e.jRoll || 0)) * 2.2 * dt * 3;
+    pos.y += (Math.cos((e.jRoll || 0)) - 1) * 1.2 * dt * 3;
+  }
+
   function playerHit() {
-    if (state.invuln > 0 || state.rollT > 0) return;
+    if (state.rollT > 0) { rollDodgeFlash(); return; }
+    if (state.invuln > 0) return;
     state.noHit = false;
     state.shields -= 1;
-    state.invuln = 0.7;
+    state.invuln = HIT_INVULN;
     state.shake = 1;
     state.hitFlash = 0.22;
     AudioFX.damage();
@@ -1655,6 +1724,7 @@ export default function createPlay(ctx) {
         e.mesh.position.x += Math.sin(e.phase * 2.2) * (e.dive ? 1 : 3.2) * dt + e.vx * dt;
         e.mesh.position.y += e.vy * dt + Math.cos(e.phase * 1.4) * 1.1 * dt;
         if (e.dive && e.mesh.position.y < -6) e.vy = 4;
+        if (e.peel) peelJink(e, dt);
         if (e.mode === 'reattack') {
           e.mesh.lookAt(camera.position);
           e.mesh.rotateY(Math.PI);
@@ -1665,6 +1735,7 @@ export default function createPlay(ctx) {
         } else {
           e.mesh.lookAt(camera.position);
           e.mesh.rotateY(Math.PI);
+          if (e.peel) e.mesh.rotateZ(e.jRoll || 0);
           if (!e.dive && e.mesh.position.z > -5) {
             if (e.passes > 0) {
               e.mode = 'break';
@@ -1692,7 +1763,7 @@ export default function createPlay(ctx) {
             enemyShoot(e);
           }
           const base = e.turret || e.coreOrb ? 1.35 : (e.kind === 'wuerger' || e.kind === 'silbergeist' ? 0.95 : 1.2);
-          e.shootCd = base + Math.random() * 0.35;
+          e.shootCd = (base + Math.random() * 0.35) * (state.stage === 0 ? SORTIE1_FIRE_SCALE : 1);
         }
       }
     }
