@@ -1,7 +1,7 @@
-import { NAMES, ROOMS, SCENE } from "../data/script.js";
+import { ENDINGS, NAMES, ROOMS, SCENE } from "../data/script.js";
 import { artMode, artUrl, fancyCount, initArt, onArtChange, setArtMode } from "./art.js";
 import { playBed, playCue } from "./audio.js";
-import { act, CROW, HERO, ITEMS, newGame, preview, spotsFor } from "./logic.js";
+import { act, choicesFor, HERO, ITEMS, maxHeat, newGame, preview, signLetters, signLevel, spotsFor, vatState } from "./logic.js";
 
 const SAVE_KEY = "rr-yolk-saves";
 const VERBS = [
@@ -129,6 +129,8 @@ function render() {
   plate.alt = "";
   mount(plate, room.plate);
   stage.append(plate);
+  if (room.sign) stage.append(feedSeed(room.sign, state));
+  if (room.vat) stage.append(vat(room.vat, state));
 
   const hidePose = lineNow && lineNow.big;
   if (!hidePose && state.pose && room.poseAt && room.poseAt[state.pose]) {
@@ -177,37 +179,62 @@ function render() {
   stage.append(bust);
 
   if (speakerFile && !speakerFile.includes("rooster")) {
-    const card = el("div", "speaker");
-    const img = el("img");
-    img.alt = NAMES[speakerFile] || "Speaker";
-    mount(img, speakerFile);
-    card.append(img, el("div", "who", NAMES[speakerFile] || ""));
+    const voiceOnly = speakerFile.startsWith("voice:");
+    const card = el("div", `speaker${voiceOnly ? " voice" : ""}${lineNow.thought ? " thinking" : ""}`);
+    if (!voiceOnly) {
+      const img = el("img");
+      img.alt = NAMES[speakerFile] || "Speaker";
+      mount(img, speakerFile);
+      card.append(img);
+    }
+    card.append(el("div", "who", `${NAMES[speakerFile] || ""}${lineNow.thought ? " (thinking)" : ""}`));
     stage.append(card);
   }
+
+  if (state.mode === "choice" && state.choice && state.choice.set === "crow") {
+    const gauge = el("div", "oil-gauge");
+    gauge.setAttribute("aria-label", `Oil heat ${state.heat || 0} of ${maxHeat(state)}`);
+    const max = maxHeat(state);
+    for (let i = max - 1; i >= 0; i -= 1) gauge.append(el("span", i < (state.heat || 0) ? "hot" : ""));
+    gauge.append(el("b", "", "OIL"));
+    stage.append(gauge);
+  }
+
+  if (ended && state.ending && ENDINGS[state.ending]) stage.append(cover(ENDINGS[state.ending]));
 
   cabinet.append(stage);
 
   const caption = el("button", "caption");
   caption.type = "button";
   caption.id = "caption";
-  caption.textContent = lineNow ? lineNow.text : "The night is waiting.";
+  caption.textContent = lineNow ? (lineNow.rap ? lineNow.text.split(" / ").join("\n") : lineNow.text) : "The night is waiting.";
+  if (lineNow && lineNow.thought) caption.classList.add("thought");
+  if (lineNow && lineNow.rap) caption.classList.add("rap"); // TODO(audio): start/stop Rocco's boom-bap loop here (sound on hold)
   caption.addEventListener("click", advance);
   cabinet.append(caption);
 
-  if (choosing && CROW[state.crowRound]) {
+  if (choosing) {
     const choices = el("div", "choices");
-    for (const option of CROW[state.crowRound].options) {
-      choices.append(button(option.say, "choice", () => dispatch({ t: "choice", id: option.id })));
+    for (const option of choicesFor(state)) {
+      const b = button(option.locked ? "???" : option.say, `choice${option.locked ? " locked" : ""}`, () => dispatch({ t: "choice", id: option.id }));
+      b.dataset.id = option.id;
+      choices.append(b);
     }
     cabinet.append(choices);
   }
 
   if (ended) {
-    cabinet.append(button("Back to the title", "end-btn", () => {
+    const end = ENDINGS[state.ending] || {};
+    const row = el("div", "title-actions end-row");
+    if ((end.rewind || end.retry) && state.checkpoint) {
+      row.append(button(end.rewind ? "Rewind" : "Try the crow-down again", "end-btn rewind", () => dispatch({ t: "rewind" })));
+    }
+    row.append(button("Back to the title", "end-btn", () => {
       ui.screen = "title";
       ui.queue = [];
       render();
     }));
+    cabinet.append(row);
   }
 
   const verbs = el("div", "verbs");
@@ -239,6 +266,7 @@ function render() {
   for (const id of state.inv) {
     const item = ITEMS[id];
     const chip = el("button", `item${state.pending === id ? " held" : ""}`);
+    chip.dataset.id = id;
     chip.type = "button";
     const img = el("img");
     img.alt = "";
@@ -255,6 +283,73 @@ function render() {
   if (ui.menu) cabinet.append(menuPanel());
   app.append(cabinet);
   playBed(state.room);
+}
+
+function place(node, rect) {
+  node.style.left = pct(rect[0], "x");
+  node.style.top = pct(rect[1], "y");
+  node.style.width = pct(rect[2], "x");
+  node.style.height = pct(rect[3], "y");
+}
+
+// NED'S FEED & SEED neon: the ambient temptation meter. Code-drawn for now (art ids fx/feedseed-*). Never labeled.
+function feedSeed(rect, state) {
+  const sign = el("div", `feedseed s${signLevel(state)}`);
+  sign.setAttribute("aria-hidden", "true");
+  place(sign, rect);
+  const text = el("div", "fs-text");
+  for (const { ch, on } of signLetters(state)) text.append(el("span", on ? "on" : "off", ch === " " ? "\u00a0" : ch));
+  sign.append(text);
+  if (signLevel(state) >= 3) sign.append(el("i", "fs-hawk"));
+  return sign;
+}
+
+// Pavilion vat bubbles: the hidden finale temptation meter. Simple animated overlay (art ids fx/vat-*).
+function vat(rect, state) {
+  const node = el("div", `vat v-${vatState(state)}`);
+  node.setAttribute("aria-hidden", "true");
+  place(node, rect);
+  for (let i = 0; i < 14; i += 1) {
+    const b = el("span", "bub");
+    b.style.left = `${(i * 37) % 84 + 6}%`;
+    b.style.bottom = `${8 + ((i * 29) % 50)}%`;
+    b.style.animationDelay = `${((i * 0.37) % 1.6).toFixed(2)}s`;
+    b.style.setProperty("--sz", `${9 + ((i * 7) % 10)}px`);
+    b.style.setProperty("--rise", `${14 + ((i * 13) % 26)}px`);
+    node.append(b);
+  }
+  // TODO(audio): vat bubbling loop per state (sound on hold)
+  return node;
+}
+
+// Comic-cover ending screen (code-drawn; art ids bg/ending-* later).
+function cover(end) {
+  const wrap = el("div", `cover tone-${end.tone}`);
+  const page = el("div", "cover-page");
+  page.append(el("div", "cover-series", end.series));
+  page.append(el("div", "cover-title", end.title));
+  if (end.stamp) page.append(el("div", "cover-stamp", end.stamp));
+  page.append(el("div", "cover-art", end.art));
+  page.append(el("div", "cover-blurb", end.blurb));
+  if (end.credit) page.append(el("div", "cover-credit", end.credit));
+  const strip = el("div", "cover-panels");
+  for (const p of end.panels) {
+    if (typeof p === "string") {
+      strip.append(el("div", "panel", p));
+    } else if (p.thought) {
+      const panel = el("div", "panel");
+      panel.append(el("div", "panel-who", `${p.thought} (thinking)`), el("div", "bubble thought", p.text));
+      strip.append(panel);
+    } else {
+      const panel = el("div", "panel spoken");
+      panel.append(el("div", "panel-who", `${p.say}, out loud. He can hear her.`), el("div", "bubble speech", p.text));
+      strip.append(panel);
+    }
+  }
+  page.append(strip);
+  if (!end.retry) page.append(el("div", "cover-click", "*click.*"));
+  wrap.append(page);
+  return wrap;
 }
 
 function menuPanel() {
@@ -313,7 +408,7 @@ function renderTitle() {
   copy.append(el("p", "sub", "and the Yolk of Midnight"));
   frame.append(copy);
   screen.append(frame);
-  screen.append(el("p", "logline", "A good heart, a stolen egg, and a femme fatale with a fryer. His crow is a wheeze until he can say it for real."));
+  screen.append(el("p", "logline", "A pure-hearted rooster, a stolen Yolk, and the femme fatale who used to be his partner. One night. One fryer. Midnight."));
   const row = el("div", "title-actions");
   row.append(button("New game", "on", startGame));
   const slots = saves().filter(Boolean);
@@ -341,6 +436,10 @@ function startGame() {
   ui.queue = [];
   ui.menu = false;
   render();
+}
+
+function atChoice() {
+  return !currentLine() || ui.index >= ui.queue.length - 1;
 }
 
 function setCaption(text, hover) {
@@ -371,6 +470,11 @@ document.addEventListener("keydown", (event) => {
   }
   if (ui.screen !== "play" || !ui.state) return;
   const verbIndex = ["1", "2", "3", "4", "5"].indexOf(event.key);
+  if (verbIndex >= 0 && ui.state.mode === "choice" && atChoice()) {
+    const opts = choicesFor(ui.state);
+    if (opts[verbIndex]) dispatch({ t: "choice", id: opts[verbIndex].id });
+    return;
+  }
   if (verbIndex >= 0 && ui.state.mode !== "choice") {
     dispatch({ t: "verb", verb: VERBS[verbIndex][0] });
     return;
@@ -398,6 +502,9 @@ window.__RR = {
   get state() {
     return ui.state;
   },
+  get index() {
+    return ui.index;
+  },
   get queue() {
     return ui.queue;
   },
@@ -406,6 +513,7 @@ window.__RR = {
   advance,
   setArtMode,
   artMode,
+  choices: () => choicesFor(ui.state),
   spots(on) {
     ui.spots = on;
     render();

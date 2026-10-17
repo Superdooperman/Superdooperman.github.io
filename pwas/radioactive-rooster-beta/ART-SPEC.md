@@ -27,18 +27,25 @@ Scene and item art is **on hold until the story is settled**. This pass has only
 | Asset id (file = `art/<set>/<id>.png`) | Logical size | Anchor | Pixel file | Fancy file (4×) | Pixel status |
 |---|---|---|---|---|---|
 | `bg/title` | 320×180 | top-left | 320×180 | 1280×720 | on hold (placeholder shows) |
-| `bg/hq` (Rooftop coop) | 320×180 | top-left | 320×180 | 1280×720 | on hold (placeholder shows) |
+| `bg/hq` (Rooftop coop) | 320×180 | top-left | 320×180 | 1280×720 | **done (slice 2)**: from Arlong-approved painted pixel art 1024×576, box-downscaled to 320×180; 4× nearest copy in `art/pixel-4x/bg/` |
 | `bg/fence` | 320×180 | top-left | 320×180 | 1280×720 | on hold (placeholder shows) |
 | `bg/henhouse` | 320×180 | top-left | 320×180 | 1280×720 | on hold (placeholder shows) |
 | `bg/barn` | 320×180 | top-left | 320×180 | 1280×720 | on hold (placeholder shows) |
 | `bg/pavilion` | 320×180 | top-left | 320×180 | 1280×720 | on hold (placeholder shows) |
-| `bg/store`, `bg/wkuk`, `bg/gate`, `bg/midway` | 320×180 | top-left | 320×180 | 1280×720 | on hold (placeholder shows) |
+| `bg/midway` | 320×180 | top-left | 320×180 | 1280×720 | **done (slice 2)**, same pipeline as bg/hq |
+| `bg/store`, `bg/wkuk`, `bg/gate` | 320×180 | top-left | 320×180 | 1280×720 | todo (placeholder shows) |
 | `portrait/rooster-talk`, `-smitten`, `-embarrassed`, `-crow` | 64×64 | top-left | 64×64 | 256×256 | **done** |
 | `portrait/gobbler` | 64×64 | top-left | 64×64 | 256×256 | **done** |
 | `portrait/henny`, `peck`, `clerk`, `deejay`, `guard`, `barker` | 64×64 | top-left | 64×64 | 256×256 | todo |
 | `sprite/rooster-squat` | 48×48 | bottom-center [24,48] | 48×48 | 192×192 | **done** |
 | `sprite/rooster-crow` | 64×64 | bottom-center [32,64] | 64×64 | 256×256 | **done** |
+| `fx/feedseed-0`..`-3` (NED'S FEED & SEED neon, temptation states; overlay) | 96×24 | top-left | 96×24 | 384×96 | code-drawn CSS neon in slice 2 (per-room `sign` rect in data/script.js); art file optional later |
+| `fx/vat-simmer`, `-gentle`, `-boil`, `-rolling` (Pavilion vat bubbles, temptation states; 4-frame loops) + `fx/vat-erupt` | 96×40 | bottom-center [48,40] | 96×40 | 384×160 | code-drawn CSS bubbles in slice 2 (`vat` rect on the pavilion room) |
 | `item/geiger`, `bulb`, `photo`, `spoon`, `stub`, `grub`, `ribbon`, `sauce`, `mirror`, `bill`, `speaker`, `map`, `pass`, `basket` | 24×24 | center | 24×24 | 96×96 | on hold (placeholder shows) |
 
 `art/manifest.json` is the machine-readable version (id, kind, logical size, anchor, frames/grid, old placeholder name).
+Temptation states are never labeled in game. Sign: 0 fully lit, 1 "NED'S F ED & SEE", 2 "ED'S FE D", 3 "FED" with a faint red hawk (letter sequence is a placeholder). Vat: calm simmer → gentle bubbling → steady boil → rolling boil with spatter and red glow. Googly eyes: big plushy eyeballs on the sides of the head, pupils usually pointing opposite ways.
 Note: pose sprites are currently placed by their top-left corner using `poseAt: [x, y, width]` in scene data; the manifest anchor is recorded for the walk-and-animate engine later.
+
+`art/pixel-4x/` holds 4× nearest-neighbor copies of finished pixel backgrounds (1280×720) for print/preview. The engine doesn't load them; it scales the 320×180 file crisply.
+World rule: every character is a human (some in animal superhero costumes); Henny, Mortgage, Midnight and the yard chickens are real animals.

@@ -1,5 +1,5 @@
 // Radioactive Rooster BETA service worker. Own prefix "rr-beta-" so it never touches other games.
-const VERSION = "1";
+const VERSION = "2";
 const CORE_CACHE = `rr-beta-core-v${VERSION}`;
 const PIXEL_CACHE = `rr-beta-pixel-v${VERSION}`;
 const FANCY_CACHE = `rr-beta-fancy-v${VERSION}`;
@@ -33,7 +33,7 @@ async function precachePixel() {
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CORE_CACHE)
-      .then((cache) => cache.addAll(CORE))
+      .then((cache) => cache.addAll(CORE.map((u) => new Request(u, { cache: "no-cache" }))))
       .then(precachePixel)
       .then(() => self.skipWaiting()),
   );
@@ -59,7 +59,20 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;
   const name = cacheFor(url);
-  // Stale-while-revalidate. Only successful responses are cached, never 404s.
+  // Code, data and pages: network first (no-cache), cache as offline fallback, so story updates show on the next load.
+  if (name === CORE_CACHE) {
+    event.respondWith(
+      fetch(req, { cache: "no-cache" }).then((res) => {
+        if (res.ok && res.type === "basic") {
+          const copy = res.clone();
+          caches.open(name).then((cache) => cache.put(req, copy));
+        }
+        return res;
+      }).catch(() => caches.open(name).then((cache) => cache.match(req)).then((hit) => hit || new Response("", { status: 504 }))),
+    );
+    return;
+  }
+  // Art: stale-while-revalidate. Only successful responses are cached, never 404s.
   event.respondWith(
     caches.open(name).then((cache) => cache.match(req).then((hit) => {
       const fresh = fetch(req).then((res) => {
