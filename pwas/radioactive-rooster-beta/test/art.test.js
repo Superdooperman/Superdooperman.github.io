@@ -23,7 +23,7 @@ test("every hotspot and pose sits inside the logical scene", () => {
 test("every art file the script names is in the manifest with a fallback", () => {
   const files = [
     ...Object.values(ROOMS).map((r) => r.plate),
-    ...Object.values(HERO), ...Object.values(SPEAKER),
+    ...Object.values(HERO), ...Object.values(SPEAKER).filter((f) => !f.startsWith("voice:")),
     ...Object.values(ITEMS).map((i) => i.icon),
     "bg-title.jpg", "sprite-squat.png", "sprite-crow.png",
   ];
