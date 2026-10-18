@@ -46,3 +46,23 @@ test("pixel files have the manifest's logical size", async () => {
     assert.deepEqual([w, h], [fw, fh], `${id} is ${fw}x${fh}`);
   }
 });
+
+test("hero and cast sprites exist as pixel files and stand inside the scene", () => {
+  const need = (id) => {
+    assert.ok(manifest.assets[id], `${id} in manifest`);
+    assert.ok(existsSync(new URL(`../art/pixel/${id}.png`, import.meta.url)), `${id} pixel file`);
+  };
+  for (const room of Object.values(ROOMS)) {
+    if (room.hero) {
+      const half = room.hero.height ? `-h${room.hero.height}` : room.hero.half ? "-half" : "";
+      for (const f of ["front", "side-r", "side-l", "walk-r", "walk-l"]) need(`sprite/rooster-${f}${half}`);
+      const [x, y] = room.hero.at;
+      assert.ok(x >= 0 && x <= SCENE.w && y > 0 && y <= SCENE.h, `${room.id} hero in bounds`);
+      if (room.hero.height) assert.ok(room.hero.height < y, `${room.id} hero head stays on screen`);
+    }
+    for (const c of room.cast || []) {
+      need(`sprite/${c.sprite}${c.height ? `-h${c.height}` : ""}`);
+      assert.ok(room.spots.some((s) => s.id === c.spot), `${room.id} cast ${c.sprite} tied to a real spot`);
+    }
+  }
+});

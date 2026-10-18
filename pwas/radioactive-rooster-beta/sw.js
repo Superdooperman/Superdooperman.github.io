@@ -1,5 +1,5 @@
 // Radioactive Rooster BETA service worker. Own prefix "rr-beta-" so it never touches other games.
-const VERSION = "2";
+const VERSION = "3";
 const CORE_CACHE = `rr-beta-core-v${VERSION}`;
 const PIXEL_CACHE = `rr-beta-pixel-v${VERSION}`;
 const FANCY_CACHE = `rr-beta-fancy-v${VERSION}`;
@@ -12,6 +12,7 @@ const CORE = [
   "./js/logic.js",
   "./js/art.js",
   "./js/audio.js",
+  "./js/walk.js",
   "./data/script.js",
   "./art/manifest.json",
 ];

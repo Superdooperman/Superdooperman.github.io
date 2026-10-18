@@ -48,7 +48,8 @@
     0,
     0
    ],
-   "legacy": "bg-fence.jpg"
+   "legacy": "bg-fence.jpg",
+   "source": "Arlong's approved rooster-scene-art-v2/fence.jpg, box-downscaled 1280x720 -> 320x180"
   },
   "bg/henhouse": {
    "kind": "bg",
@@ -469,6 +470,2682 @@
     12
    ],
    "legacy": "item-basket.svg"
+  },
+  "sprite/rooster-front": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-front": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-side-r": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-side-l": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-walk-r": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-walk-l": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-back": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-front-half": {
+   "kind": "sprite",
+   "size": [
+    26,
+    30
+   ],
+   "anchor": [
+    13,
+    30
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-side-r-half": {
+   "kind": "sprite",
+   "size": [
+    26,
+    30
+   ],
+   "anchor": [
+    13,
+    30
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-side-l-half": {
+   "kind": "sprite",
+   "size": [
+    26,
+    30
+   ],
+   "anchor": [
+    13,
+    30
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-walk-r-half": {
+   "kind": "sprite",
+   "size": [
+    26,
+    30
+   ],
+   "anchor": [
+    13,
+    30
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-walk-l-half": {
+   "kind": "sprite",
+   "size": [
+    26,
+    30
+   ],
+   "anchor": [
+    13,
+    30
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-back-half": {
+   "kind": "sprite",
+   "size": [
+    26,
+    30
+   ],
+   "anchor": [
+    13,
+    30
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-front": {
+   "kind": "sprite",
+   "size": [
+    34,
+    56
+   ],
+   "anchor": [
+    17,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-side-r": {
+   "kind": "sprite",
+   "size": [
+    34,
+    56
+   ],
+   "anchor": [
+    17,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-side-l": {
+   "kind": "sprite",
+   "size": [
+    34,
+    56
+   ],
+   "anchor": [
+    17,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-walk-r": {
+   "kind": "sprite",
+   "size": [
+    34,
+    56
+   ],
+   "anchor": [
+    17,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-walk-l": {
+   "kind": "sprite",
+   "size": [
+    34,
+    56
+   ],
+   "anchor": [
+    17,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-piano-r": {
+   "kind": "sprite",
+   "size": [
+    50,
+    56
+   ],
+   "anchor": [
+    25,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-piano-l": {
+   "kind": "sprite",
+   "size": [
+    50,
+    56
+   ],
+   "anchor": [
+    25,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-front-half": {
+   "kind": "sprite",
+   "size": [
+    20,
+    28
+   ],
+   "anchor": [
+    10,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-side-r-half": {
+   "kind": "sprite",
+   "size": [
+    20,
+    28
+   ],
+   "anchor": [
+    10,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-side-l-half": {
+   "kind": "sprite",
+   "size": [
+    20,
+    28
+   ],
+   "anchor": [
+    10,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-walk-r-half": {
+   "kind": "sprite",
+   "size": [
+    20,
+    28
+   ],
+   "anchor": [
+    10,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-walk-l-half": {
+   "kind": "sprite",
+   "size": [
+    20,
+    28
+   ],
+   "anchor": [
+    10,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-piano-r-half": {
+   "kind": "sprite",
+   "size": [
+    26,
+    28
+   ],
+   "anchor": [
+    13,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-piano-l-half": {
+   "kind": "sprite",
+   "size": [
+    26,
+    28
+   ],
+   "anchor": [
+    13,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-side-r": {
+   "kind": "sprite",
+   "size": [
+    18,
+    17
+   ],
+   "anchor": [
+    9,
+    17
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-side-l": {
+   "kind": "sprite",
+   "size": [
+    18,
+    17
+   ],
+   "anchor": [
+    9,
+    17
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-peck-r": {
+   "kind": "sprite",
+   "size": [
+    18,
+    17
+   ],
+   "anchor": [
+    9,
+    17
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-peck-l": {
+   "kind": "sprite",
+   "size": [
+    18,
+    17
+   ],
+   "anchor": [
+    9,
+    17
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-front": {
+   "kind": "sprite",
+   "size": [
+    18,
+    17
+   ],
+   "anchor": [
+    9,
+    17
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-tilt-r": {
+   "kind": "sprite",
+   "size": [
+    18,
+    17
+   ],
+   "anchor": [
+    9,
+    17
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-tilt-l": {
+   "kind": "sprite",
+   "size": [
+    18,
+    17
+   ],
+   "anchor": [
+    9,
+    17
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-side-r-half": {
+   "kind": "sprite",
+   "size": [
+    12,
+    9
+   ],
+   "anchor": [
+    6,
+    9
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-side-l-half": {
+   "kind": "sprite",
+   "size": [
+    12,
+    9
+   ],
+   "anchor": [
+    6,
+    9
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-peck-r-half": {
+   "kind": "sprite",
+   "size": [
+    12,
+    9
+   ],
+   "anchor": [
+    6,
+    9
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-peck-l-half": {
+   "kind": "sprite",
+   "size": [
+    12,
+    9
+   ],
+   "anchor": [
+    6,
+    9
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-front-half": {
+   "kind": "sprite",
+   "size": [
+    12,
+    9
+   ],
+   "anchor": [
+    6,
+    9
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-tilt-r-half": {
+   "kind": "sprite",
+   "size": [
+    12,
+    9
+   ],
+   "anchor": [
+    6,
+    9
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-tilt-l-half": {
+   "kind": "sprite",
+   "size": [
+    12,
+    9
+   ],
+   "anchor": [
+    6,
+    9
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h104": {
+   "kind": "sprite",
+   "size": [
+    84,
+    104
+   ],
+   "anchor": [
+    42,
+    104
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h104": {
+   "kind": "sprite",
+   "size": [
+    84,
+    104
+   ],
+   "anchor": [
+    42,
+    104
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h104": {
+   "kind": "sprite",
+   "size": [
+    84,
+    104
+   ],
+   "anchor": [
+    42,
+    104
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h104": {
+   "kind": "sprite",
+   "size": [
+    84,
+    104
+   ],
+   "anchor": [
+    42,
+    104
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h104": {
+   "kind": "sprite",
+   "size": [
+    84,
+    104
+   ],
+   "anchor": [
+    42,
+    104
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h104": {
+   "kind": "sprite",
+   "size": [
+    84,
+    104
+   ],
+   "anchor": [
+    42,
+    104
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-side-r-h26": {
+   "kind": "sprite",
+   "size": [
+    26,
+    26
+   ],
+   "anchor": [
+    13,
+    26
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-side-l-h26": {
+   "kind": "sprite",
+   "size": [
+    26,
+    26
+   ],
+   "anchor": [
+    13,
+    26
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-peck-r-h26": {
+   "kind": "sprite",
+   "size": [
+    26,
+    26
+   ],
+   "anchor": [
+    13,
+    26
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-peck-l-h26": {
+   "kind": "sprite",
+   "size": [
+    26,
+    26
+   ],
+   "anchor": [
+    13,
+    26
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-front-h26": {
+   "kind": "sprite",
+   "size": [
+    26,
+    26
+   ],
+   "anchor": [
+    13,
+    26
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-tilt-r-h26": {
+   "kind": "sprite",
+   "size": [
+    26,
+    26
+   ],
+   "anchor": [
+    13,
+    26
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-tilt-l-h26": {
+   "kind": "sprite",
+   "size": [
+    26,
+    26
+   ],
+   "anchor": [
+    13,
+    26
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    96
+   ],
+   "anchor": [
+    39,
+    96
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    96
+   ],
+   "anchor": [
+    39,
+    96
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    96
+   ],
+   "anchor": [
+    39,
+    96
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    96
+   ],
+   "anchor": [
+    39,
+    96
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    96
+   ],
+   "anchor": [
+    39,
+    96
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    96
+   ],
+   "anchor": [
+    39,
+    96
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-front-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-side-r-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-side-l-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-walk-r-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-walk-l-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-back-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "bg/pavilion-open": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/bg/rope_paint.py (hand-edited from Arlong's pavilion.jpg)"
+  },
+  "sprite/rooster-front-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    68
+   ],
+   "anchor": [
+    28,
+    68
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    68
+   ],
+   "anchor": [
+    28,
+    68
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    68
+   ],
+   "anchor": [
+    28,
+    68
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    68
+   ],
+   "anchor": [
+    28,
+    68
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    68
+   ],
+   "anchor": [
+    28,
+    68
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    68
+   ],
+   "anchor": [
+    28,
+    68
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    76
+   ],
+   "anchor": [
+    31,
+    76
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    76
+   ],
+   "anchor": [
+    31,
+    76
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    76
+   ],
+   "anchor": [
+    31,
+    76
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    76
+   ],
+   "anchor": [
+    31,
+    76
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    76
+   ],
+   "anchor": [
+    31,
+    76
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    76
+   ],
+   "anchor": [
+    31,
+    76
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    80
+   ],
+   "anchor": [
+    33,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    80
+   ],
+   "anchor": [
+    33,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    80
+   ],
+   "anchor": [
+    33,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    80
+   ],
+   "anchor": [
+    33,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    80
+   ],
+   "anchor": [
+    33,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    80
+   ],
+   "anchor": [
+    33,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h84": {
+   "kind": "sprite",
+   "size": [
+    68,
+    84
+   ],
+   "anchor": [
+    34,
+    84
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h84": {
+   "kind": "sprite",
+   "size": [
+    68,
+    84
+   ],
+   "anchor": [
+    34,
+    84
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h84": {
+   "kind": "sprite",
+   "size": [
+    68,
+    84
+   ],
+   "anchor": [
+    34,
+    84
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h84": {
+   "kind": "sprite",
+   "size": [
+    68,
+    84
+   ],
+   "anchor": [
+    34,
+    84
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h84": {
+   "kind": "sprite",
+   "size": [
+    68,
+    84
+   ],
+   "anchor": [
+    34,
+    84
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h84": {
+   "kind": "sprite",
+   "size": [
+    68,
+    84
+   ],
+   "anchor": [
+    34,
+    84
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h88": {
+   "kind": "sprite",
+   "size": [
+    72,
+    88
+   ],
+   "anchor": [
+    36,
+    88
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h88": {
+   "kind": "sprite",
+   "size": [
+    72,
+    88
+   ],
+   "anchor": [
+    36,
+    88
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h88": {
+   "kind": "sprite",
+   "size": [
+    72,
+    88
+   ],
+   "anchor": [
+    36,
+    88
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h88": {
+   "kind": "sprite",
+   "size": [
+    72,
+    88
+   ],
+   "anchor": [
+    36,
+    88
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h88": {
+   "kind": "sprite",
+   "size": [
+    72,
+    88
+   ],
+   "anchor": [
+    36,
+    88
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h88": {
+   "kind": "sprite",
+   "size": [
+    72,
+    88
+   ],
+   "anchor": [
+    36,
+    88
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h92": {
+   "kind": "sprite",
+   "size": [
+    76,
+    92
+   ],
+   "anchor": [
+    38,
+    92
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h92": {
+   "kind": "sprite",
+   "size": [
+    76,
+    92
+   ],
+   "anchor": [
+    38,
+    92
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h92": {
+   "kind": "sprite",
+   "size": [
+    76,
+    92
+   ],
+   "anchor": [
+    38,
+    92
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h92": {
+   "kind": "sprite",
+   "size": [
+    76,
+    92
+   ],
+   "anchor": [
+    38,
+    92
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h92": {
+   "kind": "sprite",
+   "size": [
+    76,
+    92
+   ],
+   "anchor": [
+    38,
+    92
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h92": {
+   "kind": "sprite",
+   "size": [
+    76,
+    92
+   ],
+   "anchor": [
+    38,
+    92
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h100": {
+   "kind": "sprite",
+   "size": [
+    82,
+    100
+   ],
+   "anchor": [
+    41,
+    100
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h100": {
+   "kind": "sprite",
+   "size": [
+    82,
+    100
+   ],
+   "anchor": [
+    41,
+    100
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h100": {
+   "kind": "sprite",
+   "size": [
+    82,
+    100
+   ],
+   "anchor": [
+    41,
+    100
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h100": {
+   "kind": "sprite",
+   "size": [
+    82,
+    100
+   ],
+   "anchor": [
+    41,
+    100
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h100": {
+   "kind": "sprite",
+   "size": [
+    82,
+    100
+   ],
+   "anchor": [
+    41,
+    100
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h100": {
+   "kind": "sprite",
+   "size": [
+    82,
+    100
+   ],
+   "anchor": [
+    41,
+    100
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h108": {
+   "kind": "sprite",
+   "size": [
+    88,
+    108
+   ],
+   "anchor": [
+    44,
+    108
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h108": {
+   "kind": "sprite",
+   "size": [
+    88,
+    108
+   ],
+   "anchor": [
+    44,
+    108
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h108": {
+   "kind": "sprite",
+   "size": [
+    88,
+    108
+   ],
+   "anchor": [
+    44,
+    108
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h108": {
+   "kind": "sprite",
+   "size": [
+    88,
+    108
+   ],
+   "anchor": [
+    44,
+    108
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h108": {
+   "kind": "sprite",
+   "size": [
+    88,
+    108
+   ],
+   "anchor": [
+    44,
+    108
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h108": {
+   "kind": "sprite",
+   "size": [
+    88,
+    108
+   ],
+   "anchor": [
+    44,
+    108
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    112
+   ],
+   "anchor": [
+    45,
+    112
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    112
+   ],
+   "anchor": [
+    45,
+    112
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    112
+   ],
+   "anchor": [
+    45,
+    112
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    112
+   ],
+   "anchor": [
+    45,
+    112
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    112
+   ],
+   "anchor": [
+    45,
+    112
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    112
+   ],
+   "anchor": [
+    45,
+    112
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h116": {
+   "kind": "sprite",
+   "size": [
+    94,
+    116
+   ],
+   "anchor": [
+    47,
+    116
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h116": {
+   "kind": "sprite",
+   "size": [
+    94,
+    116
+   ],
+   "anchor": [
+    47,
+    116
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h116": {
+   "kind": "sprite",
+   "size": [
+    94,
+    116
+   ],
+   "anchor": [
+    47,
+    116
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h116": {
+   "kind": "sprite",
+   "size": [
+    94,
+    116
+   ],
+   "anchor": [
+    47,
+    116
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h116": {
+   "kind": "sprite",
+   "size": [
+    94,
+    116
+   ],
+   "anchor": [
+    47,
+    116
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h116": {
+   "kind": "sprite",
+   "size": [
+    94,
+    116
+   ],
+   "anchor": [
+    47,
+    116
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    120
+   ],
+   "anchor": [
+    48,
+    120
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    120
+   ],
+   "anchor": [
+    48,
+    120
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    120
+   ],
+   "anchor": [
+    48,
+    120
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    120
+   ],
+   "anchor": [
+    48,
+    120
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    120
+   ],
+   "anchor": [
+    48,
+    120
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    120
+   ],
+   "anchor": [
+    48,
+    120
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "fg/pavilion--post-left": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 170,
+   "source": "tools/bg/occluders.py (cut from bg/pavilion)"
+  },
+  "fg/pavilion--post-front": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 169,
+   "source": "tools/bg/occluders.py (cut from bg/pavilion)"
+  },
+  "fg/pavilion--post-mid": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 146,
+   "source": "tools/bg/occluders.py (cut from bg/pavilion)"
+  },
+  "fg/pavilion--cart": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 146,
+   "source": "tools/bg/occluders.py (cut from bg/pavilion)"
+  },
+  "fg/midway--booth": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 147,
+   "source": "tools/bg/occluders.py (cut from bg/midway)"
+  },
+  "fg/hq--bucket": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 173,
+   "source": "tools/bg/occluders.py (cut from bg/hq)"
+  },
+  "fg/pavilion-open--post-left": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 170,
+   "source": "tools/bg/occluders.py (cut from bg/pavilion-open)"
+  },
+  "fg/pavilion-open--post-front": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 169,
+   "source": "tools/bg/occluders.py (cut from bg/pavilion-open)"
+  },
+  "fg/pavilion-open--post-mid": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 146,
+   "source": "tools/bg/occluders.py (cut from bg/pavilion-open)"
+  },
+  "fg/pavilion-open--cart": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 146,
+   "source": "tools/bg/occluders.py (cut from bg/pavilion-open)"
+  },
+  "sprite/rooster-front-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    28
+   ],
+   "anchor": [
+    13,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    28
+   ],
+   "anchor": [
+    13,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    28
+   ],
+   "anchor": [
+    13,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    28
+   ],
+   "anchor": [
+    13,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    28
+   ],
+   "anchor": [
+    13,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    28
+   ],
+   "anchor": [
+    13,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    36
+   ],
+   "anchor": [
+    16,
+    36
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    36
+   ],
+   "anchor": [
+    16,
+    36
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    36
+   ],
+   "anchor": [
+    16,
+    36
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    36
+   ],
+   "anchor": [
+    16,
+    36
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    36
+   ],
+   "anchor": [
+    16,
+    36
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    36
+   ],
+   "anchor": [
+    16,
+    36
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h40": {
+   "kind": "sprite",
+   "size": [
+    36,
+    40
+   ],
+   "anchor": [
+    18,
+    40
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h40": {
+   "kind": "sprite",
+   "size": [
+    36,
+    40
+   ],
+   "anchor": [
+    18,
+    40
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h40": {
+   "kind": "sprite",
+   "size": [
+    36,
+    40
+   ],
+   "anchor": [
+    18,
+    40
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h40": {
+   "kind": "sprite",
+   "size": [
+    36,
+    40
+   ],
+   "anchor": [
+    18,
+    40
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h40": {
+   "kind": "sprite",
+   "size": [
+    36,
+    40
+   ],
+   "anchor": [
+    18,
+    40
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h40": {
+   "kind": "sprite",
+   "size": [
+    36,
+    40
+   ],
+   "anchor": [
+    18,
+    40
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    44
+   ],
+   "anchor": [
+    19,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    44
+   ],
+   "anchor": [
+    19,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    44
+   ],
+   "anchor": [
+    19,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    44
+   ],
+   "anchor": [
+    19,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    44
+   ],
+   "anchor": [
+    19,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    44
+   ],
+   "anchor": [
+    19,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    48
+   ],
+   "anchor": [
+    21,
+    48
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    48
+   ],
+   "anchor": [
+    21,
+    48
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    48
+   ],
+   "anchor": [
+    21,
+    48
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    48
+   ],
+   "anchor": [
+    21,
+    48
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    48
+   ],
+   "anchor": [
+    21,
+    48
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    48
+   ],
+   "anchor": [
+    21,
+    48
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h56": {
+   "kind": "sprite",
+   "size": [
+    48,
+    56
+   ],
+   "anchor": [
+    24,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h56": {
+   "kind": "sprite",
+   "size": [
+    48,
+    56
+   ],
+   "anchor": [
+    24,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h56": {
+   "kind": "sprite",
+   "size": [
+    48,
+    56
+   ],
+   "anchor": [
+    24,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h56": {
+   "kind": "sprite",
+   "size": [
+    48,
+    56
+   ],
+   "anchor": [
+    24,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h56": {
+   "kind": "sprite",
+   "size": [
+    48,
+    56
+   ],
+   "anchor": [
+    24,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h56": {
+   "kind": "sprite",
+   "size": [
+    48,
+    56
+   ],
+   "anchor": [
+    24,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "fg/fence--crate": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 117,
+   "source": "tools/bg/occluders.py (cut from bg/fence)"
+  },
+  "fg/fence--post-end": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 102,
+   "source": "tools/bg/occluders.py (cut from bg/fence)"
   }
  }
 }

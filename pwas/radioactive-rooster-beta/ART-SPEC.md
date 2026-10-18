@@ -28,24 +28,46 @@ Scene and item art is **on hold until the story is settled**. This pass has only
 |---|---|---|---|---|---|
 | `bg/title` | 320×180 | top-left | 320×180 | 1280×720 | on hold (placeholder shows) |
 | `bg/hq` (Rooftop coop) | 320×180 | top-left | 320×180 | 1280×720 | **done (slice 2)**: from Arlong-approved painted pixel art 1024×576, box-downscaled to 320×180; 4× nearest copy in `art/pixel-4x/bg/` |
-| `bg/fence` | 320×180 | top-left | 320×180 | 1280×720 | on hold (placeholder shows) |
+| `bg/fence` | 320×180 | top-left | 320×180 | 1280×720 | installed 2026-10-18: Arlong's approved crossroads `rooster-scene-art-v2/fence.jpg`, box-downscaled (+ `pixel-4x`) |
 | `bg/henhouse` | 320×180 | top-left | 320×180 | 1280×720 | on hold (placeholder shows) |
 | `bg/barn` | 320×180 | top-left | 320×180 | 1280×720 | on hold (placeholder shows) |
-| `bg/pavilion` | 320×180 | top-left | 320×180 | 1280×720 | on hold (placeholder shows) |
+| `bg/pavilion` | 320×180 | top-left | 320×180 | 1280×720 | **done 2026-10-17**: Arlong's painted pavilion.jpg (1280×720) box-downscaled; 4× nearest copy in `art/pixel-4x/bg/`. Vat meter on the oil surface [14,66,84,17] |
+| `bg/pavilion-open` (state `rope_open`) | 320×180 | top-left | 320×180 | 1280×720 | **done 2026-10-18**: hand-edited from pavilion.jpg (tools/bg/rope_edit.py + rope_paint.py): front rope cloned out, slack rope coiled at the left post, padlock hanging open, key ring gone. `bg/pavilion` is now the CLOSED version (padlock on the centre-left post, key ring on the cart's right side) |
 | `bg/midway` | 320×180 | top-left | 320×180 | 1280×720 | **done (slice 2)**, same pipeline as bg/hq |
 | `bg/store`, `bg/wkuk`, `bg/gate` | 320×180 | top-left | 320×180 | 1280×720 | todo (placeholder shows) |
-| `portrait/rooster-talk`, `-smitten`, `-embarrassed`, `-crow` | 64×64 | top-left | 64×64 | 256×256 | **done** |
+| `portrait/rooster-talk`, `-smitten`, `-embarrassed`, `-crow` | 64×64 | top-left | 64×64 | 256×256 | **done 2026-10-17**: Arlong's new rooster-portrait.png, square crop (300,22)-(980,702) box-downscaled; same image in all four moods until mood variants are painted |
 | `portrait/gobbler` | 64×64 | top-left | 64×64 | 256×256 | **done** |
 | `portrait/henny`, `peck`, `clerk`, `deejay`, `guard`, `barker` | 64×64 | top-left | 64×64 | 256×256 | todo |
 | `sprite/rooster-squat` | 48×48 | bottom-center [24,48] | 48×48 | 192×192 | **done** |
 | `sprite/rooster-crow` | 64×64 | bottom-center [32,64] | 64×64 | 256×256 | **done** |
+| `sprite/rooster-front`, `-back`, `-side-r/-l`, `-walk-r/-l` (+ `-half`, `-h96`, `-h104`) | 54×64 (half 28×32, h96 78×96, h104 84×104) | bottom-center (feet) | same | 4× | **done 2026-10-17**: cut from Arlong-approved sheet by `tools/sprites/cut_cast.py`; walking hero in rooms with `hero: { at, walk }` |
+| `sprite/hattie-front`, `-back`, `-side-r/-l`, `-walk-r/-l` (+ `-half`, `-h52`) | 50×60 (half 26×30, h52 see manifest) | bottom-center | same | 4× | **done**: half built from full (sheet's half back is malformed) |
+| `sprite/gizzard-front`, `-side-r/-l`, `-walk-r/-l` (34×56), `-piano-r/-l` (50×56) (+ `-half`) | see manifest | bottom-center | same | 4× | **done** (no on-screen scene yet) |
+| `sprite/henny-side-r/-l`, `-peck-r/-l`, `-front`, `-tilt-r/-l` (+ `-half`, `-h26`) | 18×17 (half 12×9, h26 26×26) | bottom-center | same | 4× | **done**: knee-high (~28% of Rooster minus comb) |
 | `fx/feedseed-0`..`-3` (NED'S FEED & SEED neon, temptation states; overlay) | 96×24 | top-left | 96×24 | 384×96 | code-drawn CSS neon in slice 2 (per-room `sign` rect in data/script.js); art file optional later |
 | `fx/vat-simmer`, `-gentle`, `-boil`, `-rolling` (Pavilion vat bubbles, temptation states; 4-frame loops) + `fx/vat-erupt` | 96×40 | bottom-center [48,40] | 96×40 | 384×160 | code-drawn CSS bubbles in slice 2 (`vat` rect on the pavilion room) |
 | `item/geiger`, `bulb`, `photo`, `spoon`, `stub`, `grub`, `ribbon`, `sauce`, `mirror`, `bill`, `speaker`, `map`, `pass`, `basket` | 24×24 | center | 24×24 | 96×96 | on hold (placeholder shows) |
 
 `art/manifest.json` is the machine-readable version (id, kind, logical size, anchor, frames/grid, old placeholder name).
 Temptation states are never labeled in game. Sign: 0 fully lit, 1 "NED'S F ED & SEE", 2 "ED'S FE D", 3 "FED" with a faint red hawk (letter sequence is a placeholder). Vat: calm simmer → gentle bubbling → steady boil → rolling boil with spatter and red glow. Googly eyes: big plushy eyeballs on the sides of the head, pupils usually pointing opposite ways.
+Walk areas + background states: a room's `walk` is a list of polygons (feet positions, logical px). The hero never leaves it, and a hotspot click walks him to the nearest reachable point (`js/walk.js`). `states: [{ flag, plate, walk }]` swaps the plate AND walk area while a game flag is set (Pavilion: `rope_open`). Preview with `?flags=rope_open` (or `ropeOpen`). The rope is padlocked; `rope_open` is set by Pip's puzzle (`js/logic.js`, Pip lifts Corny's key ring once `pip_trust`), and the vat beats need it. Pavilion padlock + cart key ring are hand-painted by `tools/bg/rope_paint.py` (padlock body ~5x4 game px, brass with a light top row; keys fanned under a steel ring) so they read at 320x180; open state = lifted shackle, keys gone.
+Character sprites: adult scale is set per room, measured against the background (`hero: { at, walk, height }`, cast `{ spot, sprite, at, height }` picks the `-h<height>` frames, re-cut from the high-res sheets by `tools/sprites/cut_cast.py` ROOM_HEIGHTS; never upscale small frames). Base sets: Rooster 64 tall incl. comb, Hattie 60, Gizzard 56, Henny 17, plus `-half`.
+- Rooftop coop: Rooster 96 at feet y 156 (door 92 px, y 55-147; his hood ~84 sits just under it), starts on the hatch. Depth horizon y 99 (hatch-lid perspective). Walk y 150-177, x 40-302; he can step behind the bucket (cutout `fg/hq--bucket`, base 173); clicking the bucket stands him beside it (`stand: [250,170]`).
+- Midway: Rooster 104 at feet y 152 (booth counter top y 103, booth floor y 147: counter at his belt). Depth horizon y 105 (~80 px at the railing, y 141). Walk up to the railing posts (y 141, x 88-262) and past the booth's right corner, where the booth cutout (`fg/midway--booth`, base 147) covers him.
+- Pavilion: height ~= 1.57 x (feetY - 92) (cart counter y 109 / wheels y 145 = waist; stage edge y 114-131 = knee). Rooster 96 at feet y 153, depth horizon y 92 (~60 at the stage front, y 131); walk back to the stage front and just behind the cart's left corner. Hattie 52 on the stage in the spotlight, feet (205,110) (cast keep fixed heights; they don't walk). Cutouts: `post-left` (base 170), `post-front` + padlock (169), `post-mid` (146), `cart` (146), cut from both rope states.
+Depth + layering (`js/walk.js`): hero height = `height x (feetY - horizon) / (refY - horizon)` (refY = his start spot, where the height was measured), snapped to 4 px buckets 60-120 (`cut_cast.py` cuts every Rooster frame at each bucket; never upscaled) and capped at 120 near the bottom edge. Foreground cutouts are full-frame RGBA copies of plate pixels inside a hand-traced polygon (`tools/bg/occluders.py`, hard alpha), one per plate state: `fg/<plate>--<id>`. Plate, meters, actors and cutouts share the `.world` layer, z-sorted by feet y; a cutout covers an actor exactly when the actor's feet are above its `base` (ties go to the scenery). Re-run `occluders.py` after any plate edit (the test checks cutout pixels equal the plate); a future fancy plate set needs its own cutouts.
+- Fence crossroads: a far scene. Fence posts ~23 px (base y ~110), top rail ~20 px above the ground, so Rooster is ~30 px at the fence (rail waist-to-chest), 60 at his start spot (170,152), ~80 at the bottom edge (depth horizon y 68, min 28 / max 80; Rooster buckets 28-56 were cut for this room). Henny is a real hen at her checkpoint, `henny-front-half` (9 px) at feet (128,116), knee-high to him there (36). Walk: in front of the fence line, around the crate (slot behind it), up the Main Street road past the fence end; ditch, reeds and bank off limits. Cutouts `fg/fence--crate` (base 117), `fg/fence--post-end` (102). Squat pose on the top rail at [60,66,24].
+- Gizzard has no on-screen scene yet. Cut him at ~0.9x Rooster's room height when one exists.
+- Every frame has a subtle moonlight rim light (upper-left edges, top ~55% of the figure, applied after mirroring) and a dark ink outline matching the sheets' linework. No coloured outlines. Room `cast: [{ spot, sprite, at }]` draws a character at its feet point only while that spot is visible, and only once the room's plate is real art (placeholders already paint the cast; `?cast` forces it for previews).
 Note: pose sprites are currently placed by their top-left corner using `poseAt: [x, y, width]` in scene data; the manifest anchor is recorded for the walk-and-animate engine later.
 
 `art/pixel-4x/` holds 4× nearest-neighbor copies of finished pixel backgrounds (1280×720) for print/preview. The engine doesn't load them; it scales the 320×180 file crisply.
 World rule: every character is a human (some in animal superhero costumes); Henny, Mortgage, Midnight and the yard chickens are real animals.
+
+## Rooster costume specs (Arlong sketch, 2026-10-17; /workspace/github-pages-plans/rooster-scene-art-v2/rooster-costume-specs-sketch.jpg)
+- Comb: 3 points seen from front; 4 from side/behind, rear point aims up.
+- Beak covers nose like a visor; human mouth + chin visible beneath; wattle under chin.
+- Googly eyes: round, mounted on sides of hood like earmuffs.
+- Chest/collar: only 3 feather points on front.
+- Boots: knee guards, a calf claw, ribbed shins, clawed rooster feet.
+- Back: the back of the cowl has 3 feather points (NOT tail feathers), plus 2 shoulder feathers; together they act as a mini cape. Separate green waist tail: YES, shoots straight up then curves back (Arlong draw-over pending).

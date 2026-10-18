@@ -1,6 +1,7 @@
 import { ENDINGS, NAMES, ROOMS, SCENE } from "../data/script.js";
-import { artMode, artUrl, fancyCount, initArt, onArtChange, setArtMode } from "./art.js";
+import { artMode, artUrl, assetInfo, fancyCount, initArt, onArtChange, setArtMode } from "./art.js";
 import { playBed, playCue } from "./audio.js";
+import { clampToArea, parseFlagOverride, roomView, stepToward, depthHeight, actorZ, occluderZ, occluderAsset } from "./walk.js";
 import { act, choicesFor, HERO, ITEMS, maxHeat, newGame, preview, signLetters, signLevel, spotsFor, vatState } from "./logic.js";
 
 const SAVE_KEY = "rr-yolk-saves";
@@ -19,6 +20,8 @@ const ui = {
   screen: "title",
   menu: false,
   spots: new URLSearchParams(location.search).has("spots"),
+  cast: new URLSearchParams(location.search).has("cast"), // force cast sprites over placeholder plates (preview only)
+  flagOverride: parseFlagOverride(location.search), // "?flags=rope_open" preview: set on New game
   plateFile: "",
 };
 
@@ -124,13 +127,19 @@ function render() {
   );
   cabinet.append(head);
 
+  const view = roomView(room, state.flags);
   const stage = el("div", `stage art-${artMode()}`);
+  if (view.state) stage.dataset.view = view.state;
+  // The world layer (plate, meters, actors, foreground cutouts) has its own z order keyed by feet y; HUD sits above.
+  const world = el("div", "world");
+  stage.append(world);
   const plate = el("img", "plate");
   plate.alt = "";
-  mount(plate, room.plate);
-  stage.append(plate);
-  if (room.sign) stage.append(feedSeed(room.sign, state));
-  if (room.vat) stage.append(vat(room.vat, state));
+  mount(plate, view.plate);
+  world.append(plate);
+  if (room.sign) world.append(feedSeed(room.sign, state));
+  if (room.vat) world.append(vat(room.vat, state));
+  const realPlate = !artUrl(view.plate).startsWith("art/placeholders/");
 
   const hidePose = lineNow && lineNow.big;
   if (!hidePose && state.pose && room.poseAt && room.poseAt[state.pose]) {
@@ -141,7 +150,44 @@ function render() {
     pose.style.top = pct(at[1], "y");
     pose.style.width = pct(at[2], "x");
     mount(pose, state.pose === "crow" ? "sprite-crow.png" : "sprite-squat.png");
-    stage.append(pose);
+    world.append(pose);
+  }
+
+  if (room.hero && !hidePose && !state.pose) {
+    heroSync(room);
+    const node = el("img", "hero");
+    node.alt = "";
+    placeHero(node, room);
+    world.append(node);
+  }
+
+  if (room.cast && (ui.cast || realPlate)) {
+    const shown = new Set(spotsFor(state).map((s) => s.id));
+    for (const c of room.cast) {
+      if (c.spot && !shown.has(c.spot)) continue;
+      const node = el("img", "cast");
+      node.alt = "";
+      node.dataset.who = c.sprite;
+      placeSprite(node, `sprite/${c.sprite}${sizeTag(c)}`, c.at);
+      node.style.zIndex = actorZ(c.at[1]);
+      world.append(node);
+    }
+  }
+
+  // Walk-behind: foreground cutouts of this plate (posts, cart, booth, bucket). Appended after the actors so a
+  // tie goes to the scenery; see walk.js behind(). Only over real art (cutouts are cut from the pixel plates).
+  if (room.occluders && realPlate) {
+    for (const o of room.occluders) {
+      const id = occluderAsset(view.plate, o.id);
+      if (!assetInfo(id)) continue;
+      const node = el("img", "fg");
+      node.alt = "";
+      node.dataset.id = o.id;
+      node.dataset.base = o.base;
+      node.style.zIndex = occluderZ(o.base);
+      mount(node, id);
+      world.append(node);
+    }
   }
 
   if (lineNow && lineNow.big) {
@@ -164,7 +210,11 @@ function render() {
       hit.dataset.id = spot.id;
       hit.setAttribute("aria-label", preview(state, spot));
       hit.addEventListener("pointerenter", () => setCaption(preview(state, spot), true));
-      hit.addEventListener("click", () => dispatch({ t: "hotspot", id: spot.id }));
+      hit.addEventListener("click", () => {
+        const [sx, sy] = spot.stand || [spot.rect[0] + spot.rect[2] / 2, spot.rect[1] + spot.rect[3]];
+        walkTo(room, sx, sy); // nearest reachable point (or the spot's own `stand` point)
+        dispatch({ t: "hotspot", id: spot.id });
+      });
       stage.append(hit);
     }
   }
@@ -283,6 +333,112 @@ function render() {
   if (ui.menu) cabinet.append(menuPanel());
   app.append(cabinet);
   playBed(state.room);
+}
+
+// Walking hero sprite for rooms with a `hero` entry. Purely visual: game logic and timing are unchanged.
+// Two-frame walk (side idle / side walk), faces the way he moves, front idle when he enters a room.
+const HERO_SPEED = 70; // logical px per second
+const STEP_MS = 160;
+const hero = { room: null, view: null, x: 0, y: 0, tx: 0, ty: 0, face: "front", walking: false, last: 0, t: 0 };
+
+function heroArea(room) {
+  return roomView(room, (ui.state && ui.state.flags) || {}).walk;
+}
+
+// Frame size: depth rooms pick the 4 px bucket for his feet y (js/walk.js depthHeight), others the fixed height.
+function heroSize(room) {
+  return room.hero.depth ? `-h${depthHeight(room.hero, hero.y)}` : sizeTag(room.hero);
+}
+
+function heroFrame(room) {
+  const size = heroSize(room);
+  if (hero.face === "front") return `sprite/rooster-front${size}`;
+  const stride = hero.walking && Math.floor(hero.t / STEP_MS) % 2 === 1;
+  return `sprite/rooster-${stride ? "walk" : "side"}-${hero.face}${size}`;
+}
+
+// Per-room sprite size: `height: N` picks the frames cut at N px tall (`-hN`), `half: true` the half set.
+function sizeTag(entry) {
+  if (entry.height) return `-h${entry.height}`;
+  return entry.half ? "-half" : "";
+}
+
+function heroSync(room) {
+  const view = roomView(room, (ui.state && ui.state.flags) || {}).state;
+  if (hero.room === room.id) {
+    if (hero.view !== view) {
+      // Background state changed (e.g. rope opened): keep him where he is, but inside the new walk area.
+      hero.view = view;
+      const area = heroArea(room);
+      if (area) [hero.x, hero.y] = clampToArea(area, hero.x, hero.y);
+    }
+    return;
+  }
+  hero.room = room.id;
+  hero.view = view;
+  [hero.x, hero.y] = room.hero.at;
+  const area = heroArea(room);
+  if (area) [hero.x, hero.y] = clampToArea(area, hero.x, hero.y);
+  hero.tx = hero.x;
+  hero.ty = hero.y;
+  hero.face = "front";
+  hero.walking = false;
+}
+
+// Sprites sit on their feet: `at` is the bottom-center point in logical px.
+function placeSprite(node, id, at) {
+  const info = assetInfo(id);
+  const [w, h] = info ? info.size : [48, 64];
+  node.style.left = pct(at[0] - w / 2, "x");
+  node.style.top = pct(at[1] - h, "y");
+  node.style.width = pct(w, "x");
+  if (node.dataset.file !== id) mount(node, id);
+}
+
+function placeHero(node, room) {
+  placeSprite(node, heroFrame(room), [hero.x, hero.y]);
+  node.style.zIndex = actorZ(hero.y);
+}
+
+function walkTo(room, x, y) {
+  if (!room || !room.hero) return;
+  heroSync(room);
+  const area = heroArea(room);
+  const wantY = y === undefined ? hero.y : y;
+  if (area) [hero.tx, hero.ty] = clampToArea(area, x, wantY);
+  else {
+    const [lo, hi] = room.hero.walk || [0, SCENE.w];
+    [hero.tx, hero.ty] = [Math.max(lo, Math.min(hi, x)), hero.y];
+  }
+  if (Math.hypot(hero.tx - hero.x, hero.ty - hero.y) < 2) return;
+  if (Math.abs(hero.tx - hero.x) >= 1) hero.face = hero.tx > hero.x ? "r" : "l";
+  else if (hero.face === "front") hero.face = "r";
+  if (hero.walking) return;
+  hero.walking = true;
+  hero.t = 0;
+  hero.last = performance.now();
+  requestAnimationFrame(heroTick);
+}
+
+function heroTick(now) {
+  const dt = Math.max(0, now - hero.last);
+  hero.last = now;
+  hero.t += dt;
+  const room = ui.state && ROOMS[ui.state.room];
+  if (!hero.walking || !room || !room.hero || hero.room !== room.id) {
+    hero.walking = false;
+    return;
+  }
+  const stepPx = (HERO_SPEED * dt) / 1000;
+  const area = heroArea(room);
+  const before = [hero.x, hero.y];
+  [hero.x, hero.y] = area ? stepToward(area, before, [hero.tx, hero.ty], stepPx) : [hero.tx, hero.ty];
+  const left = Math.hypot(hero.tx - hero.x, hero.ty - hero.y);
+  const moved = Math.hypot(hero.x - before[0], hero.y - before[1]);
+  if (left < 0.5 || (dt > 0 && moved < stepPx * 0.05)) hero.walking = false; // arrived, or slid into an edge
+  const node = document.querySelector(".hero");
+  if (node) placeHero(node, room);
+  if (hero.walking) requestAnimationFrame(heroTick);
 }
 
 function place(node, rect) {
@@ -432,6 +588,7 @@ function renderTitle() {
 
 function startGame() {
   ui.state = newGame();
+  Object.assign(ui.state.flags, ui.flagOverride);
   ui.screen = "play";
   ui.queue = [];
   ui.menu = false;
@@ -509,6 +666,8 @@ window.__RR = {
     return ui.queue;
   },
   start: startGame,
+  hero: () => ({ ...hero }),
+  walkTo: (x, y) => walkTo(ui.state && ROOMS[ui.state.room], x, y),
   act: dispatch,
   advance,
   setArtMode,

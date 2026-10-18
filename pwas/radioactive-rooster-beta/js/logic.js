@@ -507,6 +507,7 @@ function tossSpeaker(s, out) {
   }
   s.flags.got_basket = true;
   s.flags.honest_toss = true;
+  s.flags.pip_trust = true; // won it straight: Pip's tickets never left the counter
   give(s, "basket");
   out.lines.push(line("Low and slow, and he wheezes into the horn. *pah.* The bottles shiver, the glue lets go, and a ring walks itself over three necks.", { sound: "wheeze" }));
   out.lines.push(line("\"...Huh. Nobody wins,\" says Dot. \"Except, apparently.\" She hands over the rubber basket.", { speaker: SPEAKER.dot }));
@@ -529,6 +530,7 @@ function talkHattieDoor(s, out) {
 function repayPip(s, out) {
   drop(s, "tickets");
   s.flags.kind_pip = true;
+  s.flags.pip_trust = true;
   tempt(s, -1);
   out.lines.push(line("He kneels at the counter and puts the roll of tickets in Pip's hand. \"These are yours. I'm sorry.\""));
   out.lines.push(line("Pip looks at the tickets, then at the red streamers under his costume arms, for a long second. \"...Thanks, mister.\"", { speaker: SPEAKER.pip }));
@@ -686,6 +688,7 @@ function sauceOil(s, out) {
     out.lines.push(line("Seasoning a crime you haven't been invited to yet. Win the room first."));
     return;
   }
+  if (!reachVat(s, out)) return;
   if (s.flags.cage_jogged) {
     out.lines.push(line("The oil's seasoned enough, and the cage is already low."));
     return;
@@ -702,7 +705,75 @@ function basketFryer(s, out) {
     out.lines.push(line("The cage isn't out over the oil yet. Win the room first."));
     return;
   }
+  if (!reachVat(s, out)) return;
   out.lines.push(line("The basket's too low. The cage is still up on the chain, hugging the Yolk."));
+}
+
+/* ---------- Pavilion rope puzzle (Arlong, 2026-10-18): Pip lifts Corny's key ring ---------- */
+// The front rope is padlocked; the vat beats need it open. Pip helps once she trusts him (pip_trust:
+// refused the ring-toss rig, won it straight, or gave her tickets back). Never a soft-lock: the exit
+// stays open after the crow-down, and every trust source stays available back on the Midway.
+function reachVat(s, out) {
+  if (s.flags.rope_open) return true;
+  out.lines.push(line("The padlocked rope keeps him one long arm short of the oil. Corny's keys are on the corn-dog cart. Somebody small could get them."));
+  return false;
+}
+
+function pipRefuses(s, out) {
+  if (s.flags.pip_robbed) {
+    out.lines.push(line("\"You won Corny's rigged prize with my tickets, mister. Ask somebody else for favors.\"", { speaker: SPEAKER.pip }));
+    if (has(s, "tickets")) out.lines.push(line("The roll of prize tickets is still in his belt. It was never his."));
+    return;
+  }
+  out.lines.push(line("\"Lots of guys wear costumes to the fair. Corny wears one, kind of.\" She nods back toward the Midway. \"Corny's ring-toss. Beat the pegs without his trick, then we'll talk.\"", { speaker: SPEAKER.pip }));
+}
+
+function pipUnlocks(s, out) {
+  s.flags.rope_open = true;
+  s.flags.pip_helped = true;
+  out.lines.push(line("Pip looks at the cage over the oil, then at him. \"Corny never watches his own cart. He's too busy watching everybody else's money.\"", { speaker: SPEAKER.pip }));
+  out.lines.push(line("She drifts off through the crowd like a kid looking for her mom. A minute later the key ring is gone from the cart hook. Nobody notices. Nobody ever notices Pip."));
+  out.lines.push(line("*click.* The padlock pops. Pip lets the rope down and coils it at the post like she's done it a hundred times."));
+  out.lines.push(line("\"You caught me last time,\" she whispers. \"My turn.\"", { speaker: SPEAKER.pip }));
+}
+
+function talkPipPavilion(s, out) {
+  if (s.flags.rope_open) {
+    out.lines.push(line("\"Go on. I'll watch the rope.\" Pip doesn't take her eyes off the cage. She was in one, once.", { speaker: SPEAKER.pip }));
+    return;
+  }
+  if (!s.flags.pip_trust) {
+    pipRefuses(s, out);
+    return;
+  }
+  pipUnlocks(s, out);
+}
+
+function lookPipPavilion(s, out) {
+  out.lines.push(line("Pip, on her break, front row by the rope, still in the chick-costume uniform. She's staring at the cage over the oil. She was the kid in that cage on the stunt night."));
+}
+
+function useKeyring(s, out) {
+  if (s.flags.pip_trust) {
+    out.lines.push(line("He reaches for the keys. Corny's head turns like a weather vane. He un-reaches. Pip, beside him, sighs like he's hopeless."));
+    pipUnlocks(s, out);
+    return;
+  }
+  out.lines.push(line("He reaches for the keys. Across the crowd, Corny's head turns like a weather vane. He un-reaches. A grown man in a rooster suit can't sneak. Somebody small could, if she trusted him."));
+}
+
+function lookPadlock(s, out) {
+  out.lines.push(line(s.flags.rope_open
+    ? "The padlock hangs open on the post. Pip's handiwork. Corny will blame the wind."
+    : "A brass padlock through the rope's hook, on the post nearest the vat. Cheap, shiny, and the only thing between him and the oil."));
+}
+
+function usePadlock(s, out) {
+  if (s.flags.rope_open) {
+    out.lines.push(line("It's already open. He closes it anyway, then opens it again. Habit."));
+    return;
+  }
+  out.lines.push(line("He tugs it. It's a padlock. It has exactly one job, and it's good at it. The key's on Corny's ring."));
 }
 
 export function computeEnding(s) {
@@ -735,6 +806,7 @@ function basketCage(s, out) {
     out.lines.push(line("Win the room first. She hasn't swung the cage out."));
     return;
   }
+  if (!reachVat(s, out)) return;
   if (!s.flags.cage_jogged) {
     out.lines.push(line("Too high. The chain needs a jog. A light in her eyes, or a reason for her to lean in."));
     return;
@@ -788,6 +860,11 @@ const specials = {
   sauce_oil: sauceOil,
   basket_fryer: basketFryer,
   basket_cage: basketCage,
+  talk_pip_pav: talkPipPavilion,
+  look_pip_pav: lookPipPavilion,
+  use_keyring: useKeyring,
+  look_padlock: lookPadlock,
+  use_padlock: usePadlock,
 };
 
 function onItem(s, id, out) {
@@ -904,6 +981,8 @@ function onTempt(s, opt, out) {
       out.lines.push(line("Corny pays out with a sour face: a rubber basket, and Pip's whole roll of prize tickets. Pip goes very quiet.", { speaker: SPEAKER.corny }));
       out.lines.push(hattie("\"See? Nobody got hurt.\" From the doorway. She's wrong, and he knows it."));
     } else {
+      s.flags.refused_ring = true;
+      s.flags.pip_trust = true; // he wouldn't take Corny's rig, or Pip's tickets
       out.lines.push(hattie("\"...You always did say no like it was a favor.\" The doorway goes dark."));
     }
   }
@@ -993,7 +1072,7 @@ function onRewind(s, out) {
   } else {
     out.lines.push(line("Rewind. The Yolk is back in the cage, the oil is back to cold-ish, and he remembers every comeback."));
   }
-  for (const f of ["learned_henny"]) if (s.flags[f]) back.flags[f] = true;
+  for (const f of ["learned_henny", "rope_open", "pip_helped"]) if (s.flags[f]) back.flags[f] = true;
   back.checkpoint = structuredClone(back);
   back.checkpoint.checkpoint = null;
   return back;

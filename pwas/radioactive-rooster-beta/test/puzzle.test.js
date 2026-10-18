@@ -66,6 +66,7 @@ function toPavilion({ phone = "pull", vip = "pull", ring = "pull", kind = false,
 }
 
 const winRest = (r2 = "ticket", r3 = "warn") => [
+  V("talk"), H("pip"), // rope puzzle: Pip lifts Corny's keys (needs pip_trust)
   V("talk"), H("gobbler"), C("henny"), C(r2), C(r3),
   V("use"), I("mirror"), H("lamp"),
   V("use"), I("basket"), H("cage"),
@@ -137,7 +138,12 @@ test("Dark Side needs temptation 3 and rewinds to the Pavilion at 2", () => {
   assert.equal(back.state.room, "pavilion");
   assert.equal(back.state.mode, "play");
   assert.equal(back.state.temptation, 2);
-  const won = run(winRest("ticket"), back.state);
+  // Robbed Pip, so she won't help with the rope until he gives her tickets back (no soft-lock: he can still go do it).
+  const refused = run(winRest("ticket"), back.state);
+  assert.notEqual(refused.state.flags.rope_open, true);
+  const repaid = run([G("out"), V("use"), I("tickets"), H("kids"), G("rope")], back.state);
+  assert.equal(repaid.state.room, "pavilion");
+  const won = run(winRest("ticket"), repaid.state);
   assert.equal(won.state.ending, "smitten");
 });
 
@@ -204,4 +210,65 @@ test("every room hotspot is reachable data (ids unique per room)", () => {
     const ids = room.spots.map((s) => s.id);
     assert.equal(new Set(ids).size, ids.length, room.id);
   }
+});
+
+/* ---------- Pavilion rope puzzle ---------- */
+test("rope puzzle: trust path. Refusing Corny's rig earns Pip's trust and she opens the padlocked rope", () => {
+  const r = run(toPavilion()); // ring = "pull" (refused the rig)
+  assert.equal(r.state.flags.refused_ring, true);
+  assert.equal(r.state.flags.pip_trust, true);
+  assert.notEqual(r.state.flags.rope_open, true, "rope starts padlocked");
+  const blocked = run([V("talk"), H("gobbler"), C("henny"), C("ticket"), C("warn"), V("use"), I("mirror"), H("lamp"), V("use"), I("basket"), H("cage")], r.state);
+  assert.notEqual(blocked.state.flags.egg_saved, true, "vat out of reach while the rope is locked");
+  assert.ok(blocked.texts.some((t) => t.includes("padlocked rope")));
+  const open = run([V("talk"), H("pip")], blocked.state);
+  assert.equal(open.state.flags.rope_open, true);
+  assert.ok(open.texts.some((t) => t.includes("You caught me last time")));
+  const done = run([V("use"), I("basket"), H("cage")], open.state);
+  assert.equal(done.state.flags.egg_saved, true);
+  assert.equal(done.state.ending, "hero");
+});
+
+test("rope puzzle: an honest ring-toss win, or using the key ring with Pip's trust, also works", () => {
+  // ring = "pull" path wins honestly with the speaker too; trust is already set. Using the key ring hands it to Pip.
+  const r = run([...toPavilion(), V("use"), H("keyring")]);
+  assert.equal(r.state.flags.rope_open, true);
+  assert.equal(r.state.flags.pip_helped, true);
+});
+
+test("rope puzzle: refusal path. Rigging the ring-toss without repaying Pip keeps the rope locked with a hint", () => {
+  const r = run(toPavilion({ ring: "follow" }));
+  assert.equal(r.state.flags.pip_robbed, true);
+  assert.notEqual(r.state.flags.pip_trust, true);
+  const asked = run([V("talk"), H("pip"), V("use"), H("keyring")], r.state);
+  assert.notEqual(asked.state.flags.rope_open, true);
+  assert.ok(asked.texts.some((t) => t.includes("my tickets")));
+  assert.ok(asked.texts.some((t) => t.includes("prize tickets is still in his belt")));
+  const fresh = newGame();
+  fresh.room = "pavilion"; fresh.flags.pavilion_in = true;
+  const stranger = run([V("talk"), H("pip")], fresh);
+  assert.ok(stranger.texts.some((t) => t.includes("ring-toss")), "unrobbed refusal points back to the ring-toss");
+});
+
+test("rope puzzle: no soft-lock. After winning the crowd without trust he can leave, repay Pip, and finish", () => {
+  let st = run(toPavilion({ ring: "follow" })).state;
+  st = run([V("talk"), H("gobbler"), C("henny"), C("ticket"), C("warn"), V("use"), I("mirror"), H("lamp")], st).state;
+  assert.equal(st.flags.crowd_won, true);
+  assert.equal(st.mode, "play");
+  assert.ok(st.inv.includes("tickets"), "the tickets can't be lost, so trust is always earnable");
+  const stuck = run([V("use"), I("basket"), H("cage")], st);
+  assert.notEqual(stuck.state.flags.egg_saved, true);
+  const out = run([G("out")], stuck.state);
+  assert.equal(out.state.room, "midway", "exit stays open after the crow-down");
+  const back = run([V("use"), I("tickets"), H("kids"), G("rope"), V("talk"), H("pip"), V("use"), I("basket"), H("cage")], out.state);
+  assert.equal(back.state.flags.rope_open, true);
+  assert.equal(back.state.flags.egg_saved, true);
+  assert.equal(back.state.mode, "end");
+});
+
+test("rope puzzle: an opened rope survives an Egg Fried rewind", () => {
+  const r = run([...toPavilion(), V("talk"), H("pip"), V("talk"), H("gobbler"), C("mean"), C("flex"), C("mean")]);
+  assert.equal(r.state.ending, "eggfried");
+  const back = run([R], r.state);
+  assert.equal(back.state.flags.rope_open, true);
 });

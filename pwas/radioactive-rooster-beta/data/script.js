@@ -315,13 +315,17 @@ export const ROOMS = {
     id: "hq",
     name: "Rooftop coop",
     plate: "bg-hq.jpg",
+    hero: { at: [205, 156], height: 96, depth: { horizon: 99 } }, // depth: height scales with feet y, 96 at y 156 (hatch lid perspective gives horizon ~99)
+    walk: [[[40, 150], [302, 150], [302, 166], [262, 168], [255, 177], [40, 177]]], // floor in front of the door/board; crate (x<34) off limits; he can step behind the bucket (y<173), the hatch is floor-level // walking Rooster: feet [x, y], walk x range, scene height (px). Door 92 px (y 55-147): his hood (~84) stands just under it; starts on the hatch he climbed out of
     sign: [258, 99, 54, 8],
+    occluders: [{ id: "bucket", base: 173 }], // fg/hq--bucket: drawn over him while his feet are behind its base (tools/bg/occluders.py)
     exits: [{ spot: "hatch", label: "Down the hatch" }],
     spots: [
       spot({
         id: "bucket",
         name: "bucket",
         rect: [261, 136, 38, 38],
+        stand: [250, 170], // walk up beside it, not behind it
         look: { special: "read_note" },
         take: "He leaves the bucket. The note is already stuck in his head.",
         talk: "\"Whoever you are, friend, I'm coming.\" The bucket does not confirm it's a friend.",
@@ -423,64 +427,126 @@ export const ROOMS = {
     id: "fence",
     name: "Fence line",
     plate: "bg-fence.jpg",
-    sign: [64, 4, 60, 9],
-    poseAt: { squat: [96, 50, 64] },
+    // Crossroads pixel bg (Arlong's approved fence.jpg, 2026-10-18). Far scene: the split-rail fence (posts ~23 px, base y ~110,
+    // top rail ~17 px above the ground) sits at his waist-to-chest when he stands at it, so he's ~30 px there.
+    hero: { at: [170, 152], height: 60, depth: { horizon: 68, min: 28, max: 80 } }, // ~30 at the fence (y 110), 36 at Henny's crate, ~80 at the bottom edge
+    // In front of the fence (base y ~110, ~102-105 at the right end), never through the crate; a slot behind the crate;
+    // up the Main Street road past the fence end; the ditch, reeds and bank (bottom right) are off limits.
+    walk: [
+      [[6, 112], [101, 112], [101, 118.5], [122, 118.5], [122, 112], [240, 112], [250, 107.5], [276, 105.5], [296, 104.5], [300, 99], [307, 93], [318, 90], [318, 117], [285, 119], [262, 127], [249, 139], [243, 158], [238, 178], [6, 178]],
+      [[96, 111.5], [127, 111.5], [127, 113.5], [96, 113.5]],
+    ],
+    occluders: [ // fg/fence--<id> cutouts (tools/bg/occluders.py)
+      { id: "crate", base: 117 },
+      { id: "post-end", base: 102 },
+    ],
+    cast: [{ spot: "henny", sprite: "henny-front", at: [128, 116], half: true }], // a real hen at her checkpoint, knee-high (9 px) to him at that spot (~36); drawn only over real art (?cast forces)
+    sign: [254, 52, 40, 6], // NED'S FEED & SEED glowing over Main Street
+    poseAt: { squat: [60, 66, 24] }, // on the top rail between the left posts
     exits: [
       { spot: "to-hq", label: "Rooftop" },
       { spot: "door", label: "Henhouse" },
       { spot: "to-barn", label: "Barn" },
+      { spot: "to-main", label: "Main Street" },
+      { spot: "to-ditch", label: "Ditch road" },
     ],
     spots: [
       spot({
         id: "birds",
         name: "yard roosters",
-        rect: [6, 61, 160, 50],
+        rect: [48, 74, 26, 12],
         look: "Round. Cheeks full. Quiet. Employed. That's the whole job and they're good at it.",
         talk: "They're busy looking like roosters. It's a skilled trade.",
         use: { special: "squat_rail" },
       }),
       spot({
         id: "rail",
-        name: "fence rail",
-        rect: [0, 90, 205, 29],
+        name: "top rail",
+        rect: [0, 84, 246, 11],
+        stand: [72, 113],
         look: "A rail worn smooth by honest poultry. It has never held a utility belt.",
         use: { special: "squat_rail" },
         push: "The rail is already committed.",
         talk: "Talking to furniture is how cover gets blown.",
       }),
       spot({
+        id: "door",
+        name: "henhouse door",
+        rect: [16, 56, 42, 26],
+        exit: true,
+        stand: [150, 113], // through the gate, past Henny
+        look: "Dark inside. Warm straw. A hint of lipstick, which is not a hen product.",
+        talk: "Doors are a quiet people.",
+        go: { special: "coop_door" },
+      }),
+      spot({
+        id: "to-barn",
+        name: "path to the barn",
+        rect: [114, 50, 44, 28],
+        exit: true,
+        stand: [155, 113],
+        look: "The barn light is on. Somebody in there owns a ribbon and a goat named Mortgage.",
+        go: { room: "barn", pose: null, say: "Across the yard. The barn smells like hay and unfinished arguments." },
+      }),
+      spot({
+        id: "gate",
+        name: "gate",
+        rect: [143, 86, 24, 25],
+        look: "A split-rail gate on a loop of baling wire. Past it: the yard, the henhouse, the barn. Henny's checkpoint decides who goes through.",
+        talk: "The gate has no opinion. Henny has all of them.",
+        use: { special: "coop_door" },
+        push: { special: "coop_door" },
+      }),
+      spot({
+        id: "crate",
+        name: "checkpoint crate",
+        rect: [100, 95, 23, 23],
+        look: "Henny's checkpoint: an upturned crate with a clipboard. The form has three lines. Name. Business. Comb size.",
+        take: "It's an official document. Henny would know.",
+        use: "Name: Rooster. Business: ...He puts the pencil down. Henny is watching.",
+        talk: "The clipboard has heard every excuse in the county.",
+      }),
+      spot({
         id: "henny",
         name: "Henny",
-        rect: [192, 43, 64, 86],
+        rect: [120, 104, 16, 13],
         look: "Henny runs this door like a nightclub that only admits spheres. She never says a word. She has never needed to.",
         talk: { special: "talk_henny" },
         use: "She doesn't want to be used. She wants a normal rooster on that rail.",
         useItem: { photo: { special: "photo_henny" } },
       }),
       spot({
-        id: "door",
-        name: "henhouse door",
-        rect: [250, 54, 51, 58],
+        id: "signpost",
+        name: "signpost",
+        rect: [218, 52, 22, 58],
+        look: "Four arrows on one post: HENHOUSE, BARN, MAIN ST., DITCH RD. Tacked under them, a weathered county map with the fair circled in red.",
+        talk: "It already told him everything it knows.",
+        take: "It's load-bearing. The whole county would get lost.",
+      }),
+      spot({
+        id: "to-main",
+        name: "Main Street",
+        rect: [296, 58, 24, 40],
         exit: true,
-        look: "Dark inside. Warm straw. A hint of lipstick, which is not a hen product.",
-        talk: "Doors are a quiet people.",
-        go: { special: "coop_door" },
+        look: "Main Street: the Feed & Seed, and WKUK's radio tower blinking red over the rooftops.",
+        go: { room: "store", pose: null, say: "Down Main Street, under the NED'S FEED & SEED sign." },
+      }),
+      spot({
+        id: "to-ditch",
+        name: "ditch road",
+        rect: [248, 118, 72, 62],
+        exit: true,
+        stand: [300, 114],
+        look: "The ditch road follows the reeds out toward the back of the fairgrounds. Frogs, mud, and nobody watching.",
+        go: "Not yet. The ditch road ends at the fair's back fence, and he doesn't have a way in until WKUK. Town first.",
       }),
       spot({
         id: "to-hq",
         name: "way up",
-        rect: [0, 0, 38, 50],
+        rect: [0, 112, 12, 30],
         exit: true,
         look: "Back up to the roof and the conspiracy board.",
         go: { room: "hq", pose: null, say: "Back up the fire escape to the coop. The board is waiting for string." },
-      }),
-      spot({
-        id: "to-barn",
-        name: "path to the barn",
-        rect: [275, 112, 45, 58],
-        exit: true,
-        look: "The barn light is on. Somebody in there owns a ribbon and a goat named Mortgage.",
-        go: { room: "barn", pose: null, say: "Across the yard. The barn smells like hay and unfinished arguments." },
       }),
     ],
   },
@@ -820,6 +886,9 @@ export const ROOMS = {
     id: "midway",
     name: "Midway, 11:40",
     plate: "bg-midway.jpg",
+    hero: { at: [180, 152], height: 104, depth: { horizon: 105 } }, // depth: 104 at y 152 (booth counter at his belt), smaller toward the railing
+    walk: [[[20, 151], [84, 149], [88, 141], [262, 141], [262, 177], [20, 177]]], // boardwalk up to the railing posts (bases y 130-145), past the booth's right corner (booth occludes him behind y 147); the Pavilion rope (x>262) is off limits // booth counter top y 103, booth floor y 147 (~44 px): counter meets his belt
+    occluders: [{ id: "booth", base: 147 }],
     sign: [268, 92, 48, 8],
     exits: [
       { spot: "to-gate", label: "Gate" },
@@ -926,15 +995,32 @@ export const ROOMS = {
     id: "pavilion",
     name: "Hot Oil Pavilion",
     plate: "bg-pavilion.jpg",
-    sign: [288, 4, 28, 5],
-    vat: [22, 104, 160, 44],
+    // New pixel bg (Arlong, 2026-10-17). Scene scale measured: height ~= 1.57 * (feetY - 92) (cart counter 109 / wheels 145 = waist; stage edge 114-131 = knee).
+    hero: { at: [150, 153], height: 96, depth: { horizon: 92 } }, // depth: 96 at y 153; ~1.57 px per px of feet y (horizon 92), so ~61 at the stage front
+    // Rope barrier: the front rope is padlocked between the left post (x 8-17) and the centre-left post (x 104-116, base y 168).
+    // A second rope runs back from the centre-left post (base 112,168) to the post at (150,145): stay in front of it.
+    // Closed: open floor in front of both ropes, back to the stage front (y 131); he can step behind the cart's left corner (cart occludes, base 146).
+    walk: [[[112, 171], [152, 147], [165, 131], [245, 131], [258, 139], [262, 148], [298, 152], [298, 177], [112, 177]]],
+    states: [
+      // Pip unlocks the padlock with Corny's key ring once she trusts him (js/logic.js, rope puzzle).
+      { flag: "rope_open", plate: "bg/pavilion-open", walk: [[[112, 171], [152, 147], [165, 131], [245, 131], [258, 139], [262, 148], [298, 152], [298, 177], [112, 177]], [[20, 149], [104, 149], [106, 166], [112, 171], [112, 177], [20, 177]]] }, // + vat front, through the gap where the front rope hung
+    ],
+    occluders: [ // fg/<plate>--<id> cutouts (tools/bg/occluders.py); drawn over actors whose feet are above `base`
+      { id: "post-left", base: 170 },
+      { id: "post-front", base: 169 },
+      { id: "post-mid", base: 146 },
+      { id: "cart", base: 146 },
+    ],
+    cast: [{ spot: "gobbler", sprite: "hattie-front", at: [205, 110], height: 52 }], // on the stage, in the spotlight
+    sign: [266, 6, 48, 8],
+    vat: [14, 66, 84, 17], // the glowing oil surface
     poseAt: { squat: [128, 76, 70] },
     exits: [{ spot: "out", label: "Midway" }],
     spots: [
       spot({
         id: "gobbler",
         name: "The Cock Gobbler",
-        rect: [160, 18, 77, 76],
+        rect: [180, 44, 56, 68],
         look: { special: "look_gobbler" },
         talk: { special: "talk_gobbler" },
         useItem: { vip: { special: "return_vip" } },
@@ -942,7 +1028,7 @@ export const ROOMS = {
       spot({
         id: "lamp",
         name: "heat lamp",
-        rect: [6, 40, 64, 50],
+        rect: [44, 0, 40, 57],
         look: "A heat lamp aimed at the oil. It could be aimed at a person, if the person stood where vanity put her.",
         useItem: {
           mirror: { special: "mirror_lamp" },
@@ -951,7 +1037,7 @@ export const ROOMS = {
       spot({
         id: "cage",
         name: "egg cage",
-        rect: [83, 29, 70, 65],
+        rect: [99, 26, 30, 53],
         look: "The Yolk of Midnight, pitch black and glowing, in the same old prize cage from the stunt night. They say whoever eats it gets the Crow: a voice the whole county obeys.",
         useItem: {
           basket: { special: "basket_cage" },
@@ -961,7 +1047,7 @@ export const ROOMS = {
       spot({
         id: "fryer",
         name: "championship fryer",
-        rect: [0, 83, 147, 94],
+        rect: [6, 64, 98, 84],
         look: { special: "look_vat" },
         useItem: {
           basket: { special: "basket_fryer" },
@@ -971,14 +1057,14 @@ export const ROOMS = {
       spot({
         id: "crowd",
         name: "crowd",
-        rect: [109, 120, 186, 56],
+        rect: [104, 76, 54, 30],
         look: "They came for a tasting. They are one bad wire away from leaving without eyebrows.",
         talk: "They shush each other. The show hasn't started, or it has, and they can't tell.",
       }),
       spot({
         id: "cart",
         name: "corn-dog cart",
-        rect: [243, 36, 70, 76],
+        rect: [253, 62, 64, 85],
         look: "A corn-dog cart parked like a getaway car. Keys in it. She always plans her exit.",
         use: "It isn't time to borrow her exit.",
         push: "The cart stays. For now.",
@@ -986,10 +1072,37 @@ export const ROOMS = {
       spot({
         id: "out",
         name: "tent flap",
-        rect: [288, 72, 32, 72],
+        rect: [262, 20, 58, 40],
         exit: true,
         look: "Back to the midway, if you need a breath that isn't made of oil.",
         go: { special: "pavilion_out" },
+      }),
+      spot({
+        id: "pip",
+        name: "Pip",
+        rect: [120, 98, 16, 34], // front row by the rope, right of the centre-left post (no sprite yet)
+        look: { special: "look_pip_pav" },
+        talk: { special: "talk_pip_pav" },
+        use: { special: "talk_pip_pav" },
+        take: "She's a person, not a prize. Corny's the one who confuses those.",
+      }),
+      spot({
+        id: "padlock",
+        name: "padlock",
+        rect: [98, 131, 11, 13],
+        look: { special: "look_padlock" },
+        use: { special: "use_padlock" },
+        take: { special: "use_padlock" },
+        push: { special: "use_padlock" },
+      }),
+      spot({
+        id: "keyring",
+        name: "Corny's key ring",
+        rect: [300, 113, 14, 17],
+        whenNot: "rope_open",
+        look: "Slick Corny's key ring on a hook on the corn-dog cart: cart key, cash-box key, and one little brass key the same color as the padlock. He hangs it in plain sight. Nobody would dare.",
+        use: { special: "use_keyring" },
+        take: { special: "use_keyring" },
       }),
     ],
   },
