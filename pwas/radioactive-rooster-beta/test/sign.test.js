@@ -20,8 +20,8 @@ const ROOT = new URL("../", import.meta.url);
 const read = (p) => readFileSync(new URL(p, ROOT));
 const pngSize = (buf) => [buf.readUInt32BE(16), buf.readUInt32BE(20)];
 const manifest = JSON.parse(read("art/manifest.json"));
-const PLATES = { hq: "art/pixel/bg/hq.png", fence: "art/pixel/bg/fence.png", midway: "art/pixel/bg/midway.png", store: "art/placeholders/bg-store.jpg", wkuk: "art/placeholders/bg-wkuk.jpg", gate: "art/placeholders/bg-gate.jpg" };
-const SRCS = { hq: "tools/neon/src/hq.png", fence: "tools/neon/src/fence.png", midway: "tools/neon/src/midway.png", store: "tools/neon/src/bg-store.jpg", wkuk: "tools/neon/src/bg-wkuk.jpg", gate: "tools/neon/src/bg-gate.jpg" };
+const PLATES = Object.fromEntries(SIGN_ROOMS.map((r) => [r, `art/pixel/bg/${r}.png`]));
+const SRCS = Object.fromEntries(SIGN_ROOMS.map((r) => [r, `tools/neon/src/${r}.png`])); // clean pixel plates, no sign
 
 test("each sign is painted into its plate and has a glow sheet with one frame per tube", () => {
   for (const id of SIGN_ROOMS) {

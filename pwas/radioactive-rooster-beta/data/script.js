@@ -777,6 +777,8 @@ export const ROOMS = {
     id: "barn",
     name: "Barn",
     plate: "bg-barn.jpg",
+    hero: { at: [186, 170], height: 108, depth: { horizon: 80 } }, // pixel plate: 108 at y 170 (Peck's eye line ~80); Mortgage's back (y ~110 over hooves ~160) sits at his belt, the ladder (y 70-155) a head taller
+    walk: [[[25, 160], [205, 160], [212, 178], [20, 178]]], // hay floor in front of Mortgage's hooves (y ~160) and left of Peck's bale (x > 212)
     exits: [
       { spot: "to-fence", label: "Fence" },
       { spot: "to-town", label: "Town" },
@@ -862,7 +864,9 @@ export const ROOMS = {
     id: "store",
     name: "Ned's Feed & Seed",
     plate: "bg-store.jpg",
-    sign: { art: "fx/neon-store", rect: [249,  21,  32,  16], frames: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (Ned's plank on the back wall, between the poster and the bell); per-letter glow frames (tools/neon/paint_neon.py)
+    hero: { at: [282, 160], height: 96, depth: { horizon: -6 } }, // pixel plate: 96 at y 160 by the counter end (counter top y ~112 at his belt), ~76 in the doorway (opening y 40-125: the door is just taller than him)
+    walk: [[[250, 128], [300, 128], [318, 142], [318, 177], [248, 177], [243, 150]]], // floorboards right of the counter, up to the street door
+    sign: { art: "fx/neon-store", rect: [248,  20,  33,  18], frames: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (Ned's plank on the back wall, between the poster and the bell); per-letter glow frames (tools/neon/paint_neon.py)
     exits: [
       { spot: "to-barn", label: "Barn" },
       { spot: "to-wkuk", label: "WKUK" },
@@ -938,6 +942,8 @@ export const ROOMS = {
     id: "wkuk",
     name: "WKUK",
     plate: "bg-wkuk.jpg",
+    hero: { at: [34, 176], height: 116, depth: { horizon: 70 } }, // pixel plate: close camera; 116 at the door (door y 37-172: just taller than him), ~88 down the hall (y 150)
+    walk: [[[6, 150], [50, 150], [62, 178], [6, 178]]], // hallway floor by the studio door; the studio wall (x > 62) runs to the frame bottom
     sign: { art: "fx/neon-wkuk", rect: [68,  26,  51,  17], frames: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (raceway above the studio door, in perspective); per-letter glow frames (tools/neon/paint_neon.py)
     exits: [
       { spot: "to-store", label: "Store" },
@@ -1017,7 +1023,9 @@ export const ROOMS = {
     id: "gate",
     name: "Fair gate",
     plate: "bg-gate.jpg",
-    sign: { art: "fx/neon-gate", rect: [39,  66,  72,  18], frames: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (tubes clipped to the turnstile canopy panel); per-letter glow frames (tools/neon/paint_neon.py)
+    hero: { at: [130, 176], height: 84 }, // pixel plate: turnstile (y 85-180) just taller than him, booth sill (y 140) at his belt line; one ground strip, so no depth scaling
+    walk: [[[8, 168], [312, 168], [312, 178], [8, 178]]], // the ground strip in front of the turnstiles, booth and cutout
+    sign: { art: "fx/neon-gate", rect: [39,  66,  71,  17], frames: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (tubes clipped to the turnstile canopy panel); per-letter glow frames (tools/neon/paint_neon.py)
     poseAt: { squat: [166, 61, 70] },
     exits: [
       { spot: "to-wkuk", label: "WKUK" },

@@ -71,3 +71,6 @@ World rule: every character is a human (some in animal superhero costumes); Henn
 - Chest/collar: only 3 feather points on front.
 - Boots: knee guards, a calf claw, ribbed shins, clawed rooster feet.
 - Back: the back of the cowl has 3 feather points (NOT tail feathers), plus 2 shoulder feathers; together they act as a mini cape. Separate green waist tail: YES, shoots straight up then curves back (Arlong draw-over pending).
+
+
+2026-10-18: henhouse, barn, store, WKUK, gate and title plates pixelated with `tools/bg/pixelate.py` (same 320x180 + 4x convention; 48-colour adaptive palette, light Bayer dither, unsharp to keep ink lines). Painted originals stay in `art/placeholders/` as the fallback (clean, no neon). Barn, store, WKUK and gate now carry the walking Rooster (hero + walk + depth in data/script.js); the henhouse is a hen-scale close-up and keeps him off-screen.

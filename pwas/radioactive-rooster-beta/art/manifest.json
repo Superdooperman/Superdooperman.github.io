@@ -24,7 +24,8 @@
     0,
     0
    ],
-   "legacy": "bg-title.jpg"
+   "legacy": "bg-title.jpg",
+   "source": "tools/bg/pixelate.py (box 1280x720 -> 320x180, unsharp, Bayer dither, 48-colour palette) from the painted bg-title.jpg; 4x nearest copy in art/pixel-4x/bg/"
   },
   "bg/hq": {
    "kind": "bg",
@@ -61,7 +62,8 @@
     0,
     0
    ],
-   "legacy": "bg-henhouse.jpg"
+   "legacy": "bg-henhouse.jpg",
+   "source": "tools/bg/pixelate.py (box 1280x720 -> 320x180, unsharp, Bayer dither, 48-colour palette) from the painted bg-henhouse.jpg; 4x nearest copy in art/pixel-4x/bg/"
   },
   "bg/barn": {
    "kind": "bg",
@@ -73,7 +75,8 @@
     0,
     0
    ],
-   "legacy": "bg-barn.jpg"
+   "legacy": "bg-barn.jpg",
+   "source": "tools/bg/pixelate.py (box 1280x720 -> 320x180, unsharp, Bayer dither, 48-colour palette) from the painted bg-barn.jpg; 4x nearest copy in art/pixel-4x/bg/"
   },
   "bg/store": {
    "kind": "bg",
@@ -85,7 +88,8 @@
     0,
     0
    ],
-   "legacy": "bg-store.jpg"
+   "legacy": "bg-store.jpg",
+   "source": "tools/bg/pixelate.py (box 1280x720 -> 320x180, unsharp, Bayer dither, 48-colour palette) from the painted bg-store.jpg; Feed & Seed sign baked by tools/neon/paint_neon.py; 4x nearest copy in art/pixel-4x/bg/"
   },
   "bg/wkuk": {
    "kind": "bg",
@@ -97,7 +101,8 @@
     0,
     0
    ],
-   "legacy": "bg-wkuk.jpg"
+   "legacy": "bg-wkuk.jpg",
+   "source": "tools/bg/pixelate.py (box 1280x720 -> 320x180, unsharp, Bayer dither, 48-colour palette) from the painted bg-wkuk.jpg; Feed & Seed sign baked by tools/neon/paint_neon.py; 4x nearest copy in art/pixel-4x/bg/"
   },
   "bg/gate": {
    "kind": "bg",
@@ -109,7 +114,8 @@
     0,
     0
    ],
-   "legacy": "bg-gate.jpg"
+   "legacy": "bg-gate.jpg",
+   "source": "tools/bg/pixelate.py (box 1280x720 -> 320x180, unsharp, Bayer dither, 48-colour palette) from the painted bg-gate.jpg; Feed & Seed sign baked by tools/neon/paint_neon.py; 4x nearest copy in art/pixel-4x/bg/"
   },
   "bg/midway": {
    "kind": "bg",
@@ -3204,15 +3210,15 @@
   "fx/neon-store": {
    "kind": "fx",
    "size": [
-    32,
-    16
+    33,
+    18
    ],
    "anchor": [
     0,
     0
    ],
    "frames": 15,
-   "scale": 4,
+   "scale": 1,
    "source": "tools/neon/paint_neon.py (glow frames, one per lit tube; unlit bent-glass sign painted into the plate)",
    "grid": [
     1,
@@ -3230,7 +3236,7 @@
     0
    ],
    "frames": 15,
-   "scale": 4,
+   "scale": 1,
    "source": "tools/neon/paint_neon.py (glow frames, one per lit tube; unlit bent-glass sign painted into the plate)",
    "grid": [
     1,
@@ -3240,15 +3246,15 @@
   "fx/neon-gate": {
    "kind": "fx",
    "size": [
-    72,
-    18
+    71,
+    17
    ],
    "anchor": [
     0,
     0
    ],
    "frames": 15,
-   "scale": 4,
+   "scale": 1,
    "source": "tools/neon/paint_neon.py (glow frames, one per lit tube; unlit bent-glass sign painted into the plate)",
    "grid": [
     1,

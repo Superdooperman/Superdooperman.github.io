@@ -58,10 +58,10 @@
  "store": {
   "art": "fx/neon-store",
   "rect": [
-   249,
-   21,
-   32,
-   16
+   248,
+   20,
+   33,
+   18
   ],
   "frames": [
    0,
@@ -80,7 +80,7 @@
    16,
    "hawk"
   ],
-  "scale": 4
+  "scale": 1
  },
  "wkuk": {
   "art": "fx/neon-wkuk",
@@ -107,15 +107,15 @@
    16,
    "hawk"
   ],
-  "scale": 4
+  "scale": 1
  },
  "gate": {
   "art": "fx/neon-gate",
   "rect": [
    39,
    66,
-   72,
-   18
+   71,
+   17
   ],
   "frames": [
    0,
@@ -134,6 +134,6 @@
    16,
    "hawk"
   ],
-  "scale": 4
+  "scale": 1
  }
 }

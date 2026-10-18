@@ -19,44 +19,6 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 SRC = os.path.join(ROOT, "tools/neon/src")
 TEXT = "NED'S FEED & SEED"  # data/script.js FEEDSEED.text; key = index into this
 
-# ---------- illustrated rooms: tube strokes in a 4x6 unit box ----------
-STROKES = {
-    "N": [[(0, 6), (0, 0), (4, 6), (4, 0)]],
-    "E": [[(4, 0), (0, 0), (0, 6), (4, 6)], [(0, 3), (3, 3)]],
-    "D": [[(0, 0), (0, 6), (2.4, 6), (4, 4.4), (4, 1.6), (2.4, 0), (0, 0)]],
-    "S": [[(4, 0.9), (3.1, 0), (0.9, 0), (0, 0.9), (0, 2.1), (0.9, 3), (3.1, 3), (4, 3.9), (4, 5.1), (3.1, 6), (0.9, 6), (0, 5.1)]],
-    "F": [[(4, 0), (0, 0), (0, 6)], [(0, 3), (3, 3)]],
-    "'": [[(0.7, 0), (0.4, 1.8)]],
-    "&": [[(4, 6), (1, 2.3), (1, 0.9), (1.9, 0), (2.8, 0.9), (2.8, 1.8), (0, 4.1), (0, 5.2), (0.9, 6), (2.3, 6), (4, 3.8)]],
-    "hawk": [[(0.2, 6), (1.6, 3.9), (1.1, 2.3), (2.1, 0.7), (3.1, 0.3), (2.9, 1.3), (5, 2.5), (3.1, 3.1), (3.8, 5.2), (2.5, 4.4), (1.6, 3.9)]],
-}
-ADV = {"'": 1.2, "hawk": 5.2}
-
-
-def adv(k):
-    return 2.2 if k is None else ADV.get("hawk" if k == "hawk" else TEXT[k], 4)
-
-
-def stroke_line(keys, x, y, u, width, masks, size, gap=0.9):
-    """Draw tube strokes (u px per unit, top-left x,y) into per-key L masks of `size`."""
-    for k in keys:
-        if k is not None:
-            m = masks.setdefault(k, Image.new("L", size, 0))
-            d = ImageDraw.Draw(m)
-            for poly in STROKES["hawk" if k == "hawk" else TEXT[k]]:
-                pts = [(x + px * u, y + py * u) for px, py in poly]
-                d.line(pts, fill=255, width=int(round(width)), joint="curve")
-                for p in (pts[0], pts[-1]):
-                    r = width / 2
-                    d.ellipse([p[0] - r, p[1] - r, p[0] + r, p[1] + r], fill=255)
-        x += (adv(k) + gap) * u
-    return x
-
-
-def stroke_width(keys, u, gap=0.9):
-    return sum((adv(k) + gap) * u for k in keys) - gap * u
-
-
 def perspective_coeffs(dst, src):
     """Coefficients mapping output (dst quad) -> input (src quad) for Image.transform PERSPECTIVE."""
     a = []
@@ -122,75 +84,6 @@ CORE, GLOW, SPILL = (255, 212, 236), (255, 70, 172), (236, 40, 140)
 SIGNS = {}
 
 
-# ---------- illustrated rooms (1280x720, painted at 4x the logical grid) ----------
-SS = 4  # supersample for local drawing
-
-
-def illus(room, src, lines, quad, local_size, backing, unlit, hi, ink, tube_px):
-    """lines: [(keys, x, y, u)] in local px. backing(draw, w, h) paints mounts/board in local px (supersampled)."""
-    im = Image.open(os.path.join(SRC, src)).convert("RGB")
-    W, H = im.size
-    lw, lh = local_size
-    L = (lw * SS, lh * SS)
-    back = Image.new("RGBA", L, (0, 0, 0, 0))
-    backing(ImageDraw.Draw(back), L[0], L[1])
-    masks = {}
-    for keys, x, y, u in lines:
-        stroke_line(keys, x * SS, y * SS, u * SS, tube_px * SS, masks, L)
-    q = [(x, y) for x, y in quad]
-    # shadow of the whole sign (backing + tubes) cast down-right onto the wall
-    sil = back.getchannel("A")
-    for m in masks.values():
-        sil = Image.fromarray(np.maximum(np.asarray(sil), np.asarray(m)))
-    sh = warp(sil.resize((lw, lh), Image.LANCZOS), [(x + 3, y + 4) for x, y in q], (W, H)).filter(ImageFilter.GaussianBlur(2.2))
-    base = np.asarray(im, dtype=float)
-    a = np.asarray(sh, dtype=float)[..., None] / 255 * 0.42
-    base = base * (1 - a) + np.array((30, 20, 36)) * a
-    im = Image.fromarray(base.astype(np.uint8)).convert("RGBA")
-    im.alpha_composite(warp(back.resize((lw, lh), Image.LANCZOS), q, (W, H)))
-    full = {}
-    for k, m in masks.items():
-        full[k] = warp(m.resize((lw, lh), Image.LANCZOS), q, (W, H))
-    union = np.zeros((H, W))
-    for m in full.values():
-        union = np.maximum(union, np.asarray(m, dtype=float) / 255)
-    ul = Image.fromarray((union * 255).astype(np.uint8))
-    outline = np.asarray(ul.filter(ImageFilter.MaxFilter(3)), dtype=float) / 255
-    hl = np.clip(union - np.asarray(ul.transform(ul.size, Image.AFFINE, (1, 0, 0, 0, 1, -1.4), Image.BILINEAR), dtype=float) / 255, 0, 1)
-    px = np.asarray(im.convert("RGB"), dtype=float)
-    for col, al in ((ink, outline * 0.9), (unlit, union), (hi, hl * 0.85)):
-        px = px * (1 - al[..., None]) + np.array(col) * al[..., None]
-    out = Image.fromarray(px.astype(np.uint8))
-    keys = ordered(full)
-    frames = []
-    for k in keys:
-        if k == "hawk":
-            frames.append(glow_frame(full[k], (255, 214, 196), (255, 66, 50), (230, 40, 40), 3, 12, 0.9, 0.45, False))
-        else:
-            frames.append(glow_frame(full[k], CORE, GLOW, SPILL, 3, 12, 0.9, 0.45, False))
-    return out, sheet(frames, keys, 4, room)
-
-
-def room_store():
-    """Ned's own neon on a painted plank, screwed to the back wall between the poster and the bell."""
-    u1, u2 = 2.5, 1.95
-    l1, l2 = ["hawk", None, 0, 1, 2, 3, 4], [6, 7, 8, 9, None, 11, None, 13, 14, 15, 16]
-    w1, w2 = stroke_width(l1, u1), stroke_width(l2, u2)
-    lw = int(max(w1, w2) + 16); lh = int(6 * u1 + 6 * u2 + 20)
-    def backing(d, W, H):
-        r = 7 * SS
-        d.rounded_rectangle([0, 0, W - 1, H - 1], r, fill=(32, 20, 14, 255))
-        d.rounded_rectangle([2 * SS, 2 * SS, W - 1 - 2 * SS, H - 1 - 2 * SS], r - 2 * SS, fill=(116, 70, 38, 255))
-        d.rounded_rectangle([2 * SS, 2 * SS, W - 1 - 2 * SS, H // 2], r - 2 * SS, fill=(132, 82, 44, 255))
-        d.line([(9 * SS, 3 * SS), (W - 9 * SS, 3 * SS)], fill=(176, 120, 70, 255), width=SS)  # lamp light from the left on the top edge
-        for sx in (5 * SS, W - 5 * SS):
-            d.ellipse([sx - 1.6 * SS, H // 2 - 1.6 * SS, sx + 1.6 * SS, H // 2 + 1.6 * SS], fill=(48, 34, 26, 255))
-    lines = [(l1, (lw - w1) / 2, 5, u1), (l2, (lw - w2) / 2, 6 + 6 * u1 + 4, u2)]
-    x0, y0 = 1003, 95
-    quad = [(x0, y0), (x0 + lw, y0 - 2), (x0 + lw, y0 - 2 + lh), (x0, y0 + lh)]  # beam line rises slightly to the right
-    return illus("store", "bg-store.jpg", lines, quad, (lw, lh), backing, (104, 84, 98), (214, 196, 206), (26, 16, 14), 2.1)
-
-
 # ---------- bent-glass script neon (coop, fence, midway, wkuk, gate) ----------
 # Drawn like the red hawk already in the Midway plate: free-standing tubes, no plate behind, smooth anti-aliased
 # bends (rendered at K x and box-downsampled to the plate), slightly irregular hand bends and tube widths.
@@ -236,10 +129,24 @@ def script_width(keys, space=1.6):
 def script_masks(keys, u, tube, seed, space=1.6, pad=1.0):
     """Per-key L masks of hand-bent tube script in a local box (px = u per unit). Returns masks, (w, h)."""
     rng = np.random.default_rng(seed)
-    w = int(np.ceil((script_width(keys, space) + 2 * pad) * u)); h = int(np.ceil((6.6 + 2 * pad) * u))
+    lines = [[]]
+    for k in keys:  # "/" breaks the line; each line is centred
+        if k == "/":
+            lines.append([])
+        else:
+            lines[-1].append(k)
+    widths = [script_width(l, space) for l in lines]
+    LEAD = 7.4
+    w = int(np.ceil((max(widths) + 2 * pad) * u)); h = int(np.ceil((6.6 + LEAD * (len(lines) - 1) + 2 * pad) * u))
     masks = {}
-    x = pad
-    for k in keys:
+    order = []
+    for li, l in enumerate(lines):
+        order += [("xy", pad + (max(widths) - widths[li]) / 2, pad + LEAD * li)] + l
+    x, y0 = pad, pad
+    for k in order:
+        if isinstance(k, tuple):
+            _, x, y0 = k
+            continue
         if k is None:
             x += space
             continue
@@ -248,7 +155,7 @@ def script_masks(keys, u, tube, seed, space=1.6, pad=1.0):
         d = ImageDraw.Draw(m)
         for path in SCRIPT[g]:
             jit = [(px + rng.uniform(-0.1, 0.1), py + rng.uniform(-0.1, 0.1)) for px, py in path]
-            pts = [((x + px) * u, (pad + py) * u) for px, py in catmull(jit)]
+            pts = [((x + px) * u, (y0 + py) * u) for px, py in catmull(jit)]
             tw = tube * rng.uniform(0.85, 1.15)
             d.line(pts, fill=255, width=max(1, int(round(tw))), joint="curve")
             for q in (pts[0], pts[-1]):
@@ -257,7 +164,7 @@ def script_masks(keys, u, tube, seed, space=1.6, pad=1.0):
     return masks, (w, h)
 
 
-def script_room(room, src, keys, quad, letter_h, tube, K, unlit, hi, glow_r, mounts=(), seed=7, scale=1, dim=0.5):
+def script_room(room, src, keys, quad, letter_h, tube, K, unlit, hi, glow_r, mounts=(), seed=7, scale=1, dim=0.5, plank=()):
     """quad: plate px (TL, TR, BR, BL) of the lettering box. letter_h: cap height in plate px.
     Render at K x, downsample to the plate; mounts: [(x0, y0, x1, y1, rgb, width)] thin brackets in plate px."""
     im = Image.open(os.path.join(SRC, src)).convert("RGB")
@@ -271,6 +178,14 @@ def script_room(room, src, keys, quad, letter_h, tube, K, unlit, hi, glow_r, mou
         full[k] = big.resize((W, H), Image.BOX)
     # mounts (brackets / standoffs), anti-aliased the same way
     base = np.asarray(im, dtype=float)
+    if plank:  # painted backing board: [(polygon in plate px, rgb)], drawn in order, anti-aliased like the tubes
+        ov = Image.new("RGBA", (W * K, H * K), (0, 0, 0, 0))
+        d = ImageDraw.Draw(ov)
+        for poly, col in plank:
+            d.polygon([(x * K, y * K) for x, y in poly], fill=tuple(col) + (255,))
+        ov = np.asarray(ov.resize((W, H), Image.BOX), dtype=float)
+        a = ov[..., 3:4] / 255
+        base = base * (1 - a) + ov[..., :3] * a
     if mounts:
         ov = Image.new("RGBA", (W * K, H * K), (0, 0, 0, 0))
         d = ImageDraw.Draw(ov)
@@ -327,39 +242,46 @@ def room_midway():
                        (92, 66, 104), (150, 120, 150), (0.6, 3.4, 0.5), clips, seed=11, dim=0.38)
 
 
+def room_store():
+    """Ned's own sign: script tubes on a small painted plank screwed to the back wall, between the poster and the bell."""
+    keys = ["hawk", None, 0, 1, 2, 3, 4, "/", 6, 7, 8, 9, None, 11, None, 13, 14, 15, 16]
+    q = [(251.5, 24.0), (276.5, 23.4), (276.5, 34.6), (251.5, 35.2)]
+    plank = [([(250.2, 23.0), (277.8, 22.3), (277.8, 35.6), (250.2, 36.3)], (40, 24, 16)),   # ink edge
+             ([(250.9, 23.6), (277.1, 22.9), (277.1, 35.0), (250.9, 35.7)], (112, 68, 38)),  # plank
+             ([(250.9, 23.6), (277.1, 22.9), (277.1, 24.2), (250.9, 24.9)], (160, 108, 62))]  # lamp-lit top edge
+    screws = [(x, y, x + 0.6, y, (46, 32, 24), 0.9) for x, y in ((252, 29.6), (276, 29.0))]
+    return script_room("store", "store.png", keys, q, 4.4, 0.8, 8, (130, 96, 104), (200, 170, 170), (0.6, 2.6, 0.5), screws,
+                       seed=19, dim=0.42, plank=plank)
+
+
 def room_wkuk():
     """Sponsor neon in bent-glass script, standoff-mounted straight onto the hall wall above the studio door."""
-    q = [(286, 128), (460, 115), (460, 138), (286, 158)]
-    stand = [(x, y, x, y + 4, (14, 12, 20), 1.6) for x, y in ((300, 154), (372, 146), (444, 136))]
-    return script_room("wkuk", "bg-wkuk.jpg", ALL, q, 19, 2.6, 2, (98, 80, 112), (170, 150, 196), (2.4, 10), stand, seed=13, scale=4, dim=0.55)
+    q = [(71.5, 32.0), (115.0, 28.75), (115.0, 34.5), (71.5, 39.5)]
+    stand = [(x, y, x, y + 1.2, (14, 12, 20), 0.6) for x, y in ((75, 38.5), (93, 36.4), (111, 33.8))]
+    return script_room("wkuk", "wkuk.png", ALL, q, 4.6, 0.75, 8, (98, 80, 112), (170, 150, 196), (0.6, 2.8, 0.5), stand,
+                       seed=13, dim=0.4)
 
 
 def room_gate():
-    """Bent-glass script clipped onto the riveted canopy panel (no raceway bar)."""
-    q = [(170, 280), (424, 283), (424, 318), (170, 316)]
-    clips = [(x, 309, x, 316, (34, 36, 42), 2.2) for x in range(190, 420, 34)]
-    return script_room("gate", "bg-gate.jpg", ALL, q, 26, 3.2, 2, (112, 104, 120), (210, 204, 220), (3, 12), clips, seed=17, scale=4, dim=0.55)
+    """Bent-glass script clipped onto the riveted canopy panel over the turnstiles."""
+    q = [(42.5, 70.0), (106.0, 70.75), (106.0, 79.5), (42.5, 79.0)]
+    clips = [(x, 77.4, x, 79.2, (34, 36, 42), 0.6) for x in range(48, 105, 9)]
+    return script_room("gate", "gate.png", ALL, q, 6.4, 0.9, 8, (112, 104, 120), (210, 204, 220), (0.6, 3.0, 0.5), clips,
+                       seed=17, dim=0.42)
 
 
 def main():
+    import shutil
     out = {}
-    for room, fn, dst in (
-        ("hq", room_hq, "art/pixel/bg/hq.png"),
-        ("fence", room_fence, "art/pixel/bg/fence.png"),
-        ("midway", room_midway, "art/pixel/bg/midway.png"),
-        ("store", room_store, "art/placeholders/bg-store.jpg"),
-        ("wkuk", room_wkuk, "art/placeholders/bg-wkuk.jpg"),
-        ("gate", room_gate, "art/placeholders/bg-gate.jpg"),
-    ):
+    for room, fn in (("hq", room_hq), ("fence", room_fence), ("midway", room_midway),
+                     ("store", room_store), ("wkuk", room_wkuk), ("gate", room_gate)):
         img, spec = fn()
-        path = os.path.join(ROOT, dst)
-        if dst.endswith(".jpg"):
-            img.save(path, quality=93, subsampling=0)
-        else:
-            img.save(path, optimize=True)
-            img.resize((img.width * 4, img.height * 4), Image.NEAREST).save(os.path.join(ROOT, dst.replace("art/pixel/", "art/pixel-4x/")), optimize=True)
+        img.save(os.path.join(ROOT, f"art/pixel/bg/{room}.png"), optimize=True)
+        img.resize((img.width * 4, img.height * 4), Image.NEAREST).save(os.path.join(ROOT, f"art/pixel-4x/bg/{room}.png"), optimize=True)
         out[room] = spec
         print(room, spec["rect"], len(spec["frames"]), "frames")
+    for room in ("store", "wkuk", "gate"):  # painted fallbacks stay clean (no sign); the pixel plate carries it
+        shutil.copyfile(os.path.join(SRC, f"bg-{room}.jpg"), os.path.join(ROOT, f"art/placeholders/bg-{room}.jpg"))
     with open(os.path.join(ROOT, "tools/neon/signs.json"), "w") as f:
         json.dump(out, f, indent=1)
     sync(out)
