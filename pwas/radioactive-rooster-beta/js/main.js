@@ -137,7 +137,7 @@ function render() {
   plate.alt = "";
   mount(plate, view.plate);
   world.append(plate);
-  if (room.sign) world.append(feedSeed(room.sign, state));
+  if (room.sign) world.append(neonSign(room.sign, state));
   if (room.vat) world.append(vat(room.vat, state));
   const realPlate = !artUrl(view.plate).startsWith("art/placeholders/");
 
@@ -450,16 +450,32 @@ function place(node, rect) {
   node.style.height = pct(rect[3], "y");
 }
 
-// NED'S FEED & SEED neon: the ambient temptation meter. Code-drawn for now (art ids fx/feedseed-*). Never labeled.
-function feedSeed(rect, state) {
-  const sign = el("div", `feedseed s${signLevel(state)}`);
-  sign.setAttribute("aria-hidden", "true");
-  place(sign, rect);
-  const text = el("div", "fs-text");
-  for (const { ch, on } of signLetters(state)) text.append(el("span", on ? "on" : "off", ch === " " ? "\u00a0" : ch));
-  sign.append(text);
-  if (signLevel(state) >= 3) sign.append(el("i", "fs-hawk"));
-  return sign;
+// NED'S FEED & SEED neon: the ambient temptation meter. The unlit sign (dim bent-glass tubes, thin mounts) is painted
+// into the room plate; each lit tube is one glow frame of fx/neon-<room> (tools/neon/paint_neon.py), switched on per
+// temptation level like a SCUMM background state. Never labeled. The next tube to die flickers.
+function neonSign(sign, state) {
+  const info = assetInfo(sign.art);
+  const node = el("div", `neon s${signLevel(state)}${info && info.scale === 1 ? " px" : ""}`);
+  node.setAttribute("aria-hidden", "true");
+  place(node, sign.rect);
+  const now = signLetters(state);
+  const level = signLevel(state);
+  const next = level < 3 ? signLetters({ ...state, temptation: level + 1 }) : null;
+  // only one tube flickers: the last lit letter that goes dark at the next level
+  const dyingKey = next ? [...sign.frames].reverse().find((k) => k !== "hawk" && now[k].on && !next[k].on) : undefined;
+  const n = sign.frames.length;
+  const url = artUrl(sign.art);
+  sign.frames.forEach((key, i) => {
+    const on = key === "hawk" ? level >= 3 : now[key].on;
+    if (!on) return;
+    const dying = key === dyingKey;
+    const tube = el("i", `neon-tube${dying ? " dying" : ""}`);
+    tube.style.backgroundImage = `url("${url}")`;
+    tube.style.backgroundSize = `100% ${n * 100}%`;
+    tube.style.backgroundPosition = `0 ${n > 1 ? (i / (n - 1)) * 100 : 0}%`;
+    node.append(tube);
+  });
+  return node;
 }
 
 // Pavilion vat bubbles: the hidden finale temptation meter. Simple animated overlay (art ids fx/vat-*).

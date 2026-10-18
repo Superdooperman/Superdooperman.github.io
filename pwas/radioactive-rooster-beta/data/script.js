@@ -389,7 +389,7 @@ export const ROOMS = {
     plate: "bg-hq.jpg",
     hero: { at: [205, 156], height: 96, depth: { horizon: 99 } }, // depth: height scales with feet y, 96 at y 156 (hatch lid perspective gives horizon ~99)
     walk: [[[40, 150], [302, 150], [302, 166], [262, 168], [255, 177], [40, 177]]], // floor in front of the door/board; crate (x<34) off limits; he can step behind the bucket (y<173), the hatch is floor-level // walking Rooster: feet [x, y], walk x range, scene height (px). Door 92 px (y 55-147): his hood (~84) stands just under it; starts on the hatch he climbed out of
-    sign: [258, 99, 54, 8],
+    sign: { art: "fx/neon-hq", rect: [293,  53,  27,  18], frames: [6, 7, 8, 9, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (rooftop board on the distant town house); per-letter glow frames (tools/neon/paint_neon.py)
     occluders: [{ id: "bucket", base: 173 }], // fg/hq--bucket: drawn over him while his feet are behind its base (tools/bg/occluders.py)
     exits: [{ spot: "hatch", label: "Down the hatch" }],
     spots: [
@@ -541,7 +541,7 @@ export const ROOMS = {
       { id: "post-end", base: 102 },
     ],
     cast: [{ spot: "henny", sprite: "henny-front", at: [128, 116], half: true }], // a real hen at her checkpoint, knee-high (9 px) to him at that spot (~36); drawn only over real art (?cast forces)
-    sign: [254, 52, 40, 6], // NED'S FEED & SEED glowing over Main Street
+    sign: { art: "fx/neon-fence", rect: [264,  49,  32,  18], frames: [6, 7, 8, 9, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (billboard on legs over the distant Main Street roofline); per-letter glow frames (tools/neon/paint_neon.py)
     poseAt: { squat: [60, 66, 24] }, // on the top rail between the left posts
     exits: [
       { spot: "to-hq", label: "Rooftop" },
@@ -862,7 +862,7 @@ export const ROOMS = {
     id: "store",
     name: "Ned's Feed & Seed",
     plate: "bg-store.jpg",
-    sign: [252, 26, 62, 10],
+    sign: { art: "fx/neon-store", rect: [249,  21,  32,  16], frames: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (Ned's plank on the back wall, between the poster and the bell); per-letter glow frames (tools/neon/paint_neon.py)
     exits: [
       { spot: "to-barn", label: "Barn" },
       { spot: "to-wkuk", label: "WKUK" },
@@ -938,7 +938,7 @@ export const ROOMS = {
     id: "wkuk",
     name: "WKUK",
     plate: "bg-wkuk.jpg",
-    sign: [4, 26, 60, 9],
+    sign: { art: "fx/neon-wkuk", rect: [68,  26,  51,  17], frames: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (raceway above the studio door, in perspective); per-letter glow frames (tools/neon/paint_neon.py)
     exits: [
       { spot: "to-store", label: "Store" },
       { spot: "to-gate", label: "Fair gate" },
@@ -1017,7 +1017,7 @@ export const ROOMS = {
     id: "gate",
     name: "Fair gate",
     plate: "bg-gate.jpg",
-    sign: [4, 4, 60, 9],
+    sign: { art: "fx/neon-gate", rect: [39,  66,  72,  18], frames: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (tubes clipped to the turnstile canopy panel); per-letter glow frames (tools/neon/paint_neon.py)
     poseAt: { squat: [166, 61, 70] },
     exits: [
       { spot: "to-wkuk", label: "WKUK" },
@@ -1090,7 +1090,7 @@ export const ROOMS = {
     hero: { at: [180, 152], height: 104, depth: { horizon: 105 } }, // depth: 104 at y 152 (booth counter at his belt), smaller toward the railing
     walk: [[[20, 151], [84, 149], [88, 141], [262, 141], [262, 177], [20, 177]]], // boardwalk up to the railing posts (bases y 130-145), past the booth's right corner (booth occludes him behind y 147); the Pavilion rope (x>262) is off limits // booth counter top y 103, booth floor y 147 (~44 px): counter meets his belt
     occluders: [{ id: "booth", base: 147 }],
-    sign: [268, 92, 48, 8],
+    sign: { art: "fx/neon-midway", rect: [266,  48,  54,  20], frames: [6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (board across the right-hand building, clear of Hattie's hawk); per-letter glow frames (tools/neon/paint_neon.py)
     exits: [
       { spot: "to-gate", label: "Gate" },
       { spot: "rope", label: "Pavilion" },
@@ -1248,7 +1248,6 @@ export const ROOMS = {
       { id: "cart", base: 146 },
     ],
     cast: [{ spot: "gobbler", sprite: "hattie-front", at: [205, 110], height: 52 }], // on the stage, in the spotlight
-    sign: [266, 6, 48, 8],
     vat: [14, 66, 84, 17], // the glowing oil surface
     poseAt: { squat: [128, 76, 70] },
     exits: [{ spot: "out", label: "Midway" }],

@@ -371,26 +371,14 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 .caption.rap { font-family: "Courier New", monospace; font-weight: 700; white-space: pre-line; }
 .choice.locked { opacity: 0.55; font-style: italic; border-style: dashed; }
 
-/* NED'S FEED & SEED neon (ambient temptation meter, never labeled) */
-.feedseed {
-  position: absolute; z-index: 1; pointer-events: none;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(10, 6, 14, 0.82); border: 1px solid #3b2a32; border-radius: 2px;
-  container-type: size;
-}
-.fs-text { font: 700 62cqh/1 "Arial Black", Impact, sans-serif; letter-spacing: 0.06em; white-space: nowrap; }
-.fs-text .on { color: #ffd9f0; text-shadow: 0 0 2px #ff7ac8, 0 0 6px #ff3ea5; animation: fsflick 7s infinite; }
-.fs-text .off { color: #3a2a33; text-shadow: none; }
-.fs-text .on:nth-child(5n) { animation-delay: 2.3s; }
-.feedseed.s3 .fs-text .on { animation-duration: 2.2s; }
-.fs-hawk {
-  position: absolute; left: 4%; top: 12%; width: 18%; height: 76%;
-  background: #ff2a2a; opacity: 0.0; filter: drop-shadow(0 0 3px #f00);
-  clip-path: polygon(10% 60%, 40% 40%, 55% 10%, 65% 35%, 100% 45%, 65% 60%, 55% 95%, 42% 62%);
-  animation: hawkflick 3.1s infinite;
-}
-@keyframes fsflick { 0%, 92%, 100% { opacity: 1; } 93% { opacity: 0.35; } 95% { opacity: 1; } 96% { opacity: 0.5; } }
-@keyframes hawkflick { 0%, 70%, 100% { opacity: 0; } 72% { opacity: 0.55; } 74% { opacity: 0.1; } 76% { opacity: 0.45; } 82% { opacity: 0; } }
+/* NED'S FEED & SEED neon (ambient temptation meter, never labeled). The unlit sign is painted into the plate;
+   each lit tube is a glow frame from fx/neon-<room>, screened over it. */
+.neon { position: absolute; z-index: 1; pointer-events: none; }
+.neon-tube { position: absolute; inset: 0; background-repeat: no-repeat; mix-blend-mode: screen; }
+.neon.px .neon-tube { image-rendering: pixelated; }
+.neon-tube.dying { animation: neondie 6.5s infinite steps(1, end); }
+@keyframes neondie { 0%, 81%, 100% { opacity: 1; } 82% { opacity: 0.15; } 84% { opacity: 1; } 86% { opacity: 0.3; } 87% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .neon-tube.dying { animation: none; } }
 
 /* Pavilion vat bubbles (hidden finale meter) */
 .vat { position: absolute; z-index: 1; pointer-events: none; border-radius: 50% / 30%; transition: box-shadow 1.5s, background 1.5s; }

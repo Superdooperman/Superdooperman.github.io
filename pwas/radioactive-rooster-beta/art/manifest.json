@@ -3146,6 +3146,114 @@
    ],
    "base": 102,
    "source": "tools/bg/occluders.py (cut from bg/fence)"
+  },
+  "fx/neon-hq": {
+   "kind": "fx",
+   "size": [
+    27,
+    18
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "frames": 5,
+   "scale": 1,
+   "source": "tools/neon/paint_neon.py (glow frames, one per lit tube; unlit bent-glass sign painted into the plate)",
+   "grid": [
+    1,
+    5
+   ]
+  },
+  "fx/neon-fence": {
+   "kind": "fx",
+   "size": [
+    32,
+    18
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "frames": 5,
+   "scale": 1,
+   "source": "tools/neon/paint_neon.py (glow frames, one per lit tube; unlit bent-glass sign painted into the plate)",
+   "grid": [
+    1,
+    5
+   ]
+  },
+  "fx/neon-midway": {
+   "kind": "fx",
+   "size": [
+    54,
+    20
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "frames": 10,
+   "scale": 1,
+   "source": "tools/neon/paint_neon.py (glow frames, one per lit tube; unlit bent-glass sign painted into the plate)",
+   "grid": [
+    1,
+    10
+   ]
+  },
+  "fx/neon-store": {
+   "kind": "fx",
+   "size": [
+    32,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "frames": 15,
+   "scale": 4,
+   "source": "tools/neon/paint_neon.py (glow frames, one per lit tube; unlit bent-glass sign painted into the plate)",
+   "grid": [
+    1,
+    15
+   ]
+  },
+  "fx/neon-wkuk": {
+   "kind": "fx",
+   "size": [
+    51,
+    17
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "frames": 15,
+   "scale": 4,
+   "source": "tools/neon/paint_neon.py (glow frames, one per lit tube; unlit bent-glass sign painted into the plate)",
+   "grid": [
+    1,
+    15
+   ]
+  },
+  "fx/neon-gate": {
+   "kind": "fx",
+   "size": [
+    72,
+    18
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "frames": 15,
+   "scale": 4,
+   "source": "tools/neon/paint_neon.py (glow frames, one per lit tube; unlit bent-glass sign painted into the plate)",
+   "grid": [
+    1,
+    15
+   ]
   }
  }
 }

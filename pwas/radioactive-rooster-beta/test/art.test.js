@@ -43,7 +43,8 @@ test("pixel files have the manifest's logical size", async () => {
     const buf = readFileSync(p);
     const w = buf.readUInt32BE(16), h = buf.readUInt32BE(20);
     const fw = a.size[0] * ((a.grid || [1, 1])[0]), fh = a.size[1] * ((a.grid || [1, 1])[1]);
-    assert.deepEqual([w, h], [fw, fh], `${id} is ${fw}x${fh}`);
+    const k = w / fw; // manifest: a file may be any whole multiple of the logical size, same aspect
+    assert.ok(Number.isInteger(k) && k >= 1 && h === fh * k, `${id} is ${fw}x${fh} (or a whole multiple), got ${w}x${h}`);
   }
 });
 
