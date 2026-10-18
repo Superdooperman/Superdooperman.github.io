@@ -119,26 +119,21 @@ button:focus-visible {
 
 .spotted { outline: 1px dashed rgba(240, 193, 74, 0.75); }
 
+.talkrow {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 8px;
+}
+.talkrow .caption { margin-top: 0; flex: 1; min-width: 0; }
+
 .bust, .speaker {
-  position: absolute;
-  z-index: 3;
+  flex: 0 0 auto;
+  width: 84px;
+  align-self: flex-start;
   background: var(--cream);
   border: 3px solid var(--ink);
   box-shadow: 4px 4px 0 #000;
-}
-
-.bust {
-  top: 8px;
-  left: 8px;
-  width: 18%;
-  max-width: 140px;
-}
-
-.speaker {
-  left: 8px;
-  bottom: 8px;
-  width: 24%;
-  max-width: 190px;
 }
 
 .bust img, .speaker img {
@@ -334,8 +329,7 @@ button.on {
 .how { opacity: 0.8; }
 
 @media (max-width: 720px) {
-  .bust { width: 28%; }
-  .speaker { width: 38%; }
+  .bust, .speaker { width: 72px; }
   .pah { font-size: 42px; }
   .caption { min-height: 6em; }
 }
@@ -370,7 +364,7 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 .caption.thought::before { width: 16px; height: 12px; left: 46px; top: -16px; }
 .caption.thought::after { width: 9px; height: 7px; left: 34px; top: -26px; }
 .speaker.thinking { border-radius: 38% / 30%; overflow: hidden; }
-.speaker.voice { width: auto; max-width: 60%; padding: 0 6px; }
+.speaker.voice { width: 72px; padding: 0 4px; align-self: center; }
 .speaker.voice .who { font-size: 14px; padding: 6px 8px; }
 .caption.rap::before { content: "\266A  "; color: var(--comb); }
 .caption.rap::after { content: "  \266A"; color: var(--comb); }

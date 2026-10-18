@@ -219,26 +219,26 @@ function render() {
     }
   }
 
+  // Talking head sits in the dialogue row under the scene (SCUMM-style), never over the art.
   const speakerFile = lineNow && lineNow.speaker;
   const heroFile = HERO[state.mood] || HERO.talk;
-  const bust = el("div", "bust");
-  const bustImg = el("img");
-  bustImg.alt = "Radioactive Rooster";
-  mount(bustImg, heroFile);
-  bust.append(bustImg);
-  stage.append(bust);
-
+  let face;
   if (speakerFile && !speakerFile.includes("rooster")) {
     const voiceOnly = speakerFile.startsWith("voice:");
-    const card = el("div", `speaker${voiceOnly ? " voice" : ""}${lineNow.thought ? " thinking" : ""}`);
+    face = el("div", `speaker${voiceOnly ? " voice" : ""}${lineNow.thought ? " thinking" : ""}`);
     if (!voiceOnly) {
       const img = el("img");
       img.alt = NAMES[speakerFile] || "Speaker";
       mount(img, speakerFile);
-      card.append(img);
+      face.append(img);
     }
-    card.append(el("div", "who", `${NAMES[speakerFile] || ""}${lineNow.thought ? " (thinking)" : ""}`));
-    stage.append(card);
+    face.append(el("div", "who", `${NAMES[speakerFile] || ""}${lineNow.thought ? " (thinking)" : ""}`));
+  } else {
+    face = el("div", "bust");
+    const bustImg = el("img");
+    bustImg.alt = "Radioactive Rooster";
+    mount(bustImg, heroFile);
+    face.append(bustImg);
   }
 
   if (state.mode === "choice" && state.choice && state.choice.set === "crow") {
@@ -261,7 +261,9 @@ function render() {
   if (lineNow && lineNow.thought) caption.classList.add("thought");
   if (lineNow && lineNow.rap) caption.classList.add("rap"); // TODO(audio): start/stop Rocco's boom-bap loop here (sound on hold)
   caption.addEventListener("click", advance);
-  cabinet.append(caption);
+  const talkRow = el("div", "talkrow");
+  talkRow.append(face, caption);
+  cabinet.append(talkRow);
 
   if (choosing) {
     const choices = el("div", "choices");

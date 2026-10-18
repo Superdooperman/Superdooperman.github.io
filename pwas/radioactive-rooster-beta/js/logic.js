@@ -109,6 +109,8 @@ export function choicesFor(state) {
     .map((o) => ({ ...o, locked: !!o.need && !state.flags[o.need] && !has(state, o.need) }));
 }
 
+// Engine-level last resorts. Every hotspot verb, item verb, item-on-hotspot and item-on-item combo has bespoke
+// text in data/script.js; test/lines.test.js fails if any of these generic lines can ever be shown.
 const FALLBACK = {
   look: "Nothing useful. Plenty to judge.",
   talk: "No answer. Rude, but consistent.",
@@ -116,6 +118,24 @@ const FALLBACK = {
   use: "That isn't the move.",
   push: "It declines to be pushed.",
 };
+export const GENERIC_LINES = [
+  ...Object.values(FALLBACK),
+  "Those two things refuse to collaborate.",
+  "It has nothing to say, which is a mercy.",
+  "It's already in a pocket. That's as taken as it gets.",
+  "Nothing there.",
+  "That isn't in a pocket.",
+  "Not yet.",
+  "Already done.",
+];
+export const GENERIC_PATTERNS = [/ doesn't work on the /];
+
+// "{item}" / "{other}" in a bespoke default line names the item being used.
+function fill(fx, vars) {
+  if (typeof fx === "string") return fx.replace(/\{(item|other)\}/g, (_, k) => vars[k] || k);
+  if (Array.isArray(fx)) return fx.map((x) => fill(x, vars));
+  return fx;
+}
 
 function commit(s, fx, out) {
   for (const flag of fx.set || []) s.flags[flag] = true;
@@ -135,6 +155,11 @@ function commit(s, fx, out) {
 
 function apply(s, fx, out, ctx = {}) {
   if (fx == null) return;
+  if (Array.isArray(fx)) {
+    // several short beats for one action (keeps each caption box small)
+    for (const beat of fx) apply(s, beat, out, ctx);
+    return;
+  }
   if (typeof fx === "string") {
     out.lines.push(line(fx));
     return;
@@ -179,11 +204,14 @@ function readNote(s, out) {
 }
 
 function lookBoard(s, out) {
-  const bits = ["Red string, push pins, and a question in the middle: WHO TOOK THE YOLK?"];
+  out.lines.push(line("The conspiracy board. Red string, push pins, and in the middle, in his best capitals: WHO TOOK THE YOLK?"));
+  out.lines.push(line("Around it, his finest work. CORN DOGS: WHY A STICK? WHO BENEFITS? WKUK plays the same song at 3:14 every night. CODE?? The ferris wheel moved two inches this year. TOWARD WHAT."));
+  out.lines.push(line("HENNY: has never once blinked in front of him. And a clipping, circled: LOCAL MAN BRAHM A. ORPINGTON BEHIND ON FEED BILL. Labeled, in a hurry: DEAD END. DO NOT PURSUE."));
+  const bits = [];
   if (s.flags.got_stub) bits.push("Pinned: a torn ticket stub. \"R— & H—\". He pins it face down.");
   if (s.flags.reveal) bits.push("The joined ticket goes in the middle. The string from THE COCK GOBBLER runs straight to HATTIE.");
   if (s.flags.saw_rig) bits.push("A new string: SLICK CORNY → FRYER WIRING → 12:00. It doesn't touch Hattie at all.");
-  if (bits.length === 1) bits.push("Right now every string runs to a photo of the goat.");
+  if (!bits.length) bits.push("Every single string still runs to a photo of the goat.");
   out.lines.push(line(bits.join(" ")));
 }
 
@@ -878,19 +906,21 @@ function onItem(s, id, out) {
     return;
   }
   if (s.verb === "talk") {
-    out.lines.push(line("It has nothing to say, which is a mercy."));
+    apply(s, item.talk || "It has nothing to say, which is a mercy.", out);
     return;
   }
   if (s.verb !== "use") {
-    out.lines.push(line("It's already in a pocket. That's as taken as it gets."));
+    apply(s, item[s.verb] || "It's already in a pocket. That's as taken as it gets.", out);
     return;
   }
   if (s.pending && s.pending !== id) {
     const key = [s.pending, id].sort().join("+");
     const fx = ITEM_ON_ITEM[key];
+    const held = ITEMS[s.pending];
     s.pending = null;
     if (!fx) {
-      out.lines.push(line("Those two things refuse to collaborate."));
+      // the held item's own line for being used on something it doesn't go with
+      apply(s, fill(held.combine || "Those two things refuse to collaborate.", { other: item.name }), out);
       return;
     }
     apply(s, fx, out);
@@ -911,8 +941,10 @@ function onSpot(s, id, out, asGo) {
     blowCover(s, out);
     return;
   }
-  if (s.pending && spot.useItem && (spot.useItem[s.pending] || spot.useItem["*"])) {
-    const fx = spot.useItem[s.pending] || spot.useItem["*"];
+  const itemFx = s.pending && ((spot.useItem && (spot.useItem[s.pending] || spot.useItem["*"])) || spot.useAny);
+  if (itemFx) {
+    // specific recipe, then the hotspot's own bespoke default for any other item (`useAny`, "{item}" = its name)
+    const fx = fill(itemFx, { item: ITEMS[s.pending].name });
     s.pending_used = s.pending;
     s.pending = null;
     apply(s, fx, out);
