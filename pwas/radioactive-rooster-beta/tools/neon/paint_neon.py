@@ -243,30 +243,28 @@ def room_midway():
 
 
 def room_store():
-    """Ned's own sign: script tubes on a small painted plank screwed to the back wall, between the poster and the bell."""
-    keys = ["hawk", None, 0, 1, 2, 3, 4, "/", 6, 7, 8, 9, None, 11, None, 13, 14, 15, 16]
-    q = [(251.5, 24.0), (276.5, 23.4), (276.5, 34.6), (251.5, 35.2)]
-    plank = [([(250.2, 23.0), (277.8, 22.3), (277.8, 35.6), (250.2, 36.3)], (40, 24, 16)),   # ink edge
-             ([(250.9, 23.6), (277.1, 22.9), (277.1, 35.0), (250.9, 35.7)], (112, 68, 38)),  # plank
-             ([(250.9, 23.6), (277.1, 22.9), (277.1, 24.2), (250.9, 24.9)], (160, 108, 62))]  # lamp-lit top edge
-    screws = [(x, y, x + 0.6, y, (46, 32, 24), 0.9) for x, y in ((252, 29.6), (276, 29.0))]
-    return script_room("store", "store.png", keys, q, 4.4, 0.8, 8, (130, 96, 104), (200, 170, 170), (0.6, 2.6, 0.5), screws,
-                       seed=19, dim=0.42, plank=plank)
+    """Ned's own sign: one line of script tubes on the blank plank above the window (store C, 2026-10-18;
+    the plank x195-257 y12-30 is painted into the plate, so no code-drawn plank), two screws at the ends."""
+    q = [(199.5, 16.8), (252.5, 16.6), (252.5, 25.4), (199.5, 25.6)]
+    screws = [(x, y, x + 0.6, y, (30, 18, 12), 0.9) for x, y in ((197.6, 21.2), (254.6, 21.0))]
+    return script_room("store", "store.png", ALL, q, 5.6, 0.85, 8, (130, 96, 104), (200, 170, 170), (0.6, 2.8, 0.5), screws,
+                       seed=19, dim=0.42)
 
 
 def room_wkuk():
-    """Sponsor neon in bent-glass script, standoff-mounted straight onto the hall wall above the studio door."""
-    q = [(71.5, 32.0), (115.0, 28.75), (115.0, 34.5), (71.5, 39.5)]
-    stand = [(x, y, x, y + 1.2, (14, 12, 20), 0.6) for x, y in ((75, 38.5), (93, 36.4), (111, 33.8))]
+    """Sponsor neon in bent-glass script, standoff-mounted flat on the blank hall wall above the studio door
+    (WKUK C, 2026-10-18: wall x66-113 y10-29, door top y31)."""
+    q = [(69.5, 15.6), (110.5, 15.6), (110.5, 22.4), (69.5, 22.4)]
+    stand = [(x, 22.0, x, 23.4, (40, 30, 30), 0.6) for x in (73, 90, 107)]
     return script_room("wkuk", "wkuk.png", ALL, q, 4.6, 0.75, 8, (98, 80, 112), (170, 150, 196), (0.6, 2.8, 0.5), stand,
                        seed=13, dim=0.4)
 
 
 def room_gate():
-    """Bent-glass script clipped onto the riveted canopy panel over the turnstiles."""
-    q = [(42.5, 70.0), (106.0, 70.75), (106.0, 79.5), (42.5, 79.0)]
-    clips = [(x, 77.4, x, 79.2, (34, 36, 42), 0.6) for x in range(48, 105, 9)]
-    return script_room("gate", "gate.png", ALL, q, 6.4, 0.9, 8, (112, 104, 120), (210, 204, 220), (0.6, 3.0, 0.5), clips,
+    """Bent-glass script clipped onto the blank canopy panel on the turnstile arch (gate B, 2026-10-18: panel face x40-95 y39-52)."""
+    q = [(43.5, 41.6), (92.0, 41.6), (92.0, 49.8), (43.5, 49.8)]
+    clips = [(x, 49.6, x, 51.2, (52, 36, 30), 0.6) for x in range(47, 92, 9)]
+    return script_room("gate", "gate.png", ALL, q, 6.0, 0.9, 8, (112, 104, 120), (210, 204, 220), (0.6, 3.0, 0.5), clips,
                        seed=17, dim=0.42)
 
 

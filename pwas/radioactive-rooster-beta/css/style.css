@@ -93,6 +93,8 @@ button:focus-visible {
   pointer-events: none;
   height: auto;
 }
+/* Plate overlays (story props on the scenery) sit on the plate, under every actor. */
+.overlay { position: absolute; z-index: 1; height: auto; pointer-events: none; }
 /* Walk-behind foreground cutouts: full-frame, pixel-identical to the plate. */
 .fg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 
@@ -299,6 +301,15 @@ button.on {
   width: 100%;
   aspect-ratio: 16 / 9;
   object-fit: cover;
+}
+
+.title-art { position: relative; }
+
+.title-frame .title-cast {
+  position: absolute;
+  aspect-ratio: auto;
+  height: auto;
+  pointer-events: none;
 }
 
 .title-copy {

@@ -63,7 +63,7 @@
     0
    ],
    "legacy": "bg-henhouse.jpg",
-   "source": "tools/bg/pixelate.py (box 1280x720 -> 320x180, unsharp, Bayer dither, 48-colour palette) from the painted bg-henhouse.jpg; 4x nearest copy in art/pixel-4x/bg/"
+   "source": "Arlong's approved henhouse A (2026-10-18; art/placeholders/bg-henhouse.jpg is its 1280x720 master): no hens or people painted in; hand patch: warm glow on Midnight's empty nest; 4x nearest copy in art/pixel-4x/bg/"
   },
   "bg/barn": {
    "kind": "bg",
@@ -76,7 +76,7 @@
     0
    ],
    "legacy": "bg-barn.jpg",
-   "source": "tools/bg/pixelate.py (box 1280x720 -> 320x180, unsharp, Bayer dither, 48-colour palette) from the painted bg-barn.jpg; 4x nearest copy in art/pixel-4x/bg/"
+   "source": "Arlong's approved barn C (2026-10-18; art/placeholders/bg-barn.jpg is its 1280x720 master): no people or animals painted in; LANCZOS 1280x720 then BOX 320x180, hand patches (snapped ladder rung, post nail); 4x nearest copy in art/pixel-4x/bg/"
   },
   "bg/store": {
    "kind": "bg",
@@ -2484,7 +2484,7 @@
     0
    ],
    "base": 147,
-   "source": "tools/bg/occluders.py (cut from bg/midway)"
+   "source": "tools/bg/occluders.py booth polygon with the counter window x25-72 y59-99 cut open (tools/bg/handcut/README.md) (cut from bg/midway)"
   },
   "fg/hq--bucket": {
    "kind": "fg",
@@ -3210,8 +3210,8 @@
   "fx/neon-store": {
    "kind": "fx",
    "size": [
-    33,
-    18
+    61,
+    16
    ],
    "anchor": [
     0,
@@ -3228,8 +3228,8 @@
   "fx/neon-wkuk": {
    "kind": "fx",
    "size": [
-    51,
-    17
+    48,
+    14
    ],
    "anchor": [
     0,
@@ -3246,8 +3246,8 @@
   "fx/neon-gate": {
    "kind": "fx",
    "size": [
-    71,
-    17
+    56,
+    16
    ],
    "anchor": [
     0,
@@ -3260,6 +3260,603 @@
     1,
     15
    ]
+  },
+  "fg/store--counter": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 128,
+   "source": "tools/bg/occluders.py (cut from bg/store)"
+  },
+  "sprite/ned-front-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/ned-talk-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "fg/barn--ribbon": {
+   "kind": "overlay",
+   "size": [
+    11,
+    18
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "hand-cut story prop (art/pixel/fg), placed by data/script.js overlays"
+  },
+  "sprite/mortgage-chew-r-h44": {
+   "kind": "sprite",
+   "size": [
+    50,
+    44
+   ],
+   "anchor": [
+    25,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/mortgage-idle-r-h44": {
+   "kind": "sprite",
+   "size": [
+    50,
+    44
+   ],
+   "anchor": [
+    25,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/peck-front-h80": {
+   "kind": "sprite",
+   "size": [
+    60,
+    80
+   ],
+   "anchor": [
+    30,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/peck-talk-h80": {
+   "kind": "sprite",
+   "size": [
+    60,
+    80
+   ],
+   "anchor": [
+    30,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "fg/wkuk--booth": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 128,
+   "source": "tools/bg/occluders.py (cut from bg/wkuk)"
+  },
+  "sprite/deejay-front-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/deejay-talk-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "fg/gate--front": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 135,
+   "source": "alpha cut, tools/bg/handcut/gate_front.py (cut from bg/gate)"
+  },
+  "sprite/guard-front-h72": {
+   "kind": "sprite",
+   "size": [
+    68,
+    72
+   ],
+   "anchor": [
+    34,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/guard-talk-h72": {
+   "kind": "sprite",
+   "size": [
+    68,
+    72
+   ],
+   "anchor": [
+    34,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "fg/henhouse--grub": {
+   "kind": "overlay",
+   "size": [
+    8,
+    4
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "hand-cut story prop (art/pixel/fg), placed by data/script.js overlays"
+  },
+  "fg/henhouse--spoon": {
+   "kind": "overlay",
+   "size": [
+    16,
+    5
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "hand-cut story prop (art/pixel/fg), placed by data/script.js overlays"
+  },
+  "fg/henhouse--stub": {
+   "kind": "overlay",
+   "size": [
+    11,
+    7
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "hand-cut story prop (art/pixel/fg), placed by data/script.js overlays"
+  },
+  "sprite/sittinghen-cluck-l-h22": {
+   "kind": "sprite",
+   "size": [
+    22,
+    22
+   ],
+   "anchor": [
+    11,
+    22
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/sittinghen-idle-l-h22": {
+   "kind": "sprite",
+   "size": [
+    22,
+    22
+   ],
+   "anchor": [
+    11,
+    22
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/yardrooster-crow-l-h12": {
+   "kind": "sprite",
+   "size": [
+    16,
+    12
+   ],
+   "anchor": [
+    8,
+    12
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/yardrooster-crow-r-h10": {
+   "kind": "sprite",
+   "size": [
+    14,
+    10
+   ],
+   "anchor": [
+    7,
+    10
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/yardrooster-peck-l-h12": {
+   "kind": "sprite",
+   "size": [
+    16,
+    12
+   ],
+   "anchor": [
+    8,
+    12
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/yardrooster-peck-r-h10": {
+   "kind": "sprite",
+   "size": [
+    14,
+    10
+   ],
+   "anchor": [
+    7,
+    10
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/yardrooster-side-l-h12": {
+   "kind": "sprite",
+   "size": [
+    16,
+    12
+   ],
+   "anchor": [
+    8,
+    12
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/yardrooster-side-r-h10": {
+   "kind": "sprite",
+   "size": [
+    14,
+    10
+   ],
+   "anchor": [
+    7,
+    10
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/titlehen-side-l-h16": {
+   "kind": "sprite",
+   "size": [
+    18,
+    16
+   ],
+   "anchor": [
+    9,
+    16
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/corny-front-h80": {
+   "kind": "sprite",
+   "size": [
+    58,
+    80
+   ],
+   "anchor": [
+    29,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/corny-ringtoss-r-h80": {
+   "kind": "sprite",
+   "size": [
+    58,
+    80
+   ],
+   "anchor": [
+    29,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/corny-talk-h80": {
+   "kind": "sprite",
+   "size": [
+    58,
+    80
+   ],
+   "anchor": [
+    29,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/dot-front-h72": {
+   "kind": "sprite",
+   "size": [
+    46,
+    72
+   ],
+   "anchor": [
+    23,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/dot-talk-h72": {
+   "kind": "sprite",
+   "size": [
+    46,
+    72
+   ],
+   "anchor": [
+    23,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rocco-front-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rocco-talk-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "fg/pavilion--rope-front": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 170,
+   "source": "alpha trace of the rope swags, tools/bg/handcut/rope_layer.py (cut from bg/pavilion)"
+  },
+  "fg/pavilion--rope-side": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 146,
+   "source": "alpha trace of the rope swags, tools/bg/handcut/rope_layer.py (cut from bg/pavilion)"
+  },
+  "fg/pavilion--rope-back": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 130,
+   "source": "alpha trace of the rope swags and back posts, tools/bg/handcut/rope_layer.py (cut from bg/pavilion)"
+  },
+  "fg/pavilion-open--rope-front": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 172,
+   "source": "alpha trace of the rope swags, tools/bg/handcut/rope_layer.py (cut from bg/pavilion-open)"
+  },
+  "fg/pavilion-open--rope-side": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 146,
+   "source": "alpha trace of the rope swags, tools/bg/handcut/rope_layer.py (cut from bg/pavilion-open)"
+  },
+  "fg/pavilion-open--rope-back": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 130,
+   "source": "alpha trace of the rope swags and back posts, tools/bg/handcut/rope_layer.py (cut from bg/pavilion-open)"
+  },
+  "sprite/corny-front-h88": {
+   "kind": "sprite",
+   "size": [
+    62,
+    88
+   ],
+   "anchor": [
+    31,
+    88
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/corny-side-l-h88": {
+   "kind": "sprite",
+   "size": [
+    62,
+    88
+   ],
+   "anchor": [
+    31,
+    88
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/corny-talk-h88": {
+   "kind": "sprite",
+   "size": [
+    62,
+    88
+   ],
+   "anchor": [
+    31,
+    88
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/littlehen-cluck-r-h18": {
+   "kind": "sprite",
+   "size": [
+    20,
+    18
+   ],
+   "anchor": [
+    10,
+    18
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/littlehen-idle-r-h18": {
+   "kind": "sprite",
+   "size": [
+    20,
+    18
+   ],
+   "anchor": [
+    10,
+    18
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/pip-front-h56": {
+   "kind": "sprite",
+   "size": [
+    44,
+    56
+   ],
+   "anchor": [
+    22,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/pip-reach-l-h56": {
+   "kind": "sprite",
+   "size": [
+    44,
+    56
+   ],
+   "anchor": [
+    22,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/pip-side-r-h56": {
+   "kind": "sprite",
+   "size": [
+    44,
+    56
+   ],
+   "anchor": [
+    22,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/pip-talk-h56": {
+   "kind": "sprite",
+   "size": [
+    44,
+    56
+   ],
+   "anchor": [
+    22,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/pip-walk-r-h56": {
+   "kind": "sprite",
+   "size": [
+    44,
+    56
+   ],
+   "anchor": [
+    22,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
   }
  }
 }

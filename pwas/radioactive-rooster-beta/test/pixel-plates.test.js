@@ -24,20 +24,22 @@ test("every room plate (and the title) has a 320x180 pixel file plus its 4x copy
 
 test("newly pixelated rooms: Rooster walks them at adult scale", () => {
   const h = (id, y) => depthHeight(ROOMS[id].hero, y);
-  for (const id of ["barn", "store", "wkuk", "gate"]) {
+  for (const id of ["barn", "store", "wkuk", "gate", "henhouse"]) {
     const r = ROOMS[id];
     assert.ok(r.hero && r.walk && inArea(r.walk, ...r.hero.at), `${id}: hero starts inside his walk area`);
   }
-  // Store: counter top (y ~112) at his belt by the counter end; the doorway (opening y 40-125) just taller than him.
-  const atCounter = h("store", 150);
-  assert.ok((150 - 112) / atCounter > 0.35 && (150 - 112) / atCounter < 0.6, `store counter at belt (${atCounter})`);
-  assert.ok(h("store", 128) < 85 && h("store", 128) > 70, "store doorway just taller than him");
-  // WKUK: studio door (y 37-172) just taller than him at the door.
-  assert.ok(h("wkuk", 172) < 135 && h("wkuk", 172) >= 108, "wkuk door just taller");
-  // Gate: turnstile (y 85-180, 95 px) just taller; ticket sill (y 140) around his belt.
-  assert.ok(h("gate", 178) < 95 && (178 - 140) / h("gate", 178) > 0.35, "gate turnstile and sill");
-  // Barn: Mortgage's back (~50 px over her hooves at y 160) waist-high on him.
-  assert.ok(50 / h("barn", 160) > 0.4 && 50 / h("barn", 160) < 0.6, "barn goat waist-high");
-  // Henhouse is a close-up into the nest boxes (hen scale): no walking Rooster there.
-  assert.equal(ROOMS.henhouse.hero, undefined);
+  // Store C: the counter top (y91) at his belt from the front of the counter (feet y131); the street door (y31-127) taller than him.
+  const atCounter = h("store", 131);
+  assert.ok((131 - 91) / atCounter > 0.4 && (131 - 91) / atCounter < 0.6, `store counter at belt (${atCounter})`);
+  assert.ok(h("store", 131) < 127 - 31 && h("store", 131) > 70, "store doorway just taller than him");
+  // WKUK C: the studio door (y31-127) just taller than him at the wall line.
+  assert.ok(h("wkuk", 131) < 96 && h("wkuk", 131) >= 80, "wkuk door just taller");
+  // Barn C: Mortgage (h44, feet y137) waist-high on him.
+  const goat = ROOMS.barn.cast.find((c) => c.spot === "goat");
+  assert.ok(goat.height / h("barn", goat.at[1]) > 0.4 && goat.height / h("barn", goat.at[1]) < 0.6, "barn goat waist-high");
+  // Gate B: the turnstile (y92-131) and the booth sill (y101, front at y135) around his belt from the plaza.
+  assert.ok((131 - 92) / h("gate", 137) > 0.35 && (131 - 92) / h("gate", 137) < 0.6, "gate turnstile waist-high");
+  assert.ok((135 - 101) / h("gate", 137) > 0.3 && (135 - 101) / h("gate", 137) < 0.55, "gate sill at his belt");
+  // Henhouse A is a walk-in now: the Sitting Hen (h22 at the wall) knee-high on him.
+  assert.ok(ROOMS.henhouse.hero && 22 / h("henhouse", 128) < 0.33, "henhouse: walk-in, hens knee-high");
 });

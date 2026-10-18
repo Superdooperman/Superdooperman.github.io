@@ -108,8 +108,79 @@ export function behind(feetY, base) {
   return feetY < base;
 }
 
+// An occluder's base line on the active plate: `bases` overrides per plate name (the opened rope sits lower).
+export function occluderBase(o, plate) {
+  const name = String(plate).replace(/^bg[/-]/, "").replace(/\.[a-z0-9]+$/i, "");
+  return (o.bases && o.bases[name] !== undefined) ? o.bases[name] : o.base;
+}
+
 // Cutout asset id for an occluder on the active plate: "fg/<plate name>--<id>".
 export function occluderAsset(plate, id) {
   const name = String(plate).replace(/^bg[/-]/, "").replace(/\.[a-z0-9]+$/i, "");
   return `fg/${name}--${id}`;
+}
+
+// Per-room sprite tint (draft, default off). A room may set
+//   spriteTint: { brightness: 0.8, saturate: 0.85, sepia: 0.1, hue: -5 }
+// to sit the lit-for-daylight character sprites into a dark plate. It becomes one CSS filter applied to every
+// character sprite in the room (hero, pose, cast); scenery and occluders are untouched. Unknown keys and
+// non-numeric or out-of-range values are dropped, so a typo can't blank a sprite. No field, null or {} = "" (off).
+const TINT_KEYS = [
+  ["brightness", "brightness", "", 0, 2],
+  ["contrast", "contrast", "", 0, 2],
+  ["saturate", "saturate", "", 0, 2],
+  ["sepia", "sepia", "", 0, 1],
+  ["hue", "hue-rotate", "deg", -180, 180],
+];
+export function spriteFilter(room) {
+  const t = room && room.spriteTint;
+  if (!t || typeof t !== "object") return "";
+  const parts = [];
+  for (const [key, fn, unit, lo, hi] of TINT_KEYS) {
+    const v = t[key];
+    if (typeof v !== "number" || !Number.isFinite(v) || v < lo || v > hi) continue;
+    parts.push(`${fn}(${+v.toFixed(3)}${unit})`);
+  }
+  return parts.join(" ");
+}
+
+/* ---------- Cast frames: idle, talk flaps, cue poses, short cue walks, ambient loops ---------- */
+// Pure: js/main.js calls it on every render and from an 80 ms ticker. Purely visual; game logic never reads it.
+export const TALK_MS = 2600; // a talk flap lasts this long after its line appears
+export const FLAP_MS = 190;
+export const CUE_WALK_MS = 2200;
+
+function speaking(c, line, lastAct, speakers) {
+  if (!line) return false;
+  const voices = [].concat(c.voice || []);
+  if (voices.some((v) => speakers[v] && speakers[v] === line.speaker)) return true;
+  // Silent characters (the sitting hen) flap when their own hotspot was the one talked to.
+  return !!(c.talkOn && lastAct && lastAct.verb === "talk" && [].concat(c.talkOn).includes(lastAct.spot) && !line.speaker);
+}
+
+export function castFrame(c, { line = null, since = Infinity, now = 0, lastAct = null, speakers = {} } = {}) {
+  const cue = line && line.cue && c.cues && c.cues[line.cue];
+  if (cue && typeof cue === "string") return { sprite: cue, at: c.at };
+  if (cue) {
+    const t = Math.min(1, Math.max(0, since) / (cue.ms || CUE_WALK_MS));
+    const at = [c.at[0] + (cue.to[0] - c.at[0]) * t, c.at[1] + (cue.to[1] - c.at[1]) * t];
+    if (t >= 1) return { sprite: cue.end || cue.walk[0], at };
+    return { sprite: cue.walk[Math.floor(Math.max(0, since) / 160) % cue.walk.length], at };
+  }
+  const fresh = line && since >= 0 && since < TALK_MS;
+  if (c.talk && fresh && speaking(c, line, lastAct, speakers)) return { sprite: Math.floor(since / FLAP_MS) % 2 ? c.sprite : c.talk, at: c.at };
+  if (c.frames) return { sprite: c.frames[Math.floor(now / (c.every || 700)) % c.frames.length], at: c.at };
+  return { sprite: c.sprite, at: c.at };
+}
+
+// Every sprite a cast entry can show (idle, talk, cue poses and walks, loop frames): what the manifest must carry.
+export function castSprites(c) {
+  const out = new Set([c.sprite]);
+  if (c.talk) out.add(c.talk);
+  for (const f of c.frames || []) out.add(f);
+  for (const cue of Object.values(c.cues || {})) {
+    if (typeof cue === "string") out.add(cue);
+    else { for (const f of cue.walk) out.add(f); if (cue.end) out.add(cue.end); }
+  }
+  return [...out];
 }

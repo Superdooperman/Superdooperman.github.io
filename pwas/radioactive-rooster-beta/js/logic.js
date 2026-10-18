@@ -31,6 +31,7 @@ export function line(text, extra = {}) {
     big: !!extra.big,
     thought: !!extra.thought,
     rap: !!extra.rap,
+    cue: extra.cue || null, // stage cue for cast frames (js/main.js castFrame); never shown
   };
 }
 
@@ -609,7 +610,7 @@ function talkCorny(s, out) {
     out.lines.push(line("Corny's smile doesn't move, but his eyes go to the cash box. \"Something you wanna ask me, feathers? No? Then enjoy the show. Big finish at midnight. Real big.\"", { speaker: SPEAKER.corny }));
     return;
   }
-  out.lines.push(line("\"Step right up, step right up! Three rings a dollar, and every one's a winner, spiritually. You here for the fry-off? Best seats in the Pavilion. Wouldn't miss the finish for the world.\"", { speaker: SPEAKER.corny }));
+  out.lines.push(line("\"Step right up, step right up! Three rings a dollar, and every one's a winner, spiritually. You here for the fry-off? Best seats in the Pavilion. Wouldn't miss the finish for the world.\"", { speaker: SPEAKER.corny, cue: "corny_pitch" }));
 }
 
 function rope(s, out) {
@@ -760,8 +761,8 @@ function pipUnlocks(s, out) {
   s.flags.rope_open = true;
   s.flags.pip_helped = true;
   out.lines.push(line("Pip looks at the cage over the oil, then at him. \"Corny never watches his own cart. He's too busy watching everybody else's money.\"", { speaker: SPEAKER.pip }));
-  out.lines.push(line("She drifts off through the crowd like a kid looking for her mom. A minute later the key ring is gone from the cart hook. Nobody notices. Nobody ever notices Pip."));
-  out.lines.push(line("*click.* The padlock pops. Pip lets the rope down and coils it at the post like she's done it a hundred times."));
+  out.lines.push(line("She drifts off through the crowd like a kid looking for her mom. A minute later the key ring is gone from the cart hook. Nobody notices. Nobody ever notices Pip.", { cue: "pip_lift" }));
+  out.lines.push(line("*click.* The padlock pops. Pip lets the rope down and coils it at the post like she's done it a hundred times.", { cue: "pip_unlock" }));
   out.lines.push(line("\"You caught me last time,\" she whispers. \"My turn.\"", { speaker: SPEAKER.pip }));
 }
 
@@ -783,11 +784,11 @@ function lookPipPavilion(s, out) {
 
 function useKeyring(s, out) {
   if (s.flags.pip_trust) {
-    out.lines.push(line("He reaches for the keys. Corny's head turns like a weather vane. He un-reaches. Pip, beside him, sighs like he's hopeless."));
+    out.lines.push(line("He reaches for the keys. Corny's head turns like a weather vane. He un-reaches. Pip, beside him, sighs like he's hopeless.", { cue: "corny_turn" }));
     pipUnlocks(s, out);
     return;
   }
-  out.lines.push(line("He reaches for the keys. Across the crowd, Corny's head turns like a weather vane. He un-reaches. A grown man in a rooster suit can't sneak. Somebody small could, if she trusted him."));
+  out.lines.push(line("He reaches for the keys. Across the crowd, Corny's head turns like a weather vane. He un-reaches. A grown man in a rooster suit can't sneak. Somebody small could, if she trusted him.", { cue: "corny_turn" }));
 }
 
 function lookPadlock(s, out) {
@@ -820,7 +821,7 @@ function finish(s, out) {
   out.lines.push(line("He plants his big orange costume boots, forgets he's still squatting, and gives the whole fair the real thing, the first real one since that night.", { mood: "crow", speaker: HERO.crow }));
   out.lines.push(line("PAH-KAW!!!", { big: true, sound: "pah-kaw", mood: "crow", speaker: HERO.crow }));
   out.lines.push(line("Nobody obeys. Nobody kneels. The Yolk doesn't give you the Crow. It never did."));
-  out.lines.push(line("Instead, in the crowd, a little brown hen says, plainly, \"Is that him? He's shorter in person.\" He understands every word. The Yolk lets him hear chickens."));
+  out.lines.push(line("Instead, in the crowd, a little brown hen says, plainly, \"Is that him? He's shorter in person.\" He understands every word. The Yolk lets him hear chickens.", { cue: "littlehen" }));
   if (s.flags.showboat) out.lines.push(line("The front row, wearing the fryer, would like a word. Several words. He can hear all of them now."));
   else out.lines.push(line("Corny tries to slip out the back. The crowd he warned is standing right there. On WKUK, DeeJay names the buyer of the fairground land: Mayor Featherstone Bantam."));
   out.lines.push(line("The corn-dog cart's engine coughs. She looks back once. Furious. Impressed. Already writing the sequel.", { speaker: SPEAKER.gobbler }));

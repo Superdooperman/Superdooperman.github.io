@@ -1,42 +1,17 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
-import { inflateSync } from "node:zlib";
 import { ROOMS } from "../data/script.js";
-import { actorZ, behind, clampToArea, depthHeight, inArea, occluderAsset, occluderZ, roomView, DEPTH_MAX, DEPTH_MIN, DEPTH_STEP } from "../js/walk.js";
+import { png } from "./png-helper.js";
+import { actorZ, behind, clampToArea, depthHeight, inArea, occluderAsset, occluderBase, occluderZ, roomView, DEPTH_MAX, DEPTH_MIN, DEPTH_STEP } from "../js/walk.js";
 
 const manifest = JSON.parse(readFileSync(new URL("../art/manifest.json", import.meta.url)));
 const byLegacy = new Map(Object.entries(manifest.assets).map(([id, a]) => [a.legacy, id]));
 const plateId = (plate) => (manifest.assets[plate] ? plate : byLegacy.get(plate));
 const depthRooms = Object.values(ROOMS).filter((r) => r.hero && r.hero.depth);
 
-// Minimal PNG decoder (8-bit RGB / RGBA, non-interlaced: what PIL writes for plates and cutouts).
-function png(path) {
-  const buf = readFileSync(new URL(`../${path}`, import.meta.url));
-  let p = 8, w, h, type, idat = [];
-  while (p < buf.length) {
-    const len = buf.readUInt32BE(p), kind = buf.toString("latin1", p + 4, p + 8), data = buf.subarray(p + 8, p + 8 + len);
-    if (kind === "IHDR") { w = data.readUInt32BE(0); h = data.readUInt32BE(4); type = data[9]; assert.equal(data[8], 8); assert.equal(data[12], 0); }
-    if (kind === "IDAT") idat.push(data);
-    p += 12 + len;
-  }
-  const bpp = { 2: 3, 6: 4 }[type];
-  assert.ok(bpp, `${path}: unsupported PNG color type ${type}`);
-  const raw = inflateSync(Buffer.concat(idat)), stride = w * bpp, out = Buffer.alloc(h * stride);
-  for (let y = 0; y < h; y++) {
-    const f = raw[y * (stride + 1)], row = raw.subarray(y * (stride + 1) + 1, (y + 1) * (stride + 1));
-    for (let i = 0; i < stride; i++) {
-      const a = i >= bpp ? out[y * stride + i - bpp] : 0, b = y ? out[(y - 1) * stride + i] : 0, c = y && i >= bpp ? out[(y - 1) * stride + i - bpp] : 0;
-      const pa = Math.abs(b - c), pb = Math.abs(a - c), pc = Math.abs(a + b - 2 * c);
-      const pred = [0, a, b, (a + b) >> 1, pa <= pb && pa <= pc ? a : pb <= pc ? b : c][f];
-      out[y * stride + i] = (row[i] + pred) & 255;
-    }
-  }
-  return { w, h, bpp, px: (x, y) => [...out.subarray(y * stride + x * bpp, y * stride + x * bpp + bpp)] };
-}
-
 test("depth: hero height is calibrated to the measured height at each room's reference spot", () => {
-  const want = { hq: [156, 96], midway: [152, 104], pavilion: [153, 96], fence: [152, 60] };
+  const want = { hq: [156, 96], midway: [152, 104], pavilion: [153, 96], fence: [152, 60], store: [178, 96], barn: [178, 96], wkuk: [178, 96], gate: [178, 96], henhouse: [178, 96] };
   for (const [id, [y, h]] of Object.entries(want)) {
     const cfg = ROOMS[id].hero;
     assert.ok(cfg.depth, `${id} has depth`);
@@ -110,7 +85,7 @@ test("occluders: cutouts exist for every plate state, match the plate pixels, an
         const id = occluderAsset(plate, o.id);
         const a = manifest.assets[id];
         assert.ok(a, `${room.id}: ${id} in manifest`);
-        assert.equal(a.base, o.base, `${id}: base matches data/script.js`);
+        assert.equal(a.base, occluderBase(o, plate), `${id}: base matches data/script.js`);
         assert.deepEqual(a.size, [320, 180]);
         const fg = png(`art/pixel/${id}.png`);
         assert.equal(fg.bpp, 4);
@@ -124,12 +99,14 @@ test("occluders: cutouts exist for every plate state, match the plate pixels, an
         // The cutout's lowest pixel row sits at its base line (within 3 px): it is a floor-standing object.
         let low = 0;
         for (let y = 0; y < 180; y++) for (let x = 0; x < 320; x++) if (fg.px(x, y)[3]) low = y;
-        assert.ok(Math.abs(low - o.base) <= 3, `${id}: lowest row ${low} near base ${o.base}`);
+        // Hanging layers (rope swags between posts) float above their base; the posts carry the floor line.
+        if (!o.hangs) assert.ok(Math.abs(low - occluderBase(o, plate)) <= 3, `${id}: lowest row ${low} near base ${occluderBase(o, plate)}`);
+        else assert.ok(low < occluderBase(o, plate) + 6, `${id}: hanging layer ends above/at its base`);
         checked++;
       }
     }
   }
-  assert.equal(checked, 12); // pavilion x2 plates x4, midway booth, rooftop bucket, fence crate + end post
+  assert.equal(checked, 21); // pavilion x2 plates x (4 + 3 rope layers), midway booth, rooftop bucket, fence crate + end post, store counter, wkuk booth, gate front
 });
 
 test("occluders: z order draws scenery over an actor exactly when his feet are behind its base", () => {

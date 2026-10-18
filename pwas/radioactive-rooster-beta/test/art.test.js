@@ -63,7 +63,8 @@ test("hero and cast sprites exist as pixel files and stand inside the scene", ()
     }
     for (const c of room.cast || []) {
       need(`sprite/${c.sprite}${c.height ? `-h${c.height}` : ""}`);
-      assert.ok(room.spots.some((s) => s.id === c.spot), `${room.id} cast ${c.sprite} tied to a real spot`);
+      // Ambient cast (no hotspot: Corny by his cart, the little hen at the finish) is fine; a named spot must exist.
+      if (c.spot !== undefined) assert.ok(room.spots.some((s) => s.id === c.spot), `${room.id} cast ${c.sprite} tied to a real spot`);
     }
   }
 });

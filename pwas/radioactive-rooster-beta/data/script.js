@@ -50,6 +50,13 @@ export const NAMES = {
 // Henny NEVER speaks out loud (Arlong, 2026-10-16). Every Henny line is a thought bubble.
 export const HENNY_THINKS = { speaker: SPEAKER.henny, thought: true };
 
+// Title-screen cutouts drawn over bg/title (top-left `at` in its 320x180 px). See js/main.js renderTitle.
+export const TITLE = {
+  overlays: [
+    { art: "sprite/titlehen-side-l-h16", at: [58, 58] }, // the white hen on the barn-roof peak (feet at 67,74), a sprite now, not plate paint
+  ],
+};
+
 export const ITEMS = {
   geiger: {
     name: "geiger counter",
@@ -540,7 +547,14 @@ export const ROOMS = {
       { id: "crate", base: 117 },
       { id: "post-end", base: 102 },
     ],
-    cast: [{ spot: "henny", sprite: "henny-front", at: [128, 116], half: true }], // a real hen at her checkpoint, knee-high (9 px) to him at that spot (~36); drawn only over real art (?cast forces)
+    cast: [
+      { spot: "henny", sprite: "henny-front", at: [128, 116], half: true }, // a real hen at her checkpoint, knee-high (9 px) to him at that spot (~36); drawn only over real art (?cast forces)
+      // The yard roosters ("the professionals"), perched on the lower rail of the yard fence: side, peck, side, crow.
+      { spot: "birds", sprite: "yardrooster-side-r", at: [58, 104], height: 10, every: 900,
+        frames: ["yardrooster-side-r", "yardrooster-peck-r", "yardrooster-side-r", "yardrooster-crow-r"] },
+      { spot: "birds", sprite: "yardrooster-peck-l", at: [78, 108], height: 12, every: 1100,
+        frames: ["yardrooster-peck-l", "yardrooster-side-l", "yardrooster-crow-l", "yardrooster-side-l"] },
+    ],
     sign: { art: "fx/neon-fence", rect: [264,  49,  32,  18], frames: [6, 7, 8, 9, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (billboard on legs over the distant Main Street roofline); per-letter glow frames (tools/neon/paint_neon.py)
     poseAt: { squat: [60, 66, 24] }, // on the top rail between the left posts
     exits: [
@@ -554,7 +568,7 @@ export const ROOMS = {
       spot({
         id: "birds",
         name: "yard roosters",
-        rect: [48, 74, 26, 12],
+        rect: [49, 92, 40, 18],
         look: "Round. Cheeks full. Quiet. Employed. That's the whole job and they're good at it.",
         talk: "They're busy looking like roosters. It's a skilled trade.",
         use: { special: "squat_rail" },
@@ -678,12 +692,23 @@ export const ROOMS = {
     id: "henhouse",
     name: "Henhouse",
     plate: "bg-henhouse.jpg",
+    // Henhouse A (2026-10-18), now a walk-in room: h96 at the front edge, h80 at the wall line (y128); horizon -158.
+    hero: { at: [70, 178], height: 96, depth: { horizon: -158 } },
+    walk: [[[8, 128], [280, 128], [284, 140], [314, 140], [314, 179], [8, 179]]], // the straw floor; off the nest row (base y122) and the roost ladder's foot (y137)
+    cast: [{ spot: "hen", sprite: "sittinghen-idle-l", talk: "sittinghen-cluck-l", talkOn: "hen", at: [212, 107], height: 22 }], // in the box next to Midnight's
+    overlays: [
+      { art: "fg/henhouse--spoon", at: [132, 70], whenNot: "got_spoon" }, // on the nest-box shelf
+      { art: "fg/henhouse--stub", at: [196, 69], whenNot: "got_stub" },
+      { art: "fg/henhouse--grub", at: [221, 104], when: "hen_up", whenNot: "got_grub" }, // freed when she shifts onto the photo
+    ],
+    spriteTint: { brightness: 0.72, saturate: 0.8, sepia: 0.15, hue: -4 }, // lantern-dim coop: sprites sink into the warm dark
     exits: [{ spot: "back", label: "Fence" }],
     spots: [
       spot({
         id: "spoon",
         name: "tasting spoon",
-        rect: [134, 50, 70, 25],
+        rect: [126, 62, 28, 16],
+        stand: [140, 132],
         whenNot: "got_spoon",
         look: "Silver, monogrammed C.G., recently in a mouth that was not a hen's.",
         take: {
@@ -699,7 +724,8 @@ export const ROOMS = {
       spot({
         id: "stub",
         name: "torn ticket",
-        rect: [198, 50, 90, 29],
+        rect: [189, 61, 24, 18],
+        stand: [201, 132],
         whenNot: "got_stub",
         look: "Half a fair ticket with a lipstick kiss on it. Left where he'd find it.",
         take: {
@@ -716,7 +742,8 @@ export const ROOMS = {
       spot({
         id: "warm",
         name: "Midnight's empty nest",
-        rect: [96, 86, 77, 54],
+        rect: [154, 80, 38, 30],
+        stand: [172, 132],
         look: { special: "look_box" },
         take: "Heat is a rude thing to pocket.",
         use: "His gloves are warm already. His conscience is working on it.",
@@ -727,7 +754,8 @@ export const ROOMS = {
       spot({
         id: "hen",
         name: "sitting hen",
-        rect: [173, 86, 96, 65],
+        rect: [196, 80, 26, 30],
+        stand: [212, 132],
         look: "A dreamy fangirl of a hen, sitting on a grub like it's a secret. She's staring at his mask with her whole heart.",
         talk: "She swoons a little. Conversation isn't the currency here. Autographs might be.",
         take: "She pecks the glove. The glove files a complaint.",
@@ -747,7 +775,8 @@ export const ROOMS = {
       spot({
         id: "grub",
         name: "fat grub",
-        rect: [192, 126, 58, 29],
+        rect: [217, 98, 16, 14],
+        stand: [228, 132],
         when: "hen_up",
         whenNot: "got_grub",
         look: "A fat grub, suddenly unemployed.",
@@ -764,7 +793,8 @@ export const ROOMS = {
       spot({
         id: "back",
         name: "door back",
-        rect: [0, 63, 26, 72],
+        rect: [4, 38, 32, 92],
+        stand: [22, 134],
         exit: true,
         look: "Out to the rail, where the professionals are still squatting.",
         go: { room: "fence", pose: null, say: "Out to the fence line. Henny pretends she never let him in." },
@@ -777,8 +807,14 @@ export const ROOMS = {
     id: "barn",
     name: "Barn",
     plate: "bg-barn.jpg",
-    hero: { at: [186, 170], height: 108, depth: { horizon: 80 } }, // pixel plate: 108 at y 170 (Peck's eye line ~80); Mortgage's back (y ~110 over hooves ~160) sits at his belt, the ladder (y 70-155) a head taller
-    walk: [[[25, 160], [205, 160], [212, 178], [20, 178]]], // hay floor in front of Mortgage's hooves (y ~160) and left of Peck's bale (x > 212)
+    // Barn C (2026-10-18): h96 at the front edge (y178), h80 at the wall line (y128); horizon -158.
+    hero: { at: [186, 178], height: 96, depth: { horizon: -158 } },
+    walk: [[[8, 128], [312, 128], [312, 179], [8, 179]]], // the barn floor; the pen, post, ladder, hay and bench all stand against the back wall (bases y122-128)
+    cast: [
+      { spot: "goat", sprite: "mortgage-idle-r", talk: "mortgage-chew-r", voice: "goat", at: [93, 137], height: 44 }, // loose in front of the pen
+      { spot: "peck", sprite: "peck-front", talk: "peck-talk", voice: "peck", at: [237, 139], height: 80 }, // by the hay and his weather vane
+    ],
+    overlays: [{ art: "fg/barn--ribbon", at: [154, 26], whenNot: "got_ribbon" }], // on the post nail until Mortgage rams it down
     exits: [
       { spot: "to-fence", label: "Fence" },
       { spot: "to-town", label: "Town" },
@@ -787,7 +823,8 @@ export const ROOMS = {
       spot({
         id: "goat",
         name: "Mortgage the goat",
-        rect: [51, 83, 83, 79],
+        rect: [70, 95, 48, 43],
+        stand: [104, 152],
         look: "Mortgage. Bored, bellied, and smarter than everyone in this barn. Never proven.",
         talk: { special: "talk_goat" },
         useItem: {
@@ -808,7 +845,8 @@ export const ROOMS = {
       spot({
         id: "ribbon",
         name: "blue ribbon",
-        rect: [166, 7, 45, 40],
+        rect: [148, 20, 24, 28],
+        stand: [170, 140],
         look: { special: "look_ribbon" },
         take: "Nailed high. Pride is not a ladder.",
         push: "It flutters. It stays.",
@@ -819,7 +857,8 @@ export const ROOMS = {
       spot({
         id: "ladder",
         name: "rotten ladder",
-        rect: [128, 72, 51, 90],
+        rect: [165, 56, 20, 68],
+        stand: [178, 134],
         look: "A ladder in the philosophical sense. In the practical sense, a stack of apologies.",
         push: "Rotten. A hero and a ladder should both be trustworthy. This one isn't.",
         use: "He puts a foot on it. The foot files for divorce.",
@@ -830,7 +869,8 @@ export const ROOMS = {
       spot({
         id: "peck",
         name: "Farmer Peck",
-        rect: [205, 54, 102, 112],
+        rect: [212, 60, 50, 80],
+        stand: [200, 150],
         look: "Farmer Peck. Hard of hearing, brass horn, and he only talks about the weather.",
         talk: { special: "talk_peck" },
         use: "He's not a tool. The goat is closer.",
@@ -841,7 +881,8 @@ export const ROOMS = {
       spot({
         id: "to-fence",
         name: "yard door",
-        rect: [0, 50, 38, 90],
+        rect: [0, 40, 44, 88],
+        stand: [24, 132],
         exit: true,
         look: "Back to the fence and Henny's standards.",
         go: { room: "fence", pose: null, say: "Out to the rail." },
@@ -851,7 +892,8 @@ export const ROOMS = {
       spot({
         id: "to-town",
         name: "road to town",
-        rect: [282, 54, 38, 90],
+        rect: [284, 50, 30, 76],
+        stand: [298, 132],
         exit: true,
         look: "Town. Ned's Feed & Seed, and a radio station that keeps bad hours.",
         go: { room: "store", pose: null, say: "Into town, under the NED'S FEED & SEED sign." },
@@ -864,18 +906,34 @@ export const ROOMS = {
     id: "store",
     name: "Ned's Feed & Seed",
     plate: "bg-store.jpg",
-    hero: { at: [282, 160], height: 96, depth: { horizon: -6 } }, // pixel plate: 96 at y 160 by the counter end (counter top y ~112 at his belt), ~76 in the doorway (opening y 40-125: the door is just taller than him)
-    walk: [[[250, 128], [300, 128], [318, 142], [318, 177], [248, 177], [243, 150]]], // floorboards right of the counter, up to the street door
-    sign: { art: "fx/neon-store", rect: [248,  20,  33,  18], frames: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (Ned's plank on the back wall, between the poster and the bell); per-letter glow frames (tools/neon/paint_neon.py)
+    // Store C (2026-10-18): h96 at the front edge (feet y178), h84 at the counter/door line (y131); horizon -222.
+    hero: { at: [250, 178], height: 96, depth: { horizon: -222 } },
+    walk: [[[44, 131], [294, 131], [294, 179], [44, 179]]], // the floorboards in front of the counter: off the feed sacks (left) and the barrel (right)
+    occluders: [{ id: "counter", base: 128 }], // Ned stands behind it (feet y122)
+    cast: [{ spot: "clerk", sprite: "ned-front", talk: "ned-talk", voice: "clerk", at: [180, 122], height: 80 }],
+    sign: { art: "fx/neon-store", rect: [196,  13,  61,  16], frames: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (one line on Ned's blank plank above the window); per-letter glow frames (tools/neon/paint_neon.py)
     exits: [
       { spot: "to-barn", label: "Barn" },
       { spot: "to-wkuk", label: "WKUK" },
     ],
     spots: [
       spot({
+        id: "jars",
+        name: "jars",
+        rect: [36, 18, 146, 74],
+        stand: [110, 134],
+        look: "Pickles, nails, and a powder that claims to be flour. The labels gave up years ago.",
+        take: "Ned's face says the price is your dignity, and it isn't on sale.",
+        talk: "The jars are neutral.",
+        use: "He opens a jar marked FLOUR. It is not flour. He closes it fast and doesn't ask.",
+        push: "The jars clink together in a nervous little chorus. Ned's eye twitches along.",
+        useAny: "He holds the {item} up next to the jars for comparison. It doesn't fit the theme. Nothing in here has a theme.",
+      }),
+      spot({
         id: "clerk",
         name: "Ned",
-        rect: [134, 40, 102, 76],
+        rect: [154, 40, 52, 60],
+        stand: [180, 134],
         look: "Ned has priced everything in the county, including trouble. He looks like a man carrying forty gallons of guilt.",
         talk: { special: "talk_clerk" },
         useItem: {
@@ -897,7 +955,8 @@ export const ROOMS = {
       spot({
         id: "bell",
         name: "service bell",
-        rect: [160, 112, 45, 29],
+        rect: [139, 83, 21, 14],
+        stand: [150, 134],
         look: "A bell that has summoned Ned through three wars and one spice recall.",
         use: "Ding. Ned was already looking at you. Now he's looking harder.",
         push: "Ding.",
@@ -906,20 +965,10 @@ export const ROOMS = {
         useAny: "He dings the bell with the {item}. Ding. Ned's eyebrow does the rest.",
       }),
       spot({
-        id: "jars",
-        name: "jars",
-        rect: [6, 7, 128, 99],
-        look: "Pickles, nails, and a powder that claims to be flour. The labels gave up years ago.",
-        take: "Ned's face says the price is your dignity, and it isn't on sale.",
-        talk: "The jars are neutral.",
-        use: "He opens a jar marked FLOUR. It is not flour. He closes it fast and doesn't ask.",
-        push: "The jars clink together in a nervous little chorus. Ned's eye twitches along.",
-        useAny: "He holds the {item} up next to the jars for comparison. It doesn't fit the theme. Nothing in here has a theme.",
-      }),
-      spot({
         id: "to-barn",
         name: "back lane",
-        rect: [0, 99, 32, 72],
+        rect: [0, 30, 32, 86],
+        stand: [46, 140],
         exit: true,
         look: "The lane back to Peck's barn.",
         go: { room: "barn", pose: null, say: "Back toward the barn. Mortgage hasn't written." },
@@ -929,7 +978,8 @@ export const ROOMS = {
       spot({
         id: "to-wkuk",
         name: "street door",
-        rect: [237, 29, 77, 130],
+        rect: [258, 30, 56, 94],
+        stand: [284, 134],
         exit: true,
         look: "The street. WKUK's on-air light stains the wet pavement down the block.",
         go: { room: "wkuk", pose: null, say: "Down the block to WKUK." },
@@ -942,9 +992,12 @@ export const ROOMS = {
     id: "wkuk",
     name: "WKUK",
     plate: "bg-wkuk.jpg",
-    hero: { at: [34, 176], height: 116, depth: { horizon: 70 } }, // pixel plate: close camera; 116 at the door (door y 37-172: just taller than him), ~88 down the hall (y 150)
-    walk: [[[6, 150], [50, 150], [62, 178], [6, 178]]], // hallway floor by the studio door; the studio wall (x > 62) runs to the frame bottom
-    sign: { art: "fx/neon-wkuk", rect: [68,  26,  51,  17], frames: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (raceway above the studio door, in perspective); per-letter glow frames (tools/neon/paint_neon.py)
+    // WKUK C (2026-10-18): same scale as the store, h96 at the front edge, h84 at the wall line (y131); horizon -222.
+    hero: { at: [150, 178], height: 96, depth: { horizon: -222 } },
+    walk: [[[4, 131], [316, 131], [316, 179], [4, 179]]], // the hall floor in front of the wall (wall meets the floor at y127)
+    occluders: [{ id: "booth", base: 128 }], // wall, sill, desk, console, mullion and mic head, in front of DeeJay (feet y110)
+    cast: [{ spot: "deejay", sprite: "deejay-front", talk: "deejay-talk", voice: "deejay", at: [174, 110], height: 72 }], // behind the glass at the mic
+    sign: { art: "fx/neon-wkuk", rect: [66,  12,  48,  14], frames: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (flat on the hall wall above the studio door); per-letter glow frames (tools/neon/paint_neon.py)
     exits: [
       { spot: "to-store", label: "Store" },
       { spot: "to-gate", label: "Fair gate" },
@@ -953,7 +1006,8 @@ export const ROOMS = {
       spot({
         id: "slot",
         name: "mail slot",
-        rect: [58, 40, 70, 126],
+        rect: [66, 31, 47, 96],
+        stand: [90, 134],
         look: "DeeJay Cluck is on the air behind the glass, pointing at a dead pair of guest headphones and mouthing one word. Beat.",
         talk: { special: "talk_slot" },
         useItem: {
@@ -967,7 +1021,8 @@ export const ROOMS = {
       spot({
         id: "deejay",
         name: "DeeJay Cluck",
-        rect: [160, 54, 90, 83],
+        rect: [154, 38, 34, 46],
+        stand: [172, 134],
         look: "The overnight voice of Cluck County. He aired the \"accident\" story years ago. He never quite believed it.",
         talk: { special: "talk_deejay" },
         take: "DeeJay is live. You can't take a man off the air. There are forms.",
@@ -978,7 +1033,8 @@ export const ROOMS = {
       spot({
         id: "onair",
         name: "on-air light",
-        rect: [128, 43, 51, 25],
+        rect: [187, 34, 19, 18],
+        stand: [196, 134],
         look: "On air. The whole county is listening, which is a lot of pressure for a wheeze.",
         talk: "The light has no notes.",
         take: "Uhhh, the light? It's wired into the building. And into DeeJay's whole personality.",
@@ -989,7 +1045,8 @@ export const ROOMS = {
       spot({
         id: "horn",
         name: "wall horn",
-        rect: [218, 29, 58, 40],
+        rect: [214, 31, 32, 31],
+        stand: [230, 134],
         look: "A parking-lot horn on a nail. It could make a polite cough sound like a station ID.",
         take: "It comes down when DeeJay says so. He hasn't said so.",
         use: "It's on his side of the glass.",
@@ -1000,7 +1057,8 @@ export const ROOMS = {
       spot({
         id: "to-store",
         name: "hall",
-        rect: [0, 36, 38, 126],
+        rect: [0, 20, 56, 108],
+        stand: [14, 140],
         exit: true,
         look: "Back toward Ned and the jars.",
         go: { room: "store", pose: null, say: "Back to the Feed & Seed." },
@@ -1010,7 +1068,8 @@ export const ROOMS = {
       spot({
         id: "to-gate",
         name: "fair road",
-        rect: [282, 36, 38, 126],
+        rect: [266, 33, 48, 95],
+        stand: [290, 134],
         exit: true,
         look: "The fair is a glow at the end of the road. Midnight is the threat.",
         go: { special: "to_gate" },
@@ -1023,10 +1082,15 @@ export const ROOMS = {
     id: "gate",
     name: "Fair gate",
     plate: "bg-gate.jpg",
-    hero: { at: [130, 176], height: 84 }, // pixel plate: turnstile (y 85-180) just taller than him, booth sill (y 140) at his belt line; one ground strip, so no depth scaling
-    walk: [[[8, 168], [312, 168], [312, 178], [8, 178]]], // the ground strip in front of the turnstiles, booth and cutout
-    sign: { art: "fx/neon-gate", rect: [39,  66,  71,  17], frames: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (tubes clipped to the turnstile canopy panel); per-letter glow frames (tools/neon/paint_neon.py)
-    poseAt: { squat: [166, 61, 70] },
+    // Gate B (2026-10-18): h84 at the gate line (fence base y131), h96 at the front edge; horizon -198.
+    hero: { at: [130, 178], height: 96, depth: { horizon: -198 } },
+    // The plaza in front of the turnstile (base y131), the booth front (y135) and the cutout's feet (y140).
+    walk: [[[6, 137], [229, 137], [233, 144], [291, 144], [295, 137], [314, 137], [314, 179], [6, 179]]],
+    occluders: [{ id: "front", base: 135 }], // sill, booth front and window posts in front of the seated guard (feet y126)
+    cast: [{ spot: "guard", sprite: "guard-front", talk: "guard-talk", voice: "guard", at: [148, 126], height: 72 }],
+    spriteTint: { brightness: 0.8, saturate: 0.85, sepia: 0.1 }, // cool night plaza: sprites sit back into the string-light glow
+    sign: { art: "fx/neon-gate", rect: [40,  38,  56,  16], frames: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (tubes clipped to the turnstile canopy panel); per-letter glow frames (tools/neon/paint_neon.py)
+    poseAt: { squat: [236, 66, 50] }, // squatting behind the cardboard prize rooster, in its place
     exits: [
       { spot: "to-wkuk", label: "WKUK" },
       { spot: "turnstile", label: "Midway" },
@@ -1035,7 +1099,8 @@ export const ROOMS = {
       spot({
         id: "guard",
         name: "gate guard",
-        rect: [109, 54, 90, 112],
+        rect: [124, 56, 46, 50],
+        stand: [150, 140],
         look: "A tired man with a fan. He has stamped a thousand tickets and believed maybe six of them. Hattie's people walk in free.",
         talk: { special: "talk_guard" },
         useItem: {
@@ -1060,7 +1125,8 @@ export const ROOMS = {
       spot({
         id: "cutout",
         name: "prize-rooster cutout",
-        rect: [198, 40, 109, 119],
+        rect: [235, 62, 51, 79],
+        stand: [262, 150],
         look: "Cardboard. Ideal proportions. The shape is what matters.",
         use: { special: "cutout" },
         talk: "The cutout grins. It has never had to mean it.",
@@ -1071,7 +1137,8 @@ export const ROOMS = {
       spot({
         id: "turnstile",
         name: "turnstile",
-        rect: [6, 50, 90, 122],
+        rect: [25, 88, 76, 44],
+        stand: [62, 140],
         exit: true,
         look: "A turnstile with a very developed sense of paperwork.",
         talk: "It clicks for a living.",
@@ -1082,7 +1149,8 @@ export const ROOMS = {
       spot({
         id: "to-wkuk",
         name: "road back",
-        rect: [0, 0, 45, 40],
+        rect: [0, 120, 22, 58],
+        stand: [12, 160],
         exit: true,
         look: "Back toward the station.",
         go: { room: "wkuk", pose: null, say: "Back down the road. The on-air light is still a gossip." },
@@ -1097,7 +1165,12 @@ export const ROOMS = {
     plate: "bg-midway.jpg",
     hero: { at: [180, 152], height: 104, depth: { horizon: 105 } }, // depth: 104 at y 152 (booth counter at his belt), smaller toward the railing
     walk: [[[20, 151], [84, 149], [88, 141], [262, 141], [262, 177], [20, 177]]], // boardwalk up to the railing posts (bases y 130-145), past the booth's right corner (booth occludes him behind y 147); the Pavilion rope (x>262) is off limits // booth counter top y 103, booth floor y 147 (~44 px): counter meets his belt
-    occluders: [{ id: "booth", base: 147 }],
+    occluders: [{ id: "booth", base: 147 }], // the booth front; its counter window is open (the kids stand behind the counter)
+    cast: [
+      { spot: "kids", sprite: "dot-front", talk: "dot-talk", voice: ["dot", "kids"], at: [38, 140], height: 72 }, // behind the counter window
+      { spot: "kids", sprite: "rocco-front", talk: "rocco-talk", voice: ["rocco", "kids"], at: [59, 141], height: 72 },
+      { spot: "corny", sprite: "corny-front", talk: "corny-talk", voice: "corny", at: [126, 141], height: 80, cues: { corny_pitch: "corny-ringtoss-r" } }, // by the clock post
+    ],
     sign: { art: "fx/neon-midway", rect: [266,  48,  54,  20], frames: [6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (board across the right-hand building, clear of Hattie's hawk); per-letter glow frames (tools/neon/paint_neon.py)
     exits: [
       { spot: "to-gate", label: "Gate" },
@@ -1118,7 +1191,7 @@ export const ROOMS = {
       spot({
         id: "kids",
         name: "Jingle Kids",
-        rect: [24, 58, 52, 38],
+        rect: [24, 60, 50, 40],
         look: "Three teenagers in faded Rad-Safe chick-costume uniforms behind the counter: Dot, Rocco and Pip. As little kids they sang the jingle in the old Rad-Safe ads. They would like you to know they are over it.",
         talk: { special: "talk_kids" },
         useItem: {
@@ -1156,7 +1229,7 @@ export const ROOMS = {
       spot({
         id: "corny",
         name: "Slick Corny",
-        rect: [106, 88, 40, 50],
+        rect: [103, 61, 42, 80],
         look: "Slick Corny, the barker, leans on the clock post in a straw boater and a corn-yellow vest, flipping a quarter. A man made entirely of fairground hustle. Something under the smile is counting.",
         talk: { special: "talk_corny" },
         useItem: { mirror: "He looks into the mirror and likes what he sees, but he never lets go of the cash box key. Professional.", map: "\"Follow the money,\" the map says. Corny sees it and stops smiling for exactly one second." },
@@ -1254,8 +1327,21 @@ export const ROOMS = {
       { id: "post-front", base: 169 },
       { id: "post-mid", base: 146 },
       { id: "cart", base: 146 },
+      // The rope swags as their own layers (hand-traced, tools/bg/handcut): anyone behind a rope is crossed by it.
+      { id: "rope-front", base: 170, bases: { "pavilion-open": 172 }, hangs: true }, // closed: post-left to the padlock; open: the dropped rope and its coil
+      { id: "rope-side", base: 146, hangs: true }, // centre-left post back to post-mid (Pip and the crowd stand behind it)
+      { id: "rope-back", base: 130, hangs: true }, // along the stage front, with the back posts
     ],
-    cast: [{ spot: "gobbler", sprite: "hattie-front", at: [205, 110], height: 52 }], // on the stage, in the spotlight
+    cast: [
+      { spot: "gobbler", sprite: "hattie-front", at: [205, 110], height: 52 }, // on the stage, in the spotlight
+      // Pip, front row behind the side rope; she drifts into the crowd for the keys, then pops the padlock (left of her).
+      { spot: "pip", sprite: "pip-front", talk: "pip-talk", voice: "pip", at: [122, 140], height: 56,
+        cues: { pip_lift: { walk: ["pip-walk-r", "pip-side-r"], to: [146, 137], end: "pip-side-r" }, pip_unlock: "pip-reach-l" } },
+      // Slick Corny by his cart; his head turns when Rooster reaches for the keys.
+      { sprite: "corny-front", talk: "corny-talk", voice: "corny", at: [238, 148], height: 88, cues: { corny_turn: "corny-side-l" } },
+      // The little brown hen in the crowd behind the side rope: only at the finish, where she speaks.
+      { sprite: "littlehen-idle-r", at: [140, 138], height: 18, when: "egg_saved", cues: { littlehen: "littlehen-cluck-r" } },
+    ],
     vat: [14, 66, 84, 17], // the glowing oil surface
     poseAt: { squat: [128, 76, 70] },
     exits: [{ spot: "out", label: "Midway" }],
@@ -1350,7 +1436,7 @@ export const ROOMS = {
       spot({
         id: "pip",
         name: "Pip",
-        rect: [120, 98, 16, 34], // front row by the rope, right of the centre-left post (no sprite yet)
+        rect: [110, 84, 24, 56], // front row behind the side rope, right of the centre-left post (sprite pip-front h56 at 122,140)
         look: { special: "look_pip_pav" },
         talk: { special: "talk_pip_pav" },
         use: { special: "talk_pip_pav" },

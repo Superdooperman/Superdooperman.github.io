@@ -1,8 +1,8 @@
-import { ENDINGS, NAMES, ROOMS, SCENE } from "../data/script.js";
+import { ENDINGS, NAMES, ROOMS, SCENE, SPEAKER, TITLE } from "../data/script.js";
 import { artMode, artUrl, assetInfo, fancyCount, initArt, onArtChange, setArtMode } from "./art.js";
 import { playBed, playCue } from "./audio.js";
-import { clampToArea, parseFlagOverride, roomView, stepToward, depthHeight, actorZ, occluderZ, occluderAsset } from "./walk.js";
-import { act, choicesFor, HERO, ITEMS, maxHeat, newGame, preview, signLetters, signLevel, spotsFor, vatState } from "./logic.js";
+import { clampToArea, parseFlagOverride, roomView, stepToward, depthHeight, actorZ, occluderZ, occluderAsset, occluderBase, spriteFilter, castFrame } from "./walk.js";
+import { act, choicesFor, HERO, ITEMS, maxHeat, newGame, preview, signLetters, signLevel, spotsFor, vatState, visible } from "./logic.js";
 
 const SAVE_KEY = "rr-yolk-saves";
 const VERBS = [
@@ -23,6 +23,8 @@ const ui = {
   cast: new URLSearchParams(location.search).has("cast"), // force cast sprites over placeholder plates (preview only)
   flagOverride: parseFlagOverride(location.search), // "?flags=rope_open" preview: set on New game
   plateFile: "",
+  lineAt: 0, // when the current caption line was shown (cast talk frames run for a beat after it)
+  lastAct: null, // { spot, verb } of the last hotspot click (cast `talkOn`)
 };
 
 const app = document.querySelector("#app");
@@ -68,6 +70,7 @@ function currentLine() {
 
 function showLine(entry) {
   if (!entry) return;
+  ui.lineAt = performance.now();
   if (entry.mood) ui.state.mood = entry.mood;
   if (entry.sound) playCue(entry.sound);
   render();
@@ -113,6 +116,7 @@ function render() {
   const ended = state.mode === "end" && atEndOfQueue;
 
   app.replaceChildren();
+  castNodes.clear();
   const cabinet = el("div", "cabinet");
   const head = el("header", "top");
   head.append(
@@ -142,6 +146,7 @@ function render() {
   const realPlate = !artUrl(view.plate).startsWith("art/placeholders/");
 
   const hidePose = lineNow && lineNow.big;
+  const tint = spriteFilter(room); // per-room sprite tint, "" (off) unless the room sets spriteTint
   if (!hidePose && state.pose && room.poseAt && room.poseAt[state.pose]) {
     const pose = el("img", "pose");
     pose.alt = "";
@@ -150,6 +155,7 @@ function render() {
     pose.style.top = pct(at[1], "y");
     pose.style.width = pct(at[2], "x");
     mount(pose, state.pose === "crow" ? "sprite-crow.png" : "sprite-squat.png");
+    if (tint) pose.style.filter = tint;
     world.append(pose);
   }
 
@@ -158,18 +164,35 @@ function render() {
     const node = el("img", "hero");
     node.alt = "";
     placeHero(node, room);
+    if (tint) node.style.filter = tint;
     world.append(node);
+  }
+
+  // Plate overlays: small cutouts that belong to the scenery but change with the story (the ribbon on its nail, the
+  // spoon and stub on the nest shelf). Painted over the plate, under every actor; shown while their when/whenNot hold.
+  if (room.overlays && realPlate) {
+    for (const o of room.overlays) {
+      if (!visible(state, o)) continue;
+      const node = el("img", "overlay");
+      node.alt = "";
+      node.dataset.id = o.art;
+      placeAt(node, o.art, o.at);
+      world.append(node);
+    }
   }
 
   if (room.cast && (ui.cast || realPlate)) {
     const shown = new Set(spotsFor(state).map((s) => s.id));
     for (const c of room.cast) {
       if (c.spot && !shown.has(c.spot)) continue;
+      if (!visible(state, c)) continue;
       const node = el("img", "cast");
       node.alt = "";
       node.dataset.who = c.sprite;
-      placeSprite(node, `sprite/${c.sprite}${sizeTag(c)}`, c.at);
       node.style.zIndex = actorZ(c.at[1]);
+      if (tint) node.style.filter = tint;
+      castNodes.set(node, c);
+      placeCast(node, c, performance.now());
       world.append(node);
     }
   }
@@ -183,8 +206,9 @@ function render() {
       const node = el("img", "fg");
       node.alt = "";
       node.dataset.id = o.id;
-      node.dataset.base = o.base;
-      node.style.zIndex = occluderZ(o.base);
+      const base = occluderBase(o, view.plate);
+      node.dataset.base = base;
+      node.style.zIndex = occluderZ(base);
       mount(node, id);
       world.append(node);
     }
@@ -213,6 +237,7 @@ function render() {
       hit.addEventListener("click", () => {
         const [sx, sy] = spot.stand || [spot.rect[0] + spot.rect[2] / 2, spot.rect[1] + spot.rect[3]];
         walkTo(room, sx, sy); // nearest reachable point (or the spot's own `stand` point)
+        ui.lastAct = { spot: spot.id, verb: state.pending ? "item" : state.verb };
         dispatch({ t: "hotspot", id: spot.id });
       });
       stage.append(hit);
@@ -397,6 +422,40 @@ function placeSprite(node, id, at) {
   if (node.dataset.file !== id) mount(node, id);
 }
 
+// Overlays and title cutouts: `at` is the top-left point in logical px, size from the manifest.
+function placeAt(node, id, at) {
+  const info = assetInfo(id);
+  const [w] = info ? info.size : [16, 16];
+  node.style.left = pct(at[0], "x");
+  node.style.top = pct(at[1], "y");
+  node.style.width = pct(w, "x");
+  if (node.dataset.file !== id) mount(node, id);
+}
+
+/* ---------- Cast frames: idle, talk, cue poses, short walks and ambient loops ---------- */
+// A cast entry: { sprite, at, height|half, spot?, when?, whenNot?,
+//   talk?, voice?: speaker key(s) from SPEAKER, talkOn?: hotspot ids  -> talk/idle flap while that voice speaks,
+//   cues?: { <line cue>: sprite | { walk: [frames], to: [x, y], end?: sprite } }  -> pose while a cued line shows,
+//   frames?: [...], every?: ms  -> ambient loop (the yard roosters) }.
+// Purely visual: game logic never reads it.
+const castNodes = new Map();
+
+function placeCast(node, c, now) {
+  const { sprite, at } = castFrame(c, { line: currentLine(), since: now - ui.lineAt, now, lastAct: ui.lastAct, speakers: SPEAKER });
+  placeSprite(node, `sprite/${sprite}${sizeTag(c)}`, at);
+  node.style.zIndex = actorZ(at[1]);
+}
+
+// One light ticker for every animated cast member (loops, talk flaps, cue walks); static frames are left alone.
+setInterval(() => {
+  if (ui.screen !== "play" || !castNodes.size) return;
+  const now = performance.now();
+  for (const [node, c] of castNodes) {
+    if (!node.isConnected) continue;
+    if (c.frames || c.talk || c.cues) placeCast(node, c, now);
+  }
+}, 80);
+
 function placeHero(node, room) {
   placeSprite(node, heroFrame(room), [hero.x, hero.y]);
   node.style.zIndex = actorZ(hero.y);
@@ -576,7 +635,18 @@ function renderTitle() {
   const img = el("img");
   img.alt = "Night over the coop and the fair";
   mount(img, "bg-title.jpg");
-  frame.append(img);
+  // Title cutouts (the hen on the barn roof): sprites on the title plate, top-left `at` in its 320x180 px.
+  const titleArt = el("div", "title-art");
+  titleArt.append(img);
+  if (!artUrl("bg-title.jpg").startsWith("art/placeholders/")) {
+    for (const o of TITLE.overlays || []) {
+      const node = el("img", "title-cast");
+      node.alt = "";
+      placeAt(node, o.art, o.at);
+      titleArt.append(node);
+    }
+  }
+  frame.append(titleArt);
   const copy = el("div", "title-copy");
   copy.append(el("h1", "", "RADIOACTIVE ROOSTER"), el("span", "beta", "BETA"));
   copy.append(el("p", "sub", "and the Yolk of Midnight"));
