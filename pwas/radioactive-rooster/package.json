@@ -1,5 +1,9 @@
 {
   "name": "radioactive-rooster",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "check": "node --check js/main.js && node --check js/logic.js && node --check js/art.js && node --check js/audio.js && node --check js/walk.js && node --check data/script.js && node --check sw.js && node -e \"JSON.parse(require('fs').readFileSync('art/manifest.json'))\"",
+    "test": "node --test test/"
+  }
 }

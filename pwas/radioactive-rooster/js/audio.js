@@ -55,6 +55,17 @@ function synth(kind) {
     for (let i = 0; i < 6; i += 1) tone(1800, now + i * 0.08, 0.03, "square", 0.05);
   } else if (kind === "click") {
     for (let i = 0; i < 3; i += 1) tone(880, now + i * 0.18, 0.05, "square", 0.06);
+  } else if (kind === "ding") {
+    // service bell: a bright struck partial over a softer fundamental, long ring-out
+    tone(1568, now, 0.9, "sine", 0.09);
+    tone(3136, now, 0.35, "sine", 0.03);
+    tone(784, now, 0.6, "triangle", 0.03);
+  } else if (kind === "bonk") {
+    // goat skull vs barn post: a dull wooden thud with a little ring
+    noise(now, 0.12, 0.16);
+    tone(110, now, 0.25, "triangle", 0.14);
+    tone(70, now + 0.02, 0.3, "sine", 0.12);
+    tone(523, now + 0.05, 0.4, "sine", 0.02);
   } else if (kind === "blip") {
     tone(660, now, 0.08, "square", 0.05);
   } else if (kind === "pah-kaw") {

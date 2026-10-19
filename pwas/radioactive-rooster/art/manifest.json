@@ -1,0 +1,8827 @@
+{
+ "version": 1,
+ "logical": {
+  "w": 320,
+  "h": 180
+ },
+ "sets": [
+  "pixel",
+  "fancy"
+ ],
+ "ext": [
+  "png",
+  "webp"
+ ],
+ "notes": "Files live at art/<set>/<id>.png (fancy may also be .webp). size = logical px; a file may be any whole multiple at the same aspect. Missing fancy -> pixel -> art/placeholders/<legacy>.",
+ "assets": {
+  "bg/title": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-title.jpg",
+   "source": "tools/bg/pixelate.py (box 1280x720 -> 320x180, unsharp, Bayer dither, 48-colour palette) from the painted bg-title.jpg; 4x nearest copy in art/pixel-4x/bg/"
+  },
+  "bg/hq": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-hq.jpg"
+  },
+  "bg/fence": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-fence.jpg",
+   "source": "Arlong's approved rooster-scene-art-v2/fence.jpg, box-downscaled 1280x720 -> 320x180"
+  },
+  "bg/henhouse": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-henhouse.jpg",
+   "source": "Arlong's approved henhouse A (2026-10-18; art/placeholders/bg-henhouse.jpg is its 1280x720 master): no hens or people painted in; hand patch: warm glow on Midnight's empty nest; 4x nearest copy in art/pixel-4x/bg/"
+  },
+  "bg/barn": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-barn.jpg",
+   "source": "Arlong's approved barn C (2026-10-18; art/placeholders/bg-barn.jpg is its 1280x720 master): no people or animals painted in; LANCZOS 1280x720 then BOX 320x180, hand patches (snapped ladder rung, post nail); 4x nearest copy in art/pixel-4x/bg/"
+  },
+  "bg/store": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-store.jpg",
+   "source": "tools/bg/pixelate.py (box 1280x720 -> 320x180, unsharp, Bayer dither, 48-colour palette) from the painted bg-store.jpg; Feed & Seed sign baked by tools/neon/paint_neon.py; 4x nearest copy in art/pixel-4x/bg/"
+  },
+  "bg/wkuk": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-wkuk.jpg",
+   "source": "tools/bg/pixelate.py (box 1280x720 -> 320x180, unsharp, Bayer dither, 48-colour palette) from the painted bg-wkuk.jpg; Feed & Seed sign baked by tools/neon/paint_neon.py; 4x nearest copy in art/pixel-4x/bg/"
+  },
+  "bg/gate": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-gate.jpg",
+   "source": "tools/bg/pixelate.py (box 1280x720 -> 320x180, unsharp, Bayer dither, 48-colour palette) from the painted bg-gate.jpg; Feed & Seed sign baked by tools/neon/paint_neon.py; 4x nearest copy in art/pixel-4x/bg/"
+  },
+  "bg/midway": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-midway.jpg"
+  },
+  "bg/pavilion": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "bg-pavilion.jpg"
+  },
+  "portrait/rooster-talk": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-rooster.png"
+  },
+  "portrait/rooster-smitten": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-rooster-smitten.png"
+  },
+  "portrait/rooster-embarrassed": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-rooster-embarrassed.png"
+  },
+  "portrait/rooster-crow": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-rooster-crow.png"
+  },
+  "portrait/gobbler": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-gobbler.png",
+   "source": "tools/sprites/cut_next.py (gobbler-portrait-v2.jpg)"
+  },
+  "portrait/henny": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-henny.jpg"
+  },
+  "portrait/peck": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-peck.jpg"
+  },
+  "portrait/deejay": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-deejay.jpg"
+  },
+  "portrait/guard": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-guard.jpg"
+  },
+  "portrait/barker": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-barker.jpg"
+  },
+  "portrait/clerk": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-clerk.jpg"
+  },
+  "sprite/rooster-squat": {
+   "kind": "sprite",
+   "size": [
+    48,
+    48
+   ],
+   "anchor": [
+    24,
+    48
+   ],
+   "frames": 1,
+   "grid": [
+    1,
+    1
+   ],
+   "fps": 0,
+   "legacy": "sprite-squat.png"
+  },
+  "sprite/rooster-crow": {
+   "kind": "sprite",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    32,
+    64
+   ],
+   "frames": 1,
+   "grid": [
+    1,
+    1
+   ],
+   "fps": 0,
+   "legacy": "sprite-crow.png"
+  },
+  "sprite/rooster-front": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-front": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-side-r": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-side-l": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-walk-r": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-walk-l": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-back": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-front-half": {
+   "kind": "sprite",
+   "size": [
+    26,
+    30
+   ],
+   "anchor": [
+    13,
+    30
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-side-r-half": {
+   "kind": "sprite",
+   "size": [
+    26,
+    30
+   ],
+   "anchor": [
+    13,
+    30
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-side-l-half": {
+   "kind": "sprite",
+   "size": [
+    26,
+    30
+   ],
+   "anchor": [
+    13,
+    30
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-walk-r-half": {
+   "kind": "sprite",
+   "size": [
+    26,
+    30
+   ],
+   "anchor": [
+    13,
+    30
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-walk-l-half": {
+   "kind": "sprite",
+   "size": [
+    26,
+    30
+   ],
+   "anchor": [
+    13,
+    30
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-back-half": {
+   "kind": "sprite",
+   "size": [
+    26,
+    30
+   ],
+   "anchor": [
+    13,
+    30
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-front": {
+   "kind": "sprite",
+   "size": [
+    34,
+    56
+   ],
+   "anchor": [
+    17,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-side-r": {
+   "kind": "sprite",
+   "size": [
+    34,
+    56
+   ],
+   "anchor": [
+    17,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-side-l": {
+   "kind": "sprite",
+   "size": [
+    34,
+    56
+   ],
+   "anchor": [
+    17,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-walk-r": {
+   "kind": "sprite",
+   "size": [
+    34,
+    56
+   ],
+   "anchor": [
+    17,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-walk-l": {
+   "kind": "sprite",
+   "size": [
+    34,
+    56
+   ],
+   "anchor": [
+    17,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-piano-r": {
+   "kind": "sprite",
+   "size": [
+    50,
+    56
+   ],
+   "anchor": [
+    25,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-piano-l": {
+   "kind": "sprite",
+   "size": [
+    50,
+    56
+   ],
+   "anchor": [
+    25,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-front-half": {
+   "kind": "sprite",
+   "size": [
+    20,
+    28
+   ],
+   "anchor": [
+    10,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-side-r-half": {
+   "kind": "sprite",
+   "size": [
+    20,
+    28
+   ],
+   "anchor": [
+    10,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-side-l-half": {
+   "kind": "sprite",
+   "size": [
+    20,
+    28
+   ],
+   "anchor": [
+    10,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-walk-r-half": {
+   "kind": "sprite",
+   "size": [
+    20,
+    28
+   ],
+   "anchor": [
+    10,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-walk-l-half": {
+   "kind": "sprite",
+   "size": [
+    20,
+    28
+   ],
+   "anchor": [
+    10,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-piano-r-half": {
+   "kind": "sprite",
+   "size": [
+    26,
+    28
+   ],
+   "anchor": [
+    13,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/gizzard-piano-l-half": {
+   "kind": "sprite",
+   "size": [
+    26,
+    28
+   ],
+   "anchor": [
+    13,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-side-r": {
+   "kind": "sprite",
+   "size": [
+    18,
+    17
+   ],
+   "anchor": [
+    9,
+    17
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-side-l": {
+   "kind": "sprite",
+   "size": [
+    18,
+    17
+   ],
+   "anchor": [
+    9,
+    17
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-peck-r": {
+   "kind": "sprite",
+   "size": [
+    18,
+    17
+   ],
+   "anchor": [
+    9,
+    17
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-peck-l": {
+   "kind": "sprite",
+   "size": [
+    18,
+    17
+   ],
+   "anchor": [
+    9,
+    17
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-front": {
+   "kind": "sprite",
+   "size": [
+    18,
+    17
+   ],
+   "anchor": [
+    9,
+    17
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-tilt-r": {
+   "kind": "sprite",
+   "size": [
+    18,
+    17
+   ],
+   "anchor": [
+    9,
+    17
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-tilt-l": {
+   "kind": "sprite",
+   "size": [
+    18,
+    17
+   ],
+   "anchor": [
+    9,
+    17
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-side-r-half": {
+   "kind": "sprite",
+   "size": [
+    12,
+    9
+   ],
+   "anchor": [
+    6,
+    9
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-side-l-half": {
+   "kind": "sprite",
+   "size": [
+    12,
+    9
+   ],
+   "anchor": [
+    6,
+    9
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-peck-r-half": {
+   "kind": "sprite",
+   "size": [
+    12,
+    9
+   ],
+   "anchor": [
+    6,
+    9
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-peck-l-half": {
+   "kind": "sprite",
+   "size": [
+    12,
+    9
+   ],
+   "anchor": [
+    6,
+    9
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-front-half": {
+   "kind": "sprite",
+   "size": [
+    12,
+    9
+   ],
+   "anchor": [
+    6,
+    9
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-tilt-r-half": {
+   "kind": "sprite",
+   "size": [
+    12,
+    9
+   ],
+   "anchor": [
+    6,
+    9
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-tilt-l-half": {
+   "kind": "sprite",
+   "size": [
+    12,
+    9
+   ],
+   "anchor": [
+    6,
+    9
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h104": {
+   "kind": "sprite",
+   "size": [
+    84,
+    104
+   ],
+   "anchor": [
+    42,
+    104
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h104": {
+   "kind": "sprite",
+   "size": [
+    84,
+    104
+   ],
+   "anchor": [
+    42,
+    104
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h104": {
+   "kind": "sprite",
+   "size": [
+    84,
+    104
+   ],
+   "anchor": [
+    42,
+    104
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h104": {
+   "kind": "sprite",
+   "size": [
+    84,
+    104
+   ],
+   "anchor": [
+    42,
+    104
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h104": {
+   "kind": "sprite",
+   "size": [
+    84,
+    104
+   ],
+   "anchor": [
+    42,
+    104
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h104": {
+   "kind": "sprite",
+   "size": [
+    84,
+    104
+   ],
+   "anchor": [
+    42,
+    104
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-side-r-h26": {
+   "kind": "sprite",
+   "size": [
+    26,
+    26
+   ],
+   "anchor": [
+    13,
+    26
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-side-l-h26": {
+   "kind": "sprite",
+   "size": [
+    26,
+    26
+   ],
+   "anchor": [
+    13,
+    26
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-peck-r-h26": {
+   "kind": "sprite",
+   "size": [
+    26,
+    26
+   ],
+   "anchor": [
+    13,
+    26
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-peck-l-h26": {
+   "kind": "sprite",
+   "size": [
+    26,
+    26
+   ],
+   "anchor": [
+    13,
+    26
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-front-h26": {
+   "kind": "sprite",
+   "size": [
+    26,
+    26
+   ],
+   "anchor": [
+    13,
+    26
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-tilt-r-h26": {
+   "kind": "sprite",
+   "size": [
+    26,
+    26
+   ],
+   "anchor": [
+    13,
+    26
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/henny-tilt-l-h26": {
+   "kind": "sprite",
+   "size": [
+    26,
+    26
+   ],
+   "anchor": [
+    13,
+    26
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    96
+   ],
+   "anchor": [
+    39,
+    96
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    96
+   ],
+   "anchor": [
+    39,
+    96
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    96
+   ],
+   "anchor": [
+    39,
+    96
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    96
+   ],
+   "anchor": [
+    39,
+    96
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    96
+   ],
+   "anchor": [
+    39,
+    96
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    96
+   ],
+   "anchor": [
+    39,
+    96
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-front-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-side-r-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-side-l-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-walk-r-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-walk-l-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/hattie-back-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "bg/pavilion-open": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/bg/rope_paint.py (hand-edited from Arlong's pavilion.jpg)"
+  },
+  "sprite/rooster-front-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    60
+   ],
+   "anchor": [
+    25,
+    60
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    64
+   ],
+   "anchor": [
+    27,
+    64
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    68
+   ],
+   "anchor": [
+    28,
+    68
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    68
+   ],
+   "anchor": [
+    28,
+    68
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    68
+   ],
+   "anchor": [
+    28,
+    68
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    68
+   ],
+   "anchor": [
+    28,
+    68
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    68
+   ],
+   "anchor": [
+    28,
+    68
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    68
+   ],
+   "anchor": [
+    28,
+    68
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    76
+   ],
+   "anchor": [
+    31,
+    76
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    76
+   ],
+   "anchor": [
+    31,
+    76
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    76
+   ],
+   "anchor": [
+    31,
+    76
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    76
+   ],
+   "anchor": [
+    31,
+    76
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    76
+   ],
+   "anchor": [
+    31,
+    76
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    76
+   ],
+   "anchor": [
+    31,
+    76
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    80
+   ],
+   "anchor": [
+    33,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    80
+   ],
+   "anchor": [
+    33,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    80
+   ],
+   "anchor": [
+    33,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    80
+   ],
+   "anchor": [
+    33,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    80
+   ],
+   "anchor": [
+    33,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    80
+   ],
+   "anchor": [
+    33,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h84": {
+   "kind": "sprite",
+   "size": [
+    68,
+    84
+   ],
+   "anchor": [
+    34,
+    84
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h84": {
+   "kind": "sprite",
+   "size": [
+    68,
+    84
+   ],
+   "anchor": [
+    34,
+    84
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h84": {
+   "kind": "sprite",
+   "size": [
+    68,
+    84
+   ],
+   "anchor": [
+    34,
+    84
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h84": {
+   "kind": "sprite",
+   "size": [
+    68,
+    84
+   ],
+   "anchor": [
+    34,
+    84
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h84": {
+   "kind": "sprite",
+   "size": [
+    68,
+    84
+   ],
+   "anchor": [
+    34,
+    84
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h84": {
+   "kind": "sprite",
+   "size": [
+    68,
+    84
+   ],
+   "anchor": [
+    34,
+    84
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h88": {
+   "kind": "sprite",
+   "size": [
+    72,
+    88
+   ],
+   "anchor": [
+    36,
+    88
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h88": {
+   "kind": "sprite",
+   "size": [
+    72,
+    88
+   ],
+   "anchor": [
+    36,
+    88
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h88": {
+   "kind": "sprite",
+   "size": [
+    72,
+    88
+   ],
+   "anchor": [
+    36,
+    88
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h88": {
+   "kind": "sprite",
+   "size": [
+    72,
+    88
+   ],
+   "anchor": [
+    36,
+    88
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h88": {
+   "kind": "sprite",
+   "size": [
+    72,
+    88
+   ],
+   "anchor": [
+    36,
+    88
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h88": {
+   "kind": "sprite",
+   "size": [
+    72,
+    88
+   ],
+   "anchor": [
+    36,
+    88
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h92": {
+   "kind": "sprite",
+   "size": [
+    76,
+    92
+   ],
+   "anchor": [
+    38,
+    92
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h92": {
+   "kind": "sprite",
+   "size": [
+    76,
+    92
+   ],
+   "anchor": [
+    38,
+    92
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h92": {
+   "kind": "sprite",
+   "size": [
+    76,
+    92
+   ],
+   "anchor": [
+    38,
+    92
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h92": {
+   "kind": "sprite",
+   "size": [
+    76,
+    92
+   ],
+   "anchor": [
+    38,
+    92
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h92": {
+   "kind": "sprite",
+   "size": [
+    76,
+    92
+   ],
+   "anchor": [
+    38,
+    92
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h92": {
+   "kind": "sprite",
+   "size": [
+    76,
+    92
+   ],
+   "anchor": [
+    38,
+    92
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h100": {
+   "kind": "sprite",
+   "size": [
+    82,
+    100
+   ],
+   "anchor": [
+    41,
+    100
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h100": {
+   "kind": "sprite",
+   "size": [
+    82,
+    100
+   ],
+   "anchor": [
+    41,
+    100
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h100": {
+   "kind": "sprite",
+   "size": [
+    82,
+    100
+   ],
+   "anchor": [
+    41,
+    100
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h100": {
+   "kind": "sprite",
+   "size": [
+    82,
+    100
+   ],
+   "anchor": [
+    41,
+    100
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h100": {
+   "kind": "sprite",
+   "size": [
+    82,
+    100
+   ],
+   "anchor": [
+    41,
+    100
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h100": {
+   "kind": "sprite",
+   "size": [
+    82,
+    100
+   ],
+   "anchor": [
+    41,
+    100
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h108": {
+   "kind": "sprite",
+   "size": [
+    88,
+    108
+   ],
+   "anchor": [
+    44,
+    108
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h108": {
+   "kind": "sprite",
+   "size": [
+    88,
+    108
+   ],
+   "anchor": [
+    44,
+    108
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h108": {
+   "kind": "sprite",
+   "size": [
+    88,
+    108
+   ],
+   "anchor": [
+    44,
+    108
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h108": {
+   "kind": "sprite",
+   "size": [
+    88,
+    108
+   ],
+   "anchor": [
+    44,
+    108
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h108": {
+   "kind": "sprite",
+   "size": [
+    88,
+    108
+   ],
+   "anchor": [
+    44,
+    108
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h108": {
+   "kind": "sprite",
+   "size": [
+    88,
+    108
+   ],
+   "anchor": [
+    44,
+    108
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    112
+   ],
+   "anchor": [
+    45,
+    112
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    112
+   ],
+   "anchor": [
+    45,
+    112
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    112
+   ],
+   "anchor": [
+    45,
+    112
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    112
+   ],
+   "anchor": [
+    45,
+    112
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    112
+   ],
+   "anchor": [
+    45,
+    112
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    112
+   ],
+   "anchor": [
+    45,
+    112
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h116": {
+   "kind": "sprite",
+   "size": [
+    94,
+    116
+   ],
+   "anchor": [
+    47,
+    116
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h116": {
+   "kind": "sprite",
+   "size": [
+    94,
+    116
+   ],
+   "anchor": [
+    47,
+    116
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h116": {
+   "kind": "sprite",
+   "size": [
+    94,
+    116
+   ],
+   "anchor": [
+    47,
+    116
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h116": {
+   "kind": "sprite",
+   "size": [
+    94,
+    116
+   ],
+   "anchor": [
+    47,
+    116
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h116": {
+   "kind": "sprite",
+   "size": [
+    94,
+    116
+   ],
+   "anchor": [
+    47,
+    116
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h116": {
+   "kind": "sprite",
+   "size": [
+    94,
+    116
+   ],
+   "anchor": [
+    47,
+    116
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    120
+   ],
+   "anchor": [
+    48,
+    120
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    120
+   ],
+   "anchor": [
+    48,
+    120
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    120
+   ],
+   "anchor": [
+    48,
+    120
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    120
+   ],
+   "anchor": [
+    48,
+    120
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    120
+   ],
+   "anchor": [
+    48,
+    120
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    120
+   ],
+   "anchor": [
+    48,
+    120
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "fg/pavilion--post-left": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 170,
+   "source": "tools/bg/occluders.py (cut from bg/pavilion)"
+  },
+  "fg/pavilion--post-front": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 169,
+   "source": "tools/bg/occluders.py (cut from bg/pavilion)"
+  },
+  "fg/pavilion--post-mid": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 146,
+   "source": "tools/bg/occluders.py (cut from bg/pavilion)"
+  },
+  "fg/pavilion--cart": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 146,
+   "source": "tools/bg/occluders.py (cut from bg/pavilion)"
+  },
+  "fg/midway--booth": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 147,
+   "source": "tools/bg/occluders.py booth polygon with the counter window x25-72 y59-99 cut open (tools/bg/handcut/README.md) (cut from bg/midway)"
+  },
+  "fg/hq--bucket": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 173,
+   "source": "tools/bg/occluders.py (cut from bg/hq)"
+  },
+  "fg/pavilion-open--post-left": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 170,
+   "source": "tools/bg/occluders.py (cut from bg/pavilion-open)"
+  },
+  "fg/pavilion-open--post-front": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 169,
+   "source": "tools/bg/occluders.py (cut from bg/pavilion-open)"
+  },
+  "fg/pavilion-open--post-mid": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 146,
+   "source": "tools/bg/occluders.py (cut from bg/pavilion-open)"
+  },
+  "fg/pavilion-open--cart": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 146,
+   "source": "tools/bg/occluders.py (cut from bg/pavilion-open)"
+  },
+  "sprite/rooster-front-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    28
+   ],
+   "anchor": [
+    13,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    28
+   ],
+   "anchor": [
+    13,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    28
+   ],
+   "anchor": [
+    13,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    28
+   ],
+   "anchor": [
+    13,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    28
+   ],
+   "anchor": [
+    13,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    28
+   ],
+   "anchor": [
+    13,
+    28
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    32
+   ],
+   "anchor": [
+    14,
+    32
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    36
+   ],
+   "anchor": [
+    16,
+    36
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    36
+   ],
+   "anchor": [
+    16,
+    36
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    36
+   ],
+   "anchor": [
+    16,
+    36
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    36
+   ],
+   "anchor": [
+    16,
+    36
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    36
+   ],
+   "anchor": [
+    16,
+    36
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    36
+   ],
+   "anchor": [
+    16,
+    36
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h40": {
+   "kind": "sprite",
+   "size": [
+    36,
+    40
+   ],
+   "anchor": [
+    18,
+    40
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h40": {
+   "kind": "sprite",
+   "size": [
+    36,
+    40
+   ],
+   "anchor": [
+    18,
+    40
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h40": {
+   "kind": "sprite",
+   "size": [
+    36,
+    40
+   ],
+   "anchor": [
+    18,
+    40
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h40": {
+   "kind": "sprite",
+   "size": [
+    36,
+    40
+   ],
+   "anchor": [
+    18,
+    40
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h40": {
+   "kind": "sprite",
+   "size": [
+    36,
+    40
+   ],
+   "anchor": [
+    18,
+    40
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h40": {
+   "kind": "sprite",
+   "size": [
+    36,
+    40
+   ],
+   "anchor": [
+    18,
+    40
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    44
+   ],
+   "anchor": [
+    19,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    44
+   ],
+   "anchor": [
+    19,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    44
+   ],
+   "anchor": [
+    19,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    44
+   ],
+   "anchor": [
+    19,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    44
+   ],
+   "anchor": [
+    19,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    44
+   ],
+   "anchor": [
+    19,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    48
+   ],
+   "anchor": [
+    21,
+    48
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    48
+   ],
+   "anchor": [
+    21,
+    48
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    48
+   ],
+   "anchor": [
+    21,
+    48
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    48
+   ],
+   "anchor": [
+    21,
+    48
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    48
+   ],
+   "anchor": [
+    21,
+    48
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    48
+   ],
+   "anchor": [
+    21,
+    48
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    52
+   ],
+   "anchor": [
+    22,
+    52
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-front-h56": {
+   "kind": "sprite",
+   "size": [
+    48,
+    56
+   ],
+   "anchor": [
+    24,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-r-h56": {
+   "kind": "sprite",
+   "size": [
+    48,
+    56
+   ],
+   "anchor": [
+    24,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-side-l-h56": {
+   "kind": "sprite",
+   "size": [
+    48,
+    56
+   ],
+   "anchor": [
+    24,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-r-h56": {
+   "kind": "sprite",
+   "size": [
+    48,
+    56
+   ],
+   "anchor": [
+    24,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-walk-l-h56": {
+   "kind": "sprite",
+   "size": [
+    48,
+    56
+   ],
+   "anchor": [
+    24,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-back-h56": {
+   "kind": "sprite",
+   "size": [
+    48,
+    56
+   ],
+   "anchor": [
+    24,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "fg/fence--crate": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 117,
+   "source": "tools/bg/occluders.py (cut from bg/fence)"
+  },
+  "fg/fence--post-end": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 102,
+   "source": "tools/bg/occluders.py (cut from bg/fence)"
+  },
+  "fx/neon-hq": {
+   "kind": "fx",
+   "size": [
+    27,
+    18
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "frames": 5,
+   "scale": 1,
+   "source": "tools/neon/paint_neon.py (glow frames, one per lit tube; unlit bent-glass sign painted into the plate)",
+   "grid": [
+    1,
+    5
+   ]
+  },
+  "fx/neon-fence": {
+   "kind": "fx",
+   "size": [
+    32,
+    18
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "frames": 5,
+   "scale": 1,
+   "source": "tools/neon/paint_neon.py (glow frames, one per lit tube; unlit bent-glass sign painted into the plate)",
+   "grid": [
+    1,
+    5
+   ]
+  },
+  "fx/neon-midway": {
+   "kind": "fx",
+   "size": [
+    54,
+    20
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "frames": 10,
+   "scale": 1,
+   "source": "tools/neon/paint_neon.py (glow frames, one per lit tube; unlit bent-glass sign painted into the plate)",
+   "grid": [
+    1,
+    10
+   ]
+  },
+  "fx/neon-store": {
+   "kind": "fx",
+   "size": [
+    61,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "frames": 15,
+   "scale": 1,
+   "source": "tools/neon/paint_neon.py (glow frames, one per lit tube; unlit bent-glass sign painted into the plate)",
+   "grid": [
+    1,
+    15
+   ]
+  },
+  "fx/neon-wkuk": {
+   "kind": "fx",
+   "size": [
+    43,
+    17
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "frames": 15,
+   "scale": 1,
+   "source": "tools/neon/paint_neon.py (glow frames, one per lit tube; unlit bent-glass sign painted into the plate)",
+   "grid": [
+    1,
+    15
+   ]
+  },
+  "fx/neon-gate": {
+   "kind": "fx",
+   "size": [
+    56,
+    16
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "frames": 15,
+   "scale": 1,
+   "source": "tools/neon/paint_neon.py (glow frames, one per lit tube; unlit bent-glass sign painted into the plate)",
+   "grid": [
+    1,
+    15
+   ]
+  },
+  "fg/store--counter": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 128,
+   "source": "tools/bg/occluders.py (cut from bg/store)"
+  },
+  "sprite/ned-front-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/ned-talk-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "fg/barn--ribbon": {
+   "kind": "overlay",
+   "size": [
+    11,
+    18
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "hand-cut story prop (art/pixel/fg), placed by data/script.js overlays"
+  },
+  "sprite/mortgage-chew-r-h44": {
+   "kind": "sprite",
+   "size": [
+    50,
+    44
+   ],
+   "anchor": [
+    25,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/mortgage-idle-r-h44": {
+   "kind": "sprite",
+   "size": [
+    50,
+    44
+   ],
+   "anchor": [
+    25,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/peck-front-h80": {
+   "kind": "sprite",
+   "size": [
+    60,
+    80
+   ],
+   "anchor": [
+    30,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/peck-talk-h80": {
+   "kind": "sprite",
+   "size": [
+    60,
+    80
+   ],
+   "anchor": [
+    30,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "fg/wkuk--booth": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 128,
+   "source": "tools/bg/occluders.py (cut from bg/wkuk)"
+  },
+  "sprite/deejay-front-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/deejay-talk-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "fg/gate--front": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 135,
+   "source": "alpha cut, tools/bg/handcut/gate_front.py (cut from bg/gate)"
+  },
+  "sprite/guard-front-h72": {
+   "kind": "sprite",
+   "size": [
+    68,
+    72
+   ],
+   "anchor": [
+    34,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/guard-talk-h72": {
+   "kind": "sprite",
+   "size": [
+    68,
+    72
+   ],
+   "anchor": [
+    34,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "fg/henhouse--grub": {
+   "kind": "overlay",
+   "size": [
+    8,
+    4
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "hand-cut story prop (art/pixel/fg), placed by data/script.js overlays"
+  },
+  "fg/henhouse--spoon": {
+   "kind": "overlay",
+   "size": [
+    16,
+    5
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "hand-cut story prop (art/pixel/fg), placed by data/script.js overlays"
+  },
+  "fg/henhouse--stub": {
+   "kind": "overlay",
+   "size": [
+    11,
+    7
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "hand-cut story prop (art/pixel/fg), placed by data/script.js overlays"
+  },
+  "sprite/sittinghen-cluck-l-h22": {
+   "kind": "sprite",
+   "size": [
+    22,
+    22
+   ],
+   "anchor": [
+    11,
+    22
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/sittinghen-idle-l-h22": {
+   "kind": "sprite",
+   "size": [
+    22,
+    22
+   ],
+   "anchor": [
+    11,
+    22
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/yardrooster-crow-l-h12": {
+   "kind": "sprite",
+   "size": [
+    16,
+    12
+   ],
+   "anchor": [
+    8,
+    12
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/yardrooster-crow-r-h10": {
+   "kind": "sprite",
+   "size": [
+    14,
+    10
+   ],
+   "anchor": [
+    7,
+    10
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/yardrooster-peck-l-h12": {
+   "kind": "sprite",
+   "size": [
+    16,
+    12
+   ],
+   "anchor": [
+    8,
+    12
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/yardrooster-peck-r-h10": {
+   "kind": "sprite",
+   "size": [
+    14,
+    10
+   ],
+   "anchor": [
+    7,
+    10
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/yardrooster-side-l-h12": {
+   "kind": "sprite",
+   "size": [
+    16,
+    12
+   ],
+   "anchor": [
+    8,
+    12
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/yardrooster-side-r-h10": {
+   "kind": "sprite",
+   "size": [
+    14,
+    10
+   ],
+   "anchor": [
+    7,
+    10
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/titlehen-side-l-h16": {
+   "kind": "sprite",
+   "size": [
+    18,
+    16
+   ],
+   "anchor": [
+    9,
+    16
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/corny-front-h80": {
+   "kind": "sprite",
+   "size": [
+    58,
+    80
+   ],
+   "anchor": [
+    29,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/corny-ringtoss-r-h80": {
+   "kind": "sprite",
+   "size": [
+    58,
+    80
+   ],
+   "anchor": [
+    29,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/corny-talk-h80": {
+   "kind": "sprite",
+   "size": [
+    58,
+    80
+   ],
+   "anchor": [
+    29,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/dot-front-h72": {
+   "kind": "sprite",
+   "size": [
+    46,
+    72
+   ],
+   "anchor": [
+    23,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/dot-talk-h72": {
+   "kind": "sprite",
+   "size": [
+    46,
+    72
+   ],
+   "anchor": [
+    23,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rocco-front-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rocco-talk-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    72
+   ],
+   "anchor": [
+    30,
+    72
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "fg/pavilion--rope-front": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 170,
+   "source": "alpha trace of the rope swags, tools/bg/handcut/rope_layer.py (cut from bg/pavilion)"
+  },
+  "fg/pavilion--rope-side": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 146,
+   "source": "alpha trace of the rope swags, tools/bg/handcut/rope_layer.py (cut from bg/pavilion)"
+  },
+  "fg/pavilion--rope-back": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 130,
+   "source": "alpha trace of the rope swags and back posts, tools/bg/handcut/rope_layer.py (cut from bg/pavilion)"
+  },
+  "fg/pavilion-open--rope-front": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 172,
+   "source": "alpha trace of the rope swags, tools/bg/handcut/rope_layer.py (cut from bg/pavilion-open)"
+  },
+  "fg/pavilion-open--rope-side": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 146,
+   "source": "alpha trace of the rope swags, tools/bg/handcut/rope_layer.py (cut from bg/pavilion-open)"
+  },
+  "fg/pavilion-open--rope-back": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 130,
+   "source": "alpha trace of the rope swags and back posts, tools/bg/handcut/rope_layer.py (cut from bg/pavilion-open)"
+  },
+  "sprite/corny-front-h88": {
+   "kind": "sprite",
+   "size": [
+    62,
+    88
+   ],
+   "anchor": [
+    31,
+    88
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/corny-side-l-h88": {
+   "kind": "sprite",
+   "size": [
+    62,
+    88
+   ],
+   "anchor": [
+    31,
+    88
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/corny-talk-h88": {
+   "kind": "sprite",
+   "size": [
+    62,
+    88
+   ],
+   "anchor": [
+    31,
+    88
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/littlehen-cluck-r-h18": {
+   "kind": "sprite",
+   "size": [
+    20,
+    18
+   ],
+   "anchor": [
+    10,
+    18
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/littlehen-idle-r-h18": {
+   "kind": "sprite",
+   "size": [
+    20,
+    18
+   ],
+   "anchor": [
+    10,
+    18
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/pip-front-h56": {
+   "kind": "sprite",
+   "size": [
+    44,
+    56
+   ],
+   "anchor": [
+    22,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/pip-reach-l-h56": {
+   "kind": "sprite",
+   "size": [
+    44,
+    56
+   ],
+   "anchor": [
+    22,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/pip-side-r-h56": {
+   "kind": "sprite",
+   "size": [
+    44,
+    56
+   ],
+   "anchor": [
+    22,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/pip-talk-h56": {
+   "kind": "sprite",
+   "size": [
+    44,
+    56
+   ],
+   "anchor": [
+    22,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/pip-walk-r-h56": {
+   "kind": "sprite",
+   "size": [
+    44,
+    56
+   ],
+   "anchor": [
+    22,
+    56
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "fg/hq--hatch": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 177,
+   "source": "tools/bg/occluders.py (cut from bg/hq)"
+  },
+  "bg/hq-dark": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/bg/relight_hq.py (bg/hq relit with the coop lamp bulb gone: lamp light divided out, moonlit ambient, window spill, other lights kept); 4x nearest copy in art/pixel-4x/bg/"
+  },
+  "fg/hq-dark--bucket": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 173,
+   "source": "tools/bg/occluders.py (cut from bg/hq-dark)"
+  },
+  "fg/hq-dark--hatch": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 177,
+   "source": "tools/bg/occluders.py (cut from bg/hq-dark)"
+  },
+  "fg/store--bell": {
+   "kind": "overlay",
+   "size": [
+    11,
+    9
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/bg/store_bell.py (hand-placed pixel prop, until bell_gone)"
+  },
+  "fx/ding": {
+   "kind": "fx",
+   "size": [
+    25,
+    9
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/bg/store_bell.py (hand-set pixel letters)"
+  },
+  "sprite/ned-walk-l-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/ned-walk-r-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/ned-side-l-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/ned-side-r-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/guard-front-h68": {
+   "kind": "sprite",
+   "size": [
+    64,
+    68
+   ],
+   "anchor": [
+    32,
+    68
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/guard-talk-h68": {
+   "kind": "sprite",
+   "size": [
+    64,
+    68
+   ],
+   "anchor": [
+    32,
+    68
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-sit-r": {
+   "kind": "sprite",
+   "size": [
+    54,
+    67
+   ],
+   "anchor": [
+    27,
+    67
+   ],
+   "seat": 46,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l": {
+   "kind": "sprite",
+   "size": [
+    54,
+    67
+   ],
+   "anchor": [
+    27,
+    67
+   ],
+   "seat": 46,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r": {
+   "kind": "sprite",
+   "size": [
+    66,
+    64
+   ],
+   "anchor": [
+    33,
+    64
+   ],
+   "seat": 48,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l": {
+   "kind": "sprite",
+   "size": [
+    66,
+    64
+   ],
+   "anchor": [
+    33,
+    64
+   ],
+   "seat": 48,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front": {
+   "kind": "sprite",
+   "size": [
+    42,
+    67
+   ],
+   "anchor": [
+    21,
+    67
+   ],
+   "seat": 46,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    33
+   ],
+   "anchor": [
+    14,
+    33
+   ],
+   "seat": 23,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    33
+   ],
+   "anchor": [
+    14,
+    33
+   ],
+   "seat": 23,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-half": {
+   "kind": "sprite",
+   "size": [
+    34,
+    32
+   ],
+   "anchor": [
+    17,
+    32
+   ],
+   "seat": 24,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-half": {
+   "kind": "sprite",
+   "size": [
+    34,
+    32
+   ],
+   "anchor": [
+    17,
+    32
+   ],
+   "seat": 24,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-half": {
+   "kind": "sprite",
+   "size": [
+    24,
+    34
+   ],
+   "anchor": [
+    12,
+    34
+   ],
+   "seat": 23,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    29
+   ],
+   "anchor": [
+    13,
+    29
+   ],
+   "seat": 20,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    29
+   ],
+   "anchor": [
+    13,
+    29
+   ],
+   "seat": 20,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h28": {
+   "kind": "sprite",
+   "size": [
+    32,
+    28
+   ],
+   "anchor": [
+    16,
+    28
+   ],
+   "seat": 21,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h28": {
+   "kind": "sprite",
+   "size": [
+    32,
+    28
+   ],
+   "anchor": [
+    16,
+    28
+   ],
+   "seat": 21,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h28": {
+   "kind": "sprite",
+   "size": [
+    20,
+    29
+   ],
+   "anchor": [
+    10,
+    29
+   ],
+   "seat": 20,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    33
+   ],
+   "anchor": [
+    14,
+    33
+   ],
+   "seat": 23,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    33
+   ],
+   "anchor": [
+    14,
+    33
+   ],
+   "seat": 23,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h32": {
+   "kind": "sprite",
+   "size": [
+    34,
+    32
+   ],
+   "anchor": [
+    17,
+    32
+   ],
+   "seat": 24,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h32": {
+   "kind": "sprite",
+   "size": [
+    34,
+    32
+   ],
+   "anchor": [
+    17,
+    32
+   ],
+   "seat": 24,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h32": {
+   "kind": "sprite",
+   "size": [
+    24,
+    34
+   ],
+   "anchor": [
+    12,
+    34
+   ],
+   "seat": 23,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    38
+   ],
+   "anchor": [
+    16,
+    38
+   ],
+   "seat": 26,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    38
+   ],
+   "anchor": [
+    16,
+    38
+   ],
+   "seat": 26,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h36": {
+   "kind": "sprite",
+   "size": [
+    38,
+    36
+   ],
+   "anchor": [
+    19,
+    36
+   ],
+   "seat": 27,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h36": {
+   "kind": "sprite",
+   "size": [
+    38,
+    36
+   ],
+   "anchor": [
+    19,
+    36
+   ],
+   "seat": 27,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h36": {
+   "kind": "sprite",
+   "size": [
+    26,
+    38
+   ],
+   "anchor": [
+    13,
+    38
+   ],
+   "seat": 26,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h40": {
+   "kind": "sprite",
+   "size": [
+    36,
+    42
+   ],
+   "anchor": [
+    18,
+    42
+   ],
+   "seat": 29,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h40": {
+   "kind": "sprite",
+   "size": [
+    36,
+    42
+   ],
+   "anchor": [
+    18,
+    42
+   ],
+   "seat": 29,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h40": {
+   "kind": "sprite",
+   "size": [
+    42,
+    40
+   ],
+   "anchor": [
+    21,
+    40
+   ],
+   "seat": 30,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h40": {
+   "kind": "sprite",
+   "size": [
+    42,
+    40
+   ],
+   "anchor": [
+    21,
+    40
+   ],
+   "seat": 30,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h40": {
+   "kind": "sprite",
+   "size": [
+    28,
+    42
+   ],
+   "anchor": [
+    14,
+    42
+   ],
+   "seat": 29,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    46
+   ],
+   "anchor": [
+    19,
+    46
+   ],
+   "seat": 31,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    46
+   ],
+   "anchor": [
+    19,
+    46
+   ],
+   "seat": 31,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h44": {
+   "kind": "sprite",
+   "size": [
+    46,
+    44
+   ],
+   "anchor": [
+    23,
+    44
+   ],
+   "seat": 33,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h44": {
+   "kind": "sprite",
+   "size": [
+    46,
+    44
+   ],
+   "anchor": [
+    23,
+    44
+   ],
+   "seat": 33,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h44": {
+   "kind": "sprite",
+   "size": [
+    30,
+    46
+   ],
+   "anchor": [
+    15,
+    46
+   ],
+   "seat": 31,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    50
+   ],
+   "anchor": [
+    21,
+    50
+   ],
+   "seat": 34,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    50
+   ],
+   "anchor": [
+    21,
+    50
+   ],
+   "seat": 34,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h48": {
+   "kind": "sprite",
+   "size": [
+    50,
+    48
+   ],
+   "anchor": [
+    25,
+    48
+   ],
+   "seat": 36,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h48": {
+   "kind": "sprite",
+   "size": [
+    50,
+    48
+   ],
+   "anchor": [
+    25,
+    48
+   ],
+   "seat": 36,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h48": {
+   "kind": "sprite",
+   "size": [
+    32,
+    50
+   ],
+   "anchor": [
+    16,
+    50
+   ],
+   "seat": 34,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    54
+   ],
+   "anchor": [
+    22,
+    54
+   ],
+   "seat": 37,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    54
+   ],
+   "anchor": [
+    22,
+    54
+   ],
+   "seat": 37,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h52": {
+   "kind": "sprite",
+   "size": [
+    54,
+    52
+   ],
+   "anchor": [
+    27,
+    52
+   ],
+   "seat": 39,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h52": {
+   "kind": "sprite",
+   "size": [
+    54,
+    52
+   ],
+   "anchor": [
+    27,
+    52
+   ],
+   "seat": 39,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h52": {
+   "kind": "sprite",
+   "size": [
+    36,
+    55
+   ],
+   "anchor": [
+    18,
+    55
+   ],
+   "seat": 38,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h56": {
+   "kind": "sprite",
+   "size": [
+    48,
+    58
+   ],
+   "anchor": [
+    24,
+    58
+   ],
+   "seat": 40,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h56": {
+   "kind": "sprite",
+   "size": [
+    48,
+    58
+   ],
+   "anchor": [
+    24,
+    58
+   ],
+   "seat": 40,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h56": {
+   "kind": "sprite",
+   "size": [
+    58,
+    56
+   ],
+   "anchor": [
+    29,
+    56
+   ],
+   "seat": 42,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h56": {
+   "kind": "sprite",
+   "size": [
+    58,
+    56
+   ],
+   "anchor": [
+    29,
+    56
+   ],
+   "seat": 42,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h56": {
+   "kind": "sprite",
+   "size": [
+    38,
+    59
+   ],
+   "anchor": [
+    19,
+    59
+   ],
+   "seat": 40,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    63
+   ],
+   "anchor": [
+    25,
+    63
+   ],
+   "seat": 43,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    63
+   ],
+   "anchor": [
+    25,
+    63
+   ],
+   "seat": 43,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h60": {
+   "kind": "sprite",
+   "size": [
+    62,
+    60
+   ],
+   "anchor": [
+    31,
+    60
+   ],
+   "seat": 45,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h60": {
+   "kind": "sprite",
+   "size": [
+    62,
+    60
+   ],
+   "anchor": [
+    31,
+    60
+   ],
+   "seat": 45,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h60": {
+   "kind": "sprite",
+   "size": [
+    40,
+    63
+   ],
+   "anchor": [
+    20,
+    63
+   ],
+   "seat": 43,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    67
+   ],
+   "anchor": [
+    27,
+    67
+   ],
+   "seat": 46,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    67
+   ],
+   "anchor": [
+    27,
+    67
+   ],
+   "seat": 46,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h64": {
+   "kind": "sprite",
+   "size": [
+    66,
+    64
+   ],
+   "anchor": [
+    33,
+    64
+   ],
+   "seat": 48,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h64": {
+   "kind": "sprite",
+   "size": [
+    66,
+    64
+   ],
+   "anchor": [
+    33,
+    64
+   ],
+   "seat": 48,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h64": {
+   "kind": "sprite",
+   "size": [
+    42,
+    67
+   ],
+   "anchor": [
+    21,
+    67
+   ],
+   "seat": 46,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    71
+   ],
+   "anchor": [
+    28,
+    71
+   ],
+   "seat": 48,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    71
+   ],
+   "anchor": [
+    28,
+    71
+   ],
+   "seat": 48,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h68": {
+   "kind": "sprite",
+   "size": [
+    70,
+    68
+   ],
+   "anchor": [
+    35,
+    68
+   ],
+   "seat": 51,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h68": {
+   "kind": "sprite",
+   "size": [
+    70,
+    68
+   ],
+   "anchor": [
+    35,
+    68
+   ],
+   "seat": 51,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h68": {
+   "kind": "sprite",
+   "size": [
+    44,
+    71
+   ],
+   "anchor": [
+    22,
+    71
+   ],
+   "seat": 48,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    75
+   ],
+   "anchor": [
+    30,
+    75
+   ],
+   "seat": 51,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    75
+   ],
+   "anchor": [
+    30,
+    75
+   ],
+   "seat": 51,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h72": {
+   "kind": "sprite",
+   "size": [
+    74,
+    72
+   ],
+   "anchor": [
+    37,
+    72
+   ],
+   "seat": 54,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h72": {
+   "kind": "sprite",
+   "size": [
+    74,
+    72
+   ],
+   "anchor": [
+    37,
+    72
+   ],
+   "seat": 54,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h72": {
+   "kind": "sprite",
+   "size": [
+    48,
+    76
+   ],
+   "anchor": [
+    24,
+    76
+   ],
+   "seat": 52,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    79
+   ],
+   "anchor": [
+    31,
+    79
+   ],
+   "seat": 54,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    79
+   ],
+   "anchor": [
+    31,
+    79
+   ],
+   "seat": 54,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h76": {
+   "kind": "sprite",
+   "size": [
+    78,
+    76
+   ],
+   "anchor": [
+    39,
+    76
+   ],
+   "seat": 57,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h76": {
+   "kind": "sprite",
+   "size": [
+    78,
+    76
+   ],
+   "anchor": [
+    39,
+    76
+   ],
+   "seat": 57,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h76": {
+   "kind": "sprite",
+   "size": [
+    50,
+    80
+   ],
+   "anchor": [
+    25,
+    80
+   ],
+   "seat": 54,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    84
+   ],
+   "anchor": [
+    33,
+    84
+   ],
+   "seat": 57,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    84
+   ],
+   "anchor": [
+    33,
+    84
+   ],
+   "seat": 57,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h80": {
+   "kind": "sprite",
+   "size": [
+    82,
+    80
+   ],
+   "anchor": [
+    41,
+    80
+   ],
+   "seat": 60,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h80": {
+   "kind": "sprite",
+   "size": [
+    82,
+    80
+   ],
+   "anchor": [
+    41,
+    80
+   ],
+   "seat": 60,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h80": {
+   "kind": "sprite",
+   "size": [
+    52,
+    84
+   ],
+   "anchor": [
+    26,
+    84
+   ],
+   "seat": 57,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h84": {
+   "kind": "sprite",
+   "size": [
+    70,
+    88
+   ],
+   "anchor": [
+    35,
+    88
+   ],
+   "seat": 60,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h84": {
+   "kind": "sprite",
+   "size": [
+    70,
+    88
+   ],
+   "anchor": [
+    35,
+    88
+   ],
+   "seat": 60,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h84": {
+   "kind": "sprite",
+   "size": [
+    86,
+    84
+   ],
+   "anchor": [
+    43,
+    84
+   ],
+   "seat": 63,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h84": {
+   "kind": "sprite",
+   "size": [
+    86,
+    84
+   ],
+   "anchor": [
+    43,
+    84
+   ],
+   "seat": 63,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h84": {
+   "kind": "sprite",
+   "size": [
+    54,
+    88
+   ],
+   "anchor": [
+    27,
+    88
+   ],
+   "seat": 60,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h88": {
+   "kind": "sprite",
+   "size": [
+    72,
+    92
+   ],
+   "anchor": [
+    36,
+    92
+   ],
+   "seat": 63,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h88": {
+   "kind": "sprite",
+   "size": [
+    72,
+    92
+   ],
+   "anchor": [
+    36,
+    92
+   ],
+   "seat": 63,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h88": {
+   "kind": "sprite",
+   "size": [
+    88,
+    88
+   ],
+   "anchor": [
+    44,
+    88
+   ],
+   "seat": 66,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h88": {
+   "kind": "sprite",
+   "size": [
+    88,
+    88
+   ],
+   "anchor": [
+    44,
+    88
+   ],
+   "seat": 66,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h88": {
+   "kind": "sprite",
+   "size": [
+    56,
+    92
+   ],
+   "anchor": [
+    28,
+    92
+   ],
+   "seat": 63,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h92": {
+   "kind": "sprite",
+   "size": [
+    76,
+    96
+   ],
+   "anchor": [
+    38,
+    96
+   ],
+   "seat": 65,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h92": {
+   "kind": "sprite",
+   "size": [
+    76,
+    96
+   ],
+   "anchor": [
+    38,
+    96
+   ],
+   "seat": 65,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h92": {
+   "kind": "sprite",
+   "size": [
+    92,
+    92
+   ],
+   "anchor": [
+    46,
+    92
+   ],
+   "seat": 69,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h92": {
+   "kind": "sprite",
+   "size": [
+    92,
+    92
+   ],
+   "anchor": [
+    46,
+    92
+   ],
+   "seat": 69,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h92": {
+   "kind": "sprite",
+   "size": [
+    60,
+    97
+   ],
+   "anchor": [
+    30,
+    97
+   ],
+   "seat": 66,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    100
+   ],
+   "anchor": [
+    39,
+    100
+   ],
+   "seat": 68,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    100
+   ],
+   "anchor": [
+    39,
+    100
+   ],
+   "seat": 68,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h96": {
+   "kind": "sprite",
+   "size": [
+    96,
+    96
+   ],
+   "anchor": [
+    48,
+    96
+   ],
+   "seat": 72,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h96": {
+   "kind": "sprite",
+   "size": [
+    96,
+    96
+   ],
+   "anchor": [
+    48,
+    96
+   ],
+   "seat": 72,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h96": {
+   "kind": "sprite",
+   "size": [
+    62,
+    101
+   ],
+   "anchor": [
+    31,
+    101
+   ],
+   "seat": 69,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h100": {
+   "kind": "sprite",
+   "size": [
+    82,
+    104
+   ],
+   "anchor": [
+    41,
+    104
+   ],
+   "seat": 71,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h100": {
+   "kind": "sprite",
+   "size": [
+    82,
+    104
+   ],
+   "anchor": [
+    41,
+    104
+   ],
+   "seat": 71,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h100": {
+   "kind": "sprite",
+   "size": [
+    100,
+    100
+   ],
+   "anchor": [
+    50,
+    100
+   ],
+   "seat": 75,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h100": {
+   "kind": "sprite",
+   "size": [
+    100,
+    100
+   ],
+   "anchor": [
+    50,
+    100
+   ],
+   "seat": 75,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h100": {
+   "kind": "sprite",
+   "size": [
+    64,
+    105
+   ],
+   "anchor": [
+    32,
+    105
+   ],
+   "seat": 71,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h104": {
+   "kind": "sprite",
+   "size": [
+    86,
+    109
+   ],
+   "anchor": [
+    43,
+    109
+   ],
+   "seat": 74,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h104": {
+   "kind": "sprite",
+   "size": [
+    86,
+    109
+   ],
+   "anchor": [
+    43,
+    109
+   ],
+   "seat": 74,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h104": {
+   "kind": "sprite",
+   "size": [
+    104,
+    104
+   ],
+   "anchor": [
+    52,
+    104
+   ],
+   "seat": 78,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h104": {
+   "kind": "sprite",
+   "size": [
+    104,
+    104
+   ],
+   "anchor": [
+    52,
+    104
+   ],
+   "seat": 78,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h104": {
+   "kind": "sprite",
+   "size": [
+    66,
+    109
+   ],
+   "anchor": [
+    33,
+    109
+   ],
+   "seat": 74,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h108": {
+   "kind": "sprite",
+   "size": [
+    88,
+    113
+   ],
+   "anchor": [
+    44,
+    113
+   ],
+   "seat": 77,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h108": {
+   "kind": "sprite",
+   "size": [
+    88,
+    113
+   ],
+   "anchor": [
+    44,
+    113
+   ],
+   "seat": 77,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h108": {
+   "kind": "sprite",
+   "size": [
+    108,
+    108
+   ],
+   "anchor": [
+    54,
+    108
+   ],
+   "seat": 81,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h108": {
+   "kind": "sprite",
+   "size": [
+    108,
+    108
+   ],
+   "anchor": [
+    54,
+    108
+   ],
+   "seat": 81,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h108": {
+   "kind": "sprite",
+   "size": [
+    68,
+    114
+   ],
+   "anchor": [
+    34,
+    114
+   ],
+   "seat": 77,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    117
+   ],
+   "anchor": [
+    45,
+    117
+   ],
+   "seat": 79,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    117
+   ],
+   "anchor": [
+    45,
+    117
+   ],
+   "seat": 79,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h112": {
+   "kind": "sprite",
+   "size": [
+    112,
+    112
+   ],
+   "anchor": [
+    56,
+    112
+   ],
+   "seat": 84,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h112": {
+   "kind": "sprite",
+   "size": [
+    112,
+    112
+   ],
+   "anchor": [
+    56,
+    112
+   ],
+   "seat": 84,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h112": {
+   "kind": "sprite",
+   "size": [
+    72,
+    118
+   ],
+   "anchor": [
+    36,
+    118
+   ],
+   "seat": 80,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h116": {
+   "kind": "sprite",
+   "size": [
+    94,
+    121
+   ],
+   "anchor": [
+    47,
+    121
+   ],
+   "seat": 82,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h116": {
+   "kind": "sprite",
+   "size": [
+    94,
+    121
+   ],
+   "anchor": [
+    47,
+    121
+   ],
+   "seat": 82,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h116": {
+   "kind": "sprite",
+   "size": [
+    116,
+    116
+   ],
+   "anchor": [
+    58,
+    116
+   ],
+   "seat": 87,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h116": {
+   "kind": "sprite",
+   "size": [
+    116,
+    116
+   ],
+   "anchor": [
+    58,
+    116
+   ],
+   "seat": 87,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h116": {
+   "kind": "sprite",
+   "size": [
+    74,
+    122
+   ],
+   "anchor": [
+    37,
+    122
+   ],
+   "seat": 83,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    125
+   ],
+   "anchor": [
+    48,
+    125
+   ],
+   "seat": 85,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    125
+   ],
+   "anchor": [
+    48,
+    125
+   ],
+   "seat": 85,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h120": {
+   "kind": "sprite",
+   "size": [
+    120,
+    120
+   ],
+   "anchor": [
+    60,
+    120
+   ],
+   "seat": 90,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h120": {
+   "kind": "sprite",
+   "size": [
+    120,
+    120
+   ],
+   "anchor": [
+    60,
+    120
+   ],
+   "seat": 90,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h120": {
+   "kind": "sprite",
+   "size": [
+    76,
+    126
+   ],
+   "anchor": [
+    38,
+    126
+   ],
+   "seat": 86,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "item/item-grub": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-grub.svg",
+   "source": "tools/items/cut_items.py (item-grub-v1.jpg)"
+  },
+  "item/item-geiger": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-geiger.svg",
+   "source": "tools/items/cut_items.py (items-painted-v1-a.jpg#0)"
+  },
+  "item/item-bulb": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-bulb.svg",
+   "source": "tools/items/cut_items.py (items-painted-v1-a.jpg#1)"
+  },
+  "item/item-photo": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-photo.svg",
+   "source": "tools/items/cut_items.py (items-painted-v1-a.jpg#2)"
+  },
+  "item/item-spoon": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-spoon.svg",
+   "source": "tools/items/cut_items.py (items-painted-v1-a.jpg#3)"
+  },
+  "item/item-stub": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-stub.svg",
+   "source": "tools/items/cut_items.py (items-painted-v1-a.jpg#4)"
+  },
+  "item/item-half": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-stub.svg",
+   "source": "tools/items/cut_items.py (items-painted-v1-a.jpg#5)"
+  },
+  "item/item-ticket": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-pass.svg",
+   "source": "tools/items/cut_items.py (items-painted-v1-b.jpg#0)"
+  },
+  "item/item-ribbon": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-ribbon.svg",
+   "source": "tools/items/cut_items.py (items-painted-v1-b.jpg#1)"
+  },
+  "item/item-sauce": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-sauce.svg",
+   "source": "tools/items/cut_items.py (items-painted-v1-b.jpg#2)"
+  },
+  "item/item-mirror": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-mirror.svg",
+   "source": "tools/items/cut_items.py (items-painted-v1-b.jpg#3)"
+  },
+  "item/item-bill": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-bill.svg",
+   "source": "tools/items/cut_items.py (items-painted-v1-b.jpg#4)"
+  },
+  "item/item-speaker": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-speaker.svg",
+   "source": "tools/items/cut_items.py (items-painted-v1-b.jpg#5)"
+  },
+  "item/item-map": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-map.svg",
+   "source": "tools/items/cut_items.py (items-painted-v1-c.jpg#0)"
+  },
+  "item/item-pass": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-pass.svg",
+   "source": "tools/items/cut_items.py (items-painted-v1-c.jpg#1)"
+  },
+  "item/item-vip": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-pass.svg",
+   "source": "tools/items/cut_items.py (items-painted-v1-c.jpg#2)"
+  },
+  "item/item-basket": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-basket.svg",
+   "source": "tools/items/cut_items.py (items-painted-v1-c.jpg#3)"
+  },
+  "item/item-tickets": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-stub.svg",
+   "source": "tools/items/cut_items.py (items-painted-v1-c.jpg#4)"
+  },
+  "fx/bonk": {
+   "kind": "fx",
+   "size": [
+    27,
+    9
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/bg/fx_bonk.py (hand-set pixel letters)"
+  },
+  "sprite/rooster-matador-stance-r": {
+   "kind": "sprite",
+   "size": [
+    62,
+    68
+   ],
+   "anchor": [
+    31,
+    68
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l": {
+   "kind": "sprite",
+   "size": [
+    62,
+    68
+   ],
+   "anchor": [
+    31,
+    68
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r": {
+   "kind": "sprite",
+   "size": [
+    54,
+    68
+   ],
+   "anchor": [
+    27,
+    68
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l": {
+   "kind": "sprite",
+   "size": [
+    54,
+    68
+   ],
+   "anchor": [
+    27,
+    68
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r": {
+   "kind": "sprite",
+   "size": [
+    56,
+    67
+   ],
+   "anchor": [
+    28,
+    67
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l": {
+   "kind": "sprite",
+   "size": [
+    56,
+    67
+   ],
+   "anchor": [
+    28,
+    67
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r": {
+   "kind": "sprite",
+   "size": [
+    54,
+    68
+   ],
+   "anchor": [
+    27,
+    68
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l": {
+   "kind": "sprite",
+   "size": [
+    54,
+    68
+   ],
+   "anchor": [
+    27,
+    68
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-half": {
+   "kind": "sprite",
+   "size": [
+    32,
+    34
+   ],
+   "anchor": [
+    16,
+    34
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-half": {
+   "kind": "sprite",
+   "size": [
+    32,
+    34
+   ],
+   "anchor": [
+    16,
+    34
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    34
+   ],
+   "anchor": [
+    14,
+    34
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    34
+   ],
+   "anchor": [
+    14,
+    34
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-half": {
+   "kind": "sprite",
+   "size": [
+    30,
+    33
+   ],
+   "anchor": [
+    15,
+    33
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-half": {
+   "kind": "sprite",
+   "size": [
+    30,
+    33
+   ],
+   "anchor": [
+    15,
+    33
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    34
+   ],
+   "anchor": [
+    14,
+    34
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    34
+   ],
+   "anchor": [
+    14,
+    34
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h28": {
+   "kind": "sprite",
+   "size": [
+    30,
+    30
+   ],
+   "anchor": [
+    15,
+    30
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h28": {
+   "kind": "sprite",
+   "size": [
+    30,
+    30
+   ],
+   "anchor": [
+    15,
+    30
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    30
+   ],
+   "anchor": [
+    13,
+    30
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    30
+   ],
+   "anchor": [
+    13,
+    30
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    29
+   ],
+   "anchor": [
+    13,
+    29
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    29
+   ],
+   "anchor": [
+    13,
+    29
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    30
+   ],
+   "anchor": [
+    13,
+    30
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    30
+   ],
+   "anchor": [
+    13,
+    30
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h32": {
+   "kind": "sprite",
+   "size": [
+    32,
+    34
+   ],
+   "anchor": [
+    16,
+    34
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h32": {
+   "kind": "sprite",
+   "size": [
+    32,
+    34
+   ],
+   "anchor": [
+    16,
+    34
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    34
+   ],
+   "anchor": [
+    14,
+    34
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    34
+   ],
+   "anchor": [
+    14,
+    34
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h32": {
+   "kind": "sprite",
+   "size": [
+    30,
+    33
+   ],
+   "anchor": [
+    15,
+    33
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h32": {
+   "kind": "sprite",
+   "size": [
+    30,
+    33
+   ],
+   "anchor": [
+    15,
+    33
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    34
+   ],
+   "anchor": [
+    14,
+    34
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    34
+   ],
+   "anchor": [
+    14,
+    34
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h36": {
+   "kind": "sprite",
+   "size": [
+    36,
+    38
+   ],
+   "anchor": [
+    18,
+    38
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h36": {
+   "kind": "sprite",
+   "size": [
+    36,
+    38
+   ],
+   "anchor": [
+    18,
+    38
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    38
+   ],
+   "anchor": [
+    16,
+    38
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    38
+   ],
+   "anchor": [
+    16,
+    38
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    37
+   ],
+   "anchor": [
+    16,
+    37
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    37
+   ],
+   "anchor": [
+    16,
+    37
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    38
+   ],
+   "anchor": [
+    16,
+    38
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    38
+   ],
+   "anchor": [
+    16,
+    38
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h40": {
+   "kind": "sprite",
+   "size": [
+    40,
+    42
+   ],
+   "anchor": [
+    20,
+    42
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h40": {
+   "kind": "sprite",
+   "size": [
+    40,
+    42
+   ],
+   "anchor": [
+    20,
+    42
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h40": {
+   "kind": "sprite",
+   "size": [
+    34,
+    42
+   ],
+   "anchor": [
+    17,
+    42
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h40": {
+   "kind": "sprite",
+   "size": [
+    34,
+    42
+   ],
+   "anchor": [
+    17,
+    42
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h40": {
+   "kind": "sprite",
+   "size": [
+    36,
+    42
+   ],
+   "anchor": [
+    18,
+    42
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h40": {
+   "kind": "sprite",
+   "size": [
+    36,
+    42
+   ],
+   "anchor": [
+    18,
+    42
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h40": {
+   "kind": "sprite",
+   "size": [
+    34,
+    42
+   ],
+   "anchor": [
+    17,
+    42
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h40": {
+   "kind": "sprite",
+   "size": [
+    34,
+    42
+   ],
+   "anchor": [
+    17,
+    42
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h44": {
+   "kind": "sprite",
+   "size": [
+    42,
+    46
+   ],
+   "anchor": [
+    21,
+    46
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h44": {
+   "kind": "sprite",
+   "size": [
+    42,
+    46
+   ],
+   "anchor": [
+    21,
+    46
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    47
+   ],
+   "anchor": [
+    19,
+    47
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    47
+   ],
+   "anchor": [
+    19,
+    47
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h44": {
+   "kind": "sprite",
+   "size": [
+    40,
+    46
+   ],
+   "anchor": [
+    20,
+    46
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h44": {
+   "kind": "sprite",
+   "size": [
+    40,
+    46
+   ],
+   "anchor": [
+    20,
+    46
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    46
+   ],
+   "anchor": [
+    19,
+    46
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    46
+   ],
+   "anchor": [
+    19,
+    46
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h48": {
+   "kind": "sprite",
+   "size": [
+    46,
+    51
+   ],
+   "anchor": [
+    23,
+    51
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h48": {
+   "kind": "sprite",
+   "size": [
+    46,
+    51
+   ],
+   "anchor": [
+    23,
+    51
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h48": {
+   "kind": "sprite",
+   "size": [
+    40,
+    51
+   ],
+   "anchor": [
+    20,
+    51
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h48": {
+   "kind": "sprite",
+   "size": [
+    40,
+    51
+   ],
+   "anchor": [
+    20,
+    51
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    50
+   ],
+   "anchor": [
+    21,
+    50
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    50
+   ],
+   "anchor": [
+    21,
+    50
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    51
+   ],
+   "anchor": [
+    21,
+    51
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    51
+   ],
+   "anchor": [
+    21,
+    51
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h52": {
+   "kind": "sprite",
+   "size": [
+    50,
+    55
+   ],
+   "anchor": [
+    25,
+    55
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h52": {
+   "kind": "sprite",
+   "size": [
+    50,
+    55
+   ],
+   "anchor": [
+    25,
+    55
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    55
+   ],
+   "anchor": [
+    22,
+    55
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    55
+   ],
+   "anchor": [
+    22,
+    55
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h52": {
+   "kind": "sprite",
+   "size": [
+    46,
+    54
+   ],
+   "anchor": [
+    23,
+    54
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h52": {
+   "kind": "sprite",
+   "size": [
+    46,
+    54
+   ],
+   "anchor": [
+    23,
+    54
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    55
+   ],
+   "anchor": [
+    22,
+    55
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    55
+   ],
+   "anchor": [
+    22,
+    55
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h56": {
+   "kind": "sprite",
+   "size": [
+    54,
+    59
+   ],
+   "anchor": [
+    27,
+    59
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h56": {
+   "kind": "sprite",
+   "size": [
+    54,
+    59
+   ],
+   "anchor": [
+    27,
+    59
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h56": {
+   "kind": "sprite",
+   "size": [
+    46,
+    59
+   ],
+   "anchor": [
+    23,
+    59
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h56": {
+   "kind": "sprite",
+   "size": [
+    46,
+    59
+   ],
+   "anchor": [
+    23,
+    59
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h56": {
+   "kind": "sprite",
+   "size": [
+    48,
+    58
+   ],
+   "anchor": [
+    24,
+    58
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h56": {
+   "kind": "sprite",
+   "size": [
+    48,
+    58
+   ],
+   "anchor": [
+    24,
+    58
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h56": {
+   "kind": "sprite",
+   "size": [
+    46,
+    59
+   ],
+   "anchor": [
+    23,
+    59
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h56": {
+   "kind": "sprite",
+   "size": [
+    46,
+    59
+   ],
+   "anchor": [
+    23,
+    59
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h60": {
+   "kind": "sprite",
+   "size": [
+    56,
+    63
+   ],
+   "anchor": [
+    28,
+    63
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h60": {
+   "kind": "sprite",
+   "size": [
+    56,
+    63
+   ],
+   "anchor": [
+    28,
+    63
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    64
+   ],
+   "anchor": [
+    25,
+    64
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    64
+   ],
+   "anchor": [
+    25,
+    64
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h60": {
+   "kind": "sprite",
+   "size": [
+    52,
+    62
+   ],
+   "anchor": [
+    26,
+    62
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h60": {
+   "kind": "sprite",
+   "size": [
+    52,
+    62
+   ],
+   "anchor": [
+    26,
+    62
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    63
+   ],
+   "anchor": [
+    25,
+    63
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    63
+   ],
+   "anchor": [
+    25,
+    63
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h64": {
+   "kind": "sprite",
+   "size": [
+    62,
+    68
+   ],
+   "anchor": [
+    31,
+    68
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h64": {
+   "kind": "sprite",
+   "size": [
+    62,
+    68
+   ],
+   "anchor": [
+    31,
+    68
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    68
+   ],
+   "anchor": [
+    27,
+    68
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    68
+   ],
+   "anchor": [
+    27,
+    68
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h64": {
+   "kind": "sprite",
+   "size": [
+    56,
+    67
+   ],
+   "anchor": [
+    28,
+    67
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h64": {
+   "kind": "sprite",
+   "size": [
+    56,
+    67
+   ],
+   "anchor": [
+    28,
+    67
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    68
+   ],
+   "anchor": [
+    27,
+    68
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    68
+   ],
+   "anchor": [
+    27,
+    68
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h68": {
+   "kind": "sprite",
+   "size": [
+    64,
+    72
+   ],
+   "anchor": [
+    32,
+    72
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h68": {
+   "kind": "sprite",
+   "size": [
+    64,
+    72
+   ],
+   "anchor": [
+    32,
+    72
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    72
+   ],
+   "anchor": [
+    28,
+    72
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    72
+   ],
+   "anchor": [
+    28,
+    72
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h68": {
+   "kind": "sprite",
+   "size": [
+    58,
+    71
+   ],
+   "anchor": [
+    29,
+    71
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h68": {
+   "kind": "sprite",
+   "size": [
+    58,
+    71
+   ],
+   "anchor": [
+    29,
+    71
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    72
+   ],
+   "anchor": [
+    28,
+    72
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    72
+   ],
+   "anchor": [
+    28,
+    72
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h72": {
+   "kind": "sprite",
+   "size": [
+    68,
+    76
+   ],
+   "anchor": [
+    34,
+    76
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h72": {
+   "kind": "sprite",
+   "size": [
+    68,
+    76
+   ],
+   "anchor": [
+    34,
+    76
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h72": {
+   "kind": "sprite",
+   "size": [
+    58,
+    76
+   ],
+   "anchor": [
+    29,
+    76
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h72": {
+   "kind": "sprite",
+   "size": [
+    58,
+    76
+   ],
+   "anchor": [
+    29,
+    76
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h72": {
+   "kind": "sprite",
+   "size": [
+    62,
+    75
+   ],
+   "anchor": [
+    31,
+    75
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h72": {
+   "kind": "sprite",
+   "size": [
+    62,
+    75
+   ],
+   "anchor": [
+    31,
+    75
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    76
+   ],
+   "anchor": [
+    30,
+    76
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    76
+   ],
+   "anchor": [
+    30,
+    76
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h76": {
+   "kind": "sprite",
+   "size": [
+    72,
+    80
+   ],
+   "anchor": [
+    36,
+    80
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h76": {
+   "kind": "sprite",
+   "size": [
+    72,
+    80
+   ],
+   "anchor": [
+    36,
+    80
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    80
+   ],
+   "anchor": [
+    31,
+    80
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    80
+   ],
+   "anchor": [
+    31,
+    80
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h76": {
+   "kind": "sprite",
+   "size": [
+    64,
+    79
+   ],
+   "anchor": [
+    32,
+    79
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h76": {
+   "kind": "sprite",
+   "size": [
+    64,
+    79
+   ],
+   "anchor": [
+    32,
+    79
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    80
+   ],
+   "anchor": [
+    31,
+    80
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    80
+   ],
+   "anchor": [
+    31,
+    80
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h80": {
+   "kind": "sprite",
+   "size": [
+    76,
+    85
+   ],
+   "anchor": [
+    38,
+    85
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h80": {
+   "kind": "sprite",
+   "size": [
+    76,
+    85
+   ],
+   "anchor": [
+    38,
+    85
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    85
+   ],
+   "anchor": [
+    33,
+    85
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    85
+   ],
+   "anchor": [
+    33,
+    85
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h80": {
+   "kind": "sprite",
+   "size": [
+    68,
+    83
+   ],
+   "anchor": [
+    34,
+    83
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h80": {
+   "kind": "sprite",
+   "size": [
+    68,
+    83
+   ],
+   "anchor": [
+    34,
+    83
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    85
+   ],
+   "anchor": [
+    33,
+    85
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    85
+   ],
+   "anchor": [
+    33,
+    85
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h84": {
+   "kind": "sprite",
+   "size": [
+    78,
+    89
+   ],
+   "anchor": [
+    39,
+    89
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h84": {
+   "kind": "sprite",
+   "size": [
+    78,
+    89
+   ],
+   "anchor": [
+    39,
+    89
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h84": {
+   "kind": "sprite",
+   "size": [
+    68,
+    89
+   ],
+   "anchor": [
+    34,
+    89
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h84": {
+   "kind": "sprite",
+   "size": [
+    68,
+    89
+   ],
+   "anchor": [
+    34,
+    89
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h84": {
+   "kind": "sprite",
+   "size": [
+    72,
+    87
+   ],
+   "anchor": [
+    36,
+    87
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h84": {
+   "kind": "sprite",
+   "size": [
+    72,
+    87
+   ],
+   "anchor": [
+    36,
+    87
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h84": {
+   "kind": "sprite",
+   "size": [
+    68,
+    89
+   ],
+   "anchor": [
+    34,
+    89
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h84": {
+   "kind": "sprite",
+   "size": [
+    68,
+    89
+   ],
+   "anchor": [
+    34,
+    89
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h88": {
+   "kind": "sprite",
+   "size": [
+    82,
+    93
+   ],
+   "anchor": [
+    41,
+    93
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h88": {
+   "kind": "sprite",
+   "size": [
+    82,
+    93
+   ],
+   "anchor": [
+    41,
+    93
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h88": {
+   "kind": "sprite",
+   "size": [
+    70,
+    93
+   ],
+   "anchor": [
+    35,
+    93
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h88": {
+   "kind": "sprite",
+   "size": [
+    70,
+    93
+   ],
+   "anchor": [
+    35,
+    93
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h88": {
+   "kind": "sprite",
+   "size": [
+    74,
+    91
+   ],
+   "anchor": [
+    37,
+    91
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h88": {
+   "kind": "sprite",
+   "size": [
+    74,
+    91
+   ],
+   "anchor": [
+    37,
+    91
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h88": {
+   "kind": "sprite",
+   "size": [
+    72,
+    93
+   ],
+   "anchor": [
+    36,
+    93
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h88": {
+   "kind": "sprite",
+   "size": [
+    72,
+    93
+   ],
+   "anchor": [
+    36,
+    93
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h92": {
+   "kind": "sprite",
+   "size": [
+    86,
+    97
+   ],
+   "anchor": [
+    43,
+    97
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h92": {
+   "kind": "sprite",
+   "size": [
+    86,
+    97
+   ],
+   "anchor": [
+    43,
+    97
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h92": {
+   "kind": "sprite",
+   "size": [
+    74,
+    97
+   ],
+   "anchor": [
+    37,
+    97
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h92": {
+   "kind": "sprite",
+   "size": [
+    74,
+    97
+   ],
+   "anchor": [
+    37,
+    97
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h92": {
+   "kind": "sprite",
+   "size": [
+    78,
+    96
+   ],
+   "anchor": [
+    39,
+    96
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h92": {
+   "kind": "sprite",
+   "size": [
+    78,
+    96
+   ],
+   "anchor": [
+    39,
+    96
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h92": {
+   "kind": "sprite",
+   "size": [
+    74,
+    97
+   ],
+   "anchor": [
+    37,
+    97
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h92": {
+   "kind": "sprite",
+   "size": [
+    74,
+    97
+   ],
+   "anchor": [
+    37,
+    97
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h96": {
+   "kind": "sprite",
+   "size": [
+    88,
+    101
+   ],
+   "anchor": [
+    44,
+    101
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h96": {
+   "kind": "sprite",
+   "size": [
+    88,
+    101
+   ],
+   "anchor": [
+    44,
+    101
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    102
+   ],
+   "anchor": [
+    39,
+    102
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    102
+   ],
+   "anchor": [
+    39,
+    102
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h96": {
+   "kind": "sprite",
+   "size": [
+    82,
+    100
+   ],
+   "anchor": [
+    41,
+    100
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h96": {
+   "kind": "sprite",
+   "size": [
+    82,
+    100
+   ],
+   "anchor": [
+    41,
+    100
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    101
+   ],
+   "anchor": [
+    39,
+    101
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    101
+   ],
+   "anchor": [
+    39,
+    101
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h100": {
+   "kind": "sprite",
+   "size": [
+    92,
+    106
+   ],
+   "anchor": [
+    46,
+    106
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h100": {
+   "kind": "sprite",
+   "size": [
+    92,
+    106
+   ],
+   "anchor": [
+    46,
+    106
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h100": {
+   "kind": "sprite",
+   "size": [
+    80,
+    106
+   ],
+   "anchor": [
+    40,
+    106
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h100": {
+   "kind": "sprite",
+   "size": [
+    80,
+    106
+   ],
+   "anchor": [
+    40,
+    106
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h100": {
+   "kind": "sprite",
+   "size": [
+    84,
+    104
+   ],
+   "anchor": [
+    42,
+    104
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h100": {
+   "kind": "sprite",
+   "size": [
+    84,
+    104
+   ],
+   "anchor": [
+    42,
+    104
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h100": {
+   "kind": "sprite",
+   "size": [
+    80,
+    106
+   ],
+   "anchor": [
+    40,
+    106
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h100": {
+   "kind": "sprite",
+   "size": [
+    80,
+    106
+   ],
+   "anchor": [
+    40,
+    106
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h104": {
+   "kind": "sprite",
+   "size": [
+    96,
+    110
+   ],
+   "anchor": [
+    48,
+    110
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h104": {
+   "kind": "sprite",
+   "size": [
+    96,
+    110
+   ],
+   "anchor": [
+    48,
+    110
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h104": {
+   "kind": "sprite",
+   "size": [
+    84,
+    110
+   ],
+   "anchor": [
+    42,
+    110
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h104": {
+   "kind": "sprite",
+   "size": [
+    84,
+    110
+   ],
+   "anchor": [
+    42,
+    110
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h104": {
+   "kind": "sprite",
+   "size": [
+    88,
+    108
+   ],
+   "anchor": [
+    44,
+    108
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h104": {
+   "kind": "sprite",
+   "size": [
+    88,
+    108
+   ],
+   "anchor": [
+    44,
+    108
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h104": {
+   "kind": "sprite",
+   "size": [
+    84,
+    110
+   ],
+   "anchor": [
+    42,
+    110
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h104": {
+   "kind": "sprite",
+   "size": [
+    84,
+    110
+   ],
+   "anchor": [
+    42,
+    110
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h108": {
+   "kind": "sprite",
+   "size": [
+    100,
+    114
+   ],
+   "anchor": [
+    50,
+    114
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h108": {
+   "kind": "sprite",
+   "size": [
+    100,
+    114
+   ],
+   "anchor": [
+    50,
+    114
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h108": {
+   "kind": "sprite",
+   "size": [
+    86,
+    114
+   ],
+   "anchor": [
+    43,
+    114
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h108": {
+   "kind": "sprite",
+   "size": [
+    86,
+    114
+   ],
+   "anchor": [
+    43,
+    114
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h108": {
+   "kind": "sprite",
+   "size": [
+    90,
+    112
+   ],
+   "anchor": [
+    45,
+    112
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h108": {
+   "kind": "sprite",
+   "size": [
+    90,
+    112
+   ],
+   "anchor": [
+    45,
+    112
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h108": {
+   "kind": "sprite",
+   "size": [
+    86,
+    114
+   ],
+   "anchor": [
+    43,
+    114
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h108": {
+   "kind": "sprite",
+   "size": [
+    86,
+    114
+   ],
+   "anchor": [
+    43,
+    114
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h112": {
+   "kind": "sprite",
+   "size": [
+    102,
+    118
+   ],
+   "anchor": [
+    51,
+    118
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h112": {
+   "kind": "sprite",
+   "size": [
+    102,
+    118
+   ],
+   "anchor": [
+    51,
+    118
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    119
+   ],
+   "anchor": [
+    45,
+    119
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    119
+   ],
+   "anchor": [
+    45,
+    119
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h112": {
+   "kind": "sprite",
+   "size": [
+    94,
+    116
+   ],
+   "anchor": [
+    47,
+    116
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h112": {
+   "kind": "sprite",
+   "size": [
+    94,
+    116
+   ],
+   "anchor": [
+    47,
+    116
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    118
+   ],
+   "anchor": [
+    45,
+    118
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    118
+   ],
+   "anchor": [
+    45,
+    118
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h116": {
+   "kind": "sprite",
+   "size": [
+    108,
+    123
+   ],
+   "anchor": [
+    54,
+    123
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h116": {
+   "kind": "sprite",
+   "size": [
+    108,
+    123
+   ],
+   "anchor": [
+    54,
+    123
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h116": {
+   "kind": "sprite",
+   "size": [
+    92,
+    123
+   ],
+   "anchor": [
+    46,
+    123
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h116": {
+   "kind": "sprite",
+   "size": [
+    92,
+    123
+   ],
+   "anchor": [
+    46,
+    123
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h116": {
+   "kind": "sprite",
+   "size": [
+    98,
+    121
+   ],
+   "anchor": [
+    49,
+    121
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h116": {
+   "kind": "sprite",
+   "size": [
+    98,
+    121
+   ],
+   "anchor": [
+    49,
+    121
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h116": {
+   "kind": "sprite",
+   "size": [
+    94,
+    123
+   ],
+   "anchor": [
+    47,
+    123
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h116": {
+   "kind": "sprite",
+   "size": [
+    94,
+    123
+   ],
+   "anchor": [
+    47,
+    123
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-r-h120": {
+   "kind": "sprite",
+   "size": [
+    110,
+    127
+   ],
+   "anchor": [
+    55,
+    127
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-stance-l-h120": {
+   "kind": "sprite",
+   "size": [
+    110,
+    127
+   ],
+   "anchor": [
+    55,
+    127
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-r-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    127
+   ],
+   "anchor": [
+    48,
+    127
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-flourish-l-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    127
+   ],
+   "anchor": [
+    48,
+    127
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-r-h120": {
+   "kind": "sprite",
+   "size": [
+    100,
+    125
+   ],
+   "anchor": [
+    50,
+    125
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-hop-l-h120": {
+   "kind": "sprite",
+   "size": [
+    100,
+    125
+   ],
+   "anchor": [
+    50,
+    125
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-r-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    127
+   ],
+   "anchor": [
+    48,
+    127
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/rooster-matador-raise-l-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    127
+   ],
+   "anchor": [
+    48,
+    127
+   ],
+   "source": "tools/sprites/cut_matador.py (rooster-matador-sprites-v3.jpg)"
+  },
+  "sprite/mortgage-paw-r-h44": {
+   "kind": "sprite",
+   "size": [
+    48,
+    36
+   ],
+   "anchor": [
+    24,
+    36
+   ],
+   "source": "tools/sprites/cut_matador.py (mortgage-charge-sprites-v1.jpg)"
+  },
+  "sprite/mortgage-paw-l-h44": {
+   "kind": "sprite",
+   "size": [
+    48,
+    36
+   ],
+   "anchor": [
+    24,
+    36
+   ],
+   "source": "tools/sprites/cut_matador.py (mortgage-charge-sprites-v1.jpg)"
+  },
+  "sprite/mortgage-charge-r-h44": {
+   "kind": "sprite",
+   "size": [
+    64,
+    36
+   ],
+   "anchor": [
+    32,
+    36
+   ],
+   "source": "tools/sprites/cut_matador.py (mortgage-charge-sprites-v1.jpg)"
+  },
+  "sprite/mortgage-charge-l-h44": {
+   "kind": "sprite",
+   "size": [
+    64,
+    36
+   ],
+   "anchor": [
+    32,
+    36
+   ],
+   "source": "tools/sprites/cut_matador.py (mortgage-charge-sprites-v1.jpg)"
+  },
+  "sprite/mortgage-bonk-r-h44": {
+   "kind": "sprite",
+   "size": [
+    44,
+    34
+   ],
+   "anchor": [
+    22,
+    34
+   ],
+   "source": "tools/sprites/cut_matador.py (mortgage-charge-sprites-v1.jpg)"
+  },
+  "sprite/mortgage-bonk-l-h44": {
+   "kind": "sprite",
+   "size": [
+    44,
+    34
+   ],
+   "anchor": [
+    22,
+    34
+   ],
+   "source": "tools/sprites/cut_matador.py (mortgage-charge-sprites-v1.jpg)"
+  },
+  "sprite/mortgage-dazed-r-h44": {
+   "kind": "sprite",
+   "size": [
+    40,
+    46
+   ],
+   "anchor": [
+    20,
+    46
+   ],
+   "source": "tools/sprites/cut_matador.py (mortgage-charge-sprites-v1.jpg)"
+  },
+  "sprite/mortgage-dazed-l-h44": {
+   "kind": "sprite",
+   "size": [
+    40,
+    46
+   ],
+   "anchor": [
+    20,
+    46
+   ],
+   "source": "tools/sprites/cut_matador.py (mortgage-charge-sprites-v1.jpg)"
+  },
+  "sprite/mortgage-grub-r-h44": {
+   "kind": "sprite",
+   "size": [
+    48,
+    44
+   ],
+   "anchor": [
+    24,
+    44
+   ],
+   "source": "tools/sprites/cut_matador.py (mortgage-charge-sprites-v1.jpg)"
+  },
+  "sprite/mortgage-grub-l-h44": {
+   "kind": "sprite",
+   "size": [
+    48,
+    44
+   ],
+   "anchor": [
+    24,
+    44
+   ],
+   "source": "tools/sprites/cut_matador.py (mortgage-charge-sprites-v1.jpg)"
+  },
+  "sprite/ned-pull-r-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_matador.py (ned-bell-sprites-v1.jpg)"
+  },
+  "sprite/ned-pull-l-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_matador.py (ned-bell-sprites-v1.jpg)"
+  },
+  "sprite/ned-twist-r-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_matador.py (ned-bell-sprites-v1.jpg)"
+  },
+  "sprite/ned-twist-l-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_matador.py (ned-bell-sprites-v1.jpg)"
+  },
+  "sprite/ned-bell-r-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_matador.py (ned-bell-sprites-v1.jpg)"
+  },
+  "sprite/ned-bell-l-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_matador.py (ned-bell-sprites-v1.jpg)"
+  },
+  "sprite/ned-pocket-r-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_matador.py (ned-bell-sprites-v1.jpg)"
+  },
+  "sprite/ned-pocket-l-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_matador.py (ned-bell-sprites-v1.jpg)"
+  },
+  "sprite/mortgage-walk-l-h44": {
+   "kind": "sprite",
+   "size": [
+    50,
+    44
+   ],
+   "anchor": [
+    25,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/mortgage-side-l-h44": {
+   "kind": "sprite",
+   "size": [
+    50,
+    44
+   ],
+   "anchor": [
+    25,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/mortgage-walk-r-h44": {
+   "kind": "sprite",
+   "size": [
+    50,
+    44
+   ],
+   "anchor": [
+    25,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/mortgage-side-r-h44": {
+   "kind": "sprite",
+   "size": [
+    50,
+    44
+   ],
+   "anchor": [
+    25,
+    44
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/cage-egg-a-h150": {
+   "kind": "sprite",
+   "size": [
+    32,
+    150
+   ],
+   "anchor": [
+    16,
+    150
+   ],
+   "source": "tools/sprites/cut_next.py (cage-egg-v1.jpg)"
+  },
+  "sprite/cage-egg-b-h150": {
+   "kind": "sprite",
+   "size": [
+    32,
+    150
+   ],
+   "anchor": [
+    16,
+    150
+   ],
+   "source": "tools/sprites/cut_next.py (cage-egg-v1.jpg)"
+  },
+  "sprite/cage-empty-h150": {
+   "kind": "sprite",
+   "size": [
+    32,
+    150
+   ],
+   "anchor": [
+    16,
+    150
+   ],
+   "source": "tools/sprites/cut_next.py (cage-egg-v1.jpg)"
+  },
+  "fx/yolk-egg": {
+   "kind": "fx",
+   "size": [
+    18,
+    21
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/sprites/cut_next.py (the Yolk from cage-egg-v1.jpg)"
+  },
+  "fg/midway--cashbox": {
+   "kind": "overlay",
+   "size": [
+    15,
+    12
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/sprites/cut_next.py (props-cashbox-geigerbulb-v1.jpg #0)"
+  },
+  "sprite/vat-steam-a-h40": {
+   "kind": "sprite",
+   "size": [
+    88,
+    40
+   ],
+   "anchor": [
+    44,
+    40
+   ],
+   "source": "tools/sprites/cut_next.py (procedural steam)"
+  },
+  "sprite/vat-steam-b-h40": {
+   "kind": "sprite",
+   "size": [
+    88,
+    40
+   ],
+   "anchor": [
+    44,
+    40
+   ],
+   "source": "tools/sprites/cut_next.py (procedural steam)"
+  },
+  "sprite/vat-steam-c-h40": {
+   "kind": "sprite",
+   "size": [
+    88,
+    40
+   ],
+   "anchor": [
+    44,
+    40
+   ],
+   "source": "tools/sprites/cut_next.py (procedural steam)"
+  },
+  "sprite/vat-steam-d-h40": {
+   "kind": "sprite",
+   "size": [
+    88,
+    40
+   ],
+   "anchor": [
+    44,
+    40
+   ],
+   "source": "tools/sprites/cut_next.py (procedural steam)"
+  },
+  "fg/pavilion--crowd": {
+   "kind": "overlay",
+   "size": [
+    320,
+    66
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/sprites/cut_next.py (crowd-fg-v1.jpg)"
+  },
+  "item/item-geiger-bulb": {
+   "kind": "item",
+   "size": [
+    24,
+    24
+   ],
+   "anchor": [
+    12,
+    12
+   ],
+   "legacy": "item-geiger-bulb.svg",
+   "source": "tools/items/cut_items.py (props-cashbox-geigerbulb-v1.jpg#0)"
+  },
+  "bg/cover-hero": {
+   "kind": "ending",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/sprites/cut_next.py (cover-splash-hero-v1.jpg)"
+  },
+  "bg/cover-hero-1": {
+   "kind": "ending",
+   "size": [
+    144,
+    81
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/sprites/cut_next.py (cover-panels-hero-v1.jpg #1)"
+  },
+  "bg/cover-hero-2": {
+   "kind": "ending",
+   "size": [
+    144,
+    81
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/sprites/cut_next.py (cover-panels-hero-v1.jpg #2)"
+  },
+  "bg/cover-hero-3": {
+   "kind": "ending",
+   "size": [
+    144,
+    81
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/sprites/cut_next.py (cover-panels-hero-v1.jpg #3)"
+  },
+  "bg/cover-hero-4": {
+   "kind": "ending",
+   "size": [
+    144,
+    81
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/sprites/cut_next.py (cover-panels-hero-v1.jpg #4)"
+  },
+  "sprite/vendor-idle-r-h80": {
+   "kind": "sprite",
+   "size": [
+    56,
+    80
+   ],
+   "anchor": [
+    28,
+    80
+   ],
+   "source": "tools/sprites/cut_next.py (vendor-sprites-v1.jpg)"
+  },
+  "sprite/vendor-idle-l-h80": {
+   "kind": "sprite",
+   "size": [
+    56,
+    80
+   ],
+   "anchor": [
+    28,
+    80
+   ],
+   "source": "tools/sprites/cut_next.py (vendor-sprites-v1.jpg)"
+  },
+  "sprite/vendor-talk-r-h80": {
+   "kind": "sprite",
+   "size": [
+    56,
+    80
+   ],
+   "anchor": [
+    28,
+    80
+   ],
+   "source": "tools/sprites/cut_next.py (vendor-sprites-v1.jpg)"
+  },
+  "sprite/vendor-talk-l-h80": {
+   "kind": "sprite",
+   "size": [
+    56,
+    80
+   ],
+   "anchor": [
+    28,
+    80
+   ],
+   "source": "tools/sprites/cut_next.py (vendor-sprites-v1.jpg)"
+  },
+  "sprite/rooster-glide-r-h84": {
+   "kind": "sprite",
+   "size": [
+    114,
+    62
+   ],
+   "anchor": [
+    57,
+    62
+   ],
+   "source": "tools/sprites/cut_next.py (rooster-glide-v2.jpg) + tools/sprites/glide_webbing.py (webbing from rooster-glide-v3-webbing-alt.jpg)"
+  },
+  "sprite/rooster-glide-l-h84": {
+   "kind": "sprite",
+   "size": [
+    114,
+    62
+   ],
+   "anchor": [
+    57,
+    62
+   ],
+   "source": "tools/sprites/cut_next.py (rooster-glide-v2.jpg) + tools/sprites/glide_webbing.py (webbing from rooster-glide-v3-webbing-alt.jpg)"
+  },
+  "sprite/rooster-glide-egg-r-h84": {
+   "kind": "sprite",
+   "size": [
+    118,
+    66
+   ],
+   "anchor": [
+    59,
+    66
+   ],
+   "source": "tools/sprites/cut_next.py (rooster-glide-v2.jpg) + tools/sprites/glide_webbing.py (webbing from rooster-glide-v3-webbing-alt.jpg)"
+  },
+  "sprite/rooster-glide-egg-l-h84": {
+   "kind": "sprite",
+   "size": [
+    118,
+    66
+   ],
+   "anchor": [
+    59,
+    66
+   ],
+   "source": "tools/sprites/cut_next.py (rooster-glide-v2.jpg) + tools/sprites/glide_webbing.py (webbing from rooster-glide-v3-webbing-alt.jpg)"
+  }
+ }
+}
