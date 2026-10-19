@@ -1,7 +1,7 @@
 import { ENDINGS, NAMES, ROOMS, SCENE, SPEAKER, TITLE } from "../data/script.js";
 import { artMode, artUrl, assetInfo, fancyCount, initArt, onArtChange, setArtMode } from "./art.js";
 import { playBed, playCue } from "./audio.js";
-import { clampToArea, findPath, parseFlagOverride, roomView, stepToward, depthHeight, actorZ, occluderZ, occluderAsset, occluderBase, spriteFilter, castFrame } from "./walk.js";
+import { clampToArea, findPath, parseFlagOverride, roomView, stepToward, depthHeight, actorZ, occluderZ, occluderAsset, occluderBase, spriteFilter, castFrame, standFor } from "./walk.js";
 import { act, choicesFor, HERO, ITEMS, maxHeat, newGame, preview, signLetters, signLevel, spotsFor, vatState, visible } from "./logic.js";
 
 const SAVE_KEY = "rr-yolk-saves";
@@ -74,6 +74,32 @@ function showLine(entry) {
   if (entry.mood) ui.state.mood = entry.mood;
   if (entry.sound) playCue(entry.sound);
   render();
+  popFx(entry);
+}
+
+// A cued one-shot over the scene (the bell's painted DING!): room.fx[cue] = { art, at: [left, top] }, fades out by CSS.
+// render() rebuilds the world, so the pop lives in ui.fx and each render re-adds it with its animation clock carried over.
+const FX_MS = 1000;
+function popFx(entry) {
+  const room = ui.state && ROOMS[ui.state.room];
+  const fx = entry.cue && room && room.fx && room.fx[entry.cue];
+  if (!fx) return;
+  ui.fx = { ...fx, room: ui.state.room, start: performance.now() };
+  render();
+  setTimeout(() => { if (ui.fx && performance.now() - ui.fx.start >= FX_MS) { ui.fx = null; render(); } }, FX_MS + 30);
+}
+
+function fxNode(state) {
+  const fx = ui.fx;
+  if (!fx || fx.room !== state.room) return null;
+  const age = performance.now() - fx.start;
+  if (age >= FX_MS) return null;
+  const node = el("img", "fx-pop");
+  node.alt = "";
+  node.dataset.id = fx.art;
+  placeAt(node, fx.art, fx.at);
+  node.style.animationDelay = `${-Math.round(age)}ms`;
+  return node;
 }
 
 function dispatch(action) {
@@ -146,23 +172,47 @@ function render() {
   const realPlate = !artUrl(view.plate).startsWith("art/placeholders/");
 
   const hidePose = lineNow && lineNow.big;
-  const tint = spriteFilter(room); // per-room sprite tint, "" (off) unless the room sets spriteTint
-  if (!hidePose && state.pose && room.poseAt && room.poseAt[state.pose]) {
+  const tint = spriteFilter({ spriteTint: view.spriteTint }); // per-room (or per-plate-state) sprite tint, "" (off) unless set
+  // Poses: the legacy [left, top, width] box (crow, gate squat), or a seated sprite { sprite, x, seat, via } whose seat
+  // row (manifest `seat`) sits exactly on the rail line `seat`, with a one-beat `via` frame on sitting down and standing up.
+  const poseCfg = state.pose && room.poseAt && room.poseAt[state.pose];
+  if (!hidePose && poseCfg) {
     const pose = el("img", "pose");
     pose.alt = "";
-    const at = room.poseAt[state.pose];
-    pose.style.left = pct(at[0], "x");
-    pose.style.top = pct(at[1], "y");
-    pose.style.width = pct(at[2], "x");
-    mount(pose, state.pose === "crow" ? "sprite-crow.png" : "sprite-squat.png");
+    if (Array.isArray(poseCfg)) {
+      pose.style.left = pct(poseCfg[0], "x");
+      pose.style.top = pct(poseCfg[1], "y");
+      pose.style.width = pct(poseCfg[2], "x");
+      mount(pose, state.pose === "crow" ? "sprite-crow.png" : "sprite-squat.png");
+    } else {
+      const fresh = ui.poseShown !== `${room.id}:${state.pose}`;
+      seatSprite(pose, poseCfg, fresh && poseCfg.via ? poseCfg.via : poseCfg.sprite);
+      if (fresh && poseCfg.via) setTimeout(() => { if (pose.isConnected) seatSprite(pose, poseCfg, poseCfg.sprite); }, POSE_BEAT_MS);
+    }
     if (tint) pose.style.filter = tint;
     world.append(pose);
   }
+  const wasSeated = !state.pose && ui.poseShown && ui.poseShown.startsWith(`${room.id}:`) ? ui.poseShown.slice(room.id.length + 1) : null;
+  ui.poseShown = state.pose && poseCfg ? `${room.id}:${state.pose}` : null;
 
   if (room.hero && !hidePose && !state.pose) {
     heroSync(room);
     const node = el("img", "hero");
     node.alt = "";
+    const seat = wasSeated && room.poseAt && room.poseAt[wasSeated];
+    if (seat && !Array.isArray(seat) && seat.via) {
+      // stand-up beat: the in-between frame on the rail, then he's on his feet at the foot of the fence
+      const area = heroArea(room);
+      [hero.x, hero.y] = area ? clampToArea(area, seat.x, seat.standY || hero.y) : [seat.x, hero.y];
+      hero.tx = hero.x; hero.ty = hero.y; hero.path = []; hero.face = "front";
+      const beat = el("img", "pose");
+      beat.alt = "";
+      seatSprite(beat, seat, seat.via);
+      if (tint) beat.style.filter = tint;
+      world.append(beat);
+      node.style.visibility = "hidden";
+      setTimeout(() => { beat.remove(); node.style.visibility = ""; }, POSE_BEAT_MS);
+    }
     placeHero(node, room);
     if (tint) node.style.filter = tint;
     world.append(node);
@@ -170,9 +220,12 @@ function render() {
 
   // Plate overlays: small cutouts that belong to the scenery but change with the story (the ribbon on its nail, the
   // spoon and stub on the nest shelf). Painted over the plate, under every actor; shown while their when/whenNot hold.
+  const fxPop = realPlate && fxNode(state);
+  if (fxPop) world.append(fxPop);
   if (room.overlays && realPlate) {
     for (const o of room.overlays) {
-      if (!visible(state, o)) continue;
+      // holdCues: a prop stays on screen while a cued line still plays it out (the bell until Ned has walked over)
+      if (!visible(state, o) && !(o.holdCues && lineNow && o.holdCues.includes(lineNow.cue))) continue;
       const node = el("img", "overlay");
       node.alt = "";
       node.dataset.id = o.art;
@@ -243,8 +296,13 @@ function render() {
       hit.addEventListener("pointerenter", () => setSentence(preview(state, spot)));
       hit.addEventListener("pointerleave", () => setSentence(null));
       hit.addEventListener("click", () => {
-        const [sx, sy] = spot.stand || [spot.rect[0] + spot.rect[2] / 2, spot.rect[1] + spot.rect[3]];
-        walkTo(room, sx, sy); // nearest reachable point (or the spot's own `stand` point)
+        // beside it, not in it (js/walk.js standFor): the side he comes from, facing the thing; exits keep their point
+        if (room.hero) heroSync(room);
+        const castIds = new Set((room.cast || []).filter((c) => !c.when || state.flags[c.when]).map((c) => c.spot));
+        const avoid = spotsFor(state).filter((s) => castIds.has(s.id) && s.id !== spot.id).map((s) => s.core || s.rect);
+        const st = room.hero ? standFor(room, spot, { walk: heroArea(room), from: [hero.x, hero.y], avoid }) : null;
+        const [sx, sy] = st ? [st.x, st.y] : spot.stand || [spot.rect[0] + spot.rect[2] / 2, spot.rect[1] + spot.rect[3]];
+        walkTo(room, sx, sy, st && st.face);
         ui.lastAct = { spot: spot.id, verb: state.pending ? "item" : state.verb };
         dispatch({ t: "hotspot", id: spot.id });
       });
@@ -427,6 +485,17 @@ function heroSync(room) {
   hero.walking = false;
 }
 
+// A seated pose: the sprite's `seat` row (manifest) lands on the rail line `cfg.seat`, centred on `cfg.x`.
+const POSE_BEAT_MS = 260;
+function seatSprite(node, cfg, sprite) {
+  const id = `sprite/${sprite}`;
+  const info = assetInfo(id);
+  const [, h] = info ? info.size : [28, 31];
+  const seatRow = info && info.seat !== undefined ? info.seat : h;
+  placeSprite(node, id, [cfg.x, cfg.seat + (h - seatRow)]);
+  node.style.zIndex = actorZ(cfg.seat);
+}
+
 // Sprites sit on their feet: `at` is the bottom-center point in logical px.
 function placeSprite(node, id, at) {
   const info = assetInfo(id);
@@ -476,9 +545,10 @@ function placeHero(node, room) {
   node.style.zIndex = actorZ(hero.y);
 }
 
-function walkTo(room, x, y) {
+function walkTo(room, x, y, faceOnArrive = null) {
   if (!room || !room.hero) return;
   heroSync(room);
+  hero.faceOnArrive = faceOnArrive; // turn to the thing he walked up to
   const area = heroArea(room);
   const wantY = y === undefined ? hero.y : y;
   if (area) {
@@ -489,7 +559,14 @@ function walkTo(room, x, y) {
     const [lo, hi] = room.hero.walk || [0, SCENE.w];
     [hero.tx, hero.ty] = [Math.max(lo, Math.min(hi, x)), hero.y];
   }
-  if (Math.hypot(hero.tx - hero.x, hero.ty - hero.y) < 2 && !(hero.path && hero.path.length)) return;
+  if (Math.hypot(hero.tx - hero.x, hero.ty - hero.y) < 2 && !(hero.path && hero.path.length)) {
+    if (faceOnArrive && hero.face !== faceOnArrive) {
+      hero.face = faceOnArrive; // already there: just turn
+      const node = document.querySelector(".hero");
+      if (node) placeHero(node, room);
+    }
+    return;
+  }
   if (Math.abs(hero.tx - hero.x) >= 1) hero.face = hero.tx > hero.x ? "r" : "l";
   else if (hero.face === "front") hero.face = "r";
   if (hero.walking) return;
@@ -517,7 +594,10 @@ function heroTick(now) {
   if (left < 0.5 && hero.path && hero.path.length) {
     [hero.tx, hero.ty] = hero.path.shift(); // next leg of the route
     if (Math.abs(hero.tx - hero.x) >= 1) hero.face = hero.tx > hero.x ? "r" : "l";
-  } else if (left < 0.5 || (dt > 0 && moved < stepPx * 0.05)) hero.walking = false; // arrived, or slid into an edge
+  } else if (left < 0.5 || (dt > 0 && moved < stepPx * 0.05)) {
+    hero.walking = false; // arrived, or slid into an edge
+    if (hero.faceOnArrive) hero.face = hero.faceOnArrive;
+  }
   const node = document.querySelector(".hero");
   if (node) placeHero(node, room);
   if (hero.walking) requestAnimationFrame(heroTick);

@@ -406,6 +406,11 @@ export const ROOMS = {
       [[258, 150], [302, 150], [302, 166], [262, 168], [255, 177], [227, 177], [258.5, 154]], // right: behind/beside the bucket, in front of the hatch's right face
     ],
     sign: { art: "fx/neon-hq", rect: [293,  53,  27,  18], frames: [6, 7, 8, 9, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (rooftop board on the distant town house); per-letter glow frames (tools/neon/paint_neon.py)
+    states: [
+      // Bulb taken: the coop lamp is dark. Relit plate (tools/bg/relight_hq.py): moonlight only, the window and the
+      // town still glow; the sprites drop into it with a cooler, darker tint.
+      { flag: "got_bulb", plate: "bg/hq-dark", spriteTint: { brightness: 0.74, saturate: 0.78, contrast: 0.96 } },
+    ],
     occluders: [
       { id: "bucket", base: 173 },
       // fg/hq--hatch, drawn in column slices [x0, x1, base]: each slice's base is that column's front edge
@@ -456,16 +461,29 @@ export const ROOMS = {
         rect: [74, 26, 22, 18],
         stand: [85, 152], // in front of the hatch line
         whenNot: "got_bulb",
-        look: "A lamp over the door with a spare bulb clipped to the shade. Rad-Safe Rule 4: always carry a spare.",
+        look: "A lamp over the door, the only light on the roof. Rad-Safe Rule 4: always carry a spare bulb. He keeps meaning to buy one.",
         take: {
           give: ["bulb"],
           set: ["got_bulb"],
-          say: "Spare bulb. Pocketed. Rule 4, honored.",
+          say: "He unscrews the bulb, quick, before it bites. The roof drops into moonlight. Rule 4, technically honored: now he's carrying a spare.",
         },
         talk: "\"Good work tonight, lamp.\" It hums. Honestly, it's the most reliable member of the team.",
         use: "He flicks it off and on. Rad-Safe Rule 9: check your lighting. Rules 5 through 8 were never written down.",
         push: "He nudges the shade. The moths reorganize into a new government.",
         useAny: "He shows the {item} to the lamp. It lights it beautifully. That's all a lamp can do, and it does it well.",
+      }),
+      spot({
+        id: "lamp-off",
+        name: "dark lamp",
+        rect: [74, 26, 22, 18],
+        stand: [85, 152],
+        when: "got_bulb",
+        look: "The coop lamp, dark. Its bulb is in his pocket. The moon is doing the lighting now, and it doesn't do requests.",
+        take: "He's already got the bulb. The shade can stay. It doesn't go with the suit.",
+        talk: "\"Sorry, lamp. Duty calls.\" It says nothing. It never did, but now it says it in the dark.",
+        use: "He flicks the switch. Nothing. He knows exactly where the bulb is. It's in his pocket.",
+        push: "He nudges the shade. It creaks round in the dark. The moths have moved to the window.",
+        useAny: "He holds the {item} up to the dark lamp. Nobody can see it. Not even him.",
       }),
       spot({
         id: "crate",
@@ -578,7 +596,9 @@ export const ROOMS = {
         frames: ["yardrooster-peck-l", "yardrooster-side-l", "yardrooster-crow-l", "yardrooster-side-l"] },
     ],
     sign: { art: "fx/neon-fence", rect: [264,  49,  32,  18], frames: [6, 7, 8, 9, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (billboard on legs over the distant Main Street roofline); per-letter glow frames (tools/neon/paint_neon.py)
-    poseAt: { squat: [60, 66, 24] }, // on the top rail between the left posts
+    // Sitting on the top rail between the left posts (rail top y91, posts x56-59 and x89-91), among the yard roosters:
+    // seat row on the rail line, boots dangling in front of the lower rail; one in-between frame on the way down and up.
+    poseAt: { squat: { sprite: "rooster-sit-front-h32", via: "rooster-sitdown-front-h32", x: 70, seat: 91, standY: 112 } },
     exits: [
       { spot: "to-hq", label: "Rooftop" },
       { spot: "door", label: "Henhouse" },
@@ -793,6 +813,14 @@ export const ROOMS = {
         use: "She's a hen, not a cushion. Also, she's already sitting. The job is taken.",
         push: "He nudges her. She swoons harder. That's the opposite of what he wanted.",
         useAny: "She glances at the {item}, then back at his mask. She doesn't want that. She wants him. On paper. Signed.",
+        alt: [{
+          when: "hen_up", // she shifted onto the signed photo: the grub's out from under her
+          name: "starstruck hen",
+          look: "She's settled on his signed photo like it's a throne and she's the queen of it. The grub is no longer her problem, or anybody's secret.",
+          talk: "\"Enjoying the photo?\" She closes her eyes and sighs. That's a yes. That's a forever yes.",
+          take: "She tucks the photo under her and gives him a look. It's hers now. That's how autographs work.",
+          use: "She's sitting on his face, in a nice way. Any more help and it gets weird.",
+        }],
       }),
       spot({
         id: "grub",
@@ -875,6 +903,16 @@ export const ROOMS = {
         talk: "\"You've had a big night too, huh.\" The ribbon flutters. GUEST JUDGE. It knows what it is.",
         use: "He can't reach it. The ladder is rotten. The goat, though, is right there and very tall when angry.",
         useAny: "He waves the {item} up at the ribbon. It stays nailed high. Something taller, or angrier, would help.",
+        alt: [{
+          when: "got_ribbon", // Mortgage knocked it down and it's in his pocket: what's left is the nail
+          name: "bare nail",
+          look: "A bare nail, high on the post, where GUEST JUDGE used to hang. It looks lighter. Less judgmental. Still pointy.",
+          take: "He's not prying a nail out of a barn for a souvenir. The ribbon was the souvenir. The nail was just the frame.",
+          push: "He can't reach it. Nobody could, which was the whole point of the nail.",
+          talk: "\"You did good, nail.\" Years of holding up other people's prizes. Not one of its own.",
+          use: "There's nothing to hang on it. He considers hanging himself up there for a second, as the Best Wattle. Too high.",
+          useAny: "He waves the {item} up at the bare nail. The nail has retired from holding things. It held the ribbon. That was its career.",
+        }],
       }),
       spot({
         id: "ladder",
@@ -932,7 +970,14 @@ export const ROOMS = {
     hero: { at: [250, 178], height: 96, depth: { horizon: -222 } },
     walk: [[[44, 131], [294, 131], [294, 179], [44, 179]]], // the floorboards in front of the counter: off the feed sacks (left) and the barrel (right)
     occluders: [{ id: "counter", base: 128 }], // Ned stands behind it (feet y122)
-    cast: [{ spot: "clerk", sprite: "ned-front", talk: "ned-talk", voice: "clerk", at: [180, 122], height: 80 }],
+    cast: [{ spot: "clerk", sprite: "ned-front", talk: "ned-talk", voice: "clerk", at: [180, 122], height: 80,
+      // the bell gag: he walks down the counter to the bell, unscrews it (side-on, hands at the bell), pockets it
+      cues: { ned_bell: { walk: ["ned-walk-l", "ned-side-l"], to: [160, 122], end: "ned-side-l" },
+        ned_pocket: { sprite: "ned-side-l", at: [160, 122] },
+        ned_back: { walk: ["ned-walk-r", "ned-side-r"], from: [160, 122], to: [180, 122], end: "ned-front" } } }],
+    // the brass service bell on the counter; it stays put through the last ding and while Ned walks over to it
+    overlays: [{ art: "fg/store--bell", at: [145, 82], whenNot: "bell_gone", holdCues: ["ding", "ned_bell"] }],
+    fx: { ding: { art: "fx/ding", at: [136, 66] } }, // painted-pixel DING! pop over the bell when it rings
     sign: { art: "fx/neon-store", rect: [196,  13,  61,  16], frames: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (one line on Ned's blank plank above the window); per-letter glow frames (tools/neon/paint_neon.py)
     exits: [
       { spot: "to-barn", label: "Barn" },
@@ -979,12 +1024,22 @@ export const ROOMS = {
         name: "service bell",
         rect: [139, 83, 21, 14],
         stand: [150, 134],
-        look: "A bell that has summoned Ned through three wars and one spice recall.",
-        use: "Ding. Ned was already looking at you. Now he's looking harder.",
-        push: "Ding.",
-        talk: "Ding is the whole vocabulary.",
-        take: "The bell is screwed to the counter. Ned screwed it there himself, during one of the wars.",
-        useAny: "He dings the bell with the {item}. Ding. Ned's eyebrow does the rest.",
+        look: "A brass service bell, screwed to the counter. It has summoned Ned through three wars and one spice recall. Ned has never once been in the back.",
+        use: { special: "ring_bell" },
+        push: { special: "ring_bell" },
+        talk: "He leans in close. \"Ding?\" The bell holds its tongue. It only talks when it's hit, like a lot of folks in this town.",
+        take: "It's screwed down. Ned screwed it there himself, during one of the wars. He'd hear a screwdriver from the moon.",
+        useAny: "He holds the {item} over the bell, then thinks better of it. Ned's eyebrow is already halfway up. It knows.",
+        alt: [{
+          when: "bell_gone", // Ned unscrewed it at the sixth ding (js/logic.js ringBell)
+          name: "screw holes",
+          look: "Two little screw holes and a clean square of counter where the bell used to be. The counter looks naked. Ned looks relieved.",
+          use: "He taps the screw holes. No ding. Just a finger on a counter. Ned doesn't even look up, and that's a choice.",
+          push: "He presses where the bell was. Silence. It's the loudest thing in the store.",
+          talk: "\"Ding,\" he says, quietly, to the holes. Ned turns a ledger page very loudly.",
+          take: "There's nothing to take but two holes, and Ned would bill him for those.",
+          useAny: "He sets the {item} on the screw holes. It doesn't ding. Nothing dings anymore. He did this.",
+        }],
       }),
       spot({
         id: "to-barn",
@@ -1108,8 +1163,10 @@ export const ROOMS = {
     hero: { at: [130, 178], height: 96, depth: { horizon: -198 } },
     // The plaza in front of the turnstile (base y131), the booth front (y135) and the cutout's feet (y140).
     walk: [[[6, 137], [229, 137], [233, 144], [291, 144], [295, 137], [314, 137], [314, 179], [6, 179]]],
-    occluders: [{ id: "front", base: 135 }], // sill, booth front and window posts in front of the seated guard (feet y126)
-    cast: [{ spot: "guard", sprite: "guard-front", talk: "guard-talk", voice: "guard", at: [148, 126], height: 72 }],
+    occluders: [{ id: "front", base: 135 }], // roof, window header, sill, booth front and posts in front of the seated guard (feet y128)
+    // seated inside the booth: h68 with feet at y128 keeps his cap under the window header (opening top y62); the roof
+    // and header are in gate--front too (tools/bg/handcut/gate_header.py), so only the frame ever trims him
+    cast: [{ spot: "guard", sprite: "guard-front", talk: "guard-talk", voice: "guard", at: [148, 128], height: 68 }],
     spriteTint: { brightness: 0.8, saturate: 0.85, sepia: 0.1 }, // cool night plaza: sprites sit back into the string-light glow
     sign: { art: "fx/neon-gate", rect: [40,  38,  56,  16], frames: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (tubes clipped to the turnstile canopy panel); per-letter glow frames (tools/neon/paint_neon.py)
     poseAt: { squat: [236, 66, 50] }, // squatting behind the cardboard prize rooster, in its place
@@ -1252,6 +1309,7 @@ export const ROOMS = {
         id: "corny",
         name: "Slick Corny",
         rect: [103, 61, 42, 80],
+        stand: [126, 150], // talk from the boardwalk in front of the booth line (y147), never tucked behind its corner
         look: "Slick Corny, the barker, leans on the clock post in a straw boater and a corn-yellow vest, flipping a quarter. A man made entirely of fairground hustle. Something under the smile is counting.",
         talk: { special: "talk_corny" },
         useItem: { mirror: "He looks into the mirror and likes what he sees, but he never lets go of the cash box key. Professional.", map: "\"Follow the money,\" the map says. Corny sees it and stops smiling for exactly one second." },
@@ -1372,6 +1430,7 @@ export const ROOMS = {
         id: "gobbler",
         name: "The Cock Gobbler",
         rect: [180, 44, 56, 68],
+        side: "l", // from the right he'd end up behind the side rope swag: always talk to him from the front-left
         look: { special: "look_gobbler" },
         talk: { special: "talk_gobbler" },
         useItem: { vip: { special: "return_vip" } },
@@ -1476,6 +1535,12 @@ export const ROOMS = {
         push: { special: "use_padlock" },
         talk: "\"Open sesame.\" Nothing. Wrong genre, wrong padlock.",
         useAny: "He jiggles the {item} at the padlock. It doesn't fit. Padlocks are picky. Only one little brass key will do.",
+        alt: [{
+          when: "rope_open", // Pip popped it
+          name: "open padlock",
+          talk: "\"Nothing personal.\" The open padlock dangles. It's had a rough night too.",
+          useAny: "He offers the {item} to the open padlock. It's done locking things tonight. It's off the clock.",
+        }],
       }),
       spot({
         id: "keyring",

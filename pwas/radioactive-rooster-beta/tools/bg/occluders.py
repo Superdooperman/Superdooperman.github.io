@@ -53,12 +53,14 @@ OCC = {
                         {'box': (152, 48, 167, 64), 'dark': 70}]),
     },
     'store': {
-        # Ned's counter (top y91, front down to the floor line) with the service bell and the bin at its right end;
+        # Ned's counter (top y91, front down to the floor line) and the bin at its right end;
         # Ned stands behind it (feet y122), Rooster's floor starts in front of it (y131)
-        'counter': (128, [[(72, 90.5), (224, 90.5), (224, 129), (72, 129)], [(142, 85.5), (157, 85.5), (157, 91), (142, 91)],
+        # (the service bell is its own overlay now, fg/store--bell, until Ned unscrews it: tools/bg/store_bell.py)
+        'counter': (128, [[(72, 90.5), (224, 90.5), (224, 129), (72, 129)],
                           [(203, 111), (217, 111), (217, 130.5), (203, 130.5)]]),
     },
 }
+OCC['hq-dark'] = OCC['hq']  # bulb taken: same bucket and hatch, cut from the relit plate (tools/bg/relight_hq.py)
 OCC['pavilion-open'] = OCC['pavilion']  # same posts and cart; cut from the open plate's own pixels
 
 
@@ -72,7 +74,7 @@ HANDCUT = {
     'pavilion-open--rope-side': (146, 'alpha trace of the rope swags, tools/bg/handcut/rope_layer.py'),
     'pavilion-open--rope-back': (130, 'alpha trace of the rope swags and back posts, tools/bg/handcut/rope_layer.py'),
     'midway--booth': (147, 'tools/bg/occluders.py booth polygon with the counter window x25-72 y59-99 cut open (tools/bg/handcut/README.md)'),
-    'gate--front': (135, 'alpha cut, tools/bg/handcut/gate_front.py'),  # sill + booth front + window posts in front of the guard
+    'gate--front': (135, 'alpha cut, tools/bg/handcut/gate_front.py + gate_header.py'),  # roof + window header + sill + booth front + posts in front of the guard
 }
 
 

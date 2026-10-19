@@ -88,3 +88,32 @@ test("bespoke lines stay short enough for the caption box", () => {
   for (const t of strings) assert.ok(t.length <= 210, `${t.length} chars: ${t}`);
   console.log(`# combos covered: ${JSON.stringify(combos)}; longest shown line ${longest.n} (legacy story beats in logic.js are exempt)`);
 });
+
+test("hotspot names follow the story: previews and replies after a state change name what's there now", async () => {
+  const { act, newGame, preview, spotsFor } = await import("../js/logic.js");
+  const at = (room, flags, verb) => { const s = newGame(); s.room = room; Object.assign(s.flags, flags); s.verb = verb; return s; };
+  const shown = (s, id) => spotsFor(s).find((x) => x.id === id);
+  const cases = [
+    ["barn", "ribbon", { got_ribbon: true }, "bare nail", "blue ribbon"],
+    ["henhouse", "hen", { hen_up: true }, "starstruck hen", "sitting hen"],
+    ["pavilion", "padlock", { rope_open: true, pavilion_in: true }, "open padlock", "padlock"],
+    ["hq", "lamp-off", { got_bulb: true }, "dark lamp", null],
+  ];
+  for (const [room, id, flags, now, before] of cases) {
+    for (const verb of ["look", "talk", "take", "use", "push"]) {
+      const s = at(room, flags, verb);
+      const spot = shown(s, id);
+      assert.ok(spot, `${room}/${id} shown`);
+      const p = preview(s, spot);
+      assert.ok(p.includes(`the ${now}`), `${room}/${id} ${verb}: "${p}"`);
+      if (before) assert.ok(!p.includes(`the ${before}.`), `${room}/${id} ${verb}: stale name in "${p}"`);
+    }
+    if (before) { const s0 = at(room, {}, "look"); assert.ok(preview(s0, shown(s0, id)).includes(`the ${before}`), `${room}/${id} before`); }
+  }
+  // the reply after the change is the new one, too
+  const s = at("barn", { got_ribbon: true }, "look");
+  const r = act(s, { t: "hotspot", id: "ribbon" });
+  assert.ok(r.lines.some((l) => /bare nail/.test(l.text)), "Look at the bare nail describes the nail");
+  // the lamp is swapped, not renamed: the lit lamp hotspot is gone once the bulb is taken
+  assert.equal(shown(at("hq", { got_bulb: true }, "look"), "lamp"), undefined);
+});

@@ -106,7 +106,7 @@ test("occluders: cutouts exist for every plate state, match the plate pixels, an
       }
     }
   }
-  assert.equal(checked, 22); // pavilion x2 plates x (4 + 3 rope layers), midway booth, rooftop bucket + hatch, fence crate + end post, store counter, wkuk booth, gate front
+  assert.equal(checked, 24); // pavilion x2 plates x (4 + 3 rope layers), midway booth, rooftop x2 plates (lamp lit / bulb taken) x (bucket + hatch), fence crate + end post, store counter, wkuk booth, gate front
 });
 
 test("occluders: z order draws scenery over an actor exactly when his feet are behind its base", () => {

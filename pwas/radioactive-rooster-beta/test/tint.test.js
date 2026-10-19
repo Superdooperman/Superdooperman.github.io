@@ -28,6 +28,17 @@ test("spriteTint drops unknown keys and bad values instead of blanking sprites",
 
 test("main.js applies the tint to hero, pose and cast sprites only", () => {
   const src = readFileSync(new URL("../js/main.js", import.meta.url), "utf8");
-  assert.match(src, /const tint = spriteFilter\(room\)/);
-  assert.equal((src.match(/if \(tint\) \w+\.style\.filter = tint;/g) || []).length, 3);
+  assert.match(src, /const tint = spriteFilter\(\{ spriteTint: view\.spriteTint \}\)/); // room tint, or the active plate state's
+  assert.equal((src.match(/if \(tint\) \w+\.style\.filter = tint;/g) || []).length, 4); // pose, stand-up beat, hero, cast
+});
+
+test("rooftop with the bulb taken: the dark plate state carries its own cooler, darker sprite tint", async () => {
+  const { roomView } = await import("../js/walk.js");
+  const Q = ROOMS.hq;
+  assert.equal(spriteFilter({ spriteTint: roomView(Q, {}).spriteTint }), "");
+  const dark = roomView(Q, { got_bulb: true });
+  assert.equal(dark.plate, "bg/hq-dark");
+  assert.equal(spriteFilter({ spriteTint: dark.spriteTint }), "brightness(0.74) contrast(0.96) saturate(0.78)");
+  // other rooms' state views keep the room tint
+  assert.equal(roomView(ROOMS.gate, {}).spriteTint, ROOMS.gate.spriteTint);
 });

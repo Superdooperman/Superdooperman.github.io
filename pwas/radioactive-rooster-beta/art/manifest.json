@@ -3870,6 +3870,166 @@
    ],
    "base": 177,
    "source": "tools/bg/occluders.py (cut from bg/hq)"
+  },
+  "bg/hq-dark": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/bg/relight_hq.py (bg/hq relit with the coop lamp bulb gone: lamp light divided out, moonlit ambient, window spill, other lights kept); 4x nearest copy in art/pixel-4x/bg/"
+  },
+  "fg/hq-dark--bucket": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 173,
+   "source": "tools/bg/occluders.py (cut from bg/hq-dark)"
+  },
+  "fg/hq-dark--hatch": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 177,
+   "source": "tools/bg/occluders.py (cut from bg/hq-dark)"
+  },
+  "sprite/rooster-sit-front-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    31
+   ],
+   "anchor": [
+    14,
+    31
+   ],
+   "seat": 24,
+   "source": "tools/sprites/make_sit.py (from sprite/rooster-front-h32)"
+  },
+  "sprite/rooster-sitdown-front-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    31
+   ],
+   "anchor": [
+    14,
+    31
+   ],
+   "seat": 25,
+   "source": "tools/sprites/make_sit.py (from sprite/rooster-front-h32)"
+  },
+  "fg/store--bell": {
+   "kind": "overlay",
+   "size": [
+    11,
+    9
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/bg/store_bell.py (hand-placed pixel prop, until bell_gone)"
+  },
+  "fx/ding": {
+   "kind": "fx",
+   "size": [
+    25,
+    9
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/bg/store_bell.py (hand-set pixel letters)"
+  },
+  "sprite/ned-walk-l-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/ned-walk-r-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/ned-side-l-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/ned-side-r-h80": {
+   "kind": "sprite",
+   "size": [
+    64,
+    80
+   ],
+   "anchor": [
+    32,
+    80
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/guard-front-h68": {
+   "kind": "sprite",
+   "size": [
+    64,
+    68
+   ],
+   "anchor": [
+    32,
+    68
+   ],
+   "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/guard-talk-h68": {
+   "kind": "sprite",
+   "size": [
+    64,
+    68
+   ],
+   "anchor": [
+    32,
+    68
+   ],
+   "source": "tools/sprites/cut_cast.py"
   }
  }
 }

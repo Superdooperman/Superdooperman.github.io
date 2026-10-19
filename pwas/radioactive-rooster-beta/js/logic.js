@@ -66,10 +66,19 @@ export function visible(state, spot) {
   return true;
 }
 
+// A hotspot can change with the story: `alt: [{ when: flag, name?, look?, take?, ... }]` overrides its fields (name
+// included, so the sentence-line preview follows) once `when` is set; later entries win.
+export function resolveSpot(state, spot) {
+  if (!spot || !spot.alt) return spot;
+  let out = spot;
+  for (const v of spot.alt) if (state.flags[v.when]) out = { ...out, ...v, when: spot.when, alt: undefined };
+  return out;
+}
+
 export function spotsFor(state) {
   const room = ROOMS[state.room];
   if (!room) return [];
-  return room.spots.filter((spot) => visible(state, spot));
+  return room.spots.filter((spot) => visible(state, spot)).map((spot) => resolveSpot(state, spot));
 }
 
 export function preview(state, spot) {
@@ -251,6 +260,36 @@ function squatRail(s, out) {
   s.pose = "squat";
   s.mood = "talk";
   out.lines.push(line("He drops onto the rail. Gut forward. Cheeks puffed. Costume wings in. For one second he's a plump, ordinary, extremely suspicious rooster, if you squint, and Henny squints."));
+}
+
+// Ned's service bell: every ring is counted; Ned's patience runs out at six and the bell goes in his pocket.
+function ringBell(s, out) {
+  const n = (s.flags.bell_rings || 0) + 1;
+  s.flags.bell_rings = n;
+  const ned = (text, extra = {}) => out.lines.push(line(text, { speaker: SPEAKER.clerk, ...extra }));
+  const ding = (text) => out.lines.push(line(text, { sound: "ding", cue: "ding" }));
+  if (n === 1) {
+    ding("*DING.*");
+    ned("\"Rooster. I'm right here. I've been right here. I'm always right here.\"");
+  } else if (n === 2) {
+    ding("*DING.*");
+    ned("\"The bell's for when I'm in the back. There is no back. I'm the back.\"");
+  } else if (n === 3) {
+    ding("*DING.*");
+    ned("\"That bell is a fixture, Rooster. Fixtures depreciate. Every ding comes straight off its resale value.\"");
+  } else if (n === 4) {
+    ding("*DING.*");
+    ned("\"I'm writing it down. 'Bell, wear and tear, one mascot.' You're a line item now. Congratulations.\"");
+  } else if (n === 5) {
+    ding("*DING.*");
+    out.lines.push(line("Ned closes the ledger very, very slowly. He doesn't say anything. That's worse."));
+  } else {
+    ding("*DING.*");
+    out.lines.push(line("Ned comes round the end of the counter with a screwdriver he keeps for exactly this. Four turns. Not one wasted.", { cue: "ned_bell" }));
+    ned("\"There. No more bell for you. I hope you're happy.\"", { cue: "ned_pocket" });
+    out.lines.push(line("He is, a little. Ned pockets the bell and goes back to pretending he isn't watching.", { cue: "ned_back" }));
+    s.flags.bell_gone = true;
+  }
 }
 
 function coopDoor(s, out) {
@@ -850,6 +889,7 @@ const specials = {
   coop_photo: coopPhoto,
   look_hawk_far: lookHawkFar,
   squat_rail: squatRail,
+  ring_bell: ringBell,
   coop_door: coopDoor,
   talk_henny: talkHenny,
   photo_henny: photoHenny,
@@ -933,7 +973,7 @@ function onItem(s, id, out) {
 
 function onSpot(s, id, out, asGo) {
   const room = ROOMS[s.room];
-  const spot = room && room.spots.find((entry) => entry.id === id);
+  const spot = resolveSpot(s, room && room.spots.find((entry) => entry.id === id));
   if (!spot || !visible(s, spot)) {
     out.lines.push(line("Nothing there."));
     return;

@@ -3,6 +3,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { ROOMS } from "../data/script.js";
 import { behind, depthHeight, inArea, roomView } from "../js/walk.js";
+import { readFileSync } from "node:fs";
+import { png } from "./png-helper.js";
+
+const manifest = JSON.parse(readFileSync(new URL("../art/manifest.json", import.meta.url)));
 
 const within = (rect, [x, y]) => x >= rect[0] && x < rect[0] + rect[2] && y >= rect[1] && y < rect[1] + rect[3];
 const spot = (room, id) => ROOMS[room].spots.find((s) => s.id === id);
@@ -157,4 +161,30 @@ test("pavilion: the stage cues ride on the story lines (key lift, padlock, Corny
   for (const cue of ["pip_lift", "pip_unlock", "corny_turn", "littlehen"]) assert.match(src, new RegExp(`cue: "${cue}"`));
   assert.equal(line("x", { cue: "pip_lift" }).cue, "pip_lift");
   assert.equal(line("x").cue, null);
+});
+
+test("fence: he sits on the top rail in his own style (sit + sit-down frames cut from his h32 front frame)", () => {
+  const cfg = ROOMS.fence.poseAt.squat;
+  assert.equal(cfg.seat, 91, "seat line is the top rail");
+  const read = (id) => png(`art/pixel/sprite/${id}.png`);
+  const front = read("rooster-front-h32");
+  const pal = new Set();
+  for (let y = 0; y < front.h; y++) for (let x = 0; x < front.w; x++) { const q = front.px(x, y); if (q[3]) pal.add(q.slice(0, 3).join()); }
+  for (const id of [cfg.sprite, cfg.via]) {
+    const a = manifest.assets[`sprite/${id}`];
+    assert.ok(a && a.seat > 0 && a.seat < a.size[1], `${id}: seat row in the manifest`);
+    const im = read(id);
+    assert.deepEqual([im.w, im.h], a.size);
+    for (let y = 0; y < im.h; y++) for (let x = 0; x < im.w; x++) {
+      const q = im.px(x, y);
+      assert.ok(q[3] === 0 || q[3] === 255, `${id}: hard alpha`);
+      if (q[3]) assert.ok(pal.has(q.slice(0, 3).join()), `${id} (${x},${y}): colour from his front frame`);
+    }
+    // feet below the rail, head above it: a seated figure, not floating, not sunk through the rail
+    const top = cfg.seat - a.seat, bottom = cfg.seat + (a.size[1] - a.seat);
+    assert.ok(top > 60 && bottom > cfg.seat + 4 && bottom < 110, `${id}: spans ${top}-${bottom}`);
+  }
+  // it stays between the left posts
+  const w = manifest.assets[`sprite/${cfg.sprite}`].size[0];
+  assert.ok(cfg.x - w / 2 >= 52 && cfg.x + w / 2 <= 92, "between the posts");
 });

@@ -1,6 +1,7 @@
 // Walkable areas + alternate background states. Pure functions (no DOM) so node tests can cover them.
 // A room may define `walk: [[ [x, y], ... ], ...]`: one or more polygons in logical px (feet positions).
-// A room may define `states: [{ flag, plate, walk }]`: when game flag `flag` is set, that plate and walk area win
+// A room may define `states: [{ flag, plate, walk, spriteTint }]`: when game flag `flag` is set, that plate, walk area
+// and sprite tint win
 // (later entries win over earlier ones).
 
 export function inPoly(poly, x, y) {
@@ -122,9 +123,9 @@ export function findPath(area, from, to, W = 320, H = 180) {
 
 // Active plate + walk area for a room given the game flags.
 export function roomView(room, flags = {}) {
-  let view = { plate: room.plate, walk: room.walk || null, state: null };
+  let view = { plate: room.plate, walk: room.walk || null, state: null, spriteTint: room.spriteTint || null };
   for (const st of room.states || []) {
-    if (flags[st.flag]) view = { plate: st.plate || view.plate, walk: st.walk || view.walk, state: st.flag };
+    if (flags[st.flag]) view = { plate: st.plate || view.plate, walk: st.walk || view.walk, state: st.flag, spriteTint: st.spriteTint || view.spriteTint };
   }
   return view;
 }
@@ -222,9 +223,11 @@ function speaking(c, line, lastAct, speakers) {
 export function castFrame(c, { line = null, since = Infinity, now = 0, lastAct = null, speakers = {} } = {}) {
   const cue = line && line.cue && c.cues && c.cues[line.cue];
   if (cue && typeof cue === "string") return { sprite: cue, at: c.at };
+  if (cue && !cue.walk) return { sprite: cue.sprite, at: cue.at || c.at }; // a held pose somewhere else: { sprite, at }
   if (cue) {
     const t = Math.min(1, Math.max(0, since) / (cue.ms || CUE_WALK_MS));
-    const at = [c.at[0] + (cue.to[0] - c.at[0]) * t, c.at[1] + (cue.to[1] - c.at[1]) * t];
+    const from = cue.from || c.at; // a walk can start where an earlier cue left him (`from`)
+    const at = [from[0] + (cue.to[0] - from[0]) * t, from[1] + (cue.to[1] - from[1]) * t];
     if (t >= 1) return { sprite: cue.end || cue.walk[0], at };
     return { sprite: cue.walk[Math.floor(Math.max(0, since) / 160) % cue.walk.length], at };
   }
@@ -241,7 +244,81 @@ export function castSprites(c) {
   for (const f of c.frames || []) out.add(f);
   for (const cue of Object.values(c.cues || {})) {
     if (typeof cue === "string") out.add(cue);
+    else if (!cue.walk) out.add(cue.sprite);
     else { for (const f of cue.walk) out.add(f); if (cue.end) out.add(cue.end); }
   }
   return [...out];
+}
+
+/* ---------- Stand beside, not in front (Arlong, 2026-10-18) ----------
+ * To use a hotspot he walks to its left or right side, never into it: his idle side frame, facing the object, must
+ * not overlap the hotspot's core rect (spot.core, else its rect; HERO_ALLOW px of overlap is fine). He prefers the
+ * side he is coming from, else the nearest open side, and turns to face the object when he arrives. Characters get
+ * conversational distance on top. Exits keep their own stand point (he walks *into* those).
+ * Overrides per spot: `beside: false` (keep `stand`, e.g. he has to be on top of it), `side: "l" | "r"` (only that
+ * side), `core: [x, y, w, h]` (the solid part, when the clickable rect is generous), `stand` (its y is the feet line
+ * to try first). */
+export const HERO_REACH = 0.2; // the idle side frame's beak/glove reach in front of his feet, as a share of his height
+export const HERO_BACK = 0.39; // ...and the tail behind him
+export const HERO_ALLOW = 2; // px his frame may overlap a hotspot's core rect
+const TALK_GAP = 0.1; // extra gap to a character, share of his height
+
+export function heroHeightAt(room, y) {
+  return room.hero.depth ? depthHeight(room.hero, y) : room.hero.height || 64;
+}
+
+// His frame's box at feet (x, y) facing `face` ("l" | "r"): [x0, y0, x1, y1].
+export function heroBox(room, x, y, face) {
+  const h = heroHeightAt(room, y);
+  const fwd = HERO_REACH * h, back = HERO_BACK * h;
+  return face === "r" ? [x - back, y - h, x + fwd, y] : [x - fwd, y - h, x + back, y];
+}
+
+function overlaps(box, core, allow = HERO_ALLOW) {
+  const [cx, cy, cw, ch] = core;
+  return box[0] < cx + cw - allow && box[2] > cx + allow && box[1] < cy + ch - allow && box[3] > cy + allow;
+}
+
+// Other characters' hotspot rects he shouldn't plant himself in front of while using something else.
+export function castRects(room, except) {
+  const ids = new Set((room.cast || []).map((c) => c.spot).filter(Boolean));
+  return room.spots.filter((s) => ids.has(s.id) && s.id !== except).map((s) => s.core || s.rect);
+}
+
+export function standFor(room, spot, { walk, from, cast = room.cast || [], avoid = castRects(room, spot.id) } = {}) {
+  const fallback = spot.stand || [spot.rect[0] + spot.rect[2] / 2, spot.rect[1] + spot.rect[3]];
+  const core = spot.core || spot.rect;
+  const mid = core[0] + core[2] / 2;
+  const faceTo = (x) => (Math.abs(mid - x) < 2 ? null : mid > x ? "r" : "l");
+  const [fx0, fy0] = walk ? clampToArea(walk, ...fallback) : fallback;
+  if (spot.exit || spot.beside === false || !walk) return { x: fx0, y: fy0, face: faceTo(fx0), rule: "fixed" };
+  const facing0 = faceTo(fx0) || "r";
+  if (!overlaps(heroBox(room, fx0, fy0, facing0), core)) return { x: fx0, y: fy0, face: faceTo(fx0), rule: "clear" };
+  const npc = spot.npc || cast.some((c) => c.spot === spot.id);
+  // the side he comes from first (else the side his old stand point leaned to), then the other; each down a few feet lines
+  const sides = spot.side ? [spot.side] : (from ? from[0] < mid : fx0 < mid) ? ["l", "r"] : ["r", "l"];
+  const ys = [0, 4, -4, 8, -8, 12, 16, 20, 24].map((d) => fy0 + d);
+  let spare = null;
+  for (const side of sides) {
+    for (const y of ys) {
+      const h = heroHeightAt(room, y);
+      const gap = (npc ? TALK_GAP * h : 0) + 0.5;
+      const reach = HERO_REACH * h;
+      const x = side === "l" ? core[0] + HERO_ALLOW - reach - gap : core[0] + core[2] - HERO_ALLOW + reach + gap;
+      const [px, py] = clampToArea(walk, x, y);
+      const face = side === "l" ? "r" : "l";
+      if (Math.hypot(px - x, py - y) > 1.5) {
+        // pushed by the walk area's edge: still fine if the clamped point clears the object from the same side
+        if (overlaps(heroBox(room, px, py, face), core)) continue;
+        if ((side === "l" && px > mid) || (side === "r" && px < mid)) continue;
+      }
+      const cand = { x: px, y: py, face, side, rule: npc ? "talk" : "beside" };
+      // don't stand in front of somebody else (the bell's right side is Ned): keep looking, remember it as a last resort
+      const box = heroBox(room, px, py, face);
+      if (avoid.some((r) => overlaps(box, r, Math.min(r[2], r[3]) * 0.25))) { spare = spare || cand; continue; }
+      return cand;
+    }
+  }
+  if (spare) return spare;
+  return { x: fx0, y: fy0, face: faceTo(fx0), rule: "blocked" };
 }

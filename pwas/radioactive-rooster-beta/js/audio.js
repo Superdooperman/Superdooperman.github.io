@@ -55,6 +55,11 @@ function synth(kind) {
     for (let i = 0; i < 6; i += 1) tone(1800, now + i * 0.08, 0.03, "square", 0.05);
   } else if (kind === "click") {
     for (let i = 0; i < 3; i += 1) tone(880, now + i * 0.18, 0.05, "square", 0.06);
+  } else if (kind === "ding") {
+    // service bell: a bright struck partial over a softer fundamental, long ring-out
+    tone(1568, now, 0.9, "sine", 0.09);
+    tone(3136, now, 0.35, "sine", 0.03);
+    tone(784, now, 0.6, "triangle", 0.03);
   } else if (kind === "blip") {
     tone(660, now, 0.08, "square", 0.05);
   } else if (kind === "pah-kaw") {
