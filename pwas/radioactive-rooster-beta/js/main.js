@@ -233,8 +233,17 @@ function render() {
       hit.style.height = pct(spot.rect[3], "y");
       hit.dataset.id = spot.id;
       hit.setAttribute("aria-label", preview(state, spot));
-      hit.addEventListener("pointerenter", () => setCaption(preview(state, spot), true));
+      // Desktop hover preview. The scene re-renders after a click, so the fresh button under the cursor fires
+      // pointerenter again; ui.hoverLock keeps that from hiding the reply until the pointer actually leaves.
+      hit.addEventListener("pointerenter", () => {
+        if (ui.hoverLock === spot.id) return;
+        setCaption(preview(state, spot), true);
+      });
+      hit.addEventListener("pointerleave", () => {
+        if (ui.hoverLock === spot.id) ui.hoverLock = null;
+      });
       hit.addEventListener("click", () => {
+        ui.hoverLock = spot.id;
         const [sx, sy] = spot.stand || [spot.rect[0] + spot.rect[2] / 2, spot.rect[1] + spot.rect[3]];
         walkTo(room, sx, sy); // nearest reachable point (or the spot's own `stand` point)
         ui.lastAct = { spot: spot.id, verb: state.pending ? "item" : state.verb };
