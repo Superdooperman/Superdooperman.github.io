@@ -205,6 +205,19 @@ button:focus-visible {
   padding: 8px 10px;
 }
 
+/* LucasArts-style sentence line: the hover preview ("Take the bucket.") lives here, never in the caption */
+.sentence {
+  margin-top: 8px;
+  min-height: 1.35em;
+  line-height: 1.35;
+  font-size: 0.95rem;
+  color: #c9b8d8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sentence.hot { color: var(--yolk); }
+
 .verbs, .exits, .inv, .title-actions {
   display: flex;
   flex-wrap: wrap;

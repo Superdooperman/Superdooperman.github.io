@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { ROOMS } from "../data/script.js";
 import { png } from "./png-helper.js";
-import { actorZ, behind, clampToArea, depthHeight, inArea, occluderAsset, occluderBase, occluderZ, roomView, DEPTH_MAX, DEPTH_MIN, DEPTH_STEP } from "../js/walk.js";
+import { actorZ, behind, clampToArea, clearLine, depthHeight, findPath, inArea, occluderAsset, occluderBase, occluderZ, roomView, DEPTH_MAX, DEPTH_MIN, DEPTH_STEP } from "../js/walk.js";
 
 const manifest = JSON.parse(readFileSync(new URL("../art/manifest.json", import.meta.url)));
 const byLegacy = new Map(Object.entries(manifest.assets).map(([id, a]) => [a.legacy, id]));
@@ -106,7 +106,7 @@ test("occluders: cutouts exist for every plate state, match the plate pixels, an
       }
     }
   }
-  assert.equal(checked, 21); // pavilion x2 plates x (4 + 3 rope layers), midway booth, rooftop bucket, fence crate + end post, store counter, wkuk booth, gate front
+  assert.equal(checked, 22); // pavilion x2 plates x (4 + 3 rope layers), midway booth, rooftop bucket + hatch, fence crate + end post, store counter, wkuk booth, gate front
 });
 
 test("occluders: z order draws scenery over an actor exactly when his feet are behind its base", () => {
@@ -164,4 +164,38 @@ test("fence: walk area stays off the fence, crate, buildings and ditch, but reac
     const [x, y] = clampToArea(F.walk, ...(sp.stand || [sp.rect[0] + sp.rect[2] / 2, sp.rect[1] + sp.rect[3]]));
     assert.ok(inArea(F.walk, x, y), `${sp.id} reachable`);
   }
+});
+
+/* ---------- Rooftop hatch: a raised box, sliced cutout, routed round ---------- */
+test("rooftop hatch: sliced cutout follows its front edge, he never stands on it, and walks round it", () => {
+  const Q = ROOMS.hq, hatch = Q.occluders.find((o) => o.id === "hatch");
+  assert.ok(hatch && hatch.slices, "hatch is a sliced occluder");
+  const fg = png(`art/pixel/${occluderAsset(plateId(Q.plate), "hatch")}.png`);
+  let covered = 0, total = 0;
+  for (let y = 0; y < 180; y++) for (let x = 0; x < 320; x++) if (fg.px(x, y)[3]) { total++; if (hatch.slices.some(([a, b]) => x >= a && x < b)) covered++; }
+  assert.equal(covered, total, "slices cover every hatch pixel");
+  for (const [x0, x1, b] of hatch.slices) {
+    let low = 0;
+    for (let x = x0; x < x1; x++) for (let y = 0; y < 180; y++) if (fg.px(x, y)[3]) low = Math.max(low, y);
+    assert.ok(Math.abs(low - b) <= 3, `slice ${x0}-${x1}: base ${b} near its lowest row ${low}`);
+    assert.ok(b <= hatch.base, "slice bases never exceed the hatch base");
+  }
+  // Never on the lid: a walkable feet point may touch the hatch outline only along its back rim (<= 5 rows in from
+  // the top of that column: the box stands ~7 px tall, so that's still floor behind it and the cutout hides his
+  // boots), never further into the lid or faces.
+  for (let y = 0; y < 180; y += 0.5) for (let x = 0; x < 320; x += 0.5) {
+    if (!inArea(Q.walk, x, y)) continue;
+    const xi = Math.floor(x), yi = Math.floor(y);
+    let depth = 0;
+    for (let yy = 0; yy <= yi; yy++) if (fg.px(xi, yy)[3]) depth++;
+    assert.ok(!fg.px(xi, yi)[3] || depth <= 5, `(${x},${y}) is walkable but ${depth} px into the hatch`);
+  }
+  // Every hotspot stand point is walkable, and left <-> right goes round the hatch, never through it.
+  for (const s of Q.spots) if (s.stand) assert.ok(inArea(Q.walk, ...s.stand), `${s.id} stand point walkable`);
+  assert.ok(!clearLine(Q.walk, [100, 165], [285, 160]), "the straight line crosses the hatch");
+  const path = findPath(Q.walk, [100, 165], [285, 160]);
+  let at = [100, 165];
+  for (const p of path) { assert.ok(clearLine(Q.walk, at, p), `leg to ${p} stays walkable`); at = p; }
+  assert.deepEqual(at, [285, 160]);
+  assert.ok(path.some(([, y]) => y < 140), "goes behind the hatch");
 });

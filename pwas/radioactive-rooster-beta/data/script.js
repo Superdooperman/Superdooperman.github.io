@@ -394,10 +394,24 @@ export const ROOMS = {
     id: "hq",
     name: "Rooftop coop",
     plate: "bg-hq.jpg",
-    hero: { at: [205, 156], height: 96, depth: { horizon: 99 } }, // depth: height scales with feet y, 96 at y 156 (hatch lid perspective gives horizon ~99)
-    walk: [[[40, 150], [302, 150], [302, 166], [262, 168], [255, 177], [40, 177]]], // floor in front of the door/board; crate (x<34) off limits; he can step behind the bucket (y<173), the hatch is floor-level // walking Rooster: feet [x, y], walk x range, scene height (px). Door 92 px (y 55-147): his hood (~84) stands just under it; starts on the hatch he climbed out of
+    hero: { at: [122, 156], height: 96, depth: { horizon: 99 } }, // depth: height scales with feet y, 96 at y 156 (hatch lid perspective gives horizon ~99); starts beside the hatch he climbed out of
+    // Walking Rooster: feet [x, y]. Door 92 px (y 55-147): his hood (~84) stands just under it. Crate (x<34) off limits.
+    // The roof hatch is a raised box (x149-255, front corner at the plate bottom): never on it. He goes round it behind,
+    // on the strip of roof between the hatch and the parapet (y>=134.5, in front of the clothes-line post), where the
+    // hatch cutout covers his boots; findPath (js/walk.js) routes him round. He can step behind the bucket (y<173).
+    walk: [
+      [[40, 150], [143, 150], [146, 154], [146, 160.5], [200, 177], [40, 177]], // left: door, board, in front of the hatch's left face
+      [[143, 150], [146, 140], [152, 134.5], [258, 134.5], [262, 150], [258, 152], [254, 150.5], [230, 143.3], [204, 135.5],
+        [200, 135.9], [185, 141.3], [166, 148], [150, 154], [146, 154]], // behind the hatch
+      [[258, 150], [302, 150], [302, 166], [262, 168], [255, 177], [227, 177], [258.5, 154]], // right: behind/beside the bucket, in front of the hatch's right face
+    ],
     sign: { art: "fx/neon-hq", rect: [293,  53,  27,  18], frames: [6, 7, 8, 9, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (rooftop board on the distant town house); per-letter glow frames (tools/neon/paint_neon.py)
-    occluders: [{ id: "bucket", base: 173 }], // fg/hq--bucket: drawn over him while his feet are behind its base (tools/bg/occluders.py)
+    occluders: [
+      { id: "bucket", base: 173 },
+      // fg/hq--hatch, drawn in column slices [x0, x1, base]: each slice's base is that column's front edge
+      { id: "hatch", base: 177, slices: [[149, 158, 159], [158, 167, 162], [167, 176, 165], [176, 185, 168], [185, 194, 171], [194, 203, 174],
+        [203, 212, 177], [212, 221, 177], [221, 230, 174], [230, 239, 167], [239, 248, 161], [248, 256, 156]] },
+    ], // fg/hq--bucket: drawn over him while his feet are behind its base (tools/bg/occluders.py)
     exits: [{ spot: "hatch", label: "Down the hatch" }],
     spots: [
       spot({
@@ -416,6 +430,7 @@ export const ROOMS = {
         id: "board",
         name: "conspiracy board",
         rect: [98, 80, 57, 58],
+        stand: [126, 152], // in front of the hatch line
         look: { special: "look_board" },
         useItem: { "*": { special: "pin_board" } },
         talk: "He asks the board who did it. The red string points at the goat. It always points at the goat.",
@@ -427,6 +442,7 @@ export const ROOMS = {
         id: "door",
         name: "coop door",
         rect: [56, 55, 38, 92],
+        stand: [75, 152], // in front of the hatch line
         look: "His coop. Headquarters, autograph storage, and a cot. A lamp's on inside like somebody's home. Somebody is: him.",
         use: { special: "coop_photo" },
         take: { special: "coop_photo" },
@@ -438,6 +454,7 @@ export const ROOMS = {
         id: "lamp",
         name: "coop lamp",
         rect: [74, 26, 22, 18],
+        stand: [85, 152], // in front of the hatch line
         whenNot: "got_bulb",
         look: "A lamp over the door with a spare bulb clipped to the shade. Rad-Safe Rule 4: always carry a spare.",
         take: {
@@ -471,6 +488,7 @@ export const ROOMS = {
         id: "laundry",
         name: "laundry line",
         rect: [119, 30, 36, 36],
+        stand: [137, 152], // in front of the hatch line
         look: "Three towels on the line. One is monogrammed in gold thread. He has never explained it to anyone, and nobody has ever seen it but the moon.",
         take: "Not in the suit. A hero does not carry a towel. (A hero should, honestly.)",
         talk: "The towels flap. They know things.",
@@ -482,6 +500,7 @@ export const ROOMS = {
         id: "tower",
         name: "water tower",
         rect: [158, 4, 52, 70],
+        stand: [140, 152], // in front of the hatch line
         look: "The water tower. The left eye is looking at it. The right eye is looking at a different water tower.",
         talk: "The tower keeps his secrets, mostly by being a tower.",
         push: "It's a water tower.",
@@ -493,6 +512,7 @@ export const ROOMS = {
         id: "hawk",
         name: "red neon hawk",
         rect: [232, 68, 22, 24],
+        stand: [262, 152], // in front of the hatch line
         look: { special: "look_hawk_far" },
         talk: "He doesn't call across town to it. He thinks about it, though.",
         take: "It's across town, it's neon, and it isn't his. Three strikes.",
@@ -504,6 +524,7 @@ export const ROOMS = {
         id: "wheel",
         name: "the fair",
         rect: [258, 52, 36, 38],
+        stand: [280, 152], // in front of the hatch line
         look: "The County Fair. One ferris wheel, a thousand bulbs, and a fry-off at midnight. Six hours. Plenty of time to be good at something.",
         talk: "\"Hang on, fair. I'm coming.\" Six hours to midnight. The wheel turns like it heard him. It didn't.",
         take: "Uhhh, the whole fair? He checks his belt. The belt says no.",
@@ -515,6 +536,7 @@ export const ROOMS = {
         id: "hatch",
         name: "roof hatch",
         rect: [152, 133, 104, 38],
+        stand: [170, 172], // in front of its left face, never on the lid
         exit: true,
         look: "The hatch down to the stairwell and the fire escape. The farm road is at the bottom.",
         talk: "The hatch doesn't do banter.",

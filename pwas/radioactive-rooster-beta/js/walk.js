@@ -59,6 +59,67 @@ export function stepToward(area, from, to, dist) {
   return clampToArea(area, nx, ny);
 }
 
+// Walk route: [to] when the straight line stays inside the area, else waypoints around whatever blocks it
+// (a 1 px grid search over the area, then string-pulled to the fewest straight legs). Used when the area has a hole
+// or a deep notch (the rooftop hatch), where sliding along an edge would get him stuck at a corner.
+export function clearLine(area, a, b) {
+  const n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1])));
+  for (let i = 0; i <= n; i++) if (!inArea(area, a[0] + ((b[0] - a[0]) * i) / n, a[1] + ((b[1] - a[1]) * i) / n)) return false;
+  return true;
+}
+
+const GRIDS = new WeakMap();
+export function findPath(area, from, to, W = 320, H = 180) {
+  if (!area || !area.length) return [to];
+  const start = clampToArea(area, from[0], from[1]);
+  const goal = clampToArea(area, to[0], to[1]);
+  if (clearLine(area, start, goal)) return [goal];
+  let ok = GRIDS.get(area);
+  if (!ok) {
+    ok = new Uint8Array(W * H);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) ok[y * W + x] = inArea(area, x + 0.5, y + 0.5) ? 1 : 0;
+    GRIDS.set(area, ok); // the walk area arrays are static room data: build each grid once
+  }
+  const cell = ([x, y]) => {
+    let cx = Math.max(0, Math.min(W - 1, Math.floor(x))), cy = Math.max(0, Math.min(H - 1, Math.floor(y)));
+    if (ok[cy * W + cx]) return cy * W + cx;
+    let best = -1, bd = Infinity; // nearest walkable cell
+    for (let i = 0; i < W * H; i++) if (ok[i]) { const d = Math.hypot((i % W) - cx, Math.floor(i / W) - cy); if (d < bd) { bd = d; best = i; } }
+    return best;
+  };
+  const s = cell(start), g = cell(goal);
+  if (s < 0 || g < 0) return [goal];
+  const prev = new Int32Array(W * H).fill(-1);
+  prev[s] = s;
+  const q = [s];
+  for (let h = 0; h < q.length && prev[g] < 0; h++) {
+    const i = q[h], x = i % W, y = (i - x) / W;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+      const nx = x + dx, ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+      const j = ny * W + nx;
+      if (!ok[j] || prev[j] >= 0) continue;
+      prev[j] = i;
+      q.push(j);
+    }
+  }
+  if (prev[g] < 0) return [goal]; // unreachable: fall back to sliding
+  const raw = [];
+  for (let i = g; i !== s; i = prev[i]) raw.push([(i % W) + 0.5, Math.floor(i / W) + 0.5]);
+  raw.reverse();
+  raw[raw.length - 1] = goal;
+  const out = [];
+  let at = start, k = 0;
+  while (k < raw.length) {
+    let far = k;
+    for (let j = raw.length - 1; j > k; j--) if (clearLine(area, at, raw[j])) { far = j; break; }
+    out.push(raw[far]);
+    at = raw[far];
+    k = far + 1;
+  }
+  return out;
+}
+
 // Active plate + walk area for a room given the game flags.
 export function roomView(room, flags = {}) {
   let view = { plate: room.plate, walk: room.walk || null, state: null };

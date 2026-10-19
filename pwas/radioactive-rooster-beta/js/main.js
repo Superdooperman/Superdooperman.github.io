@@ -1,7 +1,7 @@
 import { ENDINGS, NAMES, ROOMS, SCENE, SPEAKER, TITLE } from "../data/script.js";
 import { artMode, artUrl, assetInfo, fancyCount, initArt, onArtChange, setArtMode } from "./art.js";
 import { playBed, playCue } from "./audio.js";
-import { clampToArea, parseFlagOverride, roomView, stepToward, depthHeight, actorZ, occluderZ, occluderAsset, occluderBase, spriteFilter, castFrame } from "./walk.js";
+import { clampToArea, findPath, parseFlagOverride, roomView, stepToward, depthHeight, actorZ, occluderZ, occluderAsset, occluderBase, spriteFilter, castFrame } from "./walk.js";
 import { act, choicesFor, HERO, ITEMS, maxHeat, newGame, preview, signLetters, signLevel, spotsFor, vatState, visible } from "./logic.js";
 
 const SAVE_KEY = "rr-yolk-saves";
@@ -203,14 +203,19 @@ function render() {
     for (const o of room.occluders) {
       const id = occluderAsset(view.plate, o.id);
       if (!assetInfo(id)) continue;
-      const node = el("img", "fg");
-      node.alt = "";
-      node.dataset.id = o.id;
-      const base = occluderBase(o, view.plate);
-      node.dataset.base = base;
-      node.style.zIndex = occluderZ(base);
-      mount(node, id);
-      world.append(node);
+      // A sloped object (the rooftop hatch, seen corner-on) is drawn as vertical slices of the one cutout, each with
+      // the base line of its own column, so he is behind the near corner and in front of the far sides.
+      const parts = o.slices ? o.slices.map(([x0, x1, b]) => ({ x0, x1, base: b })) : [{ base: occluderBase(o, view.plate) }];
+      for (const part of parts) {
+        const node = el("img", "fg");
+        node.alt = "";
+        node.dataset.id = o.id;
+        node.dataset.base = part.base;
+        node.style.zIndex = occluderZ(part.base);
+        if (part.x0 !== undefined) node.style.clipPath = `inset(0 ${((SCENE.w - part.x1) / SCENE.w) * 100}% 0 ${(part.x0 / SCENE.w) * 100}%)`;
+        mount(node, id);
+        world.append(node);
+      }
     }
   }
 
@@ -233,17 +238,11 @@ function render() {
       hit.style.height = pct(spot.rect[3], "y");
       hit.dataset.id = spot.id;
       hit.setAttribute("aria-label", preview(state, spot));
-      // Desktop hover preview. The scene re-renders after a click, so the fresh button under the cursor fires
-      // pointerenter again; ui.hoverLock keeps that from hiding the reply until the pointer actually leaves.
-      hit.addEventListener("pointerenter", () => {
-        if (ui.hoverLock === spot.id) return;
-        setCaption(preview(state, spot), true);
-      });
-      hit.addEventListener("pointerleave", () => {
-        if (ui.hoverLock === spot.id) ui.hoverLock = null;
-      });
+      // Hover preview goes to the sentence line (LucasArts style), never into the caption: the reply in #caption
+      // only changes on a click/tap or when the queue advances.
+      hit.addEventListener("pointerenter", () => setSentence(preview(state, spot)));
+      hit.addEventListener("pointerleave", () => setSentence(null));
       hit.addEventListener("click", () => {
-        ui.hoverLock = spot.id;
         const [sx, sy] = spot.stand || [spot.rect[0] + spot.rect[2] / 2, spot.rect[1] + spot.rect[3]];
         walkTo(room, sx, sy); // nearest reachable point (or the spot's own `stand` point)
         ui.lastAct = { spot: spot.id, verb: state.pending ? "item" : state.verb };
@@ -322,6 +321,13 @@ function render() {
     }));
     cabinet.append(row);
   }
+
+  // Sentence line: what a click would do ("Take the bucket."), between the caption and the verbs.
+  const sentence = el("div", "sentence");
+  sentence.id = "sentence";
+  sentence.setAttribute("aria-live", "off");
+  sentence.textContent = sentenceIdle(state);
+  cabinet.append(sentence);
 
   const verbs = el("div", "verbs");
   VERBS.forEach(([id, label], index) => {
@@ -475,12 +481,15 @@ function walkTo(room, x, y) {
   heroSync(room);
   const area = heroArea(room);
   const wantY = y === undefined ? hero.y : y;
-  if (area) [hero.tx, hero.ty] = clampToArea(area, x, wantY);
-  else {
+  if (area) {
+    hero.path = findPath(area, [hero.x, hero.y], [x, wantY]); // waypoints around a hole (the rooftop hatch)
+    [hero.tx, hero.ty] = hero.path.shift();
+  } else {
+    hero.path = [];
     const [lo, hi] = room.hero.walk || [0, SCENE.w];
     [hero.tx, hero.ty] = [Math.max(lo, Math.min(hi, x)), hero.y];
   }
-  if (Math.hypot(hero.tx - hero.x, hero.ty - hero.y) < 2) return;
+  if (Math.hypot(hero.tx - hero.x, hero.ty - hero.y) < 2 && !(hero.path && hero.path.length)) return;
   if (Math.abs(hero.tx - hero.x) >= 1) hero.face = hero.tx > hero.x ? "r" : "l";
   else if (hero.face === "front") hero.face = "r";
   if (hero.walking) return;
@@ -505,7 +514,10 @@ function heroTick(now) {
   [hero.x, hero.y] = area ? stepToward(area, before, [hero.tx, hero.ty], stepPx) : [hero.tx, hero.ty];
   const left = Math.hypot(hero.tx - hero.x, hero.ty - hero.y);
   const moved = Math.hypot(hero.x - before[0], hero.y - before[1]);
-  if (left < 0.5 || (dt > 0 && moved < stepPx * 0.05)) hero.walking = false; // arrived, or slid into an edge
+  if (left < 0.5 && hero.path && hero.path.length) {
+    [hero.tx, hero.ty] = hero.path.shift(); // next leg of the route
+    if (Math.abs(hero.tx - hero.x) >= 1) hero.face = hero.tx > hero.x ? "r" : "l";
+  } else if (left < 0.5 || (dt > 0 && moved < stepPx * 0.05)) hero.walking = false; // arrived, or slid into an edge
   const node = document.querySelector(".hero");
   if (node) placeHero(node, room);
   if (hero.walking) requestAnimationFrame(heroTick);
@@ -696,11 +708,18 @@ function atChoice() {
   return !currentLine() || ui.index >= ui.queue.length - 1;
 }
 
-function setCaption(text, hover) {
-  const node = document.querySelector("#caption");
-  if (!node) return;
-  if (hover && currentLine() && ui.index < ui.queue.length - 1) return;
-  if (hover) node.textContent = text;
+function sentenceIdle(state) {
+  if (state.mode === "choice" || state.mode === "end") return "";
+  if (state.pending && ITEMS[state.pending]) return `Use the ${ITEMS[state.pending].name} on...`;
+  const verb = VERBS.find(([id]) => id === state.verb);
+  return verb ? verb[1] : "";
+}
+
+function setSentence(text) {
+  const node = document.querySelector("#sentence");
+  if (!node || !ui.state) return;
+  node.textContent = text || sentenceIdle(ui.state);
+  node.classList.toggle("hot", !!text);
 }
 
 function el(tag, className, text) {

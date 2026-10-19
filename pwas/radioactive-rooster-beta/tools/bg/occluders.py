@@ -32,6 +32,12 @@ OCC = {
         'bucket': (173, [[(260, 141), (263, 136), (272, 134), (284, 134), (285, 127), (288.5, 127), (288.5, 134),
                           (296, 136), (299, 141), (296, 150), (293, 166), (290.5, 173), (280, 175.5), (270, 174.5),
                           (266, 170), (263, 150)]]),
+        # roof hatch: a raised box seen corner-on (lid + the two front faces). Its front edge slopes from the left corner
+        # (y158) down to the near corner (y177) and back up to the right corner (y153), so data/script.js draws it in
+        # vertical slices, each with its own column's base line (room.occluders[].slices).
+        'hatch': (177, [[(149.5, 150), (165, 144.5), (184, 138), (201, 131.5), (204, 131.5), (222, 137), (240, 142),
+                         (254, 146.5), (254.5, 153.5), (240, 163), (221, 176.5), (211, 177.5), (205, 176), (185, 169.5),
+                         (165, 163), (149.5, 158)]]),
     },
     'fence': {
         # Henny's checkpoint crate (he can slip behind it, between the crate and the fence)

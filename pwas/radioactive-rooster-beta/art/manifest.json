@@ -3857,6 +3857,19 @@
     56
    ],
    "source": "tools/sprites/cut_cast.py"
+  },
+  "fg/hq--hatch": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 177,
+   "source": "tools/bg/occluders.py (cut from bg/hq)"
   }
  }
 }
