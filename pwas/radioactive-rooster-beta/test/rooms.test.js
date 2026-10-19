@@ -163,28 +163,32 @@ test("pavilion: the stage cues ride on the story lines (key lift, padlock, Corny
   assert.equal(line("x").cue, null);
 });
 
-test("fence: he sits on the top rail in his own style (sit + sit-down frames cut from his h32 front frame)", () => {
+test("fence: he sits on the top rail in Arlong's painted sit frames (side sit per facing, hop beat, front sit), seated on the rail", () => {
   const cfg = ROOMS.fence.poseAt.squat;
   assert.equal(cfg.seat, 91, "seat line is the top rail");
+  const h = depthHeight(ROOMS.fence.hero, cfg.standY);
   const read = (id) => png(`art/pixel/sprite/${id}.png`);
-  const front = read("rooster-front-h32");
-  const pal = new Set();
-  for (let y = 0; y < front.h; y++) for (let x = 0; x < front.w; x++) { const q = front.px(x, y); if (q[3]) pal.add(q.slice(0, 3).join()); }
-  for (const id of [cfg.sprite, cfg.via]) {
+  const side = manifest.assets[`sprite/rooster-side-r-h${h}`];
+  const ids = [`${cfg.sit}-r`, `${cfg.sit}-l`, `${cfg.hop}-r`, `${cfg.hop}-l`, cfg.front].map((k) => `${k}-h${h}`);
+  for (const id of ids) {
     const a = manifest.assets[`sprite/${id}`];
     assert.ok(a && a.seat > 0 && a.seat < a.size[1], `${id}: seat row in the manifest`);
     const im = read(id);
     assert.deepEqual([im.w, im.h], a.size);
-    for (let y = 0; y < im.h; y++) for (let x = 0; x < im.w; x++) {
-      const q = im.px(x, y);
-      assert.ok(q[3] === 0 || q[3] === 255, `${id}: hard alpha`);
-      if (q[3]) assert.ok(pal.has(q.slice(0, 3).join()), `${id} (${x},${y}): colour from his front frame`);
-    }
-    // feet below the rail, head above it: a seated figure, not floating, not sunk through the rail
+    for (let y = 0; y < im.h; y++) for (let x = 0; x < im.w; x++) { const q = im.px(x, y); assert.ok(q[3] === 0 || q[3] === 255, `${id}: hard alpha`); }
+    // same build as his standing frame (head + body), boots below the rail, head above it: seated, not floating or sunk
+    assert.ok(Math.abs(im.h - side.size[1]) <= 4, `${id}: ${im.h}px tall vs his standing ${side.size[1]}`);
     const top = cfg.seat - a.seat, bottom = cfg.seat + (a.size[1] - a.seat);
-    assert.ok(top > 60 && bottom > cfg.seat + 4 && bottom < 110, `${id}: spans ${top}-${bottom}`);
+    assert.ok(top > 55 && bottom > cfg.seat + 4 && bottom < 112, `${id}: spans ${top}-${bottom}`);
+    // his seat row is solid where he sits on the rail (no float): opaque pixels on the seat row, inside his outline
+    let solid = 0;
+    for (let x = 0; x < im.w; x++) if (im.px(x, Math.min(im.h - 1, a.seat - 1))[3]) solid++;
+    if (!id.includes("hop")) assert.ok(solid >= 4, `${id}: something on the rail at the seat row (${solid}px)`);
+    assert.ok(cfg.x - a.size[0] / 2 >= 50 && cfg.x + a.size[0] / 2 <= 95, `${id}: between the posts`);
   }
-  // it stays between the left posts
-  const w = manifest.assets[`sprite/${cfg.sprite}`].size[0];
-  assert.ok(cfg.x - w / 2 >= 52 && cfg.x + w / 2 <= 92, "between the posts");
+  // the right/left frames are mirrors
+  const r = read(ids[0]), l = read(ids[1]);
+  for (let y = 0; y < r.h; y++) for (let x = 0; x < r.w; x++) assert.equal(r.px(x, y)[3], l.px(r.w - 1 - x, y)[3]);
+  // the stopgap frames are gone
+  assert.ok(!manifest.assets["sprite/rooster-sitdown-front-h32"]);
 });

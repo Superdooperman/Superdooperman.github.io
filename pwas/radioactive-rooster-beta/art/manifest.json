@@ -3909,32 +3909,6 @@
    "base": 177,
    "source": "tools/bg/occluders.py (cut from bg/hq-dark)"
   },
-  "sprite/rooster-sit-front-h32": {
-   "kind": "sprite",
-   "size": [
-    28,
-    31
-   ],
-   "anchor": [
-    14,
-    31
-   ],
-   "seat": 24,
-   "source": "tools/sprites/make_sit.py (from sprite/rooster-front-h32)"
-  },
-  "sprite/rooster-sitdown-front-h32": {
-   "kind": "sprite",
-   "size": [
-    28,
-    31
-   ],
-   "anchor": [
-    14,
-    31
-   ],
-   "seat": 25,
-   "source": "tools/sprites/make_sit.py (from sprite/rooster-front-h32)"
-  },
   "fg/store--bell": {
    "kind": "overlay",
    "size": [
@@ -4030,6 +4004,1696 @@
     68
    ],
    "source": "tools/sprites/cut_cast.py"
+  },
+  "sprite/rooster-sit-r": {
+   "kind": "sprite",
+   "size": [
+    54,
+    67
+   ],
+   "anchor": [
+    27,
+    67
+   ],
+   "seat": 46,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l": {
+   "kind": "sprite",
+   "size": [
+    54,
+    67
+   ],
+   "anchor": [
+    27,
+    67
+   ],
+   "seat": 46,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r": {
+   "kind": "sprite",
+   "size": [
+    66,
+    64
+   ],
+   "anchor": [
+    33,
+    64
+   ],
+   "seat": 48,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l": {
+   "kind": "sprite",
+   "size": [
+    66,
+    64
+   ],
+   "anchor": [
+    33,
+    64
+   ],
+   "seat": 48,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front": {
+   "kind": "sprite",
+   "size": [
+    42,
+    67
+   ],
+   "anchor": [
+    21,
+    67
+   ],
+   "seat": 46,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    33
+   ],
+   "anchor": [
+    14,
+    33
+   ],
+   "seat": 23,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-half": {
+   "kind": "sprite",
+   "size": [
+    28,
+    33
+   ],
+   "anchor": [
+    14,
+    33
+   ],
+   "seat": 23,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-half": {
+   "kind": "sprite",
+   "size": [
+    34,
+    32
+   ],
+   "anchor": [
+    17,
+    32
+   ],
+   "seat": 24,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-half": {
+   "kind": "sprite",
+   "size": [
+    34,
+    32
+   ],
+   "anchor": [
+    17,
+    32
+   ],
+   "seat": 24,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-half": {
+   "kind": "sprite",
+   "size": [
+    24,
+    34
+   ],
+   "anchor": [
+    12,
+    34
+   ],
+   "seat": 23,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    29
+   ],
+   "anchor": [
+    13,
+    29
+   ],
+   "seat": 20,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h28": {
+   "kind": "sprite",
+   "size": [
+    26,
+    29
+   ],
+   "anchor": [
+    13,
+    29
+   ],
+   "seat": 20,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h28": {
+   "kind": "sprite",
+   "size": [
+    32,
+    28
+   ],
+   "anchor": [
+    16,
+    28
+   ],
+   "seat": 21,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h28": {
+   "kind": "sprite",
+   "size": [
+    32,
+    28
+   ],
+   "anchor": [
+    16,
+    28
+   ],
+   "seat": 21,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h28": {
+   "kind": "sprite",
+   "size": [
+    20,
+    29
+   ],
+   "anchor": [
+    10,
+    29
+   ],
+   "seat": 20,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    33
+   ],
+   "anchor": [
+    14,
+    33
+   ],
+   "seat": 23,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h32": {
+   "kind": "sprite",
+   "size": [
+    28,
+    33
+   ],
+   "anchor": [
+    14,
+    33
+   ],
+   "seat": 23,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h32": {
+   "kind": "sprite",
+   "size": [
+    34,
+    32
+   ],
+   "anchor": [
+    17,
+    32
+   ],
+   "seat": 24,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h32": {
+   "kind": "sprite",
+   "size": [
+    34,
+    32
+   ],
+   "anchor": [
+    17,
+    32
+   ],
+   "seat": 24,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h32": {
+   "kind": "sprite",
+   "size": [
+    24,
+    34
+   ],
+   "anchor": [
+    12,
+    34
+   ],
+   "seat": 23,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    38
+   ],
+   "anchor": [
+    16,
+    38
+   ],
+   "seat": 26,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h36": {
+   "kind": "sprite",
+   "size": [
+    32,
+    38
+   ],
+   "anchor": [
+    16,
+    38
+   ],
+   "seat": 26,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h36": {
+   "kind": "sprite",
+   "size": [
+    38,
+    36
+   ],
+   "anchor": [
+    19,
+    36
+   ],
+   "seat": 27,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h36": {
+   "kind": "sprite",
+   "size": [
+    38,
+    36
+   ],
+   "anchor": [
+    19,
+    36
+   ],
+   "seat": 27,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h36": {
+   "kind": "sprite",
+   "size": [
+    26,
+    38
+   ],
+   "anchor": [
+    13,
+    38
+   ],
+   "seat": 26,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h40": {
+   "kind": "sprite",
+   "size": [
+    36,
+    42
+   ],
+   "anchor": [
+    18,
+    42
+   ],
+   "seat": 29,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h40": {
+   "kind": "sprite",
+   "size": [
+    36,
+    42
+   ],
+   "anchor": [
+    18,
+    42
+   ],
+   "seat": 29,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h40": {
+   "kind": "sprite",
+   "size": [
+    42,
+    40
+   ],
+   "anchor": [
+    21,
+    40
+   ],
+   "seat": 30,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h40": {
+   "kind": "sprite",
+   "size": [
+    42,
+    40
+   ],
+   "anchor": [
+    21,
+    40
+   ],
+   "seat": 30,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h40": {
+   "kind": "sprite",
+   "size": [
+    28,
+    42
+   ],
+   "anchor": [
+    14,
+    42
+   ],
+   "seat": 29,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    46
+   ],
+   "anchor": [
+    19,
+    46
+   ],
+   "seat": 31,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h44": {
+   "kind": "sprite",
+   "size": [
+    38,
+    46
+   ],
+   "anchor": [
+    19,
+    46
+   ],
+   "seat": 31,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h44": {
+   "kind": "sprite",
+   "size": [
+    46,
+    44
+   ],
+   "anchor": [
+    23,
+    44
+   ],
+   "seat": 33,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h44": {
+   "kind": "sprite",
+   "size": [
+    46,
+    44
+   ],
+   "anchor": [
+    23,
+    44
+   ],
+   "seat": 33,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h44": {
+   "kind": "sprite",
+   "size": [
+    30,
+    46
+   ],
+   "anchor": [
+    15,
+    46
+   ],
+   "seat": 31,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    50
+   ],
+   "anchor": [
+    21,
+    50
+   ],
+   "seat": 34,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h48": {
+   "kind": "sprite",
+   "size": [
+    42,
+    50
+   ],
+   "anchor": [
+    21,
+    50
+   ],
+   "seat": 34,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h48": {
+   "kind": "sprite",
+   "size": [
+    50,
+    48
+   ],
+   "anchor": [
+    25,
+    48
+   ],
+   "seat": 36,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h48": {
+   "kind": "sprite",
+   "size": [
+    50,
+    48
+   ],
+   "anchor": [
+    25,
+    48
+   ],
+   "seat": 36,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h48": {
+   "kind": "sprite",
+   "size": [
+    32,
+    50
+   ],
+   "anchor": [
+    16,
+    50
+   ],
+   "seat": 34,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    54
+   ],
+   "anchor": [
+    22,
+    54
+   ],
+   "seat": 37,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h52": {
+   "kind": "sprite",
+   "size": [
+    44,
+    54
+   ],
+   "anchor": [
+    22,
+    54
+   ],
+   "seat": 37,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h52": {
+   "kind": "sprite",
+   "size": [
+    54,
+    52
+   ],
+   "anchor": [
+    27,
+    52
+   ],
+   "seat": 39,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h52": {
+   "kind": "sprite",
+   "size": [
+    54,
+    52
+   ],
+   "anchor": [
+    27,
+    52
+   ],
+   "seat": 39,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h52": {
+   "kind": "sprite",
+   "size": [
+    36,
+    55
+   ],
+   "anchor": [
+    18,
+    55
+   ],
+   "seat": 38,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h56": {
+   "kind": "sprite",
+   "size": [
+    48,
+    58
+   ],
+   "anchor": [
+    24,
+    58
+   ],
+   "seat": 40,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h56": {
+   "kind": "sprite",
+   "size": [
+    48,
+    58
+   ],
+   "anchor": [
+    24,
+    58
+   ],
+   "seat": 40,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h56": {
+   "kind": "sprite",
+   "size": [
+    58,
+    56
+   ],
+   "anchor": [
+    29,
+    56
+   ],
+   "seat": 42,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h56": {
+   "kind": "sprite",
+   "size": [
+    58,
+    56
+   ],
+   "anchor": [
+    29,
+    56
+   ],
+   "seat": 42,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h56": {
+   "kind": "sprite",
+   "size": [
+    38,
+    59
+   ],
+   "anchor": [
+    19,
+    59
+   ],
+   "seat": 40,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    63
+   ],
+   "anchor": [
+    25,
+    63
+   ],
+   "seat": 43,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h60": {
+   "kind": "sprite",
+   "size": [
+    50,
+    63
+   ],
+   "anchor": [
+    25,
+    63
+   ],
+   "seat": 43,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h60": {
+   "kind": "sprite",
+   "size": [
+    62,
+    60
+   ],
+   "anchor": [
+    31,
+    60
+   ],
+   "seat": 45,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h60": {
+   "kind": "sprite",
+   "size": [
+    62,
+    60
+   ],
+   "anchor": [
+    31,
+    60
+   ],
+   "seat": 45,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h60": {
+   "kind": "sprite",
+   "size": [
+    40,
+    63
+   ],
+   "anchor": [
+    20,
+    63
+   ],
+   "seat": 43,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    67
+   ],
+   "anchor": [
+    27,
+    67
+   ],
+   "seat": 46,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h64": {
+   "kind": "sprite",
+   "size": [
+    54,
+    67
+   ],
+   "anchor": [
+    27,
+    67
+   ],
+   "seat": 46,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h64": {
+   "kind": "sprite",
+   "size": [
+    66,
+    64
+   ],
+   "anchor": [
+    33,
+    64
+   ],
+   "seat": 48,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h64": {
+   "kind": "sprite",
+   "size": [
+    66,
+    64
+   ],
+   "anchor": [
+    33,
+    64
+   ],
+   "seat": 48,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h64": {
+   "kind": "sprite",
+   "size": [
+    42,
+    67
+   ],
+   "anchor": [
+    21,
+    67
+   ],
+   "seat": 46,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    71
+   ],
+   "anchor": [
+    28,
+    71
+   ],
+   "seat": 48,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h68": {
+   "kind": "sprite",
+   "size": [
+    56,
+    71
+   ],
+   "anchor": [
+    28,
+    71
+   ],
+   "seat": 48,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h68": {
+   "kind": "sprite",
+   "size": [
+    70,
+    68
+   ],
+   "anchor": [
+    35,
+    68
+   ],
+   "seat": 51,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h68": {
+   "kind": "sprite",
+   "size": [
+    70,
+    68
+   ],
+   "anchor": [
+    35,
+    68
+   ],
+   "seat": 51,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h68": {
+   "kind": "sprite",
+   "size": [
+    44,
+    71
+   ],
+   "anchor": [
+    22,
+    71
+   ],
+   "seat": 48,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    75
+   ],
+   "anchor": [
+    30,
+    75
+   ],
+   "seat": 51,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h72": {
+   "kind": "sprite",
+   "size": [
+    60,
+    75
+   ],
+   "anchor": [
+    30,
+    75
+   ],
+   "seat": 51,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h72": {
+   "kind": "sprite",
+   "size": [
+    74,
+    72
+   ],
+   "anchor": [
+    37,
+    72
+   ],
+   "seat": 54,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h72": {
+   "kind": "sprite",
+   "size": [
+    74,
+    72
+   ],
+   "anchor": [
+    37,
+    72
+   ],
+   "seat": 54,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h72": {
+   "kind": "sprite",
+   "size": [
+    48,
+    76
+   ],
+   "anchor": [
+    24,
+    76
+   ],
+   "seat": 52,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    79
+   ],
+   "anchor": [
+    31,
+    79
+   ],
+   "seat": 54,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h76": {
+   "kind": "sprite",
+   "size": [
+    62,
+    79
+   ],
+   "anchor": [
+    31,
+    79
+   ],
+   "seat": 54,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h76": {
+   "kind": "sprite",
+   "size": [
+    78,
+    76
+   ],
+   "anchor": [
+    39,
+    76
+   ],
+   "seat": 57,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h76": {
+   "kind": "sprite",
+   "size": [
+    78,
+    76
+   ],
+   "anchor": [
+    39,
+    76
+   ],
+   "seat": 57,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h76": {
+   "kind": "sprite",
+   "size": [
+    50,
+    80
+   ],
+   "anchor": [
+    25,
+    80
+   ],
+   "seat": 54,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    84
+   ],
+   "anchor": [
+    33,
+    84
+   ],
+   "seat": 57,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h80": {
+   "kind": "sprite",
+   "size": [
+    66,
+    84
+   ],
+   "anchor": [
+    33,
+    84
+   ],
+   "seat": 57,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h80": {
+   "kind": "sprite",
+   "size": [
+    82,
+    80
+   ],
+   "anchor": [
+    41,
+    80
+   ],
+   "seat": 60,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h80": {
+   "kind": "sprite",
+   "size": [
+    82,
+    80
+   ],
+   "anchor": [
+    41,
+    80
+   ],
+   "seat": 60,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h80": {
+   "kind": "sprite",
+   "size": [
+    52,
+    84
+   ],
+   "anchor": [
+    26,
+    84
+   ],
+   "seat": 57,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h84": {
+   "kind": "sprite",
+   "size": [
+    70,
+    88
+   ],
+   "anchor": [
+    35,
+    88
+   ],
+   "seat": 60,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h84": {
+   "kind": "sprite",
+   "size": [
+    70,
+    88
+   ],
+   "anchor": [
+    35,
+    88
+   ],
+   "seat": 60,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h84": {
+   "kind": "sprite",
+   "size": [
+    86,
+    84
+   ],
+   "anchor": [
+    43,
+    84
+   ],
+   "seat": 63,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h84": {
+   "kind": "sprite",
+   "size": [
+    86,
+    84
+   ],
+   "anchor": [
+    43,
+    84
+   ],
+   "seat": 63,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h84": {
+   "kind": "sprite",
+   "size": [
+    54,
+    88
+   ],
+   "anchor": [
+    27,
+    88
+   ],
+   "seat": 60,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h88": {
+   "kind": "sprite",
+   "size": [
+    72,
+    92
+   ],
+   "anchor": [
+    36,
+    92
+   ],
+   "seat": 63,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h88": {
+   "kind": "sprite",
+   "size": [
+    72,
+    92
+   ],
+   "anchor": [
+    36,
+    92
+   ],
+   "seat": 63,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h88": {
+   "kind": "sprite",
+   "size": [
+    88,
+    88
+   ],
+   "anchor": [
+    44,
+    88
+   ],
+   "seat": 66,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h88": {
+   "kind": "sprite",
+   "size": [
+    88,
+    88
+   ],
+   "anchor": [
+    44,
+    88
+   ],
+   "seat": 66,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h88": {
+   "kind": "sprite",
+   "size": [
+    56,
+    92
+   ],
+   "anchor": [
+    28,
+    92
+   ],
+   "seat": 63,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h92": {
+   "kind": "sprite",
+   "size": [
+    76,
+    96
+   ],
+   "anchor": [
+    38,
+    96
+   ],
+   "seat": 65,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h92": {
+   "kind": "sprite",
+   "size": [
+    76,
+    96
+   ],
+   "anchor": [
+    38,
+    96
+   ],
+   "seat": 65,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h92": {
+   "kind": "sprite",
+   "size": [
+    92,
+    92
+   ],
+   "anchor": [
+    46,
+    92
+   ],
+   "seat": 69,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h92": {
+   "kind": "sprite",
+   "size": [
+    92,
+    92
+   ],
+   "anchor": [
+    46,
+    92
+   ],
+   "seat": 69,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h92": {
+   "kind": "sprite",
+   "size": [
+    60,
+    97
+   ],
+   "anchor": [
+    30,
+    97
+   ],
+   "seat": 66,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    100
+   ],
+   "anchor": [
+    39,
+    100
+   ],
+   "seat": 68,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h96": {
+   "kind": "sprite",
+   "size": [
+    78,
+    100
+   ],
+   "anchor": [
+    39,
+    100
+   ],
+   "seat": 68,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h96": {
+   "kind": "sprite",
+   "size": [
+    96,
+    96
+   ],
+   "anchor": [
+    48,
+    96
+   ],
+   "seat": 72,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h96": {
+   "kind": "sprite",
+   "size": [
+    96,
+    96
+   ],
+   "anchor": [
+    48,
+    96
+   ],
+   "seat": 72,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h96": {
+   "kind": "sprite",
+   "size": [
+    62,
+    101
+   ],
+   "anchor": [
+    31,
+    101
+   ],
+   "seat": 69,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h100": {
+   "kind": "sprite",
+   "size": [
+    82,
+    104
+   ],
+   "anchor": [
+    41,
+    104
+   ],
+   "seat": 71,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h100": {
+   "kind": "sprite",
+   "size": [
+    82,
+    104
+   ],
+   "anchor": [
+    41,
+    104
+   ],
+   "seat": 71,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h100": {
+   "kind": "sprite",
+   "size": [
+    100,
+    100
+   ],
+   "anchor": [
+    50,
+    100
+   ],
+   "seat": 75,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h100": {
+   "kind": "sprite",
+   "size": [
+    100,
+    100
+   ],
+   "anchor": [
+    50,
+    100
+   ],
+   "seat": 75,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h100": {
+   "kind": "sprite",
+   "size": [
+    64,
+    105
+   ],
+   "anchor": [
+    32,
+    105
+   ],
+   "seat": 71,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h104": {
+   "kind": "sprite",
+   "size": [
+    86,
+    109
+   ],
+   "anchor": [
+    43,
+    109
+   ],
+   "seat": 74,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h104": {
+   "kind": "sprite",
+   "size": [
+    86,
+    109
+   ],
+   "anchor": [
+    43,
+    109
+   ],
+   "seat": 74,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h104": {
+   "kind": "sprite",
+   "size": [
+    104,
+    104
+   ],
+   "anchor": [
+    52,
+    104
+   ],
+   "seat": 78,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h104": {
+   "kind": "sprite",
+   "size": [
+    104,
+    104
+   ],
+   "anchor": [
+    52,
+    104
+   ],
+   "seat": 78,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h104": {
+   "kind": "sprite",
+   "size": [
+    66,
+    109
+   ],
+   "anchor": [
+    33,
+    109
+   ],
+   "seat": 74,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h108": {
+   "kind": "sprite",
+   "size": [
+    88,
+    113
+   ],
+   "anchor": [
+    44,
+    113
+   ],
+   "seat": 77,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h108": {
+   "kind": "sprite",
+   "size": [
+    88,
+    113
+   ],
+   "anchor": [
+    44,
+    113
+   ],
+   "seat": 77,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h108": {
+   "kind": "sprite",
+   "size": [
+    108,
+    108
+   ],
+   "anchor": [
+    54,
+    108
+   ],
+   "seat": 81,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h108": {
+   "kind": "sprite",
+   "size": [
+    108,
+    108
+   ],
+   "anchor": [
+    54,
+    108
+   ],
+   "seat": 81,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h108": {
+   "kind": "sprite",
+   "size": [
+    68,
+    114
+   ],
+   "anchor": [
+    34,
+    114
+   ],
+   "seat": 77,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    117
+   ],
+   "anchor": [
+    45,
+    117
+   ],
+   "seat": 79,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h112": {
+   "kind": "sprite",
+   "size": [
+    90,
+    117
+   ],
+   "anchor": [
+    45,
+    117
+   ],
+   "seat": 79,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h112": {
+   "kind": "sprite",
+   "size": [
+    112,
+    112
+   ],
+   "anchor": [
+    56,
+    112
+   ],
+   "seat": 84,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h112": {
+   "kind": "sprite",
+   "size": [
+    112,
+    112
+   ],
+   "anchor": [
+    56,
+    112
+   ],
+   "seat": 84,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h112": {
+   "kind": "sprite",
+   "size": [
+    72,
+    118
+   ],
+   "anchor": [
+    36,
+    118
+   ],
+   "seat": 80,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h116": {
+   "kind": "sprite",
+   "size": [
+    94,
+    121
+   ],
+   "anchor": [
+    47,
+    121
+   ],
+   "seat": 82,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h116": {
+   "kind": "sprite",
+   "size": [
+    94,
+    121
+   ],
+   "anchor": [
+    47,
+    121
+   ],
+   "seat": 82,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h116": {
+   "kind": "sprite",
+   "size": [
+    116,
+    116
+   ],
+   "anchor": [
+    58,
+    116
+   ],
+   "seat": 87,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h116": {
+   "kind": "sprite",
+   "size": [
+    116,
+    116
+   ],
+   "anchor": [
+    58,
+    116
+   ],
+   "seat": 87,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h116": {
+   "kind": "sprite",
+   "size": [
+    74,
+    122
+   ],
+   "anchor": [
+    37,
+    122
+   ],
+   "seat": 83,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-r-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    125
+   ],
+   "anchor": [
+    48,
+    125
+   ],
+   "seat": 85,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-l-h120": {
+   "kind": "sprite",
+   "size": [
+    96,
+    125
+   ],
+   "anchor": [
+    48,
+    125
+   ],
+   "seat": 85,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-r-h120": {
+   "kind": "sprite",
+   "size": [
+    120,
+    120
+   ],
+   "anchor": [
+    60,
+    120
+   ],
+   "seat": 90,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sithop-l-h120": {
+   "kind": "sprite",
+   "size": [
+    120,
+    120
+   ],
+   "anchor": [
+    60,
+    120
+   ],
+   "seat": 90,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
+  },
+  "sprite/rooster-sit-front-h120": {
+   "kind": "sprite",
+   "size": [
+    76,
+    126
+   ],
+   "anchor": [
+    38,
+    126
+   ],
+   "seat": 86,
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v1.jpg)"
   }
  }
 }

@@ -597,8 +597,9 @@ export const ROOMS = {
     ],
     sign: { art: "fx/neon-fence", rect: [264,  49,  32,  18], frames: [6, 7, 8, 9, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (billboard on legs over the distant Main Street roofline); per-letter glow frames (tools/neon/paint_neon.py)
     // Sitting on the top rail between the left posts (rail top y91, posts x56-59 and x89-91), among the yard roosters:
-    // seat row on the rail line, boots dangling in front of the lower rail; one in-between frame on the way down and up.
-    poseAt: { squat: { sprite: "rooster-sit-front-h32", via: "rooster-sitdown-front-h32", x: 70, seat: 91, standY: 112 } },
+    // seat row on the rail line, boots dangling in front of the lower rail. Painted sit frames (tools/sprites/cut_sit.py):
+    // side sit facing the way he came, the hop on the way down and up, the front sit when there's no facing (a loaded save).
+    poseAt: { squat: { sit: "rooster-sit", hop: "rooster-sithop", front: "rooster-sit-front", x: 70, seat: 91, standY: 112 } },
     exits: [
       { spot: "to-hq", label: "Rooftop" },
       { spot: "door", label: "Henhouse" },

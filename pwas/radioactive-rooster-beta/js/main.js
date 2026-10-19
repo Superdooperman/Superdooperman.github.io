@@ -186,8 +186,10 @@ function render() {
       mount(pose, state.pose === "crow" ? "sprite-crow.png" : "sprite-squat.png");
     } else {
       const fresh = ui.poseShown !== `${room.id}:${state.pose}`;
-      seatSprite(pose, poseCfg, fresh && poseCfg.via ? poseCfg.via : poseCfg.sprite);
-      if (fresh && poseCfg.via) setTimeout(() => { if (pose.isConnected) seatSprite(pose, poseCfg, poseCfg.sprite); }, POSE_BEAT_MS);
+      // he sits facing the way he came at the rail (approach direction), and keeps that facing until he stands up
+      if (fresh) ui.seatFace = poseCfg.front && hero.room !== room.id ? null : hero.x <= poseCfg.x ? "r" : "l";
+      seatSprite(pose, poseCfg, seatFrame(room, poseCfg, fresh ? "hop" : "sit"));
+      if (fresh && poseCfg.hop) setTimeout(() => { if (pose.isConnected) seatSprite(pose, poseCfg, seatFrame(room, poseCfg, "sit")); }, POSE_BEAT_MS);
     }
     if (tint) pose.style.filter = tint;
     world.append(pose);
@@ -200,14 +202,14 @@ function render() {
     const node = el("img", "hero");
     node.alt = "";
     const seat = wasSeated && room.poseAt && room.poseAt[wasSeated];
-    if (seat && !Array.isArray(seat) && seat.via) {
+    if (seat && !Array.isArray(seat) && seat.hop) {
       // stand-up beat: the in-between frame on the rail, then he's on his feet at the foot of the fence
       const area = heroArea(room);
       [hero.x, hero.y] = area ? clampToArea(area, seat.x, seat.standY || hero.y) : [seat.x, hero.y];
-      hero.tx = hero.x; hero.ty = hero.y; hero.path = []; hero.face = "front";
+      hero.tx = hero.x; hero.ty = hero.y; hero.path = []; hero.face = ui.seatFace || "front";
       const beat = el("img", "pose");
       beat.alt = "";
-      seatSprite(beat, seat, seat.via);
+      seatSprite(beat, seat, seatFrame(room, seat, "hop"));
       if (tint) beat.style.filter = tint;
       world.append(beat);
       node.style.visibility = "hidden";
@@ -486,7 +488,14 @@ function heroSync(room) {
 }
 
 // A seated pose: the sprite's `seat` row (manifest) lands on the rail line `cfg.seat`, centred on `cfg.x`.
+// Frames (tools/sprites/cut_sit.py): `sit` / `hop` side frames per facing (-r / -l), `front` when there's no facing,
+// at his depth size for the foot of the rail (`standY`).
 const POSE_BEAT_MS = 260;
+function seatFrame(room, cfg, kind) {
+  const size = room.hero && room.hero.depth ? `-h${depthHeight(room.hero, cfg.standY || room.hero.at[1])}` : sizeTag(room.hero || {});
+  if (!ui.seatFace) return `${cfg.front || cfg.sit + "-r"}${size}`; // no hop either: he is simply sitting there
+  return `${cfg[kind]}-${ui.seatFace}${size}`;
+}
 function seatSprite(node, cfg, sprite) {
   const id = `sprite/${sprite}`;
   const info = assetInfo(id);
