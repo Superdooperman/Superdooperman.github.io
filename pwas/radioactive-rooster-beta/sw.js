@@ -1,5 +1,5 @@
 // Radioactive Rooster BETA service worker. Own prefix "rr-beta-" so it never touches other games.
-const VERSION = "11";
+const VERSION = "12";
 const CORE_CACHE = `rr-beta-core-v${VERSION}`;
 const PIXEL_CACHE = `rr-beta-pixel-v${VERSION}`;
 const FANCY_CACHE = `rr-beta-fancy-v${VERSION}`;
@@ -17,25 +17,10 @@ const CORE = [
   "./art/manifest.json",
 ];
 
-async function precachePixel() {
-  const cache = await caches.open(PIXEL_CACHE);
-  try {
-    const manifest = await (await fetch("./art/manifest.json", { cache: "no-cache" })).json();
-    await Promise.all(Object.keys(manifest.assets).map(async (id) => {
-      const url = `./art/pixel/${id}.png`;
-      try {
-        const res = await fetch(url, { cache: "no-cache" });
-        if (res.ok) await cache.put(url, res);
-      } catch {}
-    }));
-  } catch {}
-}
-
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CORE_CACHE)
       .then((cache) => cache.addAll(CORE.map((u) => new Request(u, { cache: "no-cache" }))))
-      .then(precachePixel)
       .then(() => self.skipWaiting()),
   );
 });
@@ -49,6 +34,8 @@ self.addEventListener("activate", (event) => {
 });
 
 function cacheFor(url) {
+  // The art manifest is data, not art: network-first with the code, so new code never runs against an old manifest.
+  if (url.pathname.endsWith("/art/manifest.json")) return CORE_CACHE;
   if (url.pathname.includes("/art/fancy/")) return FANCY_CACHE;
   if (url.pathname.includes("/art/")) return PIXEL_CACHE;
   return CORE_CACHE;
@@ -73,14 +60,12 @@ self.addEventListener("fetch", (event) => {
     );
     return;
   }
-  // Art: stale-while-revalidate. Only successful responses are cached, never 404s.
+  // Art: cache-first. Fetched once, the first time a room shows it (no bulk precache: 2026-10-21 rate limit); art
+  // files are versioned by the cache name, so a new SW version refetches them lazily. Only 200s are cached.
   event.respondWith(
-    caches.open(name).then((cache) => cache.match(req).then((hit) => {
-      const fresh = fetch(req).then((res) => {
-        if (res.ok && res.type === "basic") cache.put(req, res.clone());
-        return res;
-      }).catch(() => hit || new Response("", { status: 504 }));
-      return hit || fresh;
-    })),
+    caches.open(name).then((cache) => cache.match(req).then((hit) => hit || fetch(req).then((res) => {
+      if (res.ok && res.type === "basic") cache.put(req, res.clone());
+      return res;
+    }))),
   );
 });

@@ -12,7 +12,7 @@
   "png",
   "webp"
  ],
- "notes": "Files live at art/<set>/<id>.png (fancy may also be .webp). size = logical px; a file may be any whole multiple at the same aspect. Missing fancy -> pixel -> art/placeholders/<legacy>.",
+ "notes": "Files live at art/<set>/<id>.png (fancy may also be .webp). size = logical px; a file may be any whole multiple at the same aspect. Missing fancy -> pixel -> art/placeholders/<legacy>. Availability: \"pixel\": false = no art/pixel/<id>.png; \"fancy\": \"<ext>\" = art/fancy/<id>.<ext> exists. The game reads these and never probes (tools/art_files.py rewrites them).",
  "assets": {
   "bg/title": {
    "kind": "bg",
@@ -211,7 +211,8 @@
     0,
     0
    ],
-   "legacy": "portrait-henny.jpg"
+   "legacy": "portrait-henny.jpg",
+   "pixel": false
   },
   "portrait/peck": {
    "kind": "portrait",
@@ -223,7 +224,8 @@
     0,
     0
    ],
-   "legacy": "portrait-peck.jpg"
+   "legacy": "portrait-peck.jpg",
+   "pixel": false
   },
   "portrait/deejay": {
    "kind": "portrait",
@@ -235,7 +237,8 @@
     0,
     0
    ],
-   "legacy": "portrait-deejay.jpg"
+   "legacy": "portrait-deejay.jpg",
+   "pixel": false
   },
   "portrait/guard": {
    "kind": "portrait",
@@ -247,7 +250,8 @@
     0,
     0
    ],
-   "legacy": "portrait-guard.jpg"
+   "legacy": "portrait-guard.jpg",
+   "pixel": false
   },
   "portrait/barker": {
    "kind": "portrait",
@@ -259,7 +263,8 @@
     0,
     0
    ],
-   "legacy": "portrait-barker.jpg"
+   "legacy": "portrait-barker.jpg",
+   "pixel": false
   },
   "portrait/clerk": {
    "kind": "portrait",
@@ -271,7 +276,8 @@
     0,
     0
    ],
-   "legacy": "portrait-clerk.jpg"
+   "legacy": "portrait-clerk.jpg",
+   "pixel": false
   },
   "sprite/rooster-squat": {
    "kind": "sprite",
@@ -319,7 +325,8 @@
     12,
     12
    ],
-   "legacy": "item-geiger.svg"
+   "legacy": "item-geiger.svg",
+   "pixel": false
   },
   "item/bulb": {
    "kind": "item",
@@ -331,7 +338,8 @@
     12,
     12
    ],
-   "legacy": "item-bulb.svg"
+   "legacy": "item-bulb.svg",
+   "pixel": false
   },
   "item/photo": {
    "kind": "item",
@@ -343,7 +351,8 @@
     12,
     12
    ],
-   "legacy": "item-photo.svg"
+   "legacy": "item-photo.svg",
+   "pixel": false
   },
   "item/spoon": {
    "kind": "item",
@@ -355,7 +364,8 @@
     12,
     12
    ],
-   "legacy": "item-spoon.svg"
+   "legacy": "item-spoon.svg",
+   "pixel": false
   },
   "item/stub": {
    "kind": "item",
@@ -367,7 +377,8 @@
     12,
     12
    ],
-   "legacy": "item-stub.svg"
+   "legacy": "item-stub.svg",
+   "pixel": false
   },
   "item/grub": {
    "kind": "item",
@@ -379,7 +390,8 @@
     12,
     12
    ],
-   "legacy": "item-grub.svg"
+   "legacy": "item-grub.svg",
+   "pixel": false
   },
   "item/ribbon": {
    "kind": "item",
@@ -391,7 +403,8 @@
     12,
     12
    ],
-   "legacy": "item-ribbon.svg"
+   "legacy": "item-ribbon.svg",
+   "pixel": false
   },
   "item/sauce": {
    "kind": "item",
@@ -403,7 +416,8 @@
     12,
     12
    ],
-   "legacy": "item-sauce.svg"
+   "legacy": "item-sauce.svg",
+   "pixel": false
   },
   "item/mirror": {
    "kind": "item",
@@ -415,7 +429,8 @@
     12,
     12
    ],
-   "legacy": "item-mirror.svg"
+   "legacy": "item-mirror.svg",
+   "pixel": false
   },
   "item/bill": {
    "kind": "item",
@@ -427,7 +442,8 @@
     12,
     12
    ],
-   "legacy": "item-bill.svg"
+   "legacy": "item-bill.svg",
+   "pixel": false
   },
   "item/speaker": {
    "kind": "item",
@@ -439,7 +455,8 @@
     12,
     12
    ],
-   "legacy": "item-speaker.svg"
+   "legacy": "item-speaker.svg",
+   "pixel": false
   },
   "item/map": {
    "kind": "item",
@@ -451,7 +468,8 @@
     12,
     12
    ],
-   "legacy": "item-map.svg"
+   "legacy": "item-map.svg",
+   "pixel": false
   },
   "item/pass": {
    "kind": "item",
@@ -463,7 +481,8 @@
     12,
     12
    ],
-   "legacy": "item-pass.svg"
+   "legacy": "item-pass.svg",
+   "pixel": false
   },
   "item/basket": {
    "kind": "item",
@@ -475,7 +494,8 @@
     12,
     12
    ],
-   "legacy": "item-basket.svg"
+   "legacy": "item-basket.svg",
+   "pixel": false
   },
   "sprite/rooster-front": {
    "kind": "sprite",

@@ -1,5 +1,5 @@
 // Dual art mode: "pixel" (default) and "fancy". Same relative ids in art/pixel/ and art/fancy/.
-// Resolution per asset: art/<mode>/<id>.(png|webp) -> art/pixel/<id>.png -> art/placeholders/<legacy>.
+// Resolution per asset: art/<mode>/<id>.(png|webp) -> art/pixel/<id>.png -> art/placeholders/<legacy>, from the manifest.
 const MODE_KEY = "rr-art-mode";
 const MODES = ["pixel", "fancy"];
 
@@ -11,46 +11,13 @@ const art = {
   listeners: new Set(),
 };
 
-async function exists(url) {
-  try {
-    const res = await fetch(url); // GET so the service worker can answer offline
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
-
-async function probe(set, id) {
-  const exts = set === "fancy" ? art.manifest.ext : ["png"];
-  for (const ext of exts) {
-    const url = `art/${set}/${id}.${ext}`;
-    if (await exists(url)) {
-      art.found[set].set(id, url);
-      return url;
-    }
-  }
-  art.found[set].set(id, null);
-  return null;
-}
-
 function notify() {
   for (const fn of art.listeners) fn();
 }
 
-function preload(urls) {
-  for (const url of urls) {
-    const img = new Image();
-    img.decoding = "async";
-    img.src = url;
-  }
-}
-
-async function probeSet(set) {
-  const ids = Object.keys(art.manifest.assets);
-  await Promise.all(ids.map((id) => probe(set, id)));
-  preload(ids.map((id) => art.found[set].get(id)).filter(Boolean));
-}
-
+// Every asset url comes from the manifest ("pixel": false / "fancy": "<ext>"), so a load never asks the server for a
+// file that isn't there (2026-10-21: the old per-asset probes + preloads were ~2,800 requests per visit and tripped
+// GitHub Pages' rate limit). Images load when a room shows them; the service worker caches them as they arrive.
 export async function initArt() {
   try {
     const res = await fetch("art/manifest.json");
@@ -60,16 +27,10 @@ export async function initArt() {
   }
   for (const [id, a] of Object.entries(art.manifest.assets)) {
     if (a.legacy) art.byLegacy.set(a.legacy, id);
+    art.found.pixel.set(id, a.pixel === false ? null : `art/pixel/${id}.png`);
+    art.found.fancy.set(id, a.fancy ? `art/fancy/${id}.${a.fancy}` : null);
   }
-  // Current set first, then the other set in the background.
-  const first = art.mode;
-  const second = first === "pixel" ? "fancy" : "pixel";
-  await probeSet(first === "fancy" ? "pixel" : first); // pixel is always the fallback, probe it first
-  if (first === "fancy") await probeSet("fancy");
   notify();
-  const later = () => probeSet(second).then(notify);
-  if ("requestIdleCallback" in window) requestIdleCallback(later);
-  else setTimeout(later, 300);
 }
 
 export function idFor(fileOrId) {

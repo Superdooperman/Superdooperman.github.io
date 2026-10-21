@@ -12,7 +12,7 @@
   "png",
   "webp"
  ],
- "notes": "Files live at art/<set>/<id>.png (fancy may also be .webp). size = logical px; a file may be any whole multiple at the same aspect. Missing fancy -> pixel -> art/placeholders/<legacy>.",
+ "notes": "Files live at art/<set>/<id>.png (fancy may also be .webp). size = logical px; a file may be any whole multiple at the same aspect. Missing fancy -> pixel -> art/placeholders/<legacy>. Availability: \"pixel\": false = no art/pixel/<id>.png; \"fancy\": \"<ext>\" = art/fancy/<id>.<ext> exists. The game reads these and never probes (tools/art_files.py rewrites them).",
  "assets": {
   "bg/title": {
    "kind": "bg",
@@ -212,7 +212,8 @@
     0,
     0
    ],
-   "legacy": "portrait-henny.jpg"
+   "legacy": "portrait-henny.jpg",
+   "pixel": false
   },
   "portrait/peck": {
    "kind": "portrait",
@@ -224,7 +225,8 @@
     0,
     0
    ],
-   "legacy": "portrait-peck.jpg"
+   "legacy": "portrait-peck.jpg",
+   "pixel": false
   },
   "portrait/deejay": {
    "kind": "portrait",
@@ -236,7 +238,8 @@
     0,
     0
    ],
-   "legacy": "portrait-deejay.jpg"
+   "legacy": "portrait-deejay.jpg",
+   "pixel": false
   },
   "portrait/guard": {
    "kind": "portrait",
@@ -248,7 +251,8 @@
     0,
     0
    ],
-   "legacy": "portrait-guard.jpg"
+   "legacy": "portrait-guard.jpg",
+   "pixel": false
   },
   "portrait/barker": {
    "kind": "portrait",
@@ -260,7 +264,8 @@
     0,
     0
    ],
-   "legacy": "portrait-barker.jpg"
+   "legacy": "portrait-barker.jpg",
+   "pixel": false
   },
   "portrait/clerk": {
    "kind": "portrait",
@@ -272,7 +277,8 @@
     0,
     0
    ],
-   "legacy": "portrait-clerk.jpg"
+   "legacy": "portrait-clerk.jpg",
+   "pixel": false
   },
   "sprite/rooster-squat": {
    "kind": "sprite",

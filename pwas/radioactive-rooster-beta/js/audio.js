@@ -1,7 +1,6 @@
 let ctx;
 let bed;
 let bedUrl = "";
-const missing = new Set();
 
 function context() {
   if (!ctx) ctx = new AudioContext();
@@ -70,16 +69,12 @@ function synth(kind) {
   }
 }
 
+// The mp3s actually in audio/in/ (none yet). Listed so the game never sends a request for a file that isn't there
+// (2026-10-21 rate limit); add a name here when its file lands.
+const AUDIO_IN = new Set([]);
+
 async function fileExists(url) {
-  if (missing.has(url)) return false;
-  try {
-    const response = await fetch(url, { method: "HEAD" });
-    if (!response.ok) missing.add(url);
-    return response.ok;
-  } catch {
-    missing.add(url);
-    return false;
-  }
+  return AUDIO_IN.has(url.replace(/^audio\/in\//, "").replace(/\.mp3$/, ""));
 }
 
 export async function playCue(kind) {
