@@ -44,6 +44,7 @@ export function line(text, extra = {}) {
     ...(extra.anim ? { anim: extra.anim } : {}), // one-shot tweens (js/main.js playAnim); never shown
     ...(extra.cutscene ? { cutscene: extra.cutscene } : {}), // a scripted beat played before the line (js/main.js)
     ...(extra.flashback ? { flashback: true } : {}), // shown in old-photo sepia (js/main.js, css .world.flashback)
+    ...(extra.flashStep !== undefined ? { flashStep: extra.flashStep } : {}), // the past beat 1..5 (js/main.js flashbackLayer)
     ...(extra.closeup ? { closeup: extra.closeup } : {}), // an item art id held up in his gloves while the line shows
   };
 }
@@ -445,7 +446,8 @@ function talkDeejay(s, out) {
     s.flags.kind_deejay = true;
     out.lines.push(line("\"Mind if I finish a story on air? Years back, an 'accident' at the Pavilion. Kid in a cage, a bird in red streamers, and a partner nobody saw again.\" He lets DeeJay finish. Every word.", { speaker: SPEAKER.deejay }));
     out.lines.push(line("Then, gently, into the slot: \"It wasn't an accident. Somebody made a bad call, and somebody else stopped it. Everybody went home. That's the part that matters.\" He doesn't say her name."));
-    out.lines.push(line("DeeJay, off-air: \"You never did tell anybody what happened that night.\" \"Just did.\"", { speaker: SPEAKER.deejay }));
+    out.lines.push(line("DeeJay, off-air: \"You never did tell anybody what happened that night.\"", { speaker: SPEAKER.deejay }));
+    out.lines.push(line("\"Just did.\"", { speaker: HERO.talk })); // Oct 23 item 32: his line, his portrait
     return;
   }
   out.lines.push(line("\"WKUK. Cluck County's only station that knows the truth. Go get her, feathers.\"", { speaker: SPEAKER.deejay }));
@@ -604,7 +606,9 @@ function joinTicket(s, out) {
   s.mood = "embarrassed";
   out.lines.push(line("The edges fit. \"ROOSTER & HATTIE: ADMIT TWO,\" dated the stunt night. Her half was pawned to Corny. The lipstick on his half is the Gobbler's."));
   // Oct 21 items 15/20: the stunt-night flashback plays here, at the joined ticket (agreed with Arlong Oct 21)
-  for (const text of FLASHBACK) out.lines.push(line(text, { flashback: true }));
+  // Oct 23 item 41: the past beats (flashStep 1..5) play on the aged Pavilion, the crowd gathering line by line, the
+  // rigger's silhouette (Mayor Bantam's muscle, unnamed) in it (js/main.js flashbackLayer)
+  FLASHBACK.forEach((text, i) => out.lines.push(line(text, { flashback: true, flashStep: i })));
   out.lines.push(line("The Cock Gobbler is Hattie. And somebody else, initials S.C., wired the fryer to blow at midnight. She doesn't know.", { mood: "embarrassed" }));
 }
 
@@ -701,7 +705,7 @@ function fixClock(s, out) {
     return;
   }
   s.flags.clock_fixed = true;
-  out.lines.push(line("He shinnies up the post and presses the minute hand back where it belongs. Somewhere, the fryer timer just lost a little ground."));
+  out.lines.push(line("He shinnies up the post and presses the minute hand back where it belongs. Somewhere, the fryer timer just lost a little ground.", { cutscene: "shimmy" }));
   if (s.flags.clock_tip) out.lines.push(hattie("\"Every minute, sugar. You're welcome.\" From the doorway. Then the door clicks shut."));
 }
 
@@ -818,15 +822,16 @@ function sauceOil(s, out) {
     out.lines.push(line("Seasoning a crime you haven't been invited to yet. Win the room first."));
     return;
   }
-  if (!reachVat(s, out)) return;
   if (s.flags.cage_jogged) {
     out.lines.push(line("The oil's seasoned enough, and the cage is already low."));
     return;
   }
+  // Oct 23 item 40: no walk, no sniff. He raises the bottle from where he stands and lobs it into the vat (cutscene
+  // sauce_toss): SPLASH, the spicy oil catches her in the face, she drops the chain, and the cage drops low.
   drop(s, "sauce");
   s.flags.cage_jogged = true;
   s.mood = "smitten";
-  out.lines.push(line("He tips Ned's hot sauce into the oil. She can't help it, she leans in to smell it, and the cage swings down with her.", { speaker: SPEAKER.gobbler, mood: "smitten", cue: "cage_jog", anim: { gobbler: "wobble" } }));
+  out.lines.push(line("He raises Ned's hottest bottle like a matador and lobs it. It arcs over the rope and into the vat. SPLASH. Spicy oil catches her square in the mask, she lets go of the chain, and the cage drops low over the oil.", { speaker: SPEAKER.gobbler, mood: "smitten", cue: "cage_jog", cutscene: "sauce_toss" }));
   out.lines.push(line("\"Did you season my crime?\" \"A little.\"", { mood: "smitten" }));
 }
 
@@ -925,9 +930,10 @@ function finish(s, out) {
   out.lines.push(line("PAH-KAW!!!", { big: true, sound: "pah-kaw", mood: "crow", speaker: HERO.crow, cutscene: s.flags.showboat ? "pahkaw_show" : "pahkaw" }));
   out.lines.push(line("Nobody obeys. Nobody kneels. The Yolk doesn't give you the Crow. It never did."));
   out.lines.push(line("Instead, in the crowd, a little brown hen says, plainly, \"Is that him? He's shorter in person.\" He understands every word. The Yolk lets him hear chickens.", { cue: "littlehen" }));
-  if (s.flags.showboat) out.lines.push(line("The front row, wearing the fryer, would like a word. Several words. He can hear all of them now."));
-  else out.lines.push(line("Corny tries to slip out the back. The crowd he warned is standing right there. On WKUK, DeeJay names the buyer of the fairground land: Mayor Featherstone Bantam."));
-  out.lines.push(line("The corn-dog cart's engine coughs. She looks back once. Furious. Impressed. Already writing the sequel.", { speaker: SPEAKER.gobbler, cue: "hattie_exit" }));
+  if (s.flags.showboat) out.lines.push(line("The front row, wearing the fryer, would like a word. Several words. He can hear all of them now.", { cue: "hen_out" }));
+  else out.lines.push(line("Corny tries to slip out the back. The crowd he warned is standing right there. On WKUK, DeeJay names the buyer of the fairground land: Mayor Featherstone Bantam.", { cue: "hen_out" }));
+  // Oct 23 item 45: her getaway car, out the back flap, a big man with a stogie at the wheel: the mayor's muscle.
+  out.lines.push(line("Out the back flap, a getaway car's engine coughs. A big man with a fat stogie at the wheel. She looks back once. Furious. Impressed. Already writing the sequel.", { speaker: SPEAKER.gobbler, cue: "hattie_exit" }));
   s.ending = computeEnding(s);
   s.mode = "end";
   s.choice = null;
@@ -1035,6 +1041,18 @@ function onItem(s, id, out) {
   }
   s.pending = id;
   out.lines.push(line(`Use the ${item.name} on...`));
+}
+
+// Oct 23 item 30: use an inventory item on Rooster himself.
+function onSelf(s, out) {
+  const id = s.pending;
+  s.pending = null;
+  if (!id || !has(s, id)) {
+    out.lines.push(line(s.verb === "look" ? "Big, green, puffed up, a little tired. Still the hero. Mostly." : "He pats himself down. All there."));
+    return;
+  }
+  const item = itemOf(s, id);
+  out.lines.push(line(item.self || `He tries the ${item.name} on himself. Nothing. He was hoping for a little something.`));
 }
 
 function onSpot(s, id, out, asGo) {
@@ -1235,6 +1253,7 @@ export function act(state, action) {
     return { state: s, lines: [] };
   }
   if (action.t === "item") onItem(s, action.id, out);
+  else if (action.t === "self") onSelf(s, out);
   else if (action.t === "hotspot") onSpot(s, action.id, out, false);
   else if (action.t === "go") onSpot(s, action.id, out, true);
   else if (action.t === "choice") onChoice(s, action.id, out);

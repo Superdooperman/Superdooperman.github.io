@@ -537,3 +537,15 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 /* Oct 21 items 15/20: the stunt-night flashback at the joined ticket: the scene goes old-photo sepia */
 .world.flashback { filter: sepia(0.85) contrast(1.08) brightness(0.92); }
 .world.flashback::after { content: ""; position: absolute; inset: 0; z-index: 990; pointer-events: none; box-shadow: inset 0 0 40px 12px rgba(40, 22, 6, 0.75); }
+
+/* Push A (Oct 24) */
+/* item 31: a new room fades in from black instead of popping (its neighbours' plates are preloaded) */
+.stage.fadein .world { animation: room-fade 0.4s ease-out; }
+@keyframes room-fade { from { opacity: 0; } to { opacity: 1; } }
+/* item 41: the flashback's past Pavilion, its gathering crowd and the rigger's silhouette (under the sepia vignette) */
+.world .flash-past { position: absolute; inset: 0; z-index: 980; pointer-events: none; }
+.world .flash-past .flash-bg { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.world .flash-past .flash-crowd { position: absolute; height: auto; image-rendering: pixelated; filter: brightness(0.55); transition: top 0.6s ease-out; }
+.world .flash-past .flash-sil { position: absolute; height: auto; image-rendering: pixelated; transition: opacity 0.8s; }
+/* item 30: Rooster himself, while an item is held */
+.spot.self { cursor: pointer; }

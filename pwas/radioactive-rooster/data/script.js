@@ -229,6 +229,29 @@ export const ITEMS = {
   },
 };
 
+// Oct 23 item 30: any inventory item used on Rooster himself (click him while holding it) gets its own line.
+export const SELF_LINES = {
+  geiger: "He waves the counter over his own chest. Click. Click-click. He decides that's the suit. It's probably the suit.",
+  bulb: "He holds the spare bulb up to his own beak. Nothing lights up. Some ideas need a socket.",
+  photo: "He signs his own photo again, under the first signature. \"To me. Stay safe.\" He feels a little better.",
+  spoon: "He checks his reflection in the spoon. Upside down, the hero looks worried. Right side up, too.",
+  stub: "He tucks the stub against his heart, under the suit. It's been there before. It knows the way.",
+  half: "He holds the half ticket up beside his own face, like a mugshot. Exhibit A: a bird who knows too much.",
+  ticket: "ADMIT TWO. He looks at it, then at himself. Admit one. For now.",
+  grub: "He considers the grub as a snack. The grub considers him back. They agree to see other people.",
+  ribbon: "He pins the GUEST JUDGE ribbon to his own chest and nods at himself. The judge finds him very heroic.",
+  sauce: "He thinks about a dab of hot sauce on his own beak, for courage. Rad-Safe Rule 4: never season the hero.",
+  mirror: "He checks the hero in the mirror. Feathers: puffed. Beak: heroic. Eyes: tired. He puffs the feathers more.",
+  bill: "He reads the bill against his own chest, in case it's for him. It isn't. He's relieved, then ashamed of being relieved.",
+  speaker: "He holds the speaker up to his own ear. It's quiet. It's waiting for something worth saying.",
+  map: "He traces the map's lines across his own belly, in case he is the treasure. He is not on the map.",
+  pass: "He flashes the gold pass at himself. He lets himself in. Nothing happens. It's a very exclusive club.",
+  vip: "He reads the VIP card to himself, out loud, in her voice. It's worse in his voice.",
+  basket: "He puts the rubber basket on his head. It fits. He takes it off before anybody sees. Somebody saw.",
+  tickets: "He tries to hand the tickets to himself. He won't take them. Good. They're Pip's.",
+};
+for (const [id, text] of Object.entries(SELF_LINES)) if (ITEMS[id]) ITEMS[id].self = text;
+
 export const ITEM_ON_ITEM = {
   "bulb+geiger": {
     unlessFlag: "geiger_rigged",
@@ -312,7 +335,7 @@ export const ENDINGS = {
     blurb: "The Yolk is safe. The Hawk has flown.",
     art: "Rooster gliding over the Pavilion, red webbing out, the Yolk in a rubber basket.",
     panels: [
-      { text: "The corn-dog cart's taillights, heading for the county line. \"Spare set.\"", art: "bg/cover-hero-1" },
+      { text: "The getaway car's taillights, heading for the county line. \"Spare set.\"", art: "bg/cover-hero-1" }, // Oct 23 item 45: his car, not Marge's cart
       { text: "A single hawk feather on the rooftop bucket.", art: "bg/cover-hero-2" },
       { text: "Across town, the neon hawk flickers. For one frame it reads HATTIE'S.", art: "bg/cover-hero-3" },
       { text: "Took you long enough, Rooster. Name. Business. ...Welcome home.", say: "Henny", art: "bg/cover-hero-4" },
@@ -341,7 +364,7 @@ export const ENDINGS = {
     blurb: "She stole the Yolk... but he stole her heart!",
     art: "Dawn on the rooftop coop. Two masked lovebirds beak to beak inside a big pink heart.",
     panels: [
-      "Dawn. She parks the corn-dog cart and climbs up to the coop instead of running. Across the street, Gizzard plays something sweet, in a major key, through the club's open window.",
+      "Dawn. She has the getaway car drop her at the corner and climbs up to the coop instead of running. Across the street, Gizzard plays something sweet, in a major key, through the club's open window.",
       "Two gloved fingers touch the ticket. The halves fit. \"Nobody's ever said no to me nicely before.\" Beaks bump. Both googly pupils spin. Neither eye was looking. Didn't matter.",
       "A soft, real kiss as the sun clears the water tower. Down below, little hearts pop over Mortgage the goat.",
       "\"Next fair, Big Green. Save me a seat.\" Over her shoulder, softly: \"Bye, B.O.\" He glides beside her a few seconds, red webbing glowing, then lets her go.",
@@ -410,11 +433,56 @@ function spot(partial) {
   return partial;
 }
 
+// A walk along waypoints as a cue `seq` (Push A, Oct 24): one step every STEP ms, the walk frames alternating, facing
+// the way she's heading. frames: { r: [...], l: [...] }.
+// Oct 23 items 33/42: the clock shimmy (midway.cutscenes.shimmy). The post is at plate x ~125; frame a has its glove on
+// the post 37 px from its left edge and 33 px above its feet, frame b 34 px / 12 px (its anchor is 30): so for a glove
+// height g, a stands at [125, g + 33] and b at [121, g + 12]. Hand over hand from g 108 to g 60, up behind the clock.
+const SHIMMY = (() => {
+  const keys = [[0, ["rooster-walk-l", "rooster-side-l"], [168, 146], [140, 142], 700]];
+  let t = 700;
+  const gs = [108, 102, 96, 90, 84, 78, 72, 66, 60];
+  gs.forEach((g, i) => { keys.push([t, i % 2 ? "rooster-shimmy-b-r" : "rooster-shimmy-a-r", i % 2 ? [121, g + 12] : [125, g + 33]]); t += 260; });
+  t += 700; // the nudge at the top (a, glove at 60, just under the housing; he reaches round behind it)
+  keys.push([t, "rooster-shimmy-a-r", [125, 60 + 33], [125, 141], 550]);
+  t += 650;
+  keys.push([t, ["rooster-walk-r", "rooster-side-r"], [140, 142], [168, 146], 650]);
+  t += 650;
+  // the clock housing (cut from the plate) is drawn over him for the beat: he goes up behind it
+  // heroZ: in front of the vendor (who stands before the post) but under the clock cutout (950)
+  return { ms: t, heroH: 88, heroZ: 900, hero: keys, props: [{ art: "fg/midway--clock", at: [108, 10] }], events: [[700 + 260 * gs.length + 250, { sound: "click" }]], end: { hero: [168, 146], face: "l" } };
+})();
+
+function walkSeq(points, frames, speed = 60) {
+  const STEP = 120, out = [];
+  let n = 0;
+  for (let i = 1; i < points.length; i += 1) {
+    const [a, b] = [points[i - 1], points[i]];
+    const steps = Math.max(1, Math.round((Math.hypot(b[0] - a[0], b[1] - a[1]) / speed) * 1000 / STEP));
+    const f = frames[b[0] >= a[0] ? "r" : "l"];
+    for (let k = 1; k <= steps; k += 1) {
+      out.push([f[n % f.length], STEP, [Math.round(a[0] + ((b[0] - a[0]) * k) / steps), Math.round(a[1] + ((b[1] - a[1]) * k) / steps)]]);
+      n += 1;
+    }
+  }
+  return out;
+}
+
 // Oct 21 item 14: Pip tiptoes behind the side rope to the corn-dog cart (Marge has her back to her), lifts Corny's key
 // ring off the hook and tiptoes back with it, keys first (pip-sneak = with the keys, pip-sneak2 = without).
+// Push A: a real two-frame sneak walk both ways, not a slide.
 const PIP_SNEAK = {
-  walk: ["pip-sneak2-r"], to: [206, 138], ms: 1700,
-  seq: [["pip-sneak2-r", 500], ["pip-sneak-l", 260], ...Array.from({ length: 8 }, (_, i) => ["pip-sneak-l", 160, [Math.round(206 - (i + 1) * 7.5), i < 4 ? 138 : 137]])],
+  walk: ["pip-sneak-r", "pip-sneak2-r"], to: [206, 138], ms: 1700,
+  seq: [["pip-sneak2-r", 500], ["pip-sneak-l", 260], ...walkSeq([[206, 138], [176, 138], [146, 137], [122, 140]], { r: ["pip-sneak-r", "pip-sneak2-r"], l: ["pip-sneak-l", "pip-sneak2-l"] }, 45)],
+};
+// Oct 23 item 38: she walks round the side rope's back post to the front of the lock post, unlocks it with her hand
+// on the padlock (pip-reach-r: hand at +18, 37 up; the padlock is at ~(102, 138)), then walks back to her spot.
+const PIP_PATH = [[122, 140], [156, 141], [156, 150], [124, 176], [84, 175]];
+const PIP_UNLOCK = {
+  seq: [...walkSeq(PIP_PATH, { r: ["pip-walk-r", "pip-side-r"], l: ["pip-walk-l", "pip-side-l"] }),
+    ["pip-reach-r", 1100, [84, 175]],
+    ...walkSeq([...PIP_PATH].reverse(), { r: ["pip-walk-r", "pip-side-r"], l: ["pip-walk-l", "pip-side-l"] }),
+    ["pip-front", 1, [122, 140]]],
 };
 
 export const ROOMS = {
@@ -1337,9 +1405,13 @@ export const ROOMS = {
     name: "Midway, 11:40",
     plate: "bg-midway.jpg",
     hero: { at: [180, 152], height: 104, depth: { horizon: 105 } }, // depth: 104 at y 152 (booth counter at his belt), smaller toward the railing
-    walk: [[[20, 151], [84, 149], [88, 141], [262, 141], [262, 177], [20, 177]]], // boardwalk up to the railing posts (bases y 130-145), past the booth's right corner (booth occludes him behind y 147); the Pavilion rope (x>262) is off limits // booth counter top y 103, booth floor y 147 (~44 px): counter meets his belt
-    occluders: [{ id: "booth", base: 147 }], // the booth front; its counter window is open (the kids stand behind the counter)
-    overlays: [{ art: "fg/midway--cashbox", at: [63, 92], z: 148 }, { art: "fg/midway--rope", at: [268, 118] }], // + Oct 21 item 12: the velvet rope and HOT OIL sign at the right edge (tools/sprites/cut_oct21.py) // over the booth front cutout (z); Corny's cash box on the end of the counter (tools/sprites/cut_next.py)
+    walk: [[[20, 151], [84, 149], [88, 141], [252, 141], [250, 146], [290, 177], [20, 177]]], // boardwalk up to the railing posts (bases y 130-145), past the booth's right corner (booth occludes him behind y 147); the Pavilion rope (Arlong's painted rope, Oct 24 item 46: back post foot (256,146), front post foot (303,179)) is off limits, he stops on its near side // booth counter top y 103, booth floor y 147 (~44 px): counter meets his belt
+    occluders: [{ id: "booth", base: 147 }, { id: "rope", base: 179, edge: [[256, 146], [303, 179]] }], // + Oct 24 item 46: Arlong's HOT OIL rope as a foreground cutout (tools/sprites/cut_push_a.py rope()), in front of anyone on its far side // the booth front; its counter window is open (the kids stand behind the counter)
+    // Oct 23 items 33/42: "fix the clock" plays: he walks round behind Corny to the post, shinnies up it hand over hand
+    // (sit v2 frames: rooster-shimmy-a/b, each with its glove on the post, manifest `post`), nudges the minute hand,
+    // slides back down and walks back to his mark.
+    cutscenes: { shimmy: SHIMMY },
+    overlays: [{ art: "fg/midway--cashbox", at: [63, 92], z: 148 }], // over the booth front cutout (z); Corny's cash box on the end of the counter (tools/sprites/cut_next.py)
     cast: [
       { spot: "kids", sprite: "dot-front", talk: "dot-talk", voice: ["dot", "kids"], at: [38, 140], height: 72 }, // behind the counter window
       { spot: "kids", sprite: "rocco-front", talk: "rocco-talk", voice: ["rocco", "kids"], at: [59, 141], height: 72 },
@@ -1463,6 +1535,7 @@ export const ROOMS = {
         id: "rope",
         name: "way to the Hot Oil Pavilion",
         rect: [266, 102, 54, 48],
+        stand: [252, 152], // the near side of the rope
         exit: true,
         look: "The boardwalk runs to the Hot Oil Pavilion's velvet rope. The rope wants a reason.",
         talk: "The rope is velvet and judgmental.",
@@ -1519,7 +1592,7 @@ export const ROOMS = {
         cues: { cage_jog: "hattie-flinch-l", hattie_exit: { walk: ["hattie-exit-walk-r", "hattie-exit-side-r"], to: [246, 112], ms: 1600, end: "hattie-exit-back" } } },
       // Pip, front row behind the side rope; she drifts into the crowd for the keys, then pops the padlock (left of her).
       { spot: "pip", sprite: "pip-front", talk: "pip-talk", voice: "pip", at: [122, 140], height: 56,
-        cues: { pip_lift: PIP_SNEAK, pip_unlock: "pip-reach-l" } },
+        cues: { pip_lift: PIP_SNEAK, pip_unlock: PIP_UNLOCK } },
       // Marge, the corn-dog vendor, at the cart (Arlong 2026-10-19: her own sprite, not the barker); she looks round
       // when Rooster reaches for Corny's keys on the cart hook.
       { spot: "vendor", sprite: "vendor-idle-r", at: [238, 148], height: 80, cues: { corny_turn: "vendor-talk-l" } },
@@ -1535,7 +1608,14 @@ export const ROOMS = {
       // Steam and red glow rolling off the oil (Arlong: more ominous vat), 4 loop frames over the oil surface.
       { sprite: "vat-steam-a", frames: ["vat-steam-a", "vat-steam-b", "vat-steam-c", "vat-steam-d"], every: 200, at: [56, 76], height: 40, prop: true },
       // The little brown hen in the crowd behind the side rope: only at the finish, where she speaks.
-      { sprite: "littlehen-idle-r", at: [140, 138], height: 18, when: "egg_saved", cues: { littlehen: "littlehen-cluck-r" } },
+      // Oct 23 item 39: she struts out under the side rope to the front, so the gag reads, and stays there.
+      { sprite: "littlehen-idle-r", at: [140, 138], height: 18, when: "egg_saved",
+        cues: { littlehen: { walk: ["littlehen-idle-r", "littlehen-cluck-r"], to: [170, 152], ms: 1400, seq: [["littlehen-cluck-r", 1]] },
+          hen_out: { sprite: "littlehen-idle-r", at: [170, 152] }, hattie_exit: { sprite: "littlehen-idle-r", at: [170, 152] } } },
+      // Oct 23 item 45: the getaway car waits out the back flap, his elbow out the window (the stogie guy, Mayor
+      // Bantam's muscle, at the wheel); the cart's cutout hides its wheels. On her exit it holds, then pulls away right.
+      { sprite: "getaway-car-r", at: [286, 66], height: 16, prop: true, when: "egg_saved",
+        cues: { hattie_exit: { seq: [["getaway-car-r", 1700], ...Array.from({ length: 12 }, (_, i) => ["getaway-car-r", 90, [286 + (i + 1) * 6, 66]])] } } },
     ],
     vat: [14, 66, 84, 17], // the glowing oil surface
     // The foreground crowd presses in with each step of the crow-down (crowd_1..3, js/logic.js talkGobbler/onCrow), so
@@ -1555,6 +1635,14 @@ export const ROOMS = {
         hero: [[0, "rooster-glide-l", null, [70, 116], 900], [900, "rooster-glide-r", null, [270, 124], 1500],
           [2400, "rooster-glide-l", null, [180, 128], 700], [3100, "rooster-glide-l", null, [150, 153], 700]],
         end: { hero: [150, 153], face: "front" },
+      },
+      // Oct 23 item 40: the hot sauce toss. From wherever he stands he raises Ned's bottle like the matador, lobs it in
+      // an arc into the vat, SPLASH, and the spicy oil hits her in the face ({f}: facing the vat, faceTo x).
+      sauce_toss: {
+        ms: 2100, faceTo: 56,
+        hero: [[0, "rooster-sauce-raise-{f}", null], [650, "rooster-matador-raise-{f}", null], [1500, "rooster-matador-flourish-{f}", null]],
+        props: [{ art: "fx/sauce-bottle", at: "hero", show: 650, arc: [650, 700, [50, 62], 46], gone: 1350 }],
+        events: [[1350, { fx: "fx/oil-splash-a", at: [6, 28] }], [1350, { shake: 350 }], [1380, { sound: "bonk" }], [1650, { fx: "fx/oil-splash-b", at: [160, 46] }]],
       },
       // the catch: the Yolk drops out of the cage into the rubber basket (he stands left of the low cage, ~(58, 149), facing it)
       catch: {
@@ -1644,6 +1732,7 @@ export const ROOMS = {
           basket: { special: "basket_fryer" },
           sauce: { special: "sauce_oil" },
         },
+        tossItems: ["sauce"], // Oct 23 item 40: he throws it from where he stands, no walk to the vat
         talk: "\"Steady, big guy.\" The oil pops back, rude and hot.",
         take: "Uhhh, a vat of hot oil does not fit in the suit. Nothing should fit in the suit.",
         use: "He's not putting his gloves anywhere near that oil. Rad-Safe Rule 1: don't fry the hero.",
@@ -1680,7 +1769,8 @@ export const ROOMS = {
         name: "corn-dog cart",
         rect: [253, 62, 64, 85],
         stand: [204, 150], beside: false, face: "r", // left of Marge, so neither hides the other
-        look: "A corn-dog cart parked like a getaway car. Keys in it. She always plans her exit.",
+        look: "Marge's corn-dog cart, parked by the back flap. Out past it, an engine idles in the dark. She always plans her exit.",
+        alt: [{ when: "egg_saved", look: "Marge's corn-dog cart. Just a cart. The getaway car was out back the whole time." }],
         use: "It isn't time to borrow her exit.",
         push: "The cart stays. For now.",
         talk: "\"Nice cart.\" The corn dogs sweat under the lamp. They know he's onto something.",

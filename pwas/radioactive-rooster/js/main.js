@@ -140,6 +140,8 @@ function fxNode(state) {
 
 function dispatch(action) {
   if (ui.cutscene) return;
+  if (ui.pendingAct && ui.pendingAct !== action) cancelPendingAct(); // a new command replaces the walk-then-act
+
   const result = act(ui.state, action);
   ui.state = result.state;
   if (result.lines.length) {
@@ -179,6 +181,9 @@ function playCutscene(name, done) {
   const goatEntry = castNode("goat");
   const heroNode = world.querySelector(".hero");
   const actors = {};
+  // Push A: a beat played from wherever he stands, facing `faceTo` (x): "{f}" in a frame name is his facing
+  const f = cs.faceTo !== undefined ? (hero.x > cs.faceTo ? "l" : "r") : hero.face === "l" ? "l" : "r";
+  const heroH = cs.heroH || (room.hero && room.hero.depth ? depthHeight(room.hero, hero.y) : 64);
   // sizes per actor: the hero by depth (or one fixed size for a beat off the floor, cs.heroH: the glide), Mortgage at h44
   const size = { hero: (y) => (cs.heroH ? `-h${cs.heroH}` : room.hero.depth ? `-h${depthHeight(room.hero, y)}` : sizeTag(room.hero)), goat: () => (goatEntry ? sizeTag(goatEntry[1]) : "-h44") };
   for (const who of ["hero", "goat"]) {
@@ -193,7 +198,14 @@ function playCutscene(name, done) {
   }
   // the prop's real overlay (already gone from the state, still on screen until the next render) hides under the copy
   for (const p of cs.props || []) for (const n of world.querySelectorAll(`img.overlay[data-id="${p.art}"]:not(.cs-prop)`)) n.style.visibility = "hidden";
-  const props = (cs.props || []).map((p) => { const node = el("img", "overlay cs-prop"); node.alt = ""; node.style.zIndex = 950; placeAt(node, p.art, p.at); world.append(node); return { ...p, node }; });
+  const props = (cs.props || []).map((p) => {
+    // at: "hero" = from his raised fist (the sauce toss): just above his head on the side he faces
+    const at = p.at === "hero" ? [hero.x + (f === "l" ? -0.29 : 0.29) * heroH - 3, hero.y - 1.06 * heroH] : p.at;
+    const node = el("img", "overlay cs-prop"); node.alt = ""; node.style.zIndex = 950; placeAt(node, p.art, at);
+    if (p.show) node.style.visibility = "hidden";
+    world.append(node);
+    return { ...p, at, node };
+  });
   const fired = new Set();
   const t0 = performance.now();
   const tint = world.querySelector(".cast") && world.querySelector(".cast").style.filter;
@@ -212,7 +224,7 @@ function playCutscene(name, done) {
     const t = performance.now() - t0;
     for (const [who, a] of Object.entries(actors)) {
       const { at, key } = posAt(a, t);
-      const frames = Array.isArray(key[1]) ? key[1] : [key[1]];
+      const frames = (Array.isArray(key[1]) ? key[1] : [key[1]]).map((x) => x.replace("{f}", f));
       const sprite = frames[Math.floor((t - key[0]) / (frames.length > 1 && who === "goat" && !key[3] ? 220 : STEP_MS)) % frames.length];
       placeSprite(a.node, `sprite/${sprite}${size[who](at[1])}`, at);
       a.node.style.zIndex = who === "hero" && cs.heroZ ? cs.heroZ : actorZ(at[1]); // heroZ: up in the air, over the crowd
@@ -220,6 +232,12 @@ function playCutscene(name, done) {
     }
     for (const p of props) {
       if (p.gone !== undefined && t >= p.gone) { p.node.remove(); continue; }
+      if (p.show) p.node.style.visibility = t >= p.show ? "" : "hidden";
+      if (p.arc && t >= p.arc[0]) { // [t0, ms, to, height]: a lob, spinning
+        const u = Math.min(1, (t - p.arc[0]) / p.arc[1]);
+        placeAt(p.node, p.art, [p.at[0] + (p.arc[2][0] - p.at[0]) * u, p.at[1] + (p.arc[2][1] - p.at[1]) * u - 4 * p.arc[3] * u * (1 - u)]);
+        p.node.style.transform = `rotate(${Math.round(u * (f === "l" ? -540 : 540))}deg)`;
+      }
       if (p.fall && t >= p.fall[0]) {
         const u = Math.min(1, (t - p.fall[0]) / p.fall[1]);
         const sway = Math.sin(u * Math.PI * 3) * 4 * (1 - u);
@@ -245,6 +263,7 @@ function playCutscene(name, done) {
     for (const p of props) p.node.remove();
     block.remove();
     if (cs.end && cs.end.hero && room.hero) { hero.x = hero.tx = cs.end.hero[0]; hero.y = hero.ty = cs.end.hero[1]; hero.path = []; hero.walking = false; hero.face = cs.end.face || "front"; }
+    else if (cs.faceTo !== undefined && room.hero) hero.face = f;
     ui.cutscene = null;
     done();
   }
@@ -366,6 +385,13 @@ function render() {
   const fxPop = realPlate && fxNode(state);
   if (fxPop) world.append(fxPop);
   world.classList.toggle("flashback", !!(lineNow && lineNow.flashback)); // Oct 21 items 15/20
+  if (lineNow && lineNow.flashback && lineNow.flashStep >= 1 && lineNow.flashStep <= 5) world.append(flashbackLayer(lineNow.flashStep));
+  // Oct 23 item 31: a new room fades in (never a black flash while its art loads), and its neighbours' plates preload
+  if (ui.shownRoom !== state.room) {
+    if (ui.shownRoom) stage.classList.add("fadein");
+    ui.shownRoom = state.room;
+    preloadNeighbours(room, state);
+  }
   // Oct 21 item 4: inventory Look holds the item up close in his gloves at the bottom of the screen
   if (lineNow && lineNow.closeup && !lineNow.big) {
     const box = el("div", "closeup");
@@ -448,15 +474,25 @@ function render() {
       hit.addEventListener("pointerenter", () => setSentence(preview(state, spot)));
       hit.addEventListener("pointerleave", () => setSentence(null));
       hit.addEventListener("click", () => {
+        if (ui.cutscene) return;
+        const now = ui.state;
+        const action = { t: "hotspot", id: spot.id };
+        const lastAct = { spot: spot.id, verb: now.pending ? "item" : now.verb };
+        // Oct 23 item 40: some things he throws from where he stands (the hot sauce into the vat): no walk
+        if (!room.hero || (now.pending && (spot.tossItems || []).includes(now.pending))) {
+          cancelPendingAct();
+          ui.lastAct = lastAct;
+          dispatch(action);
+          return;
+        }
         // beside it, not in it (js/walk.js standFor): the side he comes from, facing the thing; exits keep their point
-        if (room.hero) heroSync(room);
-        const castIds = new Set((room.cast || []).filter((c) => !c.when || state.flags[c.when]).map((c) => c.spot));
-        const avoid = spotsFor(state).filter((s) => castIds.has(s.id) && s.id !== spot.id).map((s) => s.core || s.rect);
-        const st = room.hero ? standFor(room, spot, { walk: heroArea(room), from: [hero.x, hero.y], avoid }) : null;
+        heroSync(room);
+        const castIds = new Set((room.cast || []).filter((c) => !c.when || now.flags[c.when]).map((c) => c.spot));
+        const avoid = spotsFor(now).filter((s) => castIds.has(s.id) && s.id !== spot.id).map((s) => s.core || s.rect);
+        const st = standFor(room, spot, { walk: heroArea(room), from: [hero.x, hero.y], avoid });
         const [sx, sy] = st ? [st.x, st.y] : spot.stand || [spot.rect[0] + spot.rect[2] / 2, spot.rect[1] + spot.rect[3]];
-        walkTo(room, sx, sy, st && st.face);
-        ui.lastAct = { spot: spot.id, verb: state.pending ? "item" : state.verb };
-        dispatch({ t: "hotspot", id: spot.id });
+        // Oct 23 item 35: he reaches his mark first, then the action (and its line and cutscene) plays
+        walkThen(room, sx, sy, st && st.face, action, lastAct);
       });
       // Arlong: double-click an edge exit to go straight through, whatever verb is up (no nav words needed)
       if (spot.exit) hit.addEventListener("dblclick", () => {
@@ -466,6 +502,28 @@ function render() {
       stage.append(hit);
     }
   }
+
+  // Oct 23 item 30: holding an item (or looking), click Rooster himself
+  // (under the hotspots in the stacking order: where he stands in front of one, the hotspot wins)
+  if (state.mode !== "choice" && !ended && room.hero && !state.pose && state.pending) {
+    const me = el("button", "spot self");
+    me.type = "button";
+    me.dataset.id = "self";
+    me.setAttribute("aria-label", state.pending ? `Use the ${itemOf(state, state.pending).name} on Rooster` : "Look at Rooster");
+    me.addEventListener("pointerenter", () => setSentence(me.getAttribute("aria-label")));
+    me.addEventListener("pointerleave", () => setSentence(null));
+    me.addEventListener("click", () => { if (ui.cutscene) return; cancelPendingAct(); dispatch({ t: "self" }); });
+    placeSelf(me, room);
+    if (world.parentNode === stage) world.after(me); else stage.prepend(me);
+  }
+  // Oct 23 item 29: click anywhere on the floor and he walks there (SCUMM); blocked, he gets as close as he can
+  stage.addEventListener("click", (ev) => {
+    if (ev.target !== stage || ui.cutscene || !room.hero || ui.state.mode === "choice" || ui.state.mode === "end" || ui.state.pose) return;
+    const r = world.getBoundingClientRect(); // the scene box (the stage adds a frame border)
+    if (!r.width) return;
+    cancelPendingAct();
+    walkTo(room, ((ev.clientX - r.left) / r.width) * SCENE.w, ((ev.clientY - r.top) / r.height) * SCENE.h);
+  });
 
   // Talking head sits in the dialogue row under the scene (SCUMM-style), never over the art.
   const speakerFile = lineNow && lineNow.speaker;
@@ -755,6 +813,8 @@ setInterval(() => {
 function placeHero(node, room) {
   placeSprite(node, heroFrame(room), [hero.x, hero.y], `sprite/rooster-front${heroSize(room)}`);
   node.style.zIndex = actorZ(hero.y);
+  const me = document.querySelector(".stage .spot.self");
+  if (me) placeSelf(me, room);
   // edge occluders (the hatch) follow him: just over him while he's behind, just under him while he's in front
   for (const fg of document.querySelectorAll('.world img.fg[data-edge="1"]')) {
     const o = (room.occluders || []).find((x) => x.id === fg.dataset.id);
@@ -764,6 +824,63 @@ function placeHero(node, room) {
 
 function edgeZ(o) {
   return behindOccluder(o, hero.x, hero.y) ? actorZ(hero.y) + 1 : actorZ(hero.y) - 1;
+}
+
+/* ---------- Push A (Oct 24): walk first, then act; flashback layer; neighbour preload ---------- */
+function cancelPendingAct() {
+  ui.pendingAct = null;
+  ui.actToken = (ui.actToken || 0) + 1;
+  hero.onArrive = null;
+}
+
+function walkThen(room, x, y, face, action, lastAct) {
+  cancelPendingAct();
+  const token = ui.actToken;
+  ui.pendingAct = action;
+  const go = () => {
+    if (ui.actToken !== token || ui.pendingAct !== action) return;
+    ui.pendingAct = null;
+    ui.lastAct = lastAct;
+    dispatch(action);
+  };
+  hero.onArrive = go;
+  walkTo(room, x, y, face);
+  if (!hero.walking) { hero.onArrive = null; go(); } // already on his mark
+}
+
+function placeSelf(node, room) {
+  const h = room.hero.depth ? depthHeight(room.hero, hero.y) : room.hero.height || 64;
+  place(node, [hero.x - 0.3 * h, hero.y - h, 0.6 * h, h]);
+}
+
+// Oct 23 item 41: the stunt-night beats play on the Pavilion as it was (bg/pavilion-aged), the crowd gathering a row
+// at a time, and in it, from the stunt night on, the silhouette of the man who rigged it (the mayor's muscle).
+const FLASH_CROWD = [0, 168, 158, 148, 140, 136];
+function flashbackLayer(step) {
+  const layer = el("div", "flash-past");
+  const bg = el("img", "flash-bg"); bg.alt = ""; mount(bg, "bg/pavilion-aged");
+  const sil = el("img", "flash-sil"); sil.alt = "";
+  placeSprite(sil, "sprite/stogie-sil-arms-r-h64", [262, 170]);
+  sil.style.opacity = step >= 3 ? "1" : step === 2 ? "0.55" : "0";
+  const crowd = el("img", "flash-crowd"); crowd.alt = ""; placeAt(crowd, "fg/pavilion--crowd", [0, FLASH_CROWD[step]]);
+  layer.append(bg, sil, crowd);
+  return layer;
+}
+
+const preloaded = new Set();
+function preloadNeighbours(room, state) {
+  const ids = new Set();
+  for (const sp of room.spots || []) if (sp.exit && sp.go && sp.go.room) ids.add(sp.go.room);
+  if (room.id === "midway") ids.add("pavilion");
+  if (room.id === "pavilion") ids.add("midway");
+  for (const id of ids) {
+    if (!ROOMS[id]) continue;
+    const url = urlOf(roomView(ROOMS[id], state.flags).plate);
+    if (!url || preloaded.has(url)) continue;
+    preloaded.add(url);
+    const img = new Image();
+    img.src = url;
+  }
 }
 
 function walkTo(room, x, y, faceOnArrive = null) {
@@ -1153,6 +1270,10 @@ window.__RR = {
   },
   start: startGame,
   hero: () => ({ ...hero }),
+  // walkthrough drain: a hotspot click walks first, so the action is still pending (or a cutscene is playing)
+  get busy() {
+    return !!(ui.pendingAct || ui.cutscene);
+  },
   walkTo: (x, y) => walkTo(ui.state && ROOMS[ui.state.room], x, y),
   act: dispatch,
   advance,
