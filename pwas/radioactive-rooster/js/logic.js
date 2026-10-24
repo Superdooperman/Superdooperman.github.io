@@ -43,6 +43,8 @@ export function line(text, extra = {}) {
     cue: extra.cue || null, // stage cue for cast frames (js/main.js castFrame); never shown
     ...(extra.anim ? { anim: extra.anim } : {}), // one-shot tweens (js/main.js playAnim); never shown
     ...(extra.cutscene ? { cutscene: extra.cutscene } : {}), // a scripted beat played before the line (js/main.js)
+    ...(extra.flashback ? { flashback: true } : {}), // shown in old-photo sepia (js/main.js, css .world.flashback)
+    ...(extra.closeup ? { closeup: extra.closeup } : {}), // an item art id held up in his gloves while the line shows
   };
 }
 
@@ -170,7 +172,7 @@ function commit(s, fx, out) {
     if (!Object.prototype.hasOwnProperty.call(fx, "pose")) s.pose = null;
   }
   if (fx.say) {
-    out.lines.push(line(fx.say, { speaker: fx.speaker || null, mood: fx.mood || null, sound: fx.sound || null, big: fx.big, cutscene: fx.cutscene }));
+    out.lines.push(line(fx.say, { speaker: fx.speaker || null, mood: fx.mood || null, sound: fx.sound || null, big: fx.big, cutscene: fx.cutscene, anim: fx.anim, cue: fx.cue, thought: fx.thought }));
   }
 }
 
@@ -226,7 +228,7 @@ function readNote(s, out) {
 
 function lookBoard(s, out) {
   out.lines.push(line("The conspiracy board. Red string, push pins, and in the middle, in his best capitals: WHO TOOK THE YOLK?"));
-  out.lines.push(line("Around it, his finest work. CORN DOGS: WHY A STICK? WHO BENEFITS? WKUK plays the same song at 3:14 every night. CODE?? The ferris wheel moved two inches this year. TOWARD WHAT."));
+  out.lines.push(line("Around it, his finest work. CORN DOGS: WHY A STICK? WHO BENEFITS? WKUK plays the same song at 3:33 every night. CODE?? The ferris wheel moved two inches this year. TOWARD WHAT."));
   out.lines.push(line("HENNY: has never once blinked in front of him. And a clipping, circled: LOCAL MAN BRAHM A. ORPINGTON BEHIND ON FEED BILL. Labeled, in a hurry: DEAD END. DO NOT PURSUE."));
   const bits = [];
   if (s.flags.got_stub) bits.push("Pinned: a torn ticket stub. \"R— & H—\". He pins it face down.");
@@ -403,8 +405,22 @@ function talkPeck(s, out) {
     out.lines.push(line("\"Fog by midnight. Hot front coming off the fairgrounds. Ribbon's the goat's problem.\"", { speaker: SPEAKER.peck }));
     return;
   }
-  out.lines.push(line("\"Barometer says goat.\"", { speaker: SPEAKER.peck }));
+  // Oct 21 items 23/24: Hattie is Peck's granddaughter. His memory wanders and he shouts old Rooster & Hattie
+  // memories as weather reports, fondly. He never puts it together that the bird in front of him is the fella.
+  const n = s.flags.peck_memory || 0;
+  s.flags.peck_memory = n + 1;
+  const MEM = PECK_MEMORIES[n % PECK_MEMORIES.length];
+  for (const [text, who] of MEM) out.lines.push(line(text, who ? { speaker: SPEAKER.peck } : {}));
 }
+
+const PECK_MEMORIES = [
+  [["\"FORECAST FOR THE MIDWAY! A high-pressure system in a hawk mask, and a big green front blowing in off the rooftops. Light winds at the ring-toss. Lovely conditions.\" He smiles at the hay. \"That was my Hattie-girl and her rooster fella.\"", true]],
+  [["\"Hattie-girl used to visit Sundays. Sunny, every Sunday. Then a long dry spell.\" He taps the brass horn like it's a barometer. \"Years of drought now. Can't figure what dried it up.\"", true],
+    ["He doesn't tell Peck why. He's never told anybody why.", false]],
+  [["\"STORM WARNING OVER THE PAVILION! Big green bird gliding in low, red streaks across the sky!\" Quieter: \"Folks called it an accident. I called it weather. Prettiest weather I ever saw.\"", true]],
+  [["\"Clear skies tonight for anybody who stops by to see their grandpa.\" Loud enough for the whole county. \"HINT, HINT, HATTIE-GIRL.\"", true]],
+  [["\"Barometer says goat.\"", true]],
+];
 
 function talkClerk(s, out) {
   if (s.flags.traded) {
@@ -448,6 +464,7 @@ function geigerSlot(s, out) {
   give(s, "speaker");
   give(s, "map");
   out.lines.push(line("He holds the rigged counter to the slot. Click. Click. Click. DeeJay finds the beat, and the station ID goes out on a geiger counter.", { speaker: SPEAKER.deejay, sound: "click" }));
+  out.lines.push(line("DeeJay tests the parking-lot horn before he hands it over. \"TESTING, WKUK!\" The glass hums, and a coffee mug shivers itself right off the shelf behind him. \"...She's got some kick.\"", { speaker: SPEAKER.deejay, sound: "wheeze" })); // Oct 21 item 22: loud shakes things loose
   out.lines.push(line("The parking-lot horn comes off its nail and through the slot, with a fair map. DeeJay's circled two things."));
   out.lines.push(line("Then the phone lights up. DeeJay: \"Caller, you're on WKUK.\" A voice like warm syrup on a cold knife.", { speaker: SPEAKER.deejay }));
   out.lines.push(hattie("\"Still signing pictures for folks who didn't ask, sugar? Skip the farm-fair sleuthing. Meet me at the club. I'll tell you everything.\""));
@@ -535,7 +552,7 @@ function talkKids(s, out) {
     out.lines.push(line("\"Oh my gosh. It's the guy from the tape.\" Flat. \"Hi. Rings are three for a dollar. Nobody wins.\"", { speaker: SPEAKER.dot }));
     out.lines.push(rocco("Yo, the pegs are rigged, the rings are small / Corny glued a quarter-inch on the back of 'em all / Don't throw high, throw low and slow / Bounce off the bottle, and watch it go."));
     s.flags.heard_rap = true;
-    out.lines.push(line("Dot doesn't look at Rocco. \"He does that.\"", { speaker: SPEAKER.dot }));
+    out.lines.push(line("Dot doesn't look at Rocco. \"He does that. And forget the pegs. Only thing that ever rattles this booth is Corny's own yelling.\"", { speaker: SPEAKER.dot })); // Oct 21 item 22: loud shakes the bottles
     return;
   }
   if (n === 1) {
@@ -559,7 +576,8 @@ function lookCashbox(s, out) {
     return;
   }
   s.flags.saw_rig = true;
-  out.lines.push(line("The lid's up. Under the quarters, a wiring sketch in grease pencil: FRYER → TIMER → 12:00, initialed S.C. And a torn half of a fair ticket with the same ragged edge as his."));
+  out.lines.push(line("The lid's up. Under the quarters, a wiring sketch in grease pencil: FRYER → TIMER → 12:00, initialed S.C."));
+  out.lines.push(line("And a torn half of a fair ticket, with the same ragged edge as his."));
 }
 
 function takeCashbox(s, out) {
@@ -574,7 +592,8 @@ function takeCashbox(s, out) {
   s.flags.got_half = true;
   s.flags.saw_rig = true;
   give(s, "half");
-  out.lines.push(line("He lifts the ticket half and nothing else. Under it, the wiring sketch: FRYER → TIMER → 12:00, initialed S.C. Corny is still yelling about the jingle."));
+  out.lines.push(line("He lifts the ticket half and nothing else. Under it, the wiring sketch: FRYER → TIMER → 12:00, initialed S.C."));
+  out.lines.push(line("Corny is still yelling about the jingle."));
 }
 
 function joinTicket(s, out) {
@@ -584,8 +603,20 @@ function joinTicket(s, out) {
   s.flags.reveal = true;
   s.mood = "embarrassed";
   out.lines.push(line("The edges fit. \"ROOSTER & HATTIE: ADMIT TWO,\" dated the stunt night. Her half was pawned to Corny. The lipstick on his half is the Gobbler's."));
+  // Oct 21 items 15/20: the stunt-night flashback plays here, at the joined ticket (agreed with Arlong Oct 21)
+  for (const text of FLASHBACK) out.lines.push(line(text, { flashback: true }));
   out.lines.push(line("The Cock Gobbler is Hattie. And somebody else, initials S.C., wired the fryer to blow at midnight. She doesn't know.", { mood: "embarrassed" }));
 }
+
+const FLASHBACK = [
+  "The ticket's warm in his gloves, and for a second the whole fair goes the color of an old photograph.",
+  "Years back. Corny's ring-toss, a trick-shot girl in a hawk mask, and a big green bird who beat her at her own game. She laughed, and offered him a partner's half of everything.",
+  "The stunt night. Same Pavilion, same cage, same hot oil. Hattie's hand on the old prize-cage lever. \"Nobody gets hurt, sugar. The crowd gasps, you swoop in, and they love us forever.\"",
+  "The lever goes. The cage swings out over the fryer, and there's a kid inside, a little one who climbed in for a prize.",
+  "He glides. Red webbing out, the first time anybody ever saw it, and the kid's in his arms an inch above the oil.",
+  "Later, behind the tent, he tears their ticket in half and gives her one piece. Gently: she can't be his partner anymore. He never tells anybody why.",
+  "The fair comes back in color. He's still holding both halves.",
+];
 
 function tossPlain(s, out) {
   if (s.flags.got_basket) {
@@ -885,11 +916,13 @@ export function computeEnding(s) {
 function finish(s, out) {
   drop(s, "basket");
   s.flags.egg_saved = true;
-  s.pose = "squat";
   s.mood = "crow";
   out.lines.push(line("The rubber basket takes the Yolk of Midnight. It's warm, and humming, and whole.", { sound: "geiger", cutscene: "catch" }));
-  out.lines.push(line("He plants his big orange costume boots, forgets he's still squatting, and gives the whole fair the real thing, the first real one since that night.", { mood: "crow", speaker: HERO.crow }));
-  out.lines.push(line("PAH-KAW!!!", { big: true, sound: "pah-kaw", mood: "crow", speaker: HERO.crow }));
+  // Oct 21 items 17/18: he stands with the Yolk (room.heroHold) and lunges into the crow; on the showboat run he kicks
+  // off the vat rim and the front row gets the fryer.
+  if (s.flags.showboat) out.lines.push(line("He hops up on the vat rim with the Yolk hugged to his chest, plants his big orange costume boots, and gives the whole fair the real thing, the first real one since that night.", { mood: "crow", speaker: HERO.crow }));
+  else out.lines.push(line("He hugs the Yolk to his chest, plants his big orange costume boots, and gives the whole fair the real thing, the first real one since that night.", { mood: "crow", speaker: HERO.crow }));
+  out.lines.push(line("PAH-KAW!!!", { big: true, sound: "pah-kaw", mood: "crow", speaker: HERO.crow, cutscene: s.flags.showboat ? "pahkaw_show" : "pahkaw" }));
   out.lines.push(line("Nobody obeys. Nobody kneels. The Yolk doesn't give you the Crow. It never did."));
   out.lines.push(line("Instead, in the crowd, a little brown hen says, plainly, \"Is that him? He's shorter in person.\" He understands every word. The Yolk lets him hear chickens.", { cue: "littlehen" }));
   if (s.flags.showboat) out.lines.push(line("The front row, wearing the fryer, would like a word. Several words. He can hear all of them now."));
@@ -976,7 +1009,7 @@ function onItem(s, id, out) {
     return;
   }
   if (s.verb === "look") {
-    out.lines.push(line(item.look));
+    out.lines.push(line(item.look, { closeup: item.icon })); // Oct 21 item 4: held up in his gloves on the main screen
     return;
   }
   if (s.verb === "talk") {

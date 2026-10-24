@@ -408,10 +408,12 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 
 /* Pavilion vat bubbles (hidden finale meter) */
 .vat { position: absolute; z-index: 1; pointer-events: none; border-radius: 50% / 30%; transition: box-shadow 1.5s, background 1.5s; }
+.vat { container-type: size; }
+/* Oct 21 item 13: golden oil domes like the painting: swell on the surface, stretch, and pop flat */
 .vat .bub {
-  position: absolute; bottom: 12%; width: calc(var(--sz) * 1.3); height: calc(var(--sz) * 1.3); border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #ffffff 0 28%, rgba(255, 246, 205, 0.95) 29%); border: 2px solid rgba(60, 18, 0, 0.95);
-  box-shadow: 0 0 5px 1px rgba(255, 250, 220, 0.85), 0 0 0 1px rgba(255, 210, 120, 0.6);
+  position: absolute; bottom: 12%; width: calc(var(--sz) * 0.55cqw); height: calc(var(--sz) * 0.4cqw); border-radius: 50% 50% 40% 40%;
+  background: radial-gradient(ellipse at 32% 30%, #fff6c8 0 16%, #ffc94a 17% 45%, #d98a16 46% 80%, #8a4a08 81%);
+  border: 1px solid rgba(70, 26, 0, 0.9); box-shadow: 0 0 4px rgba(255, 210, 90, 0.55);
   animation: bubble 3.2s infinite ease-in;
 }
 .vat.v-gentle { background: radial-gradient(ellipse at 50% 60%, rgba(255, 240, 190, 0.12), transparent 70%); }
@@ -421,9 +423,10 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 .vat.v-gentle .bub { animation-duration: 2.6s; }
 .vat.v-boil .bub { animation-duration: 1.4s; }
 .vat.v-boil { background: radial-gradient(ellipse at 50% 60%, rgba(255, 240, 200, 0.3), transparent 72%); box-shadow: 0 0 10px rgba(255, 200, 80, 0.45); }
-.vat.v-rolling .bub { animation-duration: 0.7s; background: rgba(255, 190, 120, 0.85); }
+.vat.v-rolling .bub { animation-duration: 0.7s; background: radial-gradient(ellipse at 32% 30%, #fff1c0 0 14%, #ff9a3a 15% 50%, #c4400e 51%); }
 .vat.v-rolling { background: radial-gradient(ellipse at 50% 70%, rgba(255, 40, 20, 0.45), transparent 75%); box-shadow: 0 0 18px rgba(255, 30, 0, 0.55) inset; animation: spatter 0.5s infinite alternate; }
-@keyframes bubble { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { transform: translateY(calc(-1 * var(--rise, 40px))) scale(1.3); opacity: 0; } }
+@keyframes bubble { 0% { transform: translateY(0) scale(0.2); opacity: 0; } 15% { opacity: 1; } 70% { transform: translateY(-25%) scale(1); opacity: 1; } 80% { transform: translateY(-35%) scale(1.15, 1.3); opacity: 1; } 88%, 100% { transform: translateY(-35%) scale(1.7, 0.6); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .vat .bub { animation-duration: 6s !important; } }
 @keyframes spatter { from { filter: brightness(1); } to { filter: brightness(1.35); } }
 
 /* Crow-down oil gauge (wrong answers) */
@@ -510,6 +513,8 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 @keyframes anim-wobble { 0% { transform: rotate(0); } 15% { transform: rotate(-9deg); } 35% { transform: rotate(7deg); } 55% { transform: rotate(-4deg); } 75% { transform: rotate(2deg); } 100% { transform: rotate(0); } }
 .world .anim-puff { transform-origin: 50% 100%; animation: anim-puff 0.8s ease-out; }
 @keyframes anim-puff { 0% { transform: none; } 20% { transform: scale(1.35, 1.25); } 40% { transform: scale(1.3, 1.2) translateY(-35%); } 55% { transform: scale(1.3, 1.2) translate(-10%, 0); } 70% { transform: scale(1.15, 1.1) translateY(-15%); } 100% { transform: none; } }
+.world .anim-juggle { transform-origin: 50% 100%; animation: anim-juggle 1.4s ease-in-out; }
+@keyframes anim-juggle { 0%, 100% { transform: none; } 10% { transform: translateY(-6%) rotate(-5deg); } 22% { transform: translateY(0) rotate(4deg); } 34% { transform: translateY(-7%) rotate(5deg); } 46% { transform: translateY(0) rotate(-4deg); } 58% { transform: translateY(-5%) rotate(-5deg); } 70% { transform: translateY(0) rotate(3deg); } 84% { transform: translateY(-2%) rotate(-2deg); } }
 .world .anim-recoil { animation: anim-recoil 0.6s ease-out 0.25s; }
 @keyframes anim-recoil { 0% { transform: none; } 25% { transform: translateX(calc(var(--away, 1) * 12%)) rotate(calc(var(--away, 1) * 4deg)); } 100% { transform: none; } }
 
@@ -523,3 +528,12 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 .caption .advance { position: absolute; right: 0.7em; bottom: 0.35em; font-size: 0.72em; font-weight: 700; letter-spacing: 0.04em; color: #8a3b12; animation: advance-bob 1s ease-in-out infinite; pointer-events: none; font-family: inherit; }
 .caption.rap .advance, .caption.thought .advance { font-family: Georgia, serif; }
 @keyframes advance-bob { 0%, 100% { transform: translateY(0); opacity: 0.75; } 50% { transform: translateY(2px); opacity: 1; } }
+
+/* Oct 21 item 4: inventory Look closeup (js/main.js) */
+.world .closeup { position: absolute; inset: 0; z-index: 960; pointer-events: none; }
+.world .closeup img { position: absolute; height: auto; image-rendering: pixelated; }
+.world .closeup .closeup-item { filter: drop-shadow(0 2px 0 rgba(0,0,0,.5)); }
+
+/* Oct 21 items 15/20: the stunt-night flashback at the joined ticket: the scene goes old-photo sepia */
+.world.flashback { filter: sepia(0.85) contrast(1.08) brightness(0.92); }
+.world.flashback::after { content: ""; position: absolute; inset: 0; z-index: 990; pointer-events: none; box-shadow: inset 0 0 40px 12px rgba(40, 22, 6, 0.75); }

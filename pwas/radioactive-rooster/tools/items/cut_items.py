@@ -45,8 +45,11 @@ def key(path):
         near = nd.binary_dilation(lab == main, iterations=25)
         keep = [i + 1 for i in range(n) if sz[i] >= 30 and (near & (lab == i + 1)).any()]
         fg = np.isin(lab, keep)
-    if k:
-        fg = pick(fg, int(k))
+    if k:  # "#2" one object, "#0+1" several (the joined ticket is two torn halves side by side)
+        sel = np.zeros_like(fg)
+        for part in k.split('+'):
+            sel |= pick(fg, int(part))
+        fg = sel
     fg = nd.binary_fill_holes(fg) & fg | nd.binary_erosion(nd.binary_fill_holes(fg), iterations=3) & ~mag
     # de-fringe: pull edge colours from the interior so no magenta halo survives the downscale
     core = nd.binary_erosion(fg, iterations=2)

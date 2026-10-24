@@ -1,6 +1,6 @@
 // Radioactive Rooster (live) service worker. Own prefix "radioactive-rooster-" (the old live SW used
 // radioactive-rooster-v2), so it never touches the beta's caches or other games.
-const VERSION = "4";
+const VERSION = "5";
 const CORE_CACHE = `radioactive-rooster-core-v${VERSION}`;
 const PIXEL_CACHE = `radioactive-rooster-pixel-v${VERSION}`;
 const FANCY_CACHE = `radioactive-rooster-fancy-v${VERSION}`;

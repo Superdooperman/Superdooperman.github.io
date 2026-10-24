@@ -19,7 +19,7 @@ export const SPEAKER = {
   guard: "portrait-guard.jpg",
   corny: "portrait-barker.jpg",
   clerk: "portrait-clerk.jpg",
-  hattie: "voice:hattie",
+  hattie: "portrait-hattie.png", // Oct 21 item 9: a silhouette behind a frosted door, no spoiler (tools/sprites/cut_oct21.py)
   dot: "voice:dot",
   rocco: "voice:rocco",
   pip: "voice:pip",
@@ -352,12 +352,16 @@ export const ENDINGS = {
   showboat: {
     series: "RADIOACTIVE ROOSTER #1 · MISPRINT EDITION",
     title: "ROOSTER SAVES EGG, NOT FACES!",
+    // Oct 21 item 19: a Silver Age cover too. Splash = the kick off the vat rim, a wave of oil over the front row
+    // (bg/cover-showboat, tools/sprites/cut_oct21.py); the beats are painted inset panels (bg/cover-showboat-1..4).
+    splash: "bg/cover-showboat",
     blurb: "Collectors' item! Oil stains included!",
     art: "Rooster mid-crow, very proud. Behind him, a front row wearing the fryer.",
     panels: [
-      "The town hoses itself off by the ferris wheel.",
-      "Ned reviews the hot sauce: \"Tasted like humiliation.\"",
-      { text: "You've got oil on your beak.", say: "Henny" },
+      { text: "The town hoses itself off by the ferris wheel.", art: "bg/cover-showboat-1" },
+      { text: "Ned reviews the hot sauce: \"Tasted like humiliation.\"", art: "bg/cover-showboat-2" },
+      { text: "You've got oil on your beak.", say: "Henny", art: "bg/cover-showboat-3" },
+      { text: "Under the boardwalk lights, his own poster, face down in the oil. Somebody stepped on the beak.", art: "bg/cover-showboat-4" },
     ],
     tone: "showboat",
   },
@@ -405,6 +409,13 @@ export const KINDNESS = ["kind_henny", "kind_deejay", "kind_goat", "kind_pip"];
 function spot(partial) {
   return partial;
 }
+
+// Oct 21 item 14: Pip tiptoes behind the side rope to the corn-dog cart (Marge has her back to her), lifts Corny's key
+// ring off the hook and tiptoes back with it, keys first (pip-sneak = with the keys, pip-sneak2 = without).
+const PIP_SNEAK = {
+  walk: ["pip-sneak2-r"], to: [206, 138], ms: 1700,
+  seq: [["pip-sneak2-r", 500], ["pip-sneak-l", 260], ...Array.from({ length: 8 }, (_, i) => ["pip-sneak-l", 160, [Math.round(206 - (i + 1) * 7.5), i < 4 ? 138 : 137]])],
+};
 
 export const ROOMS = {
   hq: {
@@ -483,11 +494,16 @@ export const ROOMS = {
         stand: [85, 152], // in front of the hatch line
         whenNot: "got_bulb",
         look: "A lamp over the door, the only light on the roof. Rad-Safe Rule 4: always carry a spare bulb. He keeps meaning to buy one.",
-        take: {
-          give: ["bulb"],
-          set: ["got_bulb"],
-          say: "He unscrews the bulb, quick, before it bites. The roof drops into moonlight. Rule 4, technically honored: now he's carrying a spare.",
-        },
+        take: [
+          {
+            give: ["bulb"],
+            set: ["got_bulb"],
+            mood: "embarrassed",
+            anim: { hero: "juggle" }, // Oct 21 note 2: the hot-bulb juggle, hand to hand
+            say: "He unscrews the bulb. \"Ooh, ouch, ah, ah! Hot bulb! Who uses tungsten bulbs anymore?!\" He juggles it glove to glove until it stops glowing.",
+          },
+          "The roof drops into moonlight. Rule 4, technically honored: now he's carrying a spare.",
+        ],
         talk: "\"Good work tonight, lamp.\" It hums. Honestly, it's the most reliable member of the team.",
         use: "He flicks it off and on. Rad-Safe Rule 9: check your lighting. Rules 5 through 8 were never written down.",
         push: "He nudges the shade. The moths reorganize into a new government.",
@@ -589,6 +605,18 @@ export const ROOMS = {
         },
         useAny: "He thinks about dropping the {item} down the hatch to save time. Then he'd have to go get it. No time saved.",
       }),
+      // Oct 21 item 21: an Act 1 memory (a red herring, not a puzzle): the golden hawk feather on the coop windowsill
+      spot({
+        id: "feather",
+        name: "coop window",
+        rect: [62, 58, 24, 30],
+        look: "On the sill inside, in a jam jar: one golden hawk feather. Hattie left it the night they split. He's moved it twice. Both times he put it back.",
+        talk: "\"Evening.\" He says it to the feather. The feather, being a feather, lets it go.",
+        take: "He reaches for it and stops. Some things stay where she left them.",
+        use: "He breathes on the glass and wipes it with his glove. Now the feather's clearer. That doesn't help.",
+        push: "He nudges the window. The jar doesn't move. Neither does he, for a while.",
+        useAny: "He holds the {item} up to the window, next to the feather. Neither one explains anything.",
+      }),
     ],
   },
   fence: {
@@ -597,7 +625,7 @@ export const ROOMS = {
     plate: "bg-fence.jpg",
     // Crossroads pixel bg (Arlong's approved fence.jpg, 2026-10-18). Far scene: the split-rail fence (posts ~23 px, base y ~110,
     // top rail ~17 px above the ground) sits at his waist-to-chest when he stands at it, so he's ~30 px there.
-    hero: { at: [170, 152], height: 60, depth: { horizon: 68, min: 28, max: 80 } }, // ~30 at the fence (y 110), 36 at Henny's crate, ~80 at the bottom edge
+    hero: { at: [170, 152], from: { hq: { at: [4, 150], walk: [40, 150] } }, height: 60, depth: { horizon: 68, min: 28, max: 80 } }, // from the rooftop he comes in from the left edge (Oct 21 note 5) // ~30 at the fence (y 110), 36 at Henny's crate, ~80 at the bottom edge
     // In front of the fence (base y ~110, ~102-105 at the right end), never through the crate; a slot behind the crate;
     // up the Main Street road past the fence end; the ditch, reeds and bank (bottom right) are off limits.
     walk: [
@@ -1205,6 +1233,19 @@ export const ROOMS = {
         talk: "\"Hang on, fair. Big Green's coming.\" He winces. That's her name for him. He doesn't use it.",
         useAny: "He holds the {item} up toward the fair's glow. The road is long. The {item} doesn't make it shorter.",
       }),
+      // Oct 21 item 21: an Act 1 memory (a red herring): the old Rooster & Hattie poster under the hall flyers
+      spot({
+        id: "poster",
+        name: "notice board",
+        rect: [10, 36, 26, 34],
+        stand: [34, 134],
+        look: "Flyers: a lost goat, fiddle lessons, the fry-off. Under them, sun-faded, a poster: ROOSTER & HATTIE, CRIME-STOPPERS, two masked birds back to back. She's laughing in it. He forgot she laughed like that.",
+        talk: "He reads the poster's slogan out loud, quietly: \"Two birds. One county. No crooks.\" It used to sound better with her saying half.",
+        take: "He starts to unpin it, then pins it back. Straighter.",
+        use: "He smooths the corner flat where it's curling. That's all. That's all he can fix.",
+        push: "He presses a loose pin back in. The poster stays up. It always does.",
+        useAny: "He holds the {item} next to the poster. Back then he'd have known what to do with it. Back then she'd have told him.",
+      }),
     ],
   },
   gate: {
@@ -1298,7 +1339,7 @@ export const ROOMS = {
     hero: { at: [180, 152], height: 104, depth: { horizon: 105 } }, // depth: 104 at y 152 (booth counter at his belt), smaller toward the railing
     walk: [[[20, 151], [84, 149], [88, 141], [262, 141], [262, 177], [20, 177]]], // boardwalk up to the railing posts (bases y 130-145), past the booth's right corner (booth occludes him behind y 147); the Pavilion rope (x>262) is off limits // booth counter top y 103, booth floor y 147 (~44 px): counter meets his belt
     occluders: [{ id: "booth", base: 147 }], // the booth front; its counter window is open (the kids stand behind the counter)
-    overlays: [{ art: "fg/midway--cashbox", at: [63, 92], z: 148 }], // over the booth front cutout (z); Corny's cash box on the end of the counter (tools/sprites/cut_next.py)
+    overlays: [{ art: "fg/midway--cashbox", at: [63, 92], z: 148 }, { art: "fg/midway--rope", at: [268, 118] }], // + Oct 21 item 12: the velvet rope and HOT OIL sign at the right edge (tools/sprites/cut_oct21.py) // over the booth front cutout (z); Corny's cash box on the end of the counter (tools/sprites/cut_next.py)
     cast: [
       { spot: "kids", sprite: "dot-front", talk: "dot-talk", voice: ["dot", "kids"], at: [38, 140], height: 72 }, // behind the counter window
       { spot: "kids", sprite: "rocco-front", talk: "rocco-talk", voice: ["rocco", "kids"], at: [59, 141], height: 72 },
@@ -1340,7 +1381,8 @@ export const ROOMS = {
         id: "booth",
         name: "ring-toss pegs",
         rect: [18, 98, 50, 12],
-        look: "Three rings, a row of bottles and pegs, and a prize shelf with one rubber basket on it.",
+        // Oct 21 items 21/22: where he met Hattie; and the hint that only something loud will shake the bottles loose
+        look: "Three rings, a row of bottles and pegs, and a prize shelf with one rubber basket on it. The pegs are glued. These won't budge in an earthquake. Right here, years ago, he beat Hawkeye Hattie at her own game.",
         use: { special: "toss_plain" },
         take: { special: "toss_plain" },
         useItem: { speaker: { special: "toss_speaker" } },
@@ -1471,11 +1513,13 @@ export const ROOMS = {
     ],
     cast: [
       // on the stage, in the spotlight; at the finish she walks off stage right to her getaway cart
-      { spot: "gobbler", sprite: "hattie-front", at: [205, 110], height: 52,
-        cues: { hattie_exit: { walk: ["hattie-walk-r", "hattie-side-r"], to: [246, 112], ms: 1600, end: "hattie-back" } } },
+      // Oct 21 item 16: she visibly holds the cage chain (it runs up off the top of the screen, over to the cage), and
+      // yanks it when the lamp blinds her or the sauce makes her lean (cage_jog). tools/sprites/cut_oct21.py
+      { spot: "gobbler", sprite: "hattie-chain-l", at: [205, 110], height: 52,
+        cues: { cage_jog: "hattie-flinch-l", hattie_exit: { walk: ["hattie-exit-walk-r", "hattie-exit-side-r"], to: [246, 112], ms: 1600, end: "hattie-exit-back" } } },
       // Pip, front row behind the side rope; she drifts into the crowd for the keys, then pops the padlock (left of her).
       { spot: "pip", sprite: "pip-front", talk: "pip-talk", voice: "pip", at: [122, 140], height: 56,
-        cues: { pip_lift: { walk: ["pip-walk-r", "pip-side-r"], to: [146, 137], end: "pip-side-r" }, pip_unlock: "pip-reach-l" } },
+        cues: { pip_lift: PIP_SNEAK, pip_unlock: "pip-reach-l" } },
       // Marge, the corn-dog vendor, at the cart (Arlong 2026-10-19: her own sprite, not the barker); she looks round
       // when Rooster reaches for Corny's keys on the cart hook.
       { spot: "vendor", sprite: "vendor-idle-r", at: [238, 148], height: 80, cues: { corny_turn: "vendor-talk-l" } },
@@ -1526,8 +1570,25 @@ export const ROOMS = {
       },
       // the dark side: the vat erupts
       erupt: { ms: 900, events: [[0, { shake: 700 }]] },
+      // Oct 21 items 17/18: PAH-KAW. Hero ending: one big lunge forward off his planted boots, the Yolk held high.
+      pahkaw: {
+        ms: 1100, heroH: 84,
+        hero: [[0, "rooster-lunge-r", null, [96, 160], 450], [450, "rooster-lunge-r", null, [112, 158], 350], [800, "rooster-yolk-r", null, [112, 158], 300]],
+        events: [[450, { shake: 250 }]],
+        end: { hero: [112, 158], face: "r" },
+      },
+      // ...showboat ending ("the front row, wearing the fryer"): up onto the vat rim, then a kick off it that sends a
+      // wave of hot oil over the front row, and a lunge out to centre stage.
+      pahkaw_show: {
+        ms: 1700, heroH: 84, heroZ: 950,
+        hero: [[0, "rooster-yolk-r", null, [46, 92], 400], [450, "rooster-lunge-r", null, [46, 92], 150], [600, "rooster-lunge-r", null, [150, 152], 750], [1350, "rooster-yolk-r", null, [150, 152], 350]],
+        events: [[600, { fx: "fx/oil-splash-b", at: [20, 36] }], [600, { shake: 500 }], [650, { sound: "bonk" }]],
+        end: { hero: [150, 152], face: "r" },
+      },
     },
-    poseAt: { squat: [30, 83, 56] }, // squatting with the basket where he caught the Yolk, left of the vat's cage
+    // Oct 21 item 17: once the Yolk is in the basket he stands holding it (no squat), side frames rooster-yolk-r/-l.
+    heroHold: { flag: "egg_saved", sprite: "rooster-yolk", size: "-h84" },
+    poseAt: { squat: [30, 83, 56] }, // (legacy: no longer used at the finish since Oct 21 item 17)
     exits: [{ spot: "out", label: "Midway" }],
     spots: [
       spot({

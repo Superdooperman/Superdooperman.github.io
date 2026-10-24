@@ -213,7 +213,7 @@
     0
    ],
    "legacy": "portrait-henny.jpg",
-   "pixel": false
+   "source": "tools/sprites/cut_oct21.py (henny-portrait-v1.jpg)"
   },
   "portrait/peck": {
    "kind": "portrait",
@@ -239,7 +239,7 @@
     0
    ],
    "legacy": "portrait-deejay.jpg",
-   "pixel": false
+   "source": "tools/sprites/cut_oct21.py (deejay-portrait-v1.jpg)"
   },
   "portrait/guard": {
    "kind": "portrait",
@@ -5636,7 +5636,7 @@
     12
    ],
    "legacy": "item-pass.svg",
-   "source": "tools/items/cut_items.py (items-painted-v1-b.jpg#0)"
+   "source": "tools/items/cut_items.py (items-painted-v1-b.jpg#0+1)"
   },
   "item/item-ribbon": {
    "kind": "item",
@@ -5649,7 +5649,7 @@
     12
    ],
    "legacy": "item-ribbon.svg",
-   "source": "tools/items/cut_items.py (items-painted-v1-b.jpg#1)"
+   "source": "tools/items/cut_items.py (items-painted-v1-b.jpg#2)"
   },
   "item/item-sauce": {
    "kind": "item",
@@ -5662,7 +5662,7 @@
     12
    ],
    "legacy": "item-sauce.svg",
-   "source": "tools/items/cut_items.py (items-painted-v1-b.jpg#2)"
+   "source": "tools/items/cut_items.py (items-painted-v1-b.jpg#3)"
   },
   "item/item-mirror": {
    "kind": "item",
@@ -5675,7 +5675,7 @@
     12
    ],
    "legacy": "item-mirror.svg",
-   "source": "tools/items/cut_items.py (items-painted-v1-b.jpg#3)"
+   "source": "tools/items/cut_items.py (items-painted-v1-b.jpg#4)"
   },
   "item/item-bill": {
    "kind": "item",
@@ -5688,7 +5688,7 @@
     12
    ],
    "legacy": "item-bill.svg",
-   "source": "tools/items/cut_items.py (items-painted-v1-b.jpg#4)"
+   "source": "tools/items/cut_items.py (items-painted-v1-b.jpg#5)"
   },
   "item/item-speaker": {
    "kind": "item",
@@ -5701,7 +5701,7 @@
     12
    ],
    "legacy": "item-speaker.svg",
-   "source": "tools/items/cut_items.py (items-painted-v1-b.jpg#5)"
+   "source": "tools/items/cut_items.py (items-painted-v1-b.jpg#6)"
   },
   "item/item-map": {
    "kind": "item",
@@ -8828,6 +8828,319 @@
     66
    ],
    "source": "tools/sprites/cut_next.py (rooster-glide-v2.jpg) + tools/sprites/glide_webbing.py (webbing from rooster-glide-v3-webbing-alt.jpg)"
+  },
+  "portrait/hattie": {
+   "kind": "portrait",
+   "size": [
+    64,
+    64
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "legacy": "portrait-hattie.png",
+   "source": "tools/sprites/cut_oct21.py (hattie-portrait-subtle-v1.jpg)"
+  },
+  "fg/midway--rope": {
+   "kind": "overlay",
+   "size": [
+    52,
+    30
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/sprites/cut_oct21.py (midway-rope-v1.jpg)"
+  },
+  "fx/closeup-gloves": {
+   "kind": "fx",
+   "size": [
+    180,
+    77
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/sprites/cut_oct21.py (closeup-gloves-v1.jpg, whitened)"
+  },
+  "fx/oil-splash-a": {
+   "kind": "fx",
+   "size": [
+    96,
+    56
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/sprites/cut_oct21.py (procedural)"
+  },
+  "fx/oil-splash-b": {
+   "kind": "fx",
+   "size": [
+    96,
+    56
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/sprites/cut_oct21.py (procedural)"
+  },
+  "fx/oil-splash-c": {
+   "kind": "fx",
+   "size": [
+    96,
+    56
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/sprites/cut_oct21.py (procedural)"
+  },
+  "bg/cover-showboat": {
+   "kind": "ending",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/sprites/cut_oct21.py (cover-splash-showboat-v2-headfix.png)"
+  },
+  "bg/cover-showboat-1": {
+   "kind": "ending",
+   "size": [
+    144,
+    81
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/sprites/cut_oct21.py (cover-panels-showboat-v2.jpg #1)"
+  },
+  "bg/cover-showboat-2": {
+   "kind": "ending",
+   "size": [
+    144,
+    81
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/sprites/cut_oct21.py (cover-panels-showboat-v2.jpg #2)"
+  },
+  "bg/cover-showboat-3": {
+   "kind": "ending",
+   "size": [
+    144,
+    81
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/sprites/cut_oct21.py (cover-panels-showboat-v2.jpg #3)"
+  },
+  "bg/cover-showboat-4": {
+   "kind": "ending",
+   "size": [
+    144,
+    81
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/sprites/cut_oct21.py (cover-panels-showboat-v2.jpg #4)"
+  },
+  "sprite/rooster-yolk-r-h84": {
+   "kind": "sprite",
+   "size": [
+    58,
+    84
+   ],
+   "anchor": [
+    29,
+    84
+   ],
+   "source": "tools/sprites/cut_oct21.py (rooster-yolk-lunge-sprites-v1.jpg)"
+  },
+  "sprite/rooster-yolk-l-h84": {
+   "kind": "sprite",
+   "size": [
+    58,
+    84
+   ],
+   "anchor": [
+    29,
+    84
+   ],
+   "source": "tools/sprites/cut_oct21.py (rooster-yolk-lunge-sprites-v1.jpg)"
+  },
+  "sprite/rooster-lunge-r-h84": {
+   "kind": "sprite",
+   "size": [
+    80,
+    78
+   ],
+   "anchor": [
+    40,
+    78
+   ],
+   "source": "tools/sprites/cut_oct21.py (rooster-lunge-sprite-v2-headfix.png)"
+  },
+  "sprite/rooster-lunge-l-h84": {
+   "kind": "sprite",
+   "size": [
+    80,
+    78
+   ],
+   "anchor": [
+    40,
+    78
+   ],
+   "source": "tools/sprites/cut_oct21.py (rooster-lunge-sprite-v2-headfix.png)"
+  },
+  "sprite/hattie-chain-r-h52": {
+   "kind": "sprite",
+   "size": [
+    56,
+    112
+   ],
+   "anchor": [
+    28,
+    112
+   ],
+   "source": "tools/sprites/cut_oct21.py (hattie-chain-sprites-v1.jpg)"
+  },
+  "sprite/hattie-chain-l-h52": {
+   "kind": "sprite",
+   "size": [
+    56,
+    112
+   ],
+   "anchor": [
+    28,
+    112
+   ],
+   "source": "tools/sprites/cut_oct21.py (hattie-chain-sprites-v1.jpg)"
+  },
+  "sprite/hattie-flinch-r-h52": {
+   "kind": "sprite",
+   "size": [
+    56,
+    112
+   ],
+   "anchor": [
+    28,
+    112
+   ],
+   "source": "tools/sprites/cut_oct21.py (hattie-chain-sprites-v1.jpg)"
+  },
+  "sprite/hattie-flinch-l-h52": {
+   "kind": "sprite",
+   "size": [
+    56,
+    112
+   ],
+   "anchor": [
+    28,
+    112
+   ],
+   "source": "tools/sprites/cut_oct21.py (hattie-chain-sprites-v1.jpg)"
+  },
+  "sprite/pip-sneak-r-h56": {
+   "kind": "sprite",
+   "size": [
+    44,
+    56
+   ],
+   "anchor": [
+    22,
+    56
+   ],
+   "source": "tools/sprites/cut_oct21.py (pip-sneak-sprites-v1.jpg)"
+  },
+  "sprite/pip-sneak-l-h56": {
+   "kind": "sprite",
+   "size": [
+    44,
+    56
+   ],
+   "anchor": [
+    22,
+    56
+   ],
+   "source": "tools/sprites/cut_oct21.py (pip-sneak-sprites-v1.jpg)"
+  },
+  "sprite/pip-sneak2-r-h56": {
+   "kind": "sprite",
+   "size": [
+    44,
+    56
+   ],
+   "anchor": [
+    22,
+    56
+   ],
+   "source": "tools/sprites/cut_oct21.py (pip-sneak-sprites-v1.jpg)"
+  },
+  "sprite/pip-sneak2-l-h56": {
+   "kind": "sprite",
+   "size": [
+    44,
+    56
+   ],
+   "anchor": [
+    22,
+    56
+   ],
+   "source": "tools/sprites/cut_oct21.py (pip-sneak-sprites-v1.jpg)"
+  },
+  "sprite/hattie-exit-walk-r-h52": {
+   "kind": "sprite",
+   "size": [
+    56,
+    112
+   ],
+   "anchor": [
+    28,
+    112
+   ],
+   "source": "tools/sprites/cut_oct21.py (hattie-walk-r-h52, re-canvassed)"
+  },
+  "sprite/hattie-exit-side-r-h52": {
+   "kind": "sprite",
+   "size": [
+    56,
+    112
+   ],
+   "anchor": [
+    28,
+    112
+   ],
+   "source": "tools/sprites/cut_oct21.py (hattie-side-r-h52, re-canvassed)"
+  },
+  "sprite/hattie-exit-back-h52": {
+   "kind": "sprite",
+   "size": [
+    56,
+    112
+   ],
+   "anchor": [
+    28,
+    112
+   ],
+   "source": "tools/sprites/cut_oct21.py (hattie-back-h52, re-canvassed)"
   }
  }
 }

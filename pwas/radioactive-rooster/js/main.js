@@ -49,11 +49,15 @@ function writeSaves(slots) {
 // `fallback`: another asset to show if this one is unknown or fails to load, so a missing frame never leaves an
 // empty image (Rooster must never vanish). An id the manifest doesn't know yet (stale manifest) is tried directly as
 // art/pixel/<id>.png first.
+function urlOf(file) {
+  // only for ids the manifest doesn't know (a stale manifest); a known id with a placeholder keeps its placeholder
+  if (!assetInfo(file) && /^(sprite|item|fg|fx|overlay|bg)\//.test(file)) return `art/pixel/${file}.png`;
+  return artUrl(file);
+}
+
 function mount(img, file, fallback = null) {
   img.dataset.file = file;
-  let url = artUrl(file);
-  // only for ids the manifest doesn't know (a stale manifest); a known id with a placeholder keeps its placeholder
-  if (!assetInfo(file) && /^(sprite|item|fg|fx|overlay|bg)\//.test(file)) url = `art/pixel/${file}.png`;
+  const url = urlOf(file);
   img.onerror = fallback && fallback !== file ? () => { img.onerror = null; mount(img, fallback); } : null;
   img.src = url;
   // Nearest-neighbor for pixel files, smooth for fancy and legacy placeholders.
@@ -297,7 +301,22 @@ function render() {
   const tint = spriteFilter({ spriteTint: view.spriteTint }); // per-room (or per-plate-state) sprite tint, "" (off) unless set
   // Poses: the legacy [left, top, width] box (crow, gate squat), or a seated sprite { sprite, x, seat, via } whose seat
   // row (manifest `seat`) sits exactly on the rail line `seat`, with a one-beat `via` frame on sitting down and standing up.
-  const poseCfg = state.pose && room.poseAt && room.poseAt[state.pose];
+  let poseCfg = state.pose && room.poseAt && room.poseAt[state.pose];
+  // A seat he isn't at yet (clicked from across the yard): he walks to the foot of the rail first, then sits. No warp.
+  let poseWalk = false;
+  if (poseCfg && !Array.isArray(poseCfg) && room.hero && hero.room === room.id && ui.poseShown !== `${room.id}:${state.pose}`) {
+    const sy = poseCfg.standY || hero.y;
+    if (Math.hypot(hero.x - poseCfg.x, hero.y - sy) > 3 && !(hero.poseTry > 2)) {
+      if (!(hero.walking && hero.poseTarget === state.pose)) {
+        walkTo(room, poseCfg.x, sy);
+        hero.poseTarget = state.pose;
+        hero.poseTry = (hero.poseTry || 0) + 1; // never stuck walking: after a blocked try or two he just sits
+        hero.onArrive = () => { hero.poseTarget = null; render(); };
+      }
+      poseWalk = true;
+      poseCfg = null;
+    } else hero.poseTry = 0;
+  }
   if (!hidePose && poseCfg) {
     const pose = el("img", "pose");
     pose.alt = "";
@@ -309,17 +328,17 @@ function render() {
     } else {
       const fresh = ui.poseShown !== `${room.id}:${state.pose}`;
       // he sits facing the way he came at the rail (approach direction), and keeps that facing until he stands up
-      if (fresh) ui.seatFace = poseCfg.front && hero.room !== room.id ? null : hero.x <= poseCfg.x ? "r" : "l";
+      if (fresh) ui.seatFace = poseCfg.front && hero.room !== room.id ? null : hero.face === "r" || hero.face === "l" ? hero.face : hero.x <= poseCfg.x ? "r" : "l";
       seatSprite(pose, poseCfg, seatFrame(room, poseCfg, fresh ? "hop" : "sit"));
       if (fresh && poseCfg.hop) setTimeout(() => { if (pose.isConnected) seatSprite(pose, poseCfg, seatFrame(room, poseCfg, "sit")); }, POSE_BEAT_MS);
     }
     if (tint) pose.style.filter = tint;
     world.append(pose);
   }
-  const wasSeated = !state.pose && ui.poseShown && ui.poseShown.startsWith(`${room.id}:`) ? ui.poseShown.slice(room.id.length + 1) : null;
+  const wasSeated = !state.pose && !poseWalk && ui.poseShown && ui.poseShown.startsWith(`${room.id}:`) ? ui.poseShown.slice(room.id.length + 1) : null;
   ui.poseShown = state.pose && poseCfg ? `${room.id}:${state.pose}` : null;
 
-  if (room.hero && !hidePose && !state.pose) {
+  if (room.hero && !hidePose && (!state.pose || poseWalk)) {
     heroSync(room);
     const node = el("img", "hero");
     node.alt = "";
@@ -346,6 +365,16 @@ function render() {
   // spoon and stub on the nest shelf). Painted over the plate, under every actor; shown while their when/whenNot hold.
   const fxPop = realPlate && fxNode(state);
   if (fxPop) world.append(fxPop);
+  world.classList.toggle("flashback", !!(lineNow && lineNow.flashback)); // Oct 21 items 15/20
+  // Oct 21 item 4: inventory Look holds the item up close in his gloves at the bottom of the screen
+  if (lineNow && lineNow.closeup && !lineNow.big) {
+    const box = el("div", "closeup");
+    const gloves = el("img", "closeup-gloves"); gloves.alt = ""; placeAt(gloves, "fx/closeup-gloves", [70, 103]);
+    const held = el("img", "closeup-item"); held.alt = ""; mount(held, lineNow.closeup);
+    held.style.left = pct(136, "x"); held.style.top = pct(78, "y"); held.style.width = pct(48, "x");
+    box.append(gloves, held);
+    world.append(box);
+  }
   if (room.overlays && realPlate) {
     for (const o of room.overlays) {
       // holdCues: a prop stays on screen while a cued line still plays it out (the bell until Ned has walked over)
@@ -586,6 +615,9 @@ function heroSize(room) {
 
 function heroFrame(room) {
   const size = heroSize(room);
+  // room.heroHold: { flag, sprite, size } -> his side frame while he holds something (the Yolk at the finish)
+  const hold = room.heroHold && ui.state && ui.state.flags[room.heroHold.flag];
+  if (hold) return `sprite/${room.heroHold.sprite}-${hero.face === "l" ? "l" : "r"}${room.heroHold.size || size}`;
   if (hero.face === "front") return `sprite/rooster-front${size}`;
   const stride = hero.walking && Math.floor(hero.t / STEP_MS) % 2 === 1;
   return `sprite/rooster-${stride ? "walk" : "side"}-${hero.face}${size}`;
@@ -608,15 +640,18 @@ function heroSync(room) {
     }
     return;
   }
+  // room.hero.from[<previous room>]: where he comes in from that room, and the few steps he walks in (Oct 21 note 5)
+  const entry = room.hero.from && hero.room && room.hero.from[hero.room];
   hero.room = room.id;
   hero.view = view;
-  [hero.x, hero.y] = room.hero.at;
+  [hero.x, hero.y] = entry ? entry.at : room.hero.at;
   const area = heroArea(room);
   if (area) [hero.x, hero.y] = clampToArea(area, hero.x, hero.y);
   hero.tx = hero.x;
   hero.ty = hero.y;
   hero.face = "front";
   hero.walking = false;
+  if (entry && entry.walk) setTimeout(() => { if (hero.room === room.id && !hero.walking && ui.state && ui.state.room === room.id && !ui.state.pose) walkTo(room, ...entry.walk); }, 0);
 }
 
 // A seated pose: the sprite's `seat` row (manifest) lands on the rail line `cfg.seat`, centred on `cfg.x`.
@@ -642,13 +677,45 @@ function seatSprite(node, cfg, sprite, room = ui.state && ROOMS[ui.state.room]) 
 }
 
 // Sprites sit on their feet: `at` is the bottom-center point in logical px.
+// Double-buffered frame swaps (Oct 21 note 1: Rooster vanished mid-walk on the roof). Frames lazy-load one at a time
+// (no bulk preload: the rate-limit design), and swapping an <img> src to a frame that isn't loaded yet shows nothing
+// until it arrives. So while a sprite already shows a loaded frame, the next one loads off-screen first; the old frame
+// keeps walking (moved, at its own size) until the new one is ready, then they swap in one step. One request per frame.
+const frameReady = new Set();
+const frameLoading = new Set();
 function placeSprite(node, id, at, fallback = null) {
-  const info = assetInfo(id);
+  node._want = [id, at, fallback];
+  let showId = id;
+  const shown = node.dataset.file;
+  if (shown && shown !== id && node.complete && node.naturalWidth > 0) {
+    const url = urlOf(id);
+    if (!frameReady.has(url)) {
+      showId = shown;
+      if (!frameLoading.has(url)) {
+        frameLoading.add(url);
+        const pre = new Image();
+        const done = () => {
+          frameLoading.delete(url);
+          frameReady.add(url); // loaded, or failed: mount's fallback chain takes it from here
+          if (node.isConnected && node._want) placeSprite(node, ...node._want);
+        };
+        pre.onload = () => (pre.decode ? pre.decode().catch(() => {}).then(done) : done());
+        pre.onerror = done;
+        pre.src = url;
+      } else {
+        // another node is loading this frame; re-check shortly
+        setTimeout(() => { if (node.isConnected && node._want && node._want[0] === id) placeSprite(node, ...node._want); }, 50);
+      }
+    }
+  } else if (shown !== id) {
+    frameReady.add(urlOf(id));
+  }
+  const info = assetInfo(showId);
   const [w, h] = info ? info.size : [48, 64];
   node.style.left = pct(at[0] - w / 2, "x");
   node.style.top = pct(at[1] - h, "y");
   node.style.width = pct(w, "x");
-  if (node.dataset.file !== id) mount(node, id, fallback);
+  if (node.dataset.file !== showId) mount(node, showId, showId === id ? fallback : null);
 }
 
 // Overlays and title cutouts: `at` is the top-left point in logical px, size from the manifest.
@@ -754,6 +821,7 @@ function heroTick(now) {
     hero.walking = false;
     hero.stuck = 0;
     if (hero.faceOnArrive) hero.face = hero.faceOnArrive;
+    if (hero.onArrive) { const f = hero.onArrive; hero.onArrive = null; setTimeout(f, 0); }
   }
   const node = document.querySelector(".hero");
   if (node) placeHero(node, room);
@@ -805,7 +873,7 @@ function vat(rect, state) {
     b.style.left = `${(i * 37) % 84 + 6}%`;
     b.style.bottom = `${8 + ((i * 29) % 50)}%`;
     b.style.animationDelay = `${((i * 0.37) % 1.6).toFixed(2)}s`;
-    b.style.setProperty("--sz", `${9 + ((i * 7) % 10)}px`);
+    b.style.setProperty("--sz", `${9 + ((i * 7) % 10)}`); // unitless: css scales it to the vat (cqw)
     b.style.setProperty("--rise", `${14 + ((i * 13) % 26)}px`);
     node.append(b);
   }
