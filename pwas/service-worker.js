@@ -16,8 +16,7 @@ const PRECACHE = [
   './video-toolbox/icon-192.png', './video-toolbox/icon-512.png', './video-toolbox/LilitaOne-Regular.ttf',
   './video-toolbox/vendor/ffmpeg/index.js', './video-toolbox/vendor/ffmpeg/classes.js', './video-toolbox/vendor/ffmpeg/const.js',
   './video-toolbox/vendor/ffmpeg/errors.js', './video-toolbox/vendor/ffmpeg/types.js', './video-toolbox/vendor/ffmpeg/utils.js', './video-toolbox/vendor/ffmpeg/worker.js',
-  './AppLog.html',
-  './games/applog.html', './games/choplifter.html', './games/dazed-map.html', './games/moon-axis-unleashed.html', './games/moon-axis.html', './games/night-lark.html', './games/radioactive-rooster.html', './boxart/radioactive-rooster.svg', './games/phish-desk.html', './games/stick-shift.html', './games/time-tracker.html', './games/video-toolbox.html', './archive/', './archive/archive.json', './archive/archive.css', './archive/thumbs/x-pulse.webp', './archive/thumbs/video-downloader.webp', './boxart/rooster-timer.svg', './boxart/video-toolbox.svg'
+  './games/choplifter.html', './games/dazed-map.html', './games/moon-axis-unleashed.html', './games/moon-axis.html', './games/night-lark.html', './games/radioactive-rooster.html', './boxart/radioactive-rooster.svg', './games/phish-desk.html', './games/stick-shift.html', './games/time-tracker.html', './games/video-toolbox.html', './archive/', './archive/archive.json', './archive/archive.css', './archive/thumbs/x-pulse.webp', './archive/thumbs/video-downloader.webp', './boxart/rooster-timer.svg', './boxart/video-toolbox.svg'
 ];
 // Folders that own their own service worker: never touch their requests.
 const OWN_SW = ['/moon-axis/', '/moon-axis-beta/', '/phish-desk-beta/', '/moon-axis-unleashed/', '/phish-desk/', '/choplifter/', '/night-lark/', '/stick-shift/', '/dazed-map/', '/radioactive-rooster/', '/radioactive-rooster-beta/'];
