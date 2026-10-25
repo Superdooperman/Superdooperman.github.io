@@ -1,5 +1,5 @@
 // Radioactive Rooster BETA service worker. Own prefix "rr-beta-" so it never touches other games.
-const VERSION = "12";
+const VERSION = "13";
 const CORE_CACHE = `rr-beta-core-v${VERSION}`;
 const PIXEL_CACHE = `rr-beta-pixel-v${VERSION}`;
 const FANCY_CACHE = `rr-beta-fancy-v${VERSION}`;
@@ -12,9 +12,11 @@ const CORE = [
   "./js/logic.js",
   "./js/art.js",
   "./js/audio.js",
+  "./js/beats.js",
   "./js/walk.js",
   "./data/script.js",
   "./art/manifest.json",
+  "./audio/in/manifest.json",
 ];
 
 self.addEventListener("install", (event) => {
@@ -34,7 +36,8 @@ self.addEventListener("activate", (event) => {
 });
 
 function cacheFor(url) {
-  // The art manifest is data, not art: network-first with the code, so new code never runs against an old manifest.
+  // The art manifest is data, not art: network-first with the code, so new code never runs against an old manifest
+  // (v11: fresh main.js + a stale-while-revalidate v10 manifest had no sit frames, and Rooster vanished on the rail).
   if (url.pathname.endsWith("/art/manifest.json")) return CORE_CACHE;
   if (url.pathname.includes("/art/fancy/")) return FANCY_CACHE;
   if (url.pathname.includes("/art/")) return PIXEL_CACHE;
@@ -51,7 +54,7 @@ self.addEventListener("fetch", (event) => {
   if (name === CORE_CACHE) {
     event.respondWith(
       fetch(req, { cache: "no-cache" }).then((res) => {
-        if (res.ok && res.type === "basic") {
+        if (res.status === 200 && res.type === "basic") { // not 206: <audio> range requests can't be cached
           const copy = res.clone();
           caches.open(name).then((cache) => cache.put(req, copy));
         }

@@ -171,6 +171,21 @@ export function behind(feetY, base) {
 }
 
 // An occluder's base line on the active plate: `bases` overrides per plate name (the opened rope sits lower).
+// Feet y of an occluder's front edge at feet x (`edge` polyline, clamped to its ends): behind it while feet y < this.
+export function edgeY(edge, x) {
+  if (x <= edge[0][0]) return edge[0][1];
+  for (let i = 1; i < edge.length; i++) {
+    const [x0, y0] = edge[i - 1], [x1, y1] = edge[i];
+    if (x <= x1) return y0 + ((y1 - y0) * (x - x0)) / (x1 - x0 || 1);
+  }
+  return edge[edge.length - 1][1];
+}
+
+// Is he (feet x, y) behind occluder o? `edge` occluders decide from his feet against their front edge; others by base.
+export function behindOccluder(o, x, y, plate) {
+  return o.edge ? y < edgeY(o.edge, x) : behind(y, occluderBase(o, plate));
+}
+
 export function occluderBase(o, plate) {
   const name = String(plate).replace(/^bg[/-]/, "").replace(/\.[a-z0-9]+$/i, "");
   return (o.bases && o.bases[name] !== undefined) ? o.bases[name] : o.base;
@@ -220,14 +235,28 @@ function speaking(c, line, lastAct, speakers) {
   return !!(c.talkOn && lastAct && lastAct.verb === "talk" && [].concat(c.talkOn).includes(lastAct.spot) && !line.speaker);
 }
 
+// A timed beat sequence, played once and held on its last frame: seq = [[sprite, ms, at?], ...] (at defaults to `at`).
+function seqFrame(seq, since, at) {
+  let t = Math.max(0, since);
+  for (const [sprite, ms, where] of seq) {
+    if (t < ms) return { sprite, at: where || at };
+    t -= ms;
+  }
+  const [sprite, , where] = seq[seq.length - 1];
+  return { sprite, at: where || at };
+}
+
 export function castFrame(c, { line = null, since = Infinity, now = 0, lastAct = null, speakers = {} } = {}) {
   const cue = line && line.cue && c.cues && c.cues[line.cue];
   if (cue && typeof cue === "string") return { sprite: cue, at: c.at };
+  if (cue && !cue.walk && cue.seq) return seqFrame(cue.seq, since, cue.at || c.at);
   if (cue && !cue.walk) return { sprite: cue.sprite, at: cue.at || c.at }; // a held pose somewhere else: { sprite, at }
   if (cue) {
-    const t = Math.min(1, Math.max(0, since) / (cue.ms || CUE_WALK_MS));
+    const ms = cue.ms || CUE_WALK_MS;
+    const t = Math.min(1, Math.max(0, since) / ms);
     const from = cue.from || c.at; // a walk can start where an earlier cue left him (`from`)
     const at = [from[0] + (cue.to[0] - from[0]) * t, from[1] + (cue.to[1] - from[1]) * t];
+    if (t >= 1 && cue.seq) return seqFrame(cue.seq, since - ms, cue.to); // walk there, then play the beat
     if (t >= 1) return { sprite: cue.end || cue.walk[0], at };
     return { sprite: cue.walk[Math.floor(Math.max(0, since) / 160) % cue.walk.length], at };
   }
@@ -244,8 +273,9 @@ export function castSprites(c) {
   for (const f of c.frames || []) out.add(f);
   for (const cue of Object.values(c.cues || {})) {
     if (typeof cue === "string") out.add(cue);
-    else if (!cue.walk) out.add(cue.sprite);
-    else { for (const f of cue.walk) out.add(f); if (cue.end) out.add(cue.end); }
+    else if (!cue.walk && !cue.seq) out.add(cue.sprite);
+    else { for (const f of cue.walk || []) out.add(f); if (cue.end) out.add(cue.end); }
+    for (const [f] of (cue && cue.seq) || []) out.add(f);
   }
   return [...out];
 }
@@ -285,15 +315,28 @@ export function castRects(room, except) {
   return room.spots.filter((s) => ids.has(s.id) && s.id !== except).map((s) => s.core || s.rect);
 }
 
-export function standFor(room, spot, { walk, from, cast = room.cast || [], avoid = castRects(room, spot.id) } = {}) {
+// The other characters' bodies (head, shoulders, chest: the part that reads), from their feet and height, for the
+// "neither blocks the other" rule (Arlong: Rooster hidden behind Corny at the clock). `when` cast only when shown.
+export function castBodies(room, except, flags = {}) {
+  const out = [];
+  for (const c of room.cast || []) {
+    if ((except && c.spot === except) || (c.when && !flags[c.when]) || (c.whenNot && flags[c.whenNot]) || !c.height || c.prop) continue; // props (cage, steam) aren't bodies
+    const h = c.height, w = Math.round(h * 0.4);
+    out.push([c.at[0] - w / 2, c.at[1] - h, w, Math.round(h * 0.6)]);
+  }
+  return out;
+}
+
+export function standFor(room, spot, { walk, from, cast = room.cast || [], avoid = castRects(room, spot.id), bodies = castBodies(room, spot.id) } = {}) {
   const fallback = spot.stand || [spot.rect[0] + spot.rect[2] / 2, spot.rect[1] + spot.rect[3]];
   const core = spot.core || spot.rect;
   const mid = core[0] + core[2] / 2;
   const faceTo = (x) => (Math.abs(mid - x) < 2 ? null : mid > x ? "r" : "l");
   const [fx0, fy0] = walk ? clampToArea(walk, ...fallback) : fallback;
-  if (spot.exit || spot.beside === false || !walk) return { x: fx0, y: fy0, face: faceTo(fx0), rule: "fixed" };
+  if (spot.exit || spot.beside === false || !walk) return { x: fx0, y: fy0, face: spot.face || faceTo(fx0), rule: spot.standBehind ? "behind" : "fixed" };
   const facing0 = faceTo(fx0) || "r";
-  if (!overlaps(heroBox(room, fx0, fy0, facing0), core)) return { x: fx0, y: fy0, face: faceTo(fx0), rule: "clear" };
+  const box0 = heroBox(room, fx0, fy0, facing0);
+  if (!overlaps(box0, core) && !bodies.some((a) => overlaps(box0, a))) return { x: fx0, y: fy0, face: faceTo(fx0), rule: "clear" };
   const npc = spot.npc || cast.some((c) => c.spot === spot.id);
   // the side he comes from first (else the side his old stand point leaned to), then the other; each down a few feet lines
   const sides = spot.side ? [spot.side] : (from ? from[0] < mid : fx0 < mid) ? ["l", "r"] : ["r", "l"];
@@ -315,7 +358,7 @@ export function standFor(room, spot, { walk, from, cast = room.cast || [], avoid
       const cand = { x: px, y: py, face, side, rule: npc ? "talk" : "beside" };
       // don't stand in front of somebody else (the bell's right side is Ned): keep looking, remember it as a last resort
       const box = heroBox(room, px, py, face);
-      if (avoid.some((r) => overlaps(box, r, Math.min(r[2], r[3]) * 0.25))) { spare = spare || cand; continue; }
+      if (avoid.some((r) => overlaps(box, r, Math.min(r[2], r[3]) * 0.25)) || bodies.some((r) => overlaps(box, r, Math.min(r[2], r[3]) * 0.25))) { spare = spare || cand; continue; }
       return cand;
     }
   }

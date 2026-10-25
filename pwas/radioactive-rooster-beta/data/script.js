@@ -19,12 +19,29 @@ export const SPEAKER = {
   guard: "portrait-guard.jpg",
   corny: "portrait-barker.jpg",
   clerk: "portrait-clerk.jpg",
-  hattie: "voice:hattie",
+  hattie: "portrait-hattie.png", // Oct 21 item 9: a silhouette behind a frosted door, no spoiler (tools/sprites/cut_oct21.py)
   dot: "voice:dot",
   rocco: "voice:rocco",
   pip: "voice:pip",
   kids: "voice:kids",
   goat: "voice:goat",
+};
+
+// Hawkeye follow-up (2026-10-25): until her "I'm the Cock Gobbler" line (UNMASK_LINES, names: true) her lines keep the
+// gobbler speaker (so the voice ids don't change) but show a "Hattie" nameplate (js/logic.js plates, js/main.js).
+// Portrait (Arlong 2026-10-25; Brook's final art): ONE smoke-hidden portrait while the Pavilion smoke is up, and it
+// clears at the same moment as the on-screen smoke. `smoke: true` = while the Pavilion veil is on screen, js/main.js
+// shows portrait/hattie-smoke (its drift loop, then its whisk-away strip, both on the stage smoke's own tick) instead
+// of `portrait`, and cuts to `portrait` when the stage smoke is done.
+//   before: everything before the Pavilion's veil: "whisk" line (portrait/hattie-smoke; door silhouette if missing).
+//   cleared: the whisk line itself (its plate puts her portrait up as the smoke clears; still narration, so its voice id
+//            is unchanged) through "Hawkeye Hattie is dead": portrait/gobbler, still named "Hattie".
+// From the names line on: the plain gobbler speaker, portrait/gobbler and "The Cock Gobbler".
+export const GOBBLER_PLATE = {
+  flag: "gobbler_named",
+  clearedFlag: "hattie_face", // set by the Pavilion whisk line (VEIL), so later batches keep the clear portrait until she names herself
+  before: { name: "Hattie", portrait: "portrait/hattie-smoke", fallback: SPEAKER.hattie, smoke: true },
+  cleared: { name: "Hattie", portrait: SPEAKER.gobbler, smoke: true },
 };
 
 export const NAMES = {
@@ -61,16 +78,23 @@ export const ITEMS = {
   geiger: {
     name: "geiger counter",
     look: "Old Rad-Safe issue. It clicks near the Yolk of Midnight. It also clicks near him, sometimes. Nobody has ever asked why.",
-    icon: "item-geiger.svg",
+    icon: "item/item-geiger",
     talk: "\"Find me the Yolk, buddy.\" Click. Click. It clicks at him. He decides that's encouragement.",
     take: "Already in the belt pouch. It clicks once, to say it's comfortable.",
     push: "He taps the dial. The needle swings toward him, then away, like it's being polite.",
     combine: "He waves the geiger counter over the {other}. A couple of clicks. Nothing glowing. A relief, and a letdown.",
+    // after the bulb+geiger combine (Arlong 2026-10-19): its own name and icon
+    alt: [{
+      when: "geiger_rigged",
+      name: "geiger counter with bulb",
+      icon: "item/item-geiger-bulb",
+      look: "The old Rad-Safe counter with Rooster's spare coop bulb jammed on top. It clicks in time now, and the bulb flickers on every click. It is, technically, a rhythm section.",
+    }],
   },
   bulb: {
     name: "spare bulb",
     look: "Off the coop lamp. Forty watts of optimism.",
-    icon: "item-bulb.svg",
+    icon: "item/item-bulb",
     talk: "\"Stay bright, buddy.\" Forty watts of optimism, currently unlit.",
     take: "Still in a pocket. Rad-Safe Rule 4 is satisfied.",
     push: "He gives the bulb a little twist in the air. There's nothing to screw it into. Rule 4 didn't plan this far.",
@@ -79,7 +103,7 @@ export const ITEMS = {
   photo: {
     name: "autograph photo",
     look: "Signed \"Stay safe! — Radioactive Rooster.\" He means it every time. He has signed four hundred of these for people who did not ask.",
-    icon: "item-photo.svg",
+    icon: "item/item-photo",
     talk: "\"Lookin' good, champ.\" The photo smiles back. It's signed, of course.",
     take: "He already has it. He also has four hundred more at home.",
     push: "He straightens the photo's corner. Presentation matters.",
@@ -88,7 +112,7 @@ export const ITEMS = {
   spoon: {
     name: "tasting spoon",
     look: "Silver. Monogrammed C.G. Somebody brought her own spoon to a fry.",
-    icon: "item-spoon.svg",
+    icon: "item/item-spoon",
     talk: "\"Tell me about C.G.\" The spoon shines. It's very discreet, for silverware.",
     take: "Already pocketed, well away from his beak. Evidence etiquette.",
     push: "He spins the spoon on his palm. It points at nobody. Then, slowly, toward the fair.",
@@ -97,7 +121,7 @@ export const ITEMS = {
   stub: {
     name: "torn ticket stub",
     look: "Half a fair ticket, lipstick on the ragged edge. Tiny print through the nostril holes: \"R— & H— Admit Tw—\". He knows this ticket. He tore it.",
-    icon: "item-stub.svg",
+    icon: "item/item-stub",
     talk: "He doesn't talk to the stub. He just holds it a while.",
     take: "Already tucked in his belt, against his chest, where tickets go when you don't want to think about them.",
     push: "He smooths the torn edge. It fits nothing. Yet.",
@@ -106,7 +130,7 @@ export const ITEMS = {
   half: {
     name: "other ticket half",
     look: "The other half. \"—ooster & —attie: —o.\" It's been in Corny's cash box. Somebody pawned it.",
-    icon: "item-stub.svg",
+    icon: "item/item-half",
     talk: "\"Where've you been?\" In Corny's cash box, apparently. Pawned. He won't forgive Corny that one.",
     take: "Safe in his belt now. Out of the cash box, at least.",
     push: "He turns the half over. On the back, in Corny's grease pencil: 5¢.",
@@ -115,7 +139,7 @@ export const ITEMS = {
   ticket: {
     name: "joined ticket",
     look: "\"ROOSTER & HATTIE: ADMIT TWO.\" Dated the stunt night. The edges still fit. That's the worst part.",
-    icon: "item-pass.svg",
+    icon: "item/item-ticket",
     talk: "\"Admit two.\" He says it out loud, once, to hear how it sounds. It sounds like a long time ago.",
     take: "It's in his belt with the edges together. He checks twice. Still whole.",
     push: "He presses the seam flat. Some things are easier to fix than others.",
@@ -124,7 +148,7 @@ export const ITEMS = {
   grub: {
     name: "fat grub",
     look: "It would change a goat's whole evening.",
-    icon: "item-grub.svg",
+    icon: "item/item-grub",
     talk: "\"Hang in there, buddy.\" The grub wiggles. It isn't sure about this partnership.",
     take: "Already in the pouch. The pouch wiggles occasionally.",
     push: "He pokes the grub. It curls up, offended. A goat would appreciate it more.",
@@ -133,7 +157,7 @@ export const ITEMS = {
   ribbon: {
     name: "blue ribbon",
     look: "GUEST JUDGE, Best Wattle. Farmer Peck's pride. The pin still works.",
-    icon: "item-ribbon.svg",
+    icon: "item/item-ribbon",
     talk: "\"Best Wattle, huh?\" He touches his own wattle. It's a decent wattle. Not a guest-judge wattle.",
     take: "Already pinned inside his belt. The pin still works. He found that out personally.",
     push: "He polishes the ribbon on his sleeve. GUEST JUDGE gleams. Peck would be proud, if he could hear it.",
@@ -142,7 +166,7 @@ export const ITEMS = {
   sauce: {
     name: "hot sauce",
     look: "Ned's hottest bottle. \"Not a gift. A line item.\"",
-    icon: "item-sauce.svg",
+    icon: "item/item-sauce",
     talk: "\"Easy, hot stuff.\" The bottle sloshes, menacingly.",
     take: "Already pocketed. The bottle is warm. It might always be warm.",
     push: "He shakes the hot sauce. Now it's angry. Good.",
@@ -151,7 +175,7 @@ export const ITEMS = {
   mirror: {
     name: "hand mirror",
     look: "It shows people the thing they actually came to see, which is usually themselves.",
-    icon: "item-mirror.svg",
+    icon: "item/item-mirror",
     talk: "He checks himself in the mirror. \"Lookin' good, Rooster.\" One eye agrees. The other is looking at the sky.",
     take: "Already in a pocket, face in, so it doesn't get vain.",
     push: "He tilts the mirror. It catches the light and throws it straight into his own eyes. Ow. Both of them.",
@@ -160,7 +184,7 @@ export const ITEMS = {
   bill: {
     name: "past-due bill",
     look: "NED'S FEED & SEED. \"ORPINGTON, BRAHM A. 1x deodorant (economy). 40 lbs scratch. PAST DUE.\" Ned asked Rooster to deliver it. Rooster said he'd make sure Brahm gets it. He will.",
-    icon: "item-bill.svg",
+    icon: "item/item-bill",
     talk: "\"Brahm A. Orpington, huh.\" He says the name a little too fast. \"Never met him. Nice fella, probably.\"",
     take: "In the belt. He promised Ned he'd deliver it. Funny how nobody's ever seen Brahm and Rooster in the same room.",
     push: "He folds the bill smaller. PAST DUE gets smaller. It doesn't get any less past due.",
@@ -169,7 +193,7 @@ export const ITEMS = {
   speaker: {
     name: "loudspeaker",
     look: "A parking-lot horn with a WKUK sticker. It makes a small voice sound like a decision.",
-    icon: "item-speaker.svg",
+    icon: "item/item-speaker",
     talk: "He clears his throat into the loudspeaker. *pah.* Even amplified, the crow is a wheeze. A louder wheeze.",
     take: "Already on his belt. It bangs his hip when he walks. Heroic bruising.",
     push: "He squeezes the trigger. *FWEEP.* Three blocks away, a dog files a complaint.",
@@ -178,7 +202,7 @@ export const ITEMS = {
   map: {
     name: "fair map",
     look: "DeeJay circled two things: the Hot Oil Pavilion, and Slick Corny's ring-toss booth. \"Follow the money,\" in grease pencil.",
-    icon: "item-map.svg",
+    icon: "item/item-map",
     talk: "\"Follow the money.\" He says it in his best DeeJay voice. It is not a good DeeJay voice.",
     take: "Already folded in his belt, the wrong way. Maps only fold the wrong way.",
     push: "He refolds the map. The Pavilion ends up on the outside, circled twice. Subtle, DeeJay.",
@@ -187,7 +211,7 @@ export const ITEMS = {
   pass: {
     name: "stamped pass",
     look: "A corner of cardboard with a real stamp. The guard's tooth was very distracting.",
-    icon: "item-pass.svg",
+    icon: "item/item-pass",
     talk: "\"Thanks, pal.\" The pass doesn't answer. The guard's tooth still haunts him, though.",
     take: "Already in his belt. It's the most official thing he owns.",
     push: "He smooths the stamp. It's real. He keeps checking.",
@@ -195,8 +219,8 @@ export const ITEMS = {
   },
   vip: {
     name: "gold VIP card",
-    look: "\"THE COCK GOBBLER — ADMIT ONE, NO QUESTIONS.\" On the back, in lipstick: \"Wear something nice, Big Green.\"",
-    icon: "item-pass.svg",
+    look: "A gold card with a red lipstick kiss on the front. \"ADMIT ONE, NO QUESTIONS.\" On the back, in lipstick: \"Wear something nice, Big Green.\"",
+    icon: "item/item-vip",
     talk: "\"Wear something nice, Big Green.\" He reads the lipstick out loud, then looks around in case anybody heard.",
     take: "In his belt, face down, so the lipstick can't look at him.",
     push: "He flips the card. Gold side. Lipstick side. Gold side. It isn't helping.",
@@ -205,7 +229,7 @@ export const ITEMS = {
   basket: {
     name: "rubber basket",
     look: "Ring-toss prize. It can catch an egg, if the egg can be talked down.",
-    icon: "item-basket.svg",
+    icon: "item/item-basket",
     talk: "\"Ready to catch something, buddy?\" The basket stays rubbery and noncommittal.",
     take: "On his belt. It bounces when he walks. Everything about him bounces a little tonight.",
     push: "He squeezes the basket. It squeaks. Rubber baskets do that.",
@@ -214,13 +238,36 @@ export const ITEMS = {
   tickets: {
     name: "prize tickets",
     look: "A roll of ring-toss prize tickets. Pip's. They came with the rigged win. They feel heavier than paper should.",
-    icon: "item-stub.svg",
+    icon: "item/item-tickets",
     talk: "\"Sorry.\" He says it to the tickets, because Pip isn't here. It doesn't count, and he knows it.",
     take: "Still in his belt. They feel heavier every time he checks.",
     push: "He counts the tickets. All of them. They're all Pip's.",
     combine: "He wraps the tickets around the {other}. It doesn't make them any less Pip's.",
   },
 };
+
+// Oct 23 item 30: any inventory item used on Rooster himself (click him while holding it) gets its own line.
+export const SELF_LINES = {
+  geiger: "He waves the counter over his own chest. Click. Click-click. He decides that's the suit. It's probably the suit.",
+  bulb: "He holds the spare bulb up to his own beak. Nothing lights up. Some ideas need a socket.",
+  photo: "He signs his own photo again, under the first signature. \"To me. Stay safe.\" He feels a little better.",
+  spoon: "He checks his reflection in the spoon. Upside down, the hero looks worried. Right side up, too.",
+  stub: "He tucks the stub against his heart, under the suit. It's been there before. It knows the way.",
+  half: "He holds the half ticket up beside his own face, like a mugshot. Exhibit A: a bird who knows too much.",
+  ticket: "ADMIT TWO. He looks at it, then at himself. Admit one. For now.",
+  grub: "He considers the grub as a snack. The grub considers him back. They agree to see other people.",
+  ribbon: "He pins the GUEST JUDGE ribbon to his own chest and nods at himself. The judge finds him very heroic.",
+  sauce: "He thinks about a dab of hot sauce on his own beak, for courage. Rad-Safe Rule 4: never season the hero.",
+  mirror: "He checks the hero in the mirror. Feathers: puffed. Beak: heroic. Eyes: tired. He puffs the feathers more.",
+  bill: "He reads the bill against his own chest, in case it's for him. It isn't. He's relieved, then ashamed of being relieved.",
+  speaker: "He holds the speaker up to his own ear. It's quiet. It's waiting for something worth saying.",
+  map: "He traces the map's lines across his own belly, in case he is the treasure. He is not on the map.",
+  pass: "He flashes the gold pass at himself. He lets himself in. Nothing happens. It's a very exclusive club.",
+  vip: "He reads the VIP card to himself, out loud, in her voice. It's worse in his voice.",
+  basket: "He puts the rubber basket on his head. It fits. He takes it off before anybody sees. Somebody saw.",
+  tickets: "He tries to hand the tickets to himself. He won't take them. Good. They're Pip's.",
+};
+for (const [id, text] of Object.entries(SELF_LINES)) if (ITEMS[id]) ITEMS[id].self = text;
 
 export const ITEM_ON_ITEM = {
   "bulb+geiger": {
@@ -289,24 +336,33 @@ export const CROW = [
   },
 ];
 
-// Comic-cover endings (code-drawn for now; art ids bg/ending-* later).
+// Comic-cover endings. With `splash` (hero, allies, smitten): a Silver Age cover, the painted splash under the series
+// banner and title, then the story beats as inset panels (panel.art = painted pixel panel; text becomes a narration
+// caption, a quote in it becomes a speech bubble; say/thought = that character's bubble + an editor's note).
+// Without it (showboat, darkside, eggfried): the older code-drawn cover.
 export const ENDINGS = {
   hero: {
     series: "RADIOACTIVE ROOSTER #1",
     title: "ROOSTER RETURNS!",
+    // Arlong 2026-10-19: a Silver Age (1950s-60s) comic cover. Splash = the glide, red webbing out; the beats below
+    // are inset panels with painted pixel art (bg/cover-hero-1..4), narration captions, bubbles and editor's notes.
+    splash: "bg/cover-hero",
+    // Arlong 2026-10-19: the approved painted cover (lettering + panels baked in) is the whole final page for now
+    final: "art/ending/cover-final-hero.webp", // source: rooster-scene-art-v2/cover-final-hero-approved.png
     blurb: "The Yolk is safe. The Hawk has flown.",
     art: "Rooster gliding over the Pavilion, red webbing out, the Yolk in a rubber basket.",
     panels: [
-      "The corn-dog cart's taillights, heading for the county line. \"Spare set.\"",
-      "A single hawk feather on the rooftop bucket.",
-      "Across town, the neon hawk flickers. For one frame it reads HATTIE'S.",
-      { text: "Took you long enough, Rooster. Name. Business. ...Welcome home.", say: "Henny" },
+      { text: "The getaway car's taillights, heading for the county line. \"Spare set.\"", art: "bg/cover-hero-1" }, // Oct 23 item 45: his car, not Marge's cart
+      { text: "A single hawk feather on the rooftop bucket.", art: "bg/cover-hero-2" },
+      { text: "Across town, the neon hawk flickers. For one frame it reads HATTIE'S.", art: "bg/cover-hero-3" },
+      { text: "Took you long enough, Rooster. Name. Business. ...Welcome home.", say: "Henny", art: "bg/cover-hero-4" },
     ],
     tone: "hero",
   },
   allies: {
     series: "RADIOACTIVE ROOSTER & FRIENDS · SPECIAL EDITION",
     title: "THE WHOLE COOP CROWS!",
+    splash: "bg/cover-hero", // panel art to come: these panels show Ben-Day dots under their captions
     blurb: "Featuring Henny, Mortgage, DeeJay Cluck and the Jingle Kids!",
     art: "Everybody on the rooftop at dawn: Henny, Mortgage, DeeJay, Dot, Rocco, Pip, and one rooster, crowing for real.",
     panels: [
@@ -321,26 +377,31 @@ export const ENDINGS = {
   smitten: {
     series: "RADIOACTIVE ROOSTER ROMANCE ANNUAL",
     title: "NEXT FAIR, BIG GREEN",
+    splash: "bg/cover-hero", // panel art to come: these panels show Ben-Day dots under their captions
     blurb: "She stole the Yolk... but he stole her heart!",
     art: "Dawn on the rooftop coop. Two masked lovebirds beak to beak inside a big pink heart.",
     panels: [
-      "Dawn. She parks the corn-dog cart and climbs up to the coop instead of running. Across the street, Gizzard plays something sweet, in a major key, through the club's open window.",
+      "Dawn. She has the getaway car drop her at the corner and climbs up to the coop instead of running. Across the street, Gizzard plays something sweet, in a major key, through the club's open window.",
       "Two gloved fingers touch the ticket. The halves fit. \"Nobody's ever said no to me nicely before.\" Beaks bump. Both googly pupils spin. Neither eye was looking. Didn't matter.",
       "A soft, real kiss as the sun clears the water tower. Down below, little hearts pop over Mortgage the goat.",
       "\"Next fair, Big Green. Save me a seat.\" Over her shoulder, softly: \"Bye, B.O.\" He glides beside her a few seconds, red webbing glowing, then lets her go.",
-      { text: "...About time.", say: "Henny" },
+      { text: "...About time.", say: "Henny", real: true }, // Arlong 2026-10-24: her only real words (voiced)
     ],
     tone: "smitten",
   },
   showboat: {
     series: "RADIOACTIVE ROOSTER #1 · MISPRINT EDITION",
     title: "ROOSTER SAVES EGG, NOT FACES!",
+    // Oct 21 item 19: a Silver Age cover too. Splash = the kick off the vat rim, a wave of oil over the front row
+    // (bg/cover-showboat, tools/sprites/cut_oct21.py); the beats are painted inset panels (bg/cover-showboat-1..4).
+    splash: "bg/cover-showboat",
     blurb: "Collectors' item! Oil stains included!",
     art: "Rooster mid-crow, very proud. Behind him, a front row wearing the fryer.",
     panels: [
-      "The town hoses itself off by the ferris wheel.",
-      "Ned reviews the hot sauce: \"Tasted like humiliation.\"",
-      { text: "You've got oil on your beak.", say: "Henny" },
+      { text: "The town hoses itself off by the ferris wheel.", art: "bg/cover-showboat-1" },
+      { text: "Ned reviews the hot sauce: \"Tasted like humiliation.\"", art: "bg/cover-showboat-2" },
+      { text: "You've got oil on your beak.", say: "Henny", art: "bg/cover-showboat-3" },
+      { text: "Under the boardwalk lights, his own poster, face down in the oil. Somebody stepped on the beak.", art: "bg/cover-showboat-4" },
     ],
     tone: "showboat",
   },
@@ -389,6 +450,58 @@ function spot(partial) {
   return partial;
 }
 
+// A walk along waypoints as a cue `seq` (Push A, Oct 24): one step every STEP ms, the walk frames alternating, facing
+// the way she's heading. frames: { r: [...], l: [...] }.
+// Oct 23 items 33/42: the clock shimmy (midway.cutscenes.shimmy). The post is at plate x ~125; frame a has its glove on
+// the post 37 px from its left edge and 33 px above its feet, frame b 34 px / 12 px (its anchor is 30): so for a glove
+// height g, a stands at [125, g + 33] and b at [121, g + 12]. Hand over hand from g 108 to g 60, up behind the clock.
+const SHIMMY = (() => {
+  const keys = [[0, ["rooster-walk-l", "rooster-side-l"], [168, 146], [140, 142], 700]];
+  let t = 700;
+  const gs = [108, 102, 96, 90, 84, 78, 72, 66, 60];
+  gs.forEach((g, i) => { keys.push([t, i % 2 ? "rooster-shimmy-b-r" : "rooster-shimmy-a-r", i % 2 ? [121, g + 12] : [125, g + 33]]); t += 260; });
+  t += 700; // the nudge at the top (a, glove at 60, just under the housing; he reaches round behind it)
+  keys.push([t, "rooster-shimmy-a-r", [125, 60 + 33], [125, 141], 550]);
+  t += 650;
+  keys.push([t, ["rooster-walk-r", "rooster-side-r"], [140, 142], [168, 146], 650]);
+  t += 650;
+  // the clock housing (cut from the plate) is drawn over him for the beat: he goes up behind it
+  // heroZ: in front of the vendor (who stands before the post) but under the clock cutout (950)
+  return { ms: t, heroH: 88, heroZ: 900, hero: keys, props: [{ art: "fg/midway--clock", at: [108, 10] }], events: [[700 + 260 * gs.length + 250, { sound: "click" }]], end: { hero: [168, 146], face: "l" } };
+})();
+
+function walkSeq(points, frames, speed = 60) {
+  const STEP = 120, out = [];
+  let n = 0;
+  for (let i = 1; i < points.length; i += 1) {
+    const [a, b] = [points[i - 1], points[i]];
+    const steps = Math.max(1, Math.round((Math.hypot(b[0] - a[0], b[1] - a[1]) / speed) * 1000 / STEP));
+    const f = frames[b[0] >= a[0] ? "r" : "l"];
+    for (let k = 1; k <= steps; k += 1) {
+      out.push([f[n % f.length], STEP, [Math.round(a[0] + ((b[0] - a[0]) * k) / steps), Math.round(a[1] + ((b[1] - a[1]) * k) / steps)]]);
+      n += 1;
+    }
+  }
+  return out;
+}
+
+// Oct 21 item 14: Pip tiptoes behind the side rope to the corn-dog cart (Marge has her back to her), lifts Corny's key
+// ring off the hook and tiptoes back with it, keys first (pip-sneak = with the keys, pip-sneak2 = without).
+// Push A: a real two-frame sneak walk both ways, not a slide.
+const PIP_SNEAK = {
+  walk: ["pip-sneak-r", "pip-sneak2-r"], to: [206, 138], ms: 1700,
+  seq: [["pip-sneak2-r", 500], ["pip-sneak-l", 260], ...walkSeq([[206, 138], [176, 138], [146, 137], [122, 140]], { r: ["pip-sneak-r", "pip-sneak2-r"], l: ["pip-sneak-l", "pip-sneak2-l"] }, 45)],
+};
+// Oct 23 item 38: she walks round the side rope's back post to the front of the lock post, unlocks it with her hand
+// on the padlock (pip-reach-r: hand at +18, 37 up; the padlock is at ~(102, 138)), then walks back to her spot.
+const PIP_PATH = [[122, 140], [156, 141], [156, 150], [124, 176], [84, 175]];
+const PIP_UNLOCK = {
+  seq: [...walkSeq(PIP_PATH, { r: ["pip-walk-r", "pip-side-r"], l: ["pip-walk-l", "pip-side-l"] }),
+    ["pip-reach-r", 1100, [84, 175]],
+    ...walkSeq([...PIP_PATH].reverse(), { r: ["pip-walk-r", "pip-side-r"], l: ["pip-walk-l", "pip-side-l"] }),
+    ["pip-front", 1, [122, 140]]],
+};
+
 export const ROOMS = {
   hq: {
     id: "hq",
@@ -413,9 +526,10 @@ export const ROOMS = {
     ],
     occluders: [
       { id: "bucket", base: 173 },
-      // fg/hq--hatch, drawn in column slices [x0, x1, base]: each slice's base is that column's front edge
-      { id: "hatch", base: 177, slices: [[149, 158, 159], [158, 167, 162], [167, 176, 165], [176, 185, 168], [185, 194, 171], [194, 203, 174],
-        [203, 212, 177], [212, 221, 177], [221, 230, 174], [230, 239, 167], [239, 248, 161], [248, 256, 156]] },
+      // fg/hq--hatch is ONE cutout, never split: he's wholly behind it while his feet are behind its front edge
+      // (the polyline under the lid, sampled at his feet x, clamped to the hatch's ends), wholly in front otherwise.
+      // One decision per feet position, so no column stripes of him through it and no flicker while he walks.
+      { id: "hatch", base: 177, edge: [[149.5, 158], [165, 163], [185, 169.5], [205, 176], [211, 177.5], [221, 176.5], [240, 163], [254.5, 153.5]] },
     ], // fg/hq--bucket: drawn over him while his feet are behind its base (tools/bg/occluders.py)
     exits: [{ spot: "hatch", label: "Down the hatch" }],
     spots: [
@@ -423,7 +537,10 @@ export const ROOMS = {
         id: "bucket",
         name: "bucket",
         rect: [261, 136, 38, 38],
-        stand: [250, 170], // walk up beside it, not behind it
+        // Arlong 2026-10-18: "for this instance let him stand behind the bucket". Upstage of it, side-on facing left
+        // (his front frame's claws poke out past the rim): the bucket covers his boots and shins cleanly, nothing
+        // sticks out below the rim. Exempt from the stand-beside rule (js/walk.js standFor).
+        stand: [281, 158], beside: false, standBehind: true, face: "l",
         look: { special: "read_note" },
         take: "He leaves the bucket. The note is already stuck in his head.",
         talk: "\"Whoever you are, friend, I'm coming.\" The bucket does not confirm it's a friend.",
@@ -462,11 +579,16 @@ export const ROOMS = {
         stand: [85, 152], // in front of the hatch line
         whenNot: "got_bulb",
         look: "A lamp over the door, the only light on the roof. Rad-Safe Rule 4: always carry a spare bulb. He keeps meaning to buy one.",
-        take: {
-          give: ["bulb"],
-          set: ["got_bulb"],
-          say: "He unscrews the bulb, quick, before it bites. The roof drops into moonlight. Rule 4, technically honored: now he's carrying a spare.",
-        },
+        take: [
+          {
+            give: ["bulb"],
+            set: ["got_bulb"],
+            mood: "embarrassed",
+            anim: { hero: "juggle" }, // Oct 21 note 2: the hot-bulb juggle, hand to hand
+            say: "He unscrews the bulb. \"Ooh, ouch, ah, ah! Hot bulb! Who uses tungsten bulbs anymore?!\" He juggles it glove to glove until it stops glowing.",
+          },
+          "The roof drops into moonlight. Rule 4, technically honored: now he's carrying a spare.",
+        ],
         talk: "\"Good work tonight, lamp.\" It hums. Honestly, it's the most reliable member of the team.",
         use: "He flicks it off and on. Rad-Safe Rule 9: check your lighting. Rules 5 through 8 were never written down.",
         push: "He nudges the shade. The moths reorganize into a new government.",
@@ -568,6 +690,18 @@ export const ROOMS = {
         },
         useAny: "He thinks about dropping the {item} down the hatch to save time. Then he'd have to go get it. No time saved.",
       }),
+      // Oct 21 item 21: an Act 1 memory (a red herring, not a puzzle): the golden hawk feather on the coop windowsill
+      spot({
+        id: "feather",
+        name: "coop window",
+        rect: [62, 58, 24, 30],
+        look: "On the sill inside, in a jam jar: one golden hawk feather. Hattie left it the night they split. He's moved it twice. Both times he put it back.",
+        talk: "\"Evening.\" He says it to the feather. The feather, being a feather, lets it go.",
+        take: "He reaches for it and stops. Some things stay where she left them.",
+        use: "He breathes on the glass and wipes it with his glove. Now the feather's clearer. That doesn't help.",
+        push: "He nudges the window. The jar doesn't move. Neither does he, for a while.",
+        useAny: "He holds the {item} up to the window, next to the feather. Neither one explains anything.",
+      }),
     ],
   },
   fence: {
@@ -576,7 +710,7 @@ export const ROOMS = {
     plate: "bg-fence.jpg",
     // Crossroads pixel bg (Arlong's approved fence.jpg, 2026-10-18). Far scene: the split-rail fence (posts ~23 px, base y ~110,
     // top rail ~17 px above the ground) sits at his waist-to-chest when he stands at it, so he's ~30 px there.
-    hero: { at: [170, 152], height: 60, depth: { horizon: 68, min: 28, max: 80 } }, // ~30 at the fence (y 110), 36 at Henny's crate, ~80 at the bottom edge
+    hero: { at: [170, 152], from: { hq: { at: [4, 150], walk: [40, 150] } }, height: 60, depth: { horizon: 68, min: 28, max: 80 } }, // from the rooftop he comes in from the left edge (Oct 21 note 5) // ~30 at the fence (y 110), 36 at Henny's crate, ~80 at the bottom edge
     // In front of the fence (base y ~110, ~102-105 at the right end), never through the crate; a slot behind the crate;
     // up the Main Street road past the fence end; the ditch, reeds and bank (bottom right) are off limits.
     walk: [
@@ -612,6 +746,7 @@ export const ROOMS = {
         id: "birds",
         name: "yard roosters",
         rect: [49, 92, 40, 18],
+        useItem: { photo: { say: "He holds the photo out to the yard roosters. One pecks the signature, decides it isn't corn, and goes back to standing like a rooster. Brutal crowd." } }, // he keeps the stack: everybody gets one
         look: "Round. Cheeks full. Quiet. Employed. That's the whole job and they're good at it.",
         talk: "They're busy looking like roosters. It's a skilled trade.",
         use: { special: "squat_rail" },
@@ -684,7 +819,7 @@ export const ROOMS = {
         use: "She doesn't want to be used. She wants a normal rooster on that rail.",
         useItem: { photo: { special: "photo_henny" } },
         take: "You don't pick up the law. Henny gives him a look that could stamp a passport.",
-        push: "He reaches out. Henny looks at the glove. The glove goes back to his belt, where it belongs.",
+        push: { special: "push_henny" },
         useAny: "He offers Henny the {item}. She looks at it, then at him, then at the rail. Wrong paperwork.",
       }),
       spot({
@@ -803,12 +938,11 @@ export const ROOMS = {
         talk: "She swoons a little. Conversation isn't the currency here. Autographs might be.",
         take: "She pecks the glove. The glove files a complaint.",
         useItem: {
-          photo: {
-            consume: ["photo"],
+          photo: { // he keeps his stack: a fresh one off the top, signed on the spot (Arlong 2026-10-19)
             set: ["hen_up"],
             unlessFlag: "hen_up",
             already: "She's already sitting on his face. Once is a compliment. Twice is a residency.",
-            say: "He signs it \"To my biggest fan\" and slides it under her. She shifts onto it, overcome. The grub is free, and somewhere a hen is very seen.",
+            say: "He peels a fresh one off the stack, signs it \"To my biggest fan\" and slides it under her. She shifts onto it, overcome. The grub is free, and somewhere a hen is very seen.",
           },
         },
         use: "She's a hen, not a cushion. Also, she's already sitting. The job is taken.",
@@ -866,6 +1000,27 @@ export const ROOMS = {
       { spot: "peck", sprite: "peck-front", talk: "peck-talk", voice: "peck", at: [237, 139], height: 80 }, // by the hay and his weather vane
     ],
     overlays: [{ art: "fg/barn--ribbon", at: [154, 26], whenNot: "got_ribbon" }], // on the post nail until Mortgage rams it down
+    // Give grub to Mortgage (Arlong 2026-10-18): Rooster the matador (rooster-matador-sprites-v3), up and back right
+    // beside the ribbon post (Arlong 2026-10-19: was too low/forward), holds the grub out, she
+    // paws and charges along the floor (walk area, y131-137), he sidesteps downstage with a knee-up flourish, she rams
+    // the post (BONK!, shake), sees stars, the ribbon flutters down, he picks it up and she gets the grub, then she
+    // ambles back to her spot. Input is locked while it plays (js/main.js playCutscene). Sprites take their size per
+    // actor: the hero by depth, Mortgage at her barn h44. Keys: [t ms, sprite or [frames], at, to?, ms?].
+    cutscenes: {
+      grub: {
+        ms: 7300,
+        hero: [[0, ["rooster-walk-l", "rooster-side-l"], null, [147, 130], 1000], [1000, "rooster-matador-raise-l", [147, 130]],
+          [1700, "rooster-matador-stance-l"], [2450, "rooster-matador-flourish-l"], [2650, "rooster-matador-hop-r", null, [182, 134], 350],
+          [3000, "rooster-matador-flourish-l"], [3600, "rooster-matador-stance-l"], [4500, "rooster-matador-raise-l"],
+          [5000, ["rooster-walk-l", "rooster-side-l"], null, [162, 136], 450], [5450, "rooster-front"]],
+        goat: [[0, "mortgage-idle-r", [93, 137]], [1700, ["mortgage-paw-r", "mortgage-idle-r"]], [2500, "mortgage-charge-r", null, [134, 131], 500],
+          [3000, "mortgage-bonk-r"], [3500, "mortgage-dazed-r"], [5600, "mortgage-grub-r"],
+          [6400, ["mortgage-walk-l", "mortgage-side-l"], null, [93, 137], 800], [7200, "mortgage-idle-r"]],
+        props: [{ art: "fg/barn--ribbon", at: [154, 26], fall: [3450, 900, [146, 112]], gone: 5450 }],
+        events: [[3000, { fx: "fx/bonk", at: [136, 78] }], [3000, { shake: 350, sound: "bonk" }]],
+        end: { hero: [162, 136], face: "front" },
+      },
+    },
     exits: [
       { spot: "to-fence", label: "Fence" },
       { spot: "to-town", label: "Town" },
@@ -879,12 +1034,14 @@ export const ROOMS = {
         look: "Mortgage. Bored, bellied, and smarter than everyone in this barn. Never proven.",
         talk: { special: "talk_goat" },
         useItem: {
+          photo: { say: "Mortgage takes the signed photo very gently, looks Rooster in the eye, and eats it. Slowly. Signature last. \"meeeh.\" A review." }, // he keeps the stack: everybody gets one
           grub: {
             consume: ["grub"],
             set: ["got_ribbon"],
             give: ["ribbon"],
             unlessFlag: "got_ribbon",
             already: "Mortgage has already done the crime. Mortgage is retired.",
+            cutscene: "grub", // the matador beat (barn.cutscenes.grub) plays first, then this line
             say: "Mortgage takes the grub, sniffs Rooster for a long time, says \"meeeeh,\" and charges the post. The blue ribbon flutters down. Farmer Peck says it looks like rain.",
           },
         },
@@ -931,12 +1088,13 @@ export const ROOMS = {
         id: "peck",
         name: "Farmer Peck",
         rect: [212, 60, 50, 80],
+        useItem: { photo: { say: "\"An autograph? Ha! I KNOW that fella!\" Peck holds it to the brass horn like it might talk. \"...Who is it?\" He keeps it anyway. \"Looks like rain on him.\"" } }, // he keeps the stack: everybody gets one
         stand: [200, 150],
         look: "Farmer Peck. Hard of hearing, brass horn, and he only talks about the weather.",
         talk: { special: "talk_peck" },
         use: "He's not a tool. The goat is closer.",
         take: "Farmer Peck is a whole farmer. Also, he's holding a brass horn, and he'd use it.",
-        push: "He gives Peck a friendly nudge. Peck says \"Clear skies by Tuesday\" to nobody in particular.",
+        push: { special: "push_peck" },
         useAny: "He shows Peck the {item}. Peck squints at it down the brass horn. \"Looks like rain.\"",
       }),
       spot({
@@ -972,10 +1130,14 @@ export const ROOMS = {
     walk: [[[44, 131], [294, 131], [294, 179], [44, 179]]], // the floorboards in front of the counter: off the feed sacks (left) and the barrel (right)
     occluders: [{ id: "counter", base: 128 }], // Ned stands behind it (feet y122)
     cast: [{ spot: "clerk", sprite: "ned-front", talk: "ned-talk", voice: "clerk", at: [180, 122], height: 80,
-      // the bell gag: he walks down the counter to the bell, unscrews it (side-on, hands at the bell), pockets it
-      cues: { ned_bell: { walk: ["ned-walk-l", "ned-side-l"], to: [160, 122], end: "ned-side-l" },
-        ned_pocket: { sprite: "ned-side-l", at: [160, 122] },
-        ned_back: { walk: ["ned-walk-r", "ned-side-r"], from: [160, 122], to: [180, 122], end: "ned-front" } } }],
+      // the bell gag (ned-bell-sprites-v1, tools/sprites/cut_matador.py): he walks down the counter to the bell, pulls
+      // the screwdriver from his apron, bends and unscrews it (the tip on the bell's base screws at the counter top,
+      // y89; the bent frame stands 2 px lower so his hands reach it, the counter still covers him), lifts it (the
+      // overlay goes, the same bell is in his hand) and tucks it in his apron pocket
+      cues: { ned_bell: { walk: ["ned-walk-l", "ned-side-l"], to: [171, 122], ms: 900,
+        seq: [["ned-pull-l", 700], ["ned-twist-l", 260, [171, 124]], ["ned-twist-l", 260, [170, 124]], ["ned-twist-l", 260, [171, 124]], ["ned-twist-l", 260, [170, 124]], ["ned-twist-l", 260, [171, 124]], ["ned-pull-l", 9e9]] },
+        ned_pocket: { at: [171, 122], seq: [["ned-bell-l", 1100], ["ned-pocket-l", 9e9]] },
+        ned_back: { walk: ["ned-walk-r", "ned-side-r"], from: [171, 122], to: [180, 122], end: "ned-front" } } }],
     // the brass service bell on the counter; it stays put through the last ding and while Ned walks over to it
     overlays: [{ art: "fg/store--bell", at: [145, 82], whenNot: "bell_gone", holdCues: ["ding", "ned_bell"] }],
     fx: { ding: { art: "fx/ding", at: [136, 66] } }, // painted-pixel DING! pop over the bell when it rings
@@ -1005,6 +1167,7 @@ export const ROOMS = {
         look: "Ned has priced everything in the county, including trouble. He looks like a man carrying forty gallons of guilt.",
         talk: { special: "talk_clerk" },
         useItem: {
+          photo: { say: "Ned takes the photo, turns it over, and pins it to the wall behind the register next to the bounced checks. \"Good likeness. I'll put it with the others who owe me money.\"" }, // he keeps the stack: everybody gets one
           spoon: {
             consume: ["spoon"],
             set: ["traded"],
@@ -1075,7 +1238,7 @@ export const ROOMS = {
     walk: [[[4, 131], [316, 131], [316, 179], [4, 179]]], // the hall floor in front of the wall (wall meets the floor at y127)
     occluders: [{ id: "booth", base: 128 }], // wall, sill, desk, console, mullion and mic head, in front of DeeJay (feet y110)
     cast: [{ spot: "deejay", sprite: "deejay-front", talk: "deejay-talk", voice: "deejay", at: [174, 110], height: 72 }], // behind the glass at the mic
-    sign: { art: "fx/neon-wkuk", rect: [66,  12,  48,  14], frames: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (flat on the hall wall above the studio door); per-letter glow frames (tools/neon/paint_neon.py)
+    sign: { art: "fx/neon-wkuk", rect: [7,  24,  43,  17], frames: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, "hawk"] }, // NED'S FEED & SEED neon painted into the plate (down the side hall, over the notice board: the way back to Ned's); per-letter glow frames (tools/neon/paint_neon.py)
     exits: [
       { spot: "to-store", label: "Store" },
       { spot: "to-gate", label: "Fair gate" },
@@ -1100,6 +1263,7 @@ export const ROOMS = {
         id: "deejay",
         name: "DeeJay Cluck",
         rect: [154, 38, 34, 46],
+        useItem: { photo: { say: "DeeJay holds it up to the booth glass. \"A signed glossy, live on WKUK! Folks, he's handing these out like coupons. Call in if you want one. Nobody? ...Nobody.\"" } }, // he keeps the stack: everybody gets one
         stand: [172, 134],
         look: "The overnight voice of Cluck County. He aired the \"accident\" story years ago. He never quite believed it.",
         talk: { special: "talk_deejay" },
@@ -1111,8 +1275,8 @@ export const ROOMS = {
       spot({
         id: "onair",
         name: "on-air light",
-        rect: [187, 34, 19, 18],
-        stand: [196, 134],
+        rect: [71, 15, 36, 11], // the lit box above the studio door (tools/bg/next_signs.py); was a red panel in the window
+        stand: [100, 134],
         look: "On air. The whole county is listening, which is a lot of pressure for a wheeze.",
         talk: "The light has no notes.",
         take: "Uhhh, the light? It's wired into the building. And into DeeJay's whole personality.",
@@ -1154,6 +1318,19 @@ export const ROOMS = {
         talk: "\"Hang on, fair. Big Green's coming.\" He winces. That's her name for him. He doesn't use it.",
         useAny: "He holds the {item} up toward the fair's glow. The road is long. The {item} doesn't make it shorter.",
       }),
+      // Oct 21 item 21: an Act 1 memory (a red herring): the old Rooster & Hattie poster under the hall flyers
+      spot({
+        id: "poster",
+        name: "notice board",
+        rect: [10, 36, 26, 34],
+        stand: [34, 134],
+        look: "Flyers: a lost goat, fiddle lessons, the fry-off. Under them, sun-faded, a poster: ROOSTER & HATTIE, CRIME-STOPPERS, two masked birds back to back. She's laughing in it. He forgot she laughed like that.",
+        talk: "He reads the poster's slogan out loud, quietly: \"Two birds. One county. No crooks.\" It used to sound better with her saying half.",
+        take: "He starts to unpin it, then pins it back. Straighter.",
+        use: "He smooths the corner flat where it's curling. That's all. That's all he can fix.",
+        push: "He presses a loose pin back in. The poster stays up. It always does.",
+        useAny: "He holds the {item} next to the poster. Back then he'd have known what to do with it. Back then she'd have told him.",
+      }),
     ],
   },
   gate: {
@@ -1184,6 +1361,7 @@ export const ROOMS = {
         look: "A tired man with a fan. He has stamped a thousand tickets and believed maybe six of them. Hattie's people walk in free.",
         talk: { special: "talk_guard" },
         useItem: {
+          photo: { say: "The guard squints at it, then at him, then at it. \"Says Radioactive Rooster. You're the guy?\" A long look at the suit. \"Huh. Still smells like goat in here. Whole ticket, pal.\"" }, // he keeps the stack: everybody gets one
           mirror: {
             set: ["guard_distracted"],
             unlessFlag: "guard_distracted",
@@ -1244,8 +1422,17 @@ export const ROOMS = {
     name: "Midway, 11:40",
     plate: "bg-midway.jpg",
     hero: { at: [180, 152], height: 104, depth: { horizon: 105 } }, // depth: 104 at y 152 (booth counter at his belt), smaller toward the railing
-    walk: [[[20, 151], [84, 149], [88, 141], [262, 141], [262, 177], [20, 177]]], // boardwalk up to the railing posts (bases y 130-145), past the booth's right corner (booth occludes him behind y 147); the Pavilion rope (x>262) is off limits // booth counter top y 103, booth floor y 147 (~44 px): counter meets his belt
-    occluders: [{ id: "booth", base: 147 }], // the booth front; its counter window is open (the kids stand behind the counter)
+    walk: [[[20, 151], [84, 149], [88, 141], [252, 141], [250, 146], [290, 177], [20, 177]]], // boardwalk up to the railing posts (bases y 130-145), past the booth's right corner (booth occludes him behind y 147); the Pavilion rope (Arlong's painted rope, Oct 24 item 46: back post foot (256,146), front post foot (303,179)) is off limits, he stops on its near side // booth counter top y 103, booth floor y 147 (~44 px): counter meets his belt
+    occluders: [{ id: "booth", base: 147 }, { id: "rope", base: 179, edge: [[256, 146], [303, 179]] }], // + Oct 24 item 46: Arlong's HOT OIL rope as a foreground cutout (tools/sprites/cut_push_a.py rope()), in front of anyone on its far side // the booth front; its counter window is open (the kids stand behind the counter)
+    // Oct 23 items 33/42: "fix the clock" plays: he walks round behind Corny to the post, shinnies up it hand over hand
+    // (sit v2 frames: rooster-shimmy-a/b, each with its glove on the post, manifest `post`), nudges the minute hand,
+    // slides back down and walks back to his mark.
+    cutscenes: { shimmy: SHIMMY },
+    overlays: [{ art: "fg/midway--cashbox", at: [63, 92], z: 148 }, // over the booth front cutout (z); Corny's cash box on the end of the counter (tools/sprites/cut_next.py)
+      // Hawkeye pass (2026-10-25): the plate's club sign is painted fully lit; these PLACEHOLDER dead-tube patches
+      // (tools/neon/club_sign_parts.py) cover whichever CLUB_SIGN parts are dark (js/main.js, signParts in js/logic.js)
+      { art: "fx/clubsign-dark-thecock", at: [216, 48], signPart: "thecock" },
+      ...[[215, 57], [220, 57], [226, 57], [232, 57], [238, 57], [244, 57], [250, 57]].map((at, i) => ({ art: `fx/clubsign-dark-g${i + 1}`, at, signPart: "gobbler" }))],
     cast: [
       { spot: "kids", sprite: "dot-front", talk: "dot-talk", voice: ["dot", "kids"], at: [38, 140], height: 72 }, // behind the counter window
       { spot: "kids", sprite: "rocco-front", talk: "rocco-talk", voice: ["rocco", "kids"], at: [59, 141], height: 72 },
@@ -1272,7 +1459,7 @@ export const ROOMS = {
         id: "kids",
         name: "Jingle Kids",
         rect: [24, 60, 50, 40],
-        look: "Three teenagers in faded Rad-Safe chick-costume uniforms behind the counter: Dot, Rocco and Pip. As little kids they sang the jingle in the old Rad-Safe ads. They would like you to know they are over it.",
+        look: "Two teens in faded Rad-Safe chick suits, Dot and Rocco, and a third so small she's just eyes over the counter: Pip. As little kids they sang the old Rad-Safe jingle. They'd like you to know they're over it.",
         talk: { special: "talk_kids" },
         useItem: {
           tickets: { special: "repay_pip" },
@@ -1287,7 +1474,8 @@ export const ROOMS = {
         id: "booth",
         name: "ring-toss pegs",
         rect: [18, 98, 50, 12],
-        look: "Three rings, a row of bottles and pegs, and a prize shelf with one rubber basket on it.",
+        // Oct 21 items 21/22: where he met Hattie; and the hint that only something loud will shake the bottles loose
+        look: "Three rings, a row of bottles and pegs, and a prize shelf with one rubber basket on it. The pegs are glued. These won't budge in an earthquake. Right here, years ago, he beat Hawkeye Hattie at her own game.",
         use: { special: "toss_plain" },
         take: { special: "toss_plain" },
         useItem: { speaker: { special: "toss_speaker" } },
@@ -1313,7 +1501,7 @@ export const ROOMS = {
         stand: [126, 150], // talk from the boardwalk in front of the booth line (y147), never tucked behind its corner
         look: "Slick Corny, the barker, leans on the clock post in a straw boater and a corn-yellow vest, flipping a quarter. A man made entirely of fairground hustle. Something under the smile is counting.",
         talk: { special: "talk_corny" },
-        useItem: { mirror: "He looks into the mirror and likes what he sees, but he never lets go of the cash box key. Professional.", map: "\"Follow the money,\" the map says. Corny sees it and stops smiling for exactly one second." },
+        useItem: { photo: { say: "Corny flips it over, fast as a quarter. \"Signed? I could move these at a buck apiece.\" He pockets it. \"Twenty percent to the talent. Ten. Five. Get outta here.\"" }, mirror: "He looks into the mirror and likes what he sees, but he never lets go of the cash box key. Professional.", map: "\"Follow the money,\" the map says. Corny sees it and stops smiling for exactly one second." },
         take: "You can't take Slick Corny anywhere. People have tried. Usually he takes them.",
         use: "\"Corny, my man.\" Corny flips his quarter. \"Your man costs a dollar.\"",
         push: "He bumps the clock post. Corny doesn't wobble. Corny is held up by grease and confidence.",
@@ -1323,6 +1511,7 @@ export const ROOMS = {
         id: "clock",
         name: "midway clock",
         rect: [112, 14, 34, 38],
+        stand: [168, 146], beside: false, face: "l", // Arlong: to the barker's RIGHT, looking up past him; neither hides the other
         look: { special: "look_clock" },
         push: { special: "fix_clock" },
         use: { special: "fix_clock" },
@@ -1344,8 +1533,8 @@ export const ROOMS = {
       spot({
         id: "hawk",
         name: "red neon hawk",
-        rect: [214, 30, 32, 42],
-        look: "THE COCK GOBBLER, in red neon over the club that went up across from the Pavilion. A hawk in profile, wings half open. Hattie always did like a sign.",
+        rect: [215, 27, 44, 42], // the painted-in club neon (tools/bg/next_signs.py club); its parts light per CLUB_SIGN
+        look: { special: "look_club_sign" }, // SIGN_LOOK below, by variant and reveal
         talk: "The neon buzzes back. Not a yes. Not a no.",
         take: "It's her sign, over her club. You don't take a woman's neon.",
         use: "He studies the hawk like a clue. It studies him back. Red, steady, not blinking.",
@@ -1367,6 +1556,7 @@ export const ROOMS = {
         id: "rope",
         name: "way to the Hot Oil Pavilion",
         rect: [266, 102, 54, 48],
+        stand: [252, 152], // the near side of the rope
         exit: true,
         look: "The boardwalk runs to the Hot Oil Pavilion's velvet rope. The rope wants a reason.",
         talk: "The rope is velvet and judgmental.",
@@ -1394,7 +1584,9 @@ export const ROOMS = {
     name: "Hot Oil Pavilion",
     plate: "bg-pavilion.jpg",
     // New pixel bg (Arlong, 2026-10-17). Scene scale measured: height ~= 1.57 * (feetY - 92) (cart counter 109 / wheels 145 = waist; stage edge 114-131 = knee).
-    hero: { at: [150, 153], height: 96, depth: { horizon: 92 } }, // depth: 96 at y 153; ~1.57 px per px of feet y (horizon 92), so ~61 at the stage front
+    // Arlong (2026-10-19): he read far too big down by the lock. Now he's Corny's height (88 at y148) give or take, a
+    // touch bigger only because he's nearer the camera: 84 at y153, ~92 at the front rope (y171), ~72 at the stage front.
+    hero: { at: [150, 153], height: 84, depth: { horizon: -20 } },
     // Rope barrier: the front rope is padlocked between the left post (x 8-17) and the centre-left post (x 104-116, base y 168).
     // A second rope runs back from the centre-left post (base 112,168) to the post at (150,145): stay in front of it.
     // Closed: open floor in front of both ropes, back to the stage front (y 131); he can step behind the cart's left corner (cart occludes, base 146).
@@ -1414,28 +1606,110 @@ export const ROOMS = {
       { id: "rope-back", base: 130, hangs: true }, // along the stage front, with the back posts
     ],
     cast: [
-      { spot: "gobbler", sprite: "hattie-front", at: [205, 110], height: 52 }, // on the stage, in the spotlight
+      // on the stage, in the spotlight; at the finish she walks off stage right to her getaway cart
+      // Oct 21 item 16: she visibly holds the cage chain (it runs up off the top of the screen, over to the cage), and
+      // yanks it when the lamp blinds her or the sauce makes her lean (cage_jog). tools/sprites/cut_oct21.py
+      { spot: "gobbler", sprite: "hattie-chain-l", at: [205, 110], height: 52,
+        cues: { cage_jog: "hattie-flinch-l", hattie_exit: { walk: ["hattie-exit-walk-r", "hattie-exit-side-r"], to: [246, 112], ms: 1600, end: "hattie-exit-back" } } },
       // Pip, front row behind the side rope; she drifts into the crowd for the keys, then pops the padlock (left of her).
       { spot: "pip", sprite: "pip-front", talk: "pip-talk", voice: "pip", at: [122, 140], height: 56,
-        cues: { pip_lift: { walk: ["pip-walk-r", "pip-side-r"], to: [146, 137], end: "pip-side-r" }, pip_unlock: "pip-reach-l" } },
-      // Slick Corny by his cart; his head turns when Rooster reaches for the keys.
-      { sprite: "corny-front", talk: "corny-talk", voice: "corny", at: [238, 148], height: 88, cues: { corny_turn: "corny-side-l" } },
+        cues: { pip_lift: PIP_SNEAK, pip_unlock: PIP_UNLOCK } },
+      // Marge, the corn-dog vendor, at the cart (Arlong 2026-10-19: her own sprite, not the barker); she looks round
+      // when Rooster reaches for Corny's keys on the cart hook.
+      { spot: "vendor", sprite: "vendor-idle-r", at: [238, 148], height: 80, cues: { corny_turn: "vendor-talk-l" } },
+      // The prize cage with the glowing Yolk (a prop, tools/sprites/cut_next.py; the plate's painted cage is gone): it
+      // hangs by the vat, swings out over the oil on the CLUNK, jogs down on the lamp/sauce beat, and is empty once
+      // the Yolk drops into the basket. The Yolk pulses (two glow frames). The chain runs off the top of the screen.
+      { sprite: "cage-egg-a", frames: ["cage-egg-a", "cage-egg-b"], every: 520, at: [114, 79], height: 150, prop: true, whenNot: "crowd_won" },
+      { sprite: "cage-egg-a", frames: ["cage-egg-a", "cage-egg-b"], every: 520, at: [88, 62], height: 150, prop: true, when: "crowd_won", whenNot: "cage_jogged",
+        cues: { cage_out: { walk: ["cage-egg-a", "cage-egg-b"], from: [114, 79], to: [88, 62], ms: 1800, end: "cage-egg-a" } } },
+      { sprite: "cage-egg-a", frames: ["cage-egg-a", "cage-egg-b"], every: 300, at: [88, 72], height: 150, prop: true, when: "cage_jogged", whenNot: "egg_saved",
+        cues: { cage_jog: { walk: ["cage-egg-b", "cage-egg-a"], from: [88, 62], to: [88, 72], ms: 500, end: "cage-egg-b" } } },
+      { sprite: "cage-empty", at: [88, 72], height: 150, prop: true, when: "egg_saved" },
+      // Steam and red glow rolling off the oil (Arlong: more ominous vat), 4 loop frames over the oil surface.
+      { sprite: "vat-steam-a", frames: ["vat-steam-a", "vat-steam-b", "vat-steam-c", "vat-steam-d"], every: 200, at: [56, 76], height: 40, prop: true },
       // The little brown hen in the crowd behind the side rope: only at the finish, where she speaks.
-      { sprite: "littlehen-idle-r", at: [140, 138], height: 18, when: "egg_saved", cues: { littlehen: "littlehen-cluck-r" } },
+      // Oct 23 item 39: she struts out under the side rope to the front, so the gag reads, and stays there.
+      { sprite: "littlehen-idle-r", at: [140, 138], height: 18, when: "egg_saved",
+        cues: { littlehen: { walk: ["littlehen-idle-r", "littlehen-cluck-r"], to: [170, 152], ms: 1400, seq: [["littlehen-cluck-r", 1]] },
+          hen_out: { sprite: "littlehen-idle-r", at: [170, 152] }, hattie_exit: { sprite: "littlehen-idle-r", at: [170, 152] } } },
+      // Oct 23 item 45: the getaway car waits out the back flap, his elbow out the window (the stogie guy, Mayor
+      // Bantam's muscle, at the wheel); the cart's cutout hides its wheels. On her exit it holds, then pulls away right.
+      { sprite: "getaway-car-r", at: [286, 66], height: 16, prop: true, when: "egg_saved",
+        cues: { hattie_exit: { seq: [["getaway-car-r", 1700], ...Array.from({ length: 12 }, (_, i) => ["getaway-car-r", 90, [286 + (i + 1) * 6, 66]])] } } },
     ],
     vat: [14, 66, 84, 17], // the glowing oil surface
-    poseAt: { squat: [128, 76, 70] },
+    // The foreground crowd presses in with each step of the crow-down (crowd_1..3, js/logic.js talkGobbler/onCrow), so
+    // the glide over their heads makes sense; once he's herded them back from the fryer they settle low again.
+    // One row of heads (fg/pavilion--crowd, 320 x 66), drawn over everybody (z: in front of any feet line).
+    overlays: [
+      { art: "fg/pavilion--crowd", at: [0, 162], when: "crowd_1", whenNot: "crowd_2", z: 200 },
+      { art: "fg/pavilion--crowd", at: [0, 148], when: "crowd_2", whenNot: "crowd_3", z: 200 },
+      { art: "fg/pavilion--crowd", at: [0, 132], when: "crowd_3", whenNot: "crowd_won", z: 200, holdCues: ["cage_out", "glide"] },
+      { art: "fg/pavilion--crowd", at: [0, 160], when: "crowd_won", z: 200 },
+    ],
+    // Finale beats (Arlong 2026-10-19: every finale action animates). Played when their line comes up (js/main.js).
+    cutscenes: {
+            glide: {
+        // over the front row: up and left toward the fryer, a long pass right over their heads, back and down
+        ms: 3800, heroH: 84, heroZ: 950,
+        hero: [[0, "rooster-glide-l", null, [70, 116], 900], [900, "rooster-glide-r", null, [270, 124], 1500],
+          [2400, "rooster-glide-l", null, [180, 128], 700], [3100, "rooster-glide-l", null, [150, 153], 700]],
+        end: { hero: [150, 153], face: "front" },
+      },
+      // Oct 23 item 40: the hot sauce toss. From wherever he stands he raises Ned's bottle like the matador, lobs it in
+      // an arc into the vat, SPLASH, and the spicy oil hits her in the face ({f}: facing the vat, faceTo x).
+      sauce_toss: {
+        ms: 2100, faceTo: 56,
+        hero: [[0, "rooster-sauce-raise-{f}", null], [650, "rooster-matador-raise-{f}", null], [1500, "rooster-matador-flourish-{f}", null]],
+        props: [{ art: "fx/sauce-bottle", at: "hero", show: 650, arc: [650, 700, [50, 62], 46], gone: 1350 }],
+        events: [[1350, { fx: "fx/oil-splash-a", at: [6, 28] }], [1350, { shake: 350 }], [1380, { sound: "bonk" }], [1650, { fx: "fx/oil-splash-b", at: [160, 46] }]],
+      },
+      // the catch: the Yolk drops out of the cage into the rubber basket (he stands left of the low cage, ~(58, 149), facing it)
+      catch: {
+        ms: 1300,
+        props: [{ art: "fx/yolk-egg", at: [79, 50], fall: [150, 900, [64, 92]], gone: 1300 }],
+        events: [[1050, { sound: "geiger" }]],
+      },
+      // the bad ending: the chain slips, the Yolk drops into the fryer
+      fried: {
+        ms: 1400,
+        props: [{ art: "fx/yolk-egg", at: [79, 50], fall: [200, 700, [79, 70]], gone: 900 }],
+        events: [[900, { shake: 400 }]],
+      },
+      // the dark side: the vat erupts
+      erupt: { ms: 900, events: [[0, { shake: 700 }]] },
+      // Oct 21 items 17/18: PAH-KAW. Hero ending: one big lunge forward off his planted boots, the Yolk held high.
+      pahkaw: {
+        ms: 1100, heroH: 84,
+        hero: [[0, "rooster-lunge-r", null, [96, 160], 450], [450, "rooster-lunge-r", null, [112, 158], 350], [800, "rooster-yolk-r", null, [112, 158], 300]],
+        events: [[450, { shake: 250 }]],
+        end: { hero: [112, 158], face: "r" },
+      },
+      // ...showboat ending ("the front row, wearing the fryer"): up onto the vat rim, then a kick off it that sends a
+      // wave of hot oil over the front row, and a lunge out to centre stage.
+      pahkaw_show: {
+        ms: 1700, heroH: 84, heroZ: 950,
+        hero: [[0, "rooster-yolk-r", null, [46, 92], 400], [450, "rooster-lunge-r", null, [46, 92], 150], [600, "rooster-lunge-r", null, [150, 152], 750], [1350, "rooster-yolk-r", null, [150, 152], 350]],
+        events: [[600, { fx: "fx/oil-splash-b", at: [20, 36] }], [600, { shake: 500 }], [650, { sound: "bonk" }]],
+        end: { hero: [150, 152], face: "r" },
+      },
+    },
+    // Oct 21 item 17: once the Yolk is in the basket he stands holding it (no squat), side frames rooster-yolk-r/-l.
+    heroHold: { flag: "egg_saved", sprite: "rooster-yolk", size: "-h84" },
+    poseAt: { squat: [30, 83, 56] }, // (legacy: no longer used at the finish since Oct 21 item 17)
     exits: [{ spot: "out", label: "Midway" }],
     spots: [
       spot({
         id: "gobbler",
-        name: "The Cock Gobbler",
-        rect: [180, 44, 56, 68],
+        name: "Hattie", // Hawkeye pass: first named the Cock Gobbler in her Pavilion speech (alt below)
+        rect: [180, 44, 48, 68],
         side: "l", // from the right he'd end up behind the side rope swag: always talk to him from the front-left
         look: { special: "look_gobbler" },
         talk: { special: "talk_gobbler" },
-        useItem: { vip: { special: "return_vip" } },
-        take: "You don't take The Cock Gobbler anywhere. She takes the stage, the Yolk, and the last word.",
+        useItem: { sauce: { say: "He holds Ned's hottest bottle up to the stage. She looks at it, then at him, one hand on her hip. \"Whatsa matter, I'm not hot enough for ya?\"", speaker: SPEAKER.gobbler }, photo: { say: "Hattie takes the photo from the edge of the stage with two black-gloved fingers, reads \"Stay safe!\", and laughs low. \"Oh, sugar. Still signing these?\" She tucks it in her glove anyway." }, vip: { special: "return_vip" } },
+        take: "You don't take Hattie anywhere. She takes the stage, the Yolk, and the last word.",
+        alt: [{ when: "unmasked", name: "The Cock Gobbler", take: "You don't take The Cock Gobbler anywhere. She takes the stage, the Yolk, and the last word." }],
         use: "\"Hattie, let's talk.\" She smiles from the stage. \"We are talking, sugar. It's called a show.\"",
         push: "He takes one step toward the stage. The whole crowd shushes him. He takes the step back.",
         useAny: "He holds up the {item}. Hattie blows him a kiss. \"Bring me something I don't have, Big Green.\"",
@@ -1444,6 +1718,7 @@ export const ROOMS = {
         id: "lamp",
         name: "heat lamp",
         rect: [44, 0, 40, 57],
+        stand: [152, 170], beside: false, face: "l", // looks up at it from right of Pip, not on top of her
         look: "A heat lamp aimed at the oil. It could be aimed at a person, if the person stood where vanity put her.",
         useItem: {
           mirror: { special: "mirror_lamp" },
@@ -1458,6 +1733,8 @@ export const ROOMS = {
         id: "cage",
         name: "egg cage",
         rect: [99, 26, 30, 53],
+        alt: [{ when: "crowd_won", rect: [73, 5, 30, 57] }, { when: "cage_jogged", rect: [73, 15, 30, 57] },
+          { when: "egg_saved", look: "The prize cage, empty, swinging over the oil. The Yolk's in the basket now." }],
         look: "The Yolk of Midnight, pitch black and glowing, in the same old prize cage from the stunt night. They say whoever eats it gets the Crow: a voice the whole county obeys.",
         useItem: {
           basket: { special: "basket_cage" },
@@ -1477,6 +1754,7 @@ export const ROOMS = {
           basket: { special: "basket_fryer" },
           sauce: { special: "sauce_oil" },
         },
+        tossItems: ["sauce"], // Oct 23 item 40: he throws it from where he stands, no walk to the vat
         talk: "\"Steady, big guy.\" The oil pops back, rude and hot.",
         take: "Uhhh, a vat of hot oil does not fit in the suit. Nothing should fit in the suit.",
         use: "He's not putting his gloves anywhere near that oil. Rad-Safe Rule 1: don't fry the hero.",
@@ -1487,6 +1765,7 @@ export const ROOMS = {
         id: "crowd",
         name: "crowd",
         rect: [104, 76, 54, 30],
+        side: "r", // from the stage side; on the vat side (rope open) the side rope swag cuts him
         look: "They came for a tasting. They are one bad wire away from leaving without eyebrows.",
         talk: "They shush each other. The show hasn't started, or it has, and they can't tell.",
         take: "He can't take a whole crowd. He'd need a bus, and a reason, and they'd want snacks.",
@@ -1495,10 +1774,25 @@ export const ROOMS = {
         useAny: "He holds the {item} up to the crowd. A few people clap politely. They think it's part of the show.",
       }),
       spot({
+        id: "vendor",
+        name: "corn-dog lady",
+        rect: [228, 68, 24, 80],
+        side: "l",
+        look: "Marge, who runs the corn-dog cart. Striped paper hat, striped apron, a corn dog held like a scepter. Corny hangs his keys on her cart hook because nobody gets past Marge.",
+        talk: "\"Corn dog, hon? Two bucks. Rooster discount: also two bucks.\" She never takes her eyes off the cart hook.",
+        useItem: { photo: { say: "Marge takes the signed photo, squints at it, and props it up against the mustard. \"Hon, you look taller on paper.\"" } },
+        take: "He reaches for a corn dog. Marge raps his glove with the next one. \"Two bucks.\"",
+        use: "\"One corn dog, please.\" \"Two bucks.\" He has no bucks. He has feathers.",
+        push: "He is not shoving Marge. Nobody shoves Marge.",
+        useAny: "He offers Marge the {item}. \"We don't barter, hon. This is a cart, not a church raffle.\"",
+      }),
+      spot({
         id: "cart",
         name: "corn-dog cart",
         rect: [253, 62, 64, 85],
-        look: "A corn-dog cart parked like a getaway car. Keys in it. She always plans her exit.",
+        stand: [204, 150], beside: false, face: "r", // left of Marge, so neither hides the other
+        look: "Marge's corn-dog cart, parked by the back flap. Out past it, an engine idles in the dark. She always plans her exit.",
+        alt: [{ when: "egg_saved", look: "Marge's corn-dog cart. Just a cart. The getaway car was out back the whole time." }],
         use: "It isn't time to borrow her exit.",
         push: "The cart stays. For now.",
         talk: "\"Nice cart.\" The corn dogs sweat under the lamp. They know he's onto something.",
@@ -1558,3 +1852,46 @@ export const ROOMS = {
     ],
   },
 };
+
+/* ---------- Push C placeholder beats (2026-10-24). PLACEHOLDER: wording, art and timing await Arlong's sign-off. ---------- */
+
+// How far into the night each room sits, 0 (dusk) .. 1 (midnight). One driver for the colour shift and the music's
+// tension (js/logic.js nightOf). It only ratchets up: walking back to HQ late doesn't make it dusk again.
+export const NIGHT = { hq: 0, fence: 0.15, henhouse: 0.2, barn: 0.25, store: 0.35, wkuk: 0.45, gate: 0.6, midway: 0.8, pavilion: 1 };
+
+// Time cards (rr-scumm-build-order-2026-10-24): shown once each, the first time the trigger happens.
+// `on`: "start" = after the cold open; { room } = the first time he enters `room`.
+// `then`: beats that follow the card (the club cutaway after THREE HOURS).
+// The club's neon sign (Hawkeye pass, Arlong + Usopp 2026-10-25): three parts, each lit or dark. Before the Pavilion
+// reveal only some are lit (SIGN_VARIANT picks which); the stogie henchman's smack in the club cutaway sputters the dark
+// ones for half a second; right after Hattie's "Hawkeye Hattie is dead" speech every part lights (flag CLUB_SIGN.lit)
+// and stays lit. Variant "B" (default): hawk + THE COCK lit, GOBBLER dead, so players read the club as "The Cock".
+// Variant "A": only the hawk lit (Usopp's first call). Not locked by Usopp yet: flip this one constant.
+export const SIGN_VARIANT = "B";
+export const CLUB_SIGN = {
+  parts: ["hawk", "thecock", "gobbler"],
+  before: { A: { hawk: true, thecock: false, gobbler: false }, B: { hawk: true, thecock: true, gobbler: false } },
+  lit: "sign_lit",
+  // club cutaway plates: Brook's B3 family, same layout (the smoke strips fit all three)
+  clubArt: { A: "club/bg-signoff", B: "club/bg-thecock", lit: "club/bg" },
+};
+// Extra code-side dim over the dead GOBBLER tubes in the club cutaway (0 = off, 1 = black). Brook's updated
+// club-B3-thecock already ghosts them, so it's off; lifted during the smack sputter. Tune 0..0.6.
+export const GOBBLER_DIM = 0;
+// Rooster's LOOK at the Midway sign (placeholder wording; the B line is Usopp's).
+export const SIGN_LOOK = {
+  A: "A new red neon hawk over the old bar across from the Pavilion, all hot red glass. Under it, a whole sign's worth of dead tubes. He squints out THE COCK before the dark takes the rest. \"The Cock. Finally, a joint that gets me.\"",
+  B: "A new red neon hawk over the old bar across from the Pavilion, and under it, in hot red script: THE COCK. Below that, a row of dead tubes nobody fixed. \"The Cock. Finally, a joint that gets me.\"",
+  lit: "THE COCK GOBBLER, every letter lit now, over the old bar across from the Pavilion, under the new red neon hawk. Hattie always did like a sign.",
+};
+
+export const TIME_CARDS = [
+  { id: "six", on: "start", title: "SIX HOURS TO MIDNIGHT", sub: "Bawlsack County. The rooftop." },
+  { id: "three", on: { room: "gate" }, title: "THREE HOURS TO MIDNIGHT", sub: "Meanwhile, across the county...", then: ["club"] },
+  { id: "1140", on: { room: "midway" }, title: "11:40", sub: "The Midway." },
+];
+
+// The cold open: Hattie's henhouse at night, seen only as a glove, an egg's glow and a cigar ember. Never a face.
+// No dialogue until Arlong approves it (BRIEF.md). On by default in dev; set to false here, or ?coldopen=0 /
+// the Menu toggle (localStorage rr-coldopen), to skip it.
+export const COLD_OPEN = true;

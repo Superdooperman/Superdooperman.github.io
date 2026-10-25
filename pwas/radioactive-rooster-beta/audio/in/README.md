@@ -1,25 +1,16 @@
 # audio/in
 
-Empty on purpose. Drop a file here when you have one. The game uses it instead of the stand-in.
+Drop a file here and the game uses it instead of the WebAudio stand-in. No code change is needed.
+After adding or removing a file, run `python3 tools/audio_files.py`. It rewrites `manifest.json`, and the game
+only requests files listed there, so a missing file is never fetched.
 
-Cues (short, not looped):
+- Cues and loops: `<cue>.ogg|wav|mp3`. The full list, with triggers, is in [CUES.md](CUES.md).
+- Music beds: `bed-<area>-calm` / `bed-<area>-tense` (crossfaded by tension), or `bed-<area>` (a single layer).
+  A per-room `bed-<room>[-calm|-tense]` overrides its area bed. Areas are farm, mainstreet, midway, club.
+- Voice: `voice/<line id>.ogg|mp3`. The id scheme is in [VOICE-IDS.md](VOICE-IDS.md).
 
-- `wheeze.mp3` — the call with no Atomic Egg, the `*pah*`
-- `geiger.mp3` — the counter
-- `click.mp3` — the rigged counter keeping time
-- `blip.mp3` — a small UI beep
-- `pah-kaw.mp3` — the real trademark call, used once, when the egg is saved
+`python3 tools/audio_files.py --stage` copies Brook's pack from `assets/audio-placeholder/`: every cue plus the
+area calm/tense beds. It skips the per-room beds, which would mask the area beds, and `_preview.mp3`.
+Add `--force` to overwrite existing files.
 
-Beds (looped, volume 0.35), one per room:
-
-- `bed-hq.mp3`
-- `bed-fence.mp3`
-- `bed-henhouse.mp3`
-- `bed-barn.mp3`
-- `bed-store.mp3`
-- `bed-wkuk.mp3`
-- `bed-gate.mp3`
-- `bed-midway.mp3`
-- `bed-pavilion.mp3`
-
-A missing file stays silent for a bed, or falls back to the synth for a cue. Do not add a bed for the title screen.
+Missing files: a cue or bed falls back to a synth stand-in, and a voice line stays silent. The title screen has no bed.

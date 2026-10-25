@@ -1,8 +1,9 @@
-import { ENDINGS, NAMES, ROOMS, SCENE, SPEAKER, TITLE } from "../data/script.js";
+import { COLD_OPEN, ENDINGS, NAMES, ROOMS, SCENE, SPEAKER, TIME_CARDS, TITLE } from "../data/script.js";
 import { artMode, artUrl, assetInfo, fancyCount, initArt, onArtChange, setArtMode } from "./art.js";
-import { playBed, playCue } from "./audio.js";
-import { clampToArea, findPath, parseFlagOverride, roomView, stepToward, depthHeight, actorZ, occluderZ, occluderAsset, occluderBase, spriteFilter, castFrame, standFor } from "./walk.js";
-import { act, choicesFor, HERO, ITEMS, maxHeat, newGame, preview, signLetters, signLevel, spotsFor, vatState, visible } from "./logic.js";
+import { audioSettings, audioState, hasVoice, initAudio, playBed, playCue, playVoice, playVoiceSeq, resumeAudio, setAudio, setTension, stopVoice } from "./audio.js";
+import { beatActive, onBeatsDone, playBeats, smokeVeil } from "./beats.js";
+import { clampToArea, findPath, parseFlagOverride, roomView, stepToward, depthHeight, actorZ, occluderZ, occluderAsset, occluderBase, spriteFilter, castFrame, standFor, behindOccluder } from "./walk.js";
+import { act, choicesFor, HERO, ITEMS, itemOf, maxHeat, newGame, nightOf, nightTint, panelVoice, preview, signLetters, signLevel, signParts, spotsFor, startBeats, vatState, veilLifted, visible } from "./logic.js";
 
 const SAVE_KEY = "rr-yolk-saves";
 const VERBS = [
@@ -25,6 +26,18 @@ const ui = {
   plateFile: "",
   lineAt: 0, // when the current caption line was shown (cast talk frames run for a beat after it)
   lastAct: null, // { spot, verb } of the last hotspot click (cast `talkOn`)
+  // Hints / easy mode (Arlong 2026-10-19): hover highlighting is OFF by default; the menu turns it on (kept per device).
+  hints: (() => { try { return localStorage.getItem("rr-hints") === "1"; } catch { return false; } })(),
+  // Push C PLACEHOLDER beats (2026-10-24). Cold open: COLD_OPEN in data/script.js, overridden per device by the Menu
+  // toggle (localStorage rr-coldopen) or per visit by ?coldopen=0|1. Colour shift: Menu toggle (rr-nightshift).
+  coldOpen: (() => {
+    const q = new URLSearchParams(location.search).get("coldopen");
+    if (q === "0" || q === "1") return q === "1";
+    try { const v = localStorage.getItem("rr-coldopen"); if (v === "0" || v === "1") return v === "1"; } catch { /* */ }
+    return COLD_OPEN;
+  })(),
+  nightShift: (() => { try { return localStorage.getItem("rr-nightshift") !== "0"; } catch { return true; } })(),
+  voiceAfterBeat: null,
 };
 
 const app = document.querySelector("#app");
@@ -44,9 +57,19 @@ function writeSaves(slots) {
   localStorage.setItem(SAVE_KEY, JSON.stringify(slots));
 }
 
-function mount(img, file) {
+// `fallback`: another asset to show if this one is unknown or fails to load, so a missing frame never leaves an
+// empty image (Rooster must never vanish). An id the manifest doesn't know yet (stale manifest) is tried directly as
+// art/pixel/<id>.png first.
+function urlOf(file) {
+  // only for ids the manifest doesn't know (a stale manifest); a known id with a placeholder keeps its placeholder
+  if (!assetInfo(file) && /^(sprite|item|fg|fx|overlay|bg)\//.test(file)) return `art/pixel/${file}.png`;
+  return artUrl(file);
+}
+
+function mount(img, file, fallback = null) {
   img.dataset.file = file;
-  const url = artUrl(file);
+  const url = urlOf(file);
+  img.onerror = fallback && fallback !== file ? () => { img.onerror = null; mount(img, fallback); } : null;
   img.src = url;
   // Nearest-neighbor for pixel files, smooth for fancy and legacy placeholders.
   img.classList.toggle("px", url.startsWith("art/pixel/"));
@@ -70,11 +93,123 @@ function currentLine() {
 
 function showLine(entry) {
   if (!entry) return;
+  // a line with a cutscene plays its beat first (input locked), then shows; the queue waits for it
+  if (entry.cutscene && !entry.played) {
+    entry.played = true;
+    playCutscene(entry.cutscene, () => showLine(entry));
+    return;
+  }
+  // Usopp 2026-10-25: the cut to the club sign (GOBBLER lights letter by letter) plays first, then back here
+  if (entry.signCut && !entry.played) {
+    entry.played = true;
+    playBeats([{ kind: "sign" }]).then(() => showLine(entry));
+    return;
+  }
   ui.lineAt = performance.now();
   if (entry.mood) ui.state.mood = entry.mood;
   if (entry.sound) playCue(entry.sound);
+  else if (entry.speaker === SPEAKER.goat && !hasVoice(entry.id)) playCue("goat-bleat"); // Mortgage's "meeeeeh."
+  else if (entry.speaker === SPEAKER.henny) playCue("henny-cluck"); // Henny reacts in chicken gibberish, never words
+  // optional voice: audio/in/voice/<entry.id>.ogg|mp3 when the manifest has it, silent otherwise; held until a beat ends
+  if (beatActive()) { stopVoice(); ui.voiceAfterBeat = entry.id || null; } else playVoice(entry.id);
   render();
   popFx(entry);
+  playAnim(entry);
+  if (entry.veil === "whisk" && ui.pavVeil && !ui.pavVeil.clearing) { // the Pavilion unmasking: the smoke whisks off her mask
+    const v = ui.pavVeil;
+    v.clearing = true;
+    v.veil.clear().then(() => { v.cleared = true; v.wrap.remove(); syncSmokePlate(); });
+  }
+}
+
+// Arlong 2026-10-25: her smoke-hidden portrait clears at the same moment as the on-screen smoke (Brook's final art).
+// A plate with `smoke` (GOBBLER_PLATE) shows the portrait smoke while the Pavilion veil is on screen: the
+// portrait/hattie-smoke-drift loop on stage drift frame % 6 (6 x 180 ms = half the 12-frame stage loop), then
+// portrait/hattie-smoke-clear on the same frame index as pavilion/smoke-clear, stepped by smokeVeil's onFrame on the
+// stage's own tick; when the stage veil is done it cuts to the plate's clear portrait (portrait/gobbler; clear frames
+// 6-8 already equal it). Without the strips: the still portrait/hattie-smoke, cut on done. One node per render; the
+// frame lives on ui.pavVeil, so a re-render mid-clear stays in step.
+const pavVeilUp = () => !!(ui.pavVeil && !ui.pavVeil.cleared && ui.pavVeil.phase !== "done" && ui.state && ui.state.room === "pavilion");
+function smokePlateArt() { // -> { id, frame } for the current stage phase
+  const v = ui.pavVeil, still = { id: "portrait/hattie-smoke", frame: 0 };
+  if (!v) return still;
+  if (v.phase === "clear" && artUrl("portrait/hattie-smoke-clear")) return { id: "portrait/hattie-smoke-clear", frame: v.frame };
+  if (v.phase === "drift" && artUrl("portrait/hattie-smoke-drift")) {
+    const n = (assetInfo("portrait/hattie-smoke-drift") || {}).frames || 1;
+    return { id: "portrait/hattie-smoke-drift", frame: v.frame % n };
+  }
+  return still;
+}
+function paintSmokePlate(node) {
+  const { id, frame } = smokePlateArt();
+  const n = (assetInfo(id) || {}).frames || 1;
+  if (node.dataset.id !== id) {
+    node.dataset.id = id;
+    node.style.backgroundImage = `url("${artUrl(id)}")`;
+    node.style.setProperty("--frames", String(n));
+  }
+  node.style.backgroundPosition = `${n > 1 ? (Math.min(frame, n - 1) / (n - 1)) * 100 : 0}% 0`;
+  node.dataset.frame = String(frame + 1);
+}
+function smokePlateNode(clearTo, fallback) {
+  const node = el("div", "portrait-smoke");
+  node.setAttribute("role", "img");
+  node.dataset.clearTo = clearTo;
+  if (fallback) node.dataset.fallback = fallback;
+  paintSmokePlate(node);
+  return node;
+}
+function syncSmokePlate() {
+  for (const node of document.querySelectorAll(".speaker .portrait-smoke")) {
+    if (pavVeilUp()) { paintSmokePlate(node); continue; }
+    const img = el("img"); // the smoke is gone: cut to the clear portrait
+    img.alt = node.getAttribute("aria-label") || "Hattie";
+    mount(img, node.dataset.clearTo, node.dataset.fallback || null);
+    node.replaceWith(img);
+  }
+}
+
+// Hawkeye pass (Arlong/Usopp 2026-10-25): at the Pavilion a smoke veil (js/beats.js smokeVeil, CSS blobs) hangs over her
+// mask and face until the hero choice; the veil: "whisk" line clears it. One persistent node, re-added on every render
+// so the drift keeps going; gone once cleared or when the save is already past the unmasking.
+// Brook's pavilion/smoke strips are full 320x180 frames aligned to bg/pavilion (her head at x 195-208, y 53-70), so the
+// wrap is the whole scene; without them, the procedural CSS blobs in the small box over her head (fallback only).
+const PAV_VEIL = { spot: "gobbler", ids: "pavilion/smoke", box: [0, 0, 320, 180], fallbackBox: [190, 44, 34, 34] }; // logical px: left, top, w, h
+function pavilionVeil(state, world) {
+  if (state.room !== "pavilion") return;
+  if (!veilLifted(state) && (!ui.pavVeil || ui.pavVeil.cleared)) {
+    const art = !!(artUrl(`${PAV_VEIL.ids}-drift`) && artUrl(`${PAV_VEIL.ids}-clear`));
+    const wrap = el("div", `pav-veil${art ? " pav-veil-art" : ""}`);
+    const pv = { wrap, veil: null, clearing: false, cleared: false, phase: "drift", frame: 0 };
+    ui.pavVeil = pv;
+    // her portrait smoke steps on the stage smoke's own tick (syncSmokePlate)
+    const veil = smokeVeil("thick", { ids: PAV_VEIL.ids, onFrame: (phase, i) => { pv.phase = phase; pv.frame = i; if (phase === "done") pv.cleared = true; if (ui.pavVeil === pv) syncSmokePlate(); } });
+    pv.veil = veil;
+    wrap.append(veil.node);
+    const [x, y, w, h] = art ? PAV_VEIL.box : PAV_VEIL.fallbackBox;
+    wrap.style.left = pct(x, "x"); wrap.style.top = pct(y, "y"); wrap.style.width = pct(w, "x"); wrap.style.height = pct(h, "y");
+  }
+  const v = ui.pavVeil;
+  if (!v || v.cleared || !world.querySelector(`img.cast[data-spot="${PAV_VEIL.spot}"]`)) return;
+  v.wrap.style.zIndex = String(actorZ(110) + 1);
+  world.append(v.wrap);
+}
+
+// One-shot tweens on existing frames (push gags): entry.anim = { <cast spot id | "hero">: "wobble" | "puff" | "recoil" }.
+function playAnim(entry) {
+  if (!entry.anim) return;
+  for (const [who, kind] of Object.entries(entry.anim)) {
+    const node = who === "hero" ? document.querySelector(".world .hero, .world .pose") : document.querySelector(`.world img.cast[data-spot="${who}"]`);
+    if (!node) continue;
+    if (who === "hero") {
+      const other = Object.keys(entry.anim).find((k) => k !== "hero");
+      const o = other && document.querySelector(`.world img.cast[data-spot="${other}"]`);
+      node.style.setProperty("--away", o && o.getBoundingClientRect().left > node.getBoundingClientRect().left ? -1 : 1);
+    }
+    node.classList.remove(`anim-${kind}`);
+    void node.offsetWidth; // restart
+    node.classList.add(`anim-${kind}`);
+  }
 }
 
 // A cued one-shot over the scene (the bell's painted DING!): room.fx[cue] = { art, at: [left, top] }, fades out by CSS.
@@ -103,8 +238,14 @@ function fxNode(state) {
 }
 
 function dispatch(action) {
+  if (ui.cutscene) return;
+  if (ui.pendingAct && ui.pendingAct !== action) cancelPendingAct(); // a new command replaces the walk-then-act
+
+  const before = ui.state;
   const result = act(ui.state, action);
   ui.state = result.state;
+  soundsFor(before, result.state, action, result);
+  if (result.beats && result.beats.length) playBeats(result.beats);
   if (result.lines.length) {
     ui.queue = result.lines;
     ui.index = 0;
@@ -116,7 +257,23 @@ function dispatch(action) {
   render();
 }
 
+// Push C cue wiring: door / hatch / turnstile on a room change, pickup when a pocket fills, the ring toss.
+function soundsFor(before, after, action, result) {
+  if (!before || !after) return;
+  if (after.room !== before.room) {
+    if (before.room === "gate" && after.room === "midway") playCue("turnstile");
+    else if (before.room === "henhouse" || after.room === "henhouse") playCue("hatch");
+    else playCue("door");
+    if (after.room === "fence") setTimeout(() => playCue("hen-cluck"), 500); // the yard hens
+  } else if (action.id === "turnstile" && (action.t === "go" || action.t === "hotspot")) playCue("turnstile");
+  if ((after.inv || []).length > (before.inv || []).length) playCue("pickup");
+  if (action.t === "choice" && before.choice && before.choice.id === "ringtoss") playCue("ring-toss");
+  // Henny looked at / talked to / handed something: she clucks (her thought lines cluck on their own in showLine)
+  if (action.t === "hotspot" && action.id === "henny" && !(result && result.lines || []).some((l) => l.speaker === SPEAKER.henny)) playCue("henny-cluck");
+}
+
 function advance() {
+  if (ui.cutscene) return;
   if (ui.index < ui.queue.length - 1) {
     ui.index += 1;
     showLine(ui.queue[ui.index]);
@@ -125,11 +282,117 @@ function advance() {
   render();
 }
 
+/* ---------- Cutscenes: a scripted beat on existing frames (room.cutscenes[name], see the barn's grub) ----------
+ * Each actor track is keys [t, sprite | [frames], at?, to?, ms?]: from t it shows that frame (frames cycle every
+ * STEP_MS) at `at` (else where it was), moving to `to` over `ms`. props fall/vanish, events pop fx / shake / sound.
+ * Input is locked (a blocker over the page) until it ends; then `end` places the hero and `done` shows the lines. */
+function playCutscene(name, done) {
+  const room = ROOMS[ui.state.room];
+  const cs = room && room.cutscenes && room.cutscenes[name];
+  const world = document.querySelector(".world");
+  if (!cs || !world) { done(); return; }
+  ui.cutscene = name;
+  const block = el("div", "cs-block");
+  document.body.append(block);
+  const castNode = (spot) => [...castNodes].find(([n, c]) => c.spot === spot && n.isConnected);
+  const goatEntry = castNode("goat");
+  const heroNode = world.querySelector(".hero");
+  const actors = {};
+  // Push A: a beat played from wherever he stands, facing `faceTo` (x): "{f}" in a frame name is his facing
+  const f = cs.faceTo !== undefined ? (hero.x > cs.faceTo ? "l" : "r") : hero.face === "l" ? "l" : "r";
+  const heroH = cs.heroH || (room.hero && room.hero.depth ? depthHeight(room.hero, hero.y) : 64);
+  // sizes per actor: the hero by depth (or one fixed size for a beat off the floor, cs.heroH: the glide), Mortgage at h44
+  const size = { hero: (y) => (cs.heroH ? `-h${cs.heroH}` : room.hero.depth ? `-h${depthHeight(room.hero, y)}` : sizeTag(room.hero)), goat: () => (goatEntry ? sizeTag(goatEntry[1]) : "-h44") };
+  for (const who of ["hero", "goat"]) {
+    if (!cs[who]) continue;
+    const real = who === "hero" ? heroNode : goatEntry && goatEntry[0];
+    if (real) real.style.visibility = "hidden";
+    const node = el("img", "cast cs-actor");
+    node.alt = "";
+    world.append(node);
+    const start = who === "hero" ? [hero.x, hero.y] : goatEntry ? goatEntry[1].at : cs[who][0][2];
+    actors[who] = { node, real, keys: cs[who], start };
+  }
+  // the prop's real overlay (already gone from the state, still on screen until the next render) hides under the copy
+  for (const p of cs.props || []) for (const n of world.querySelectorAll(`img.overlay[data-id="${p.art}"]:not(.cs-prop)`)) n.style.visibility = "hidden";
+  const props = (cs.props || []).map((p) => {
+    // at: "hero" = from his raised fist (the sauce toss): just above his head on the side he faces
+    const at = p.at === "hero" ? [hero.x + (f === "l" ? -0.29 : 0.29) * heroH - 3, hero.y - 1.06 * heroH] : p.at;
+    const node = el("img", "overlay cs-prop"); node.alt = ""; node.style.zIndex = 950; placeAt(node, p.art, at);
+    if (p.show) node.style.visibility = "hidden";
+    world.append(node);
+    return { ...p, at, node };
+  });
+  const fired = new Set();
+  const t0 = performance.now();
+  const tint = world.querySelector(".cast") && world.querySelector(".cast").style.filter;
+  const posAt = (a, t) => { // walk the keys up to t, carrying the position
+    let at = a.start, key = a.keys[0];
+    for (const k of a.keys) {
+      if (k[0] > t) break;
+      const from = k[2] || at;
+      if (k[3]) { const u = Math.min(1, (t - k[0]) / (k[4] || 1)); at = [from[0] + (k[3][0] - from[0]) * u, from[1] + (k[3][1] - from[1]) * u]; } else at = from;
+      key = k;
+    }
+    return { at, key };
+  };
+  const tick = () => {
+    if (!world.isConnected) { finish(); return; }
+    const t = performance.now() - t0;
+    for (const [who, a] of Object.entries(actors)) {
+      const { at, key } = posAt(a, t);
+      const frames = (Array.isArray(key[1]) ? key[1] : [key[1]]).map((x) => x.replace("{f}", f));
+      const sprite = frames[Math.floor((t - key[0]) / (frames.length > 1 && who === "goat" && !key[3] ? 220 : STEP_MS)) % frames.length];
+      placeSprite(a.node, `sprite/${sprite}${size[who](at[1])}`, at);
+      a.node.style.zIndex = who === "hero" && cs.heroZ ? cs.heroZ : actorZ(at[1]); // heroZ: up in the air, over the crowd
+      if (tint) a.node.style.filter = tint;
+    }
+    for (const p of props) {
+      if (p.gone !== undefined && t >= p.gone) { p.node.remove(); continue; }
+      if (p.show) p.node.style.visibility = t >= p.show ? "" : "hidden";
+      if (p.arc && t >= p.arc[0]) { // [t0, ms, to, height]: a lob, spinning
+        const u = Math.min(1, (t - p.arc[0]) / p.arc[1]);
+        placeAt(p.node, p.art, [p.at[0] + (p.arc[2][0] - p.at[0]) * u, p.at[1] + (p.arc[2][1] - p.at[1]) * u - 4 * p.arc[3] * u * (1 - u)]);
+        p.node.style.transform = `rotate(${Math.round(u * (f === "l" ? -540 : 540))}deg)`;
+      }
+      if (p.fall && t >= p.fall[0]) {
+        const u = Math.min(1, (t - p.fall[0]) / p.fall[1]);
+        const sway = Math.sin(u * Math.PI * 3) * 4 * (1 - u);
+        placeAt(p.node, p.art, [p.at[0] + (p.fall[2][0] - p.at[0]) * u + sway, p.at[1] + (p.fall[2][1] - p.at[1]) * u * u]);
+        p.node.style.transform = `rotate(${sway * 6}deg)`;
+      }
+    }
+    (cs.events || []).forEach(([te, ev], i) => {
+      if (t < te || fired.has(i)) return;
+      fired.add(i);
+      if (ev.sound) playCue(ev.sound);
+      if (ev.fx) { const n = el("img", "fx-pop"); n.alt = ""; placeAt(n, ev.fx, ev.at); world.append(n); setTimeout(() => n.remove(), FX_MS + 100); }
+      if (ev.shake) { world.classList.remove("shake"); void world.offsetWidth; world.classList.add("shake"); setTimeout(() => world.classList.remove("shake"), ev.shake); }
+    });
+    if (t >= cs.ms) { finish(); return; }
+    requestAnimationFrame(tick);
+  };
+  let over = false;
+  function finish() {
+    if (over) return;
+    over = true;
+    for (const a of Object.values(actors)) { a.node.remove(); if (a.real) a.real.style.visibility = ""; }
+    for (const p of props) p.node.remove();
+    block.remove();
+    if (cs.end && cs.end.hero && room.hero) { hero.x = hero.tx = cs.end.hero[0]; hero.y = hero.ty = cs.end.hero[1]; hero.path = []; hero.walking = false; hero.face = cs.end.face || "front"; }
+    else if (cs.faceTo !== undefined && room.hero) hero.face = f;
+    ui.cutscene = null;
+    done();
+  }
+  requestAnimationFrame(tick);
+}
+
 function roomOf(state) {
   return ROOMS[state.room];
 }
 
 function render() {
+  document.body.classList.toggle("hints", !!ui.hints);
   if (ui.screen === "title") {
     renderTitle();
     return;
@@ -175,7 +438,22 @@ function render() {
   const tint = spriteFilter({ spriteTint: view.spriteTint }); // per-room (or per-plate-state) sprite tint, "" (off) unless set
   // Poses: the legacy [left, top, width] box (crow, gate squat), or a seated sprite { sprite, x, seat, via } whose seat
   // row (manifest `seat`) sits exactly on the rail line `seat`, with a one-beat `via` frame on sitting down and standing up.
-  const poseCfg = state.pose && room.poseAt && room.poseAt[state.pose];
+  let poseCfg = state.pose && room.poseAt && room.poseAt[state.pose];
+  // A seat he isn't at yet (clicked from across the yard): he walks to the foot of the rail first, then sits. No warp.
+  let poseWalk = false;
+  if (poseCfg && !Array.isArray(poseCfg) && room.hero && hero.room === room.id && ui.poseShown !== `${room.id}:${state.pose}`) {
+    const sy = poseCfg.standY || hero.y;
+    if (Math.hypot(hero.x - poseCfg.x, hero.y - sy) > 3 && !(hero.poseTry > 2)) {
+      if (!(hero.walking && hero.poseTarget === state.pose)) {
+        walkTo(room, poseCfg.x, sy);
+        hero.poseTarget = state.pose;
+        hero.poseTry = (hero.poseTry || 0) + 1; // never stuck walking: after a blocked try or two he just sits
+        hero.onArrive = () => { hero.poseTarget = null; render(); };
+      }
+      poseWalk = true;
+      poseCfg = null;
+    } else hero.poseTry = 0;
+  }
   if (!hidePose && poseCfg) {
     const pose = el("img", "pose");
     pose.alt = "";
@@ -187,17 +465,17 @@ function render() {
     } else {
       const fresh = ui.poseShown !== `${room.id}:${state.pose}`;
       // he sits facing the way he came at the rail (approach direction), and keeps that facing until he stands up
-      if (fresh) ui.seatFace = poseCfg.front && hero.room !== room.id ? null : hero.x <= poseCfg.x ? "r" : "l";
+      if (fresh) ui.seatFace = poseCfg.front && hero.room !== room.id ? null : hero.face === "r" || hero.face === "l" ? hero.face : hero.x <= poseCfg.x ? "r" : "l";
       seatSprite(pose, poseCfg, seatFrame(room, poseCfg, fresh ? "hop" : "sit"));
       if (fresh && poseCfg.hop) setTimeout(() => { if (pose.isConnected) seatSprite(pose, poseCfg, seatFrame(room, poseCfg, "sit")); }, POSE_BEAT_MS);
     }
     if (tint) pose.style.filter = tint;
     world.append(pose);
   }
-  const wasSeated = !state.pose && ui.poseShown && ui.poseShown.startsWith(`${room.id}:`) ? ui.poseShown.slice(room.id.length + 1) : null;
+  const wasSeated = !state.pose && !poseWalk && ui.poseShown && ui.poseShown.startsWith(`${room.id}:`) ? ui.poseShown.slice(room.id.length + 1) : null;
   ui.poseShown = state.pose && poseCfg ? `${room.id}:${state.pose}` : null;
 
-  if (room.hero && !hidePose && !state.pose) {
+  if (room.hero && !hidePose && (!state.pose || poseWalk)) {
     heroSync(room);
     const node = el("img", "hero");
     node.alt = "";
@@ -224,14 +502,42 @@ function render() {
   // spoon and stub on the nest shelf). Painted over the plate, under every actor; shown while their when/whenNot hold.
   const fxPop = realPlate && fxNode(state);
   if (fxPop) world.append(fxPop);
+  world.classList.toggle("flashback", !!(lineNow && lineNow.flashback)); // Oct 21 items 15/20
+  // Push C PLACEHOLDER colour shift: dusk blue -> deep night -> hot-oil red at the Pavilion, one driver with the music
+  if (ui.nightShift) {
+    const tint = nightTint(nightOf(state.room, state.night));
+    const wash = el("div", "night-tint");
+    wash.style.backgroundColor = tint;
+    world.append(wash);
+    const nightTag = el("div", "night-tag", "PLACEHOLDER tint");
+    world.append(nightTag);
+  }
+  if (lineNow && lineNow.flashback && lineNow.flashStep >= 1 && lineNow.flashStep <= 5) world.append(flashbackLayer(lineNow.flashStep));
+  // Oct 23 item 31: a new room fades in (never a black flash while its art loads), and its neighbours' plates preload
+  if (ui.shownRoom !== state.room) {
+    if (ui.shownRoom) stage.classList.add("fadein");
+    ui.shownRoom = state.room;
+    preloadNeighbours(room, state);
+  }
+  // Oct 21 item 4: inventory Look holds the item up close in his gloves at the bottom of the screen
+  if (lineNow && lineNow.closeup && !lineNow.big) {
+    const box = el("div", "closeup");
+    const gloves = el("img", "closeup-gloves"); gloves.alt = ""; placeAt(gloves, "fx/closeup-gloves", [70, 103]);
+    const held = el("img", "closeup-item"); held.alt = ""; mount(held, lineNow.closeup);
+    held.style.left = pct(136, "x"); held.style.top = pct(78, "y"); held.style.width = pct(48, "x");
+    box.append(gloves, held);
+    world.append(box);
+  }
   if (room.overlays && realPlate) {
     for (const o of room.overlays) {
       // holdCues: a prop stays on screen while a cued line still plays it out (the bell until Ned has walked over)
       if (!visible(state, o) && !(o.holdCues && lineNow && o.holdCues.includes(lineNow.cue))) continue;
+      if (o.signPart && signParts(state)[o.signPart]) continue; // club sign: dead-tube patch only while that part is dark
       const node = el("img", "overlay");
       node.alt = "";
       node.dataset.id = o.art;
-      placeAt(node, o.art, o.at);
+      placeAt(node, o.art, o.at || (assetInfo(o.art) && assetInfo(o.art).at) || [0, 0]);
+      if (o.z) node.style.zIndex = occluderZ(o.z); // a foreground overlay (the Pavilion crowd): over actors whose feet are above z
       world.append(node);
     }
   }
@@ -244,6 +550,7 @@ function render() {
       const node = el("img", "cast");
       node.alt = "";
       node.dataset.who = c.sprite;
+      if (c.spot) node.dataset.spot = c.spot;
       node.style.zIndex = actorZ(c.at[1]);
       if (tint) node.style.filter = tint;
       castNodes.set(node, c);
@@ -252,25 +559,24 @@ function render() {
     }
   }
 
+  pavilionVeil(state, world);
+
   // Walk-behind: foreground cutouts of this plate (posts, cart, booth, bucket). Appended after the actors so a
   // tie goes to the scenery; see walk.js behind(). Only over real art (cutouts are cut from the pixel plates).
   if (room.occluders && realPlate) {
     for (const o of room.occluders) {
       const id = occluderAsset(view.plate, o.id);
       if (!assetInfo(id)) continue;
-      // A sloped object (the rooftop hatch, seen corner-on) is drawn as vertical slices of the one cutout, each with
-      // the base line of its own column, so he is behind the near corner and in front of the far sides.
-      const parts = o.slices ? o.slices.map(([x0, x1, b]) => ({ x0, x1, base: b })) : [{ base: occluderBase(o, view.plate) }];
-      for (const part of parts) {
-        const node = el("img", "fg");
-        node.alt = "";
-        node.dataset.id = o.id;
-        node.dataset.base = part.base;
-        node.style.zIndex = occluderZ(part.base);
-        if (part.x0 !== undefined) node.style.clipPath = `inset(0 ${((SCENE.w - part.x1) / SCENE.w) * 100}% 0 ${(part.x0 / SCENE.w) * 100}%)`;
-        mount(node, id);
-        world.append(node);
-      }
+      // A sloped object (the rooftop hatch, seen corner-on) has an `edge`: one node, wholly over or under him by his
+      // feet against that edge (edgeZ, re-checked every step in placeHero).
+      const node = el("img", "fg");
+      node.alt = "";
+      node.dataset.id = o.id;
+      node.dataset.base = occluderBase(o, view.plate);
+      node.style.zIndex = o.edge ? edgeZ(o) : occluderZ(occluderBase(o, view.plate));
+      if (o.edge) node.dataset.edge = "1";
+      mount(node, id);
+      world.append(node);
     }
   }
 
@@ -298,40 +604,90 @@ function render() {
       hit.addEventListener("pointerenter", () => setSentence(preview(state, spot)));
       hit.addEventListener("pointerleave", () => setSentence(null));
       hit.addEventListener("click", () => {
+        if (ui.cutscene) return;
+        const now = ui.state;
+        const action = { t: "hotspot", id: spot.id };
+        const lastAct = { spot: spot.id, verb: now.pending ? "item" : now.verb };
+        // Oct 23 item 40: some things he throws from where he stands (the hot sauce into the vat): no walk
+        if (!room.hero || (now.pending && (spot.tossItems || []).includes(now.pending))) {
+          cancelPendingAct();
+          ui.lastAct = lastAct;
+          dispatch(action);
+          return;
+        }
         // beside it, not in it (js/walk.js standFor): the side he comes from, facing the thing; exits keep their point
-        if (room.hero) heroSync(room);
-        const castIds = new Set((room.cast || []).filter((c) => !c.when || state.flags[c.when]).map((c) => c.spot));
-        const avoid = spotsFor(state).filter((s) => castIds.has(s.id) && s.id !== spot.id).map((s) => s.core || s.rect);
-        const st = room.hero ? standFor(room, spot, { walk: heroArea(room), from: [hero.x, hero.y], avoid }) : null;
+        heroSync(room);
+        const castIds = new Set((room.cast || []).filter((c) => !c.when || now.flags[c.when]).map((c) => c.spot));
+        const avoid = spotsFor(now).filter((s) => castIds.has(s.id) && s.id !== spot.id).map((s) => s.core || s.rect);
+        const st = standFor(room, spot, { walk: heroArea(room), from: [hero.x, hero.y], avoid });
         const [sx, sy] = st ? [st.x, st.y] : spot.stand || [spot.rect[0] + spot.rect[2] / 2, spot.rect[1] + spot.rect[3]];
-        walkTo(room, sx, sy, st && st.face);
-        ui.lastAct = { spot: spot.id, verb: state.pending ? "item" : state.verb };
-        dispatch({ t: "hotspot", id: spot.id });
+        // Oct 23 item 35: he reaches his mark first, then the action (and its line and cutscene) plays
+        walkThen(room, sx, sy, st && st.face, action, lastAct);
+      });
+      // Arlong: double-click an edge exit to go straight through, whatever verb is up (no nav words needed)
+      if (spot.exit) hit.addEventListener("dblclick", () => {
+        if (ui.state.mode === "choice" || ui.cutscene) return;
+        dispatch({ t: "go", id: spot.id });
       });
       stage.append(hit);
     }
   }
 
+  // Oct 23 item 30: holding an item (or looking), click Rooster himself
+  // (under the hotspots in the stacking order: where he stands in front of one, the hotspot wins)
+  if (state.mode !== "choice" && !ended && room.hero && !state.pose && state.pending) {
+    const me = el("button", "spot self");
+    me.type = "button";
+    me.dataset.id = "self";
+    me.setAttribute("aria-label", state.pending ? `Use the ${itemOf(state, state.pending).name} on Rooster` : "Look at Rooster");
+    me.addEventListener("pointerenter", () => setSentence(me.getAttribute("aria-label")));
+    me.addEventListener("pointerleave", () => setSentence(null));
+    me.addEventListener("click", () => { if (ui.cutscene) return; cancelPendingAct(); dispatch({ t: "self" }); });
+    placeSelf(me, room);
+    if (world.parentNode === stage) world.after(me); else stage.prepend(me);
+  }
+  // Oct 23 item 29: click anywhere on the floor and he walks there (SCUMM); blocked, he gets as close as he can
+  stage.addEventListener("click", (ev) => {
+    if (ev.target !== stage || ui.cutscene || !room.hero || ui.state.mode === "choice" || ui.state.mode === "end" || ui.state.pose) return;
+    const r = world.getBoundingClientRect(); // the scene box (the stage adds a frame border)
+    if (!r.width) return;
+    cancelPendingAct();
+    walkTo(room, ((ev.clientX - r.left) / r.width) * SCENE.w, ((ev.clientY - r.top) / r.height) * SCENE.h);
+  });
+
   // Talking head sits in the dialogue row under the scene (SCUMM-style), never over the art.
-  const speakerFile = lineNow && lineNow.speaker;
+  // a narration line can carry her plate (the Pavilion whisk line), so her portrait is up while the smoke clears
+  const speakerFile = lineNow && (lineNow.speaker || (lineNow.plate && lineNow.plate.portrait));
   const heroFile = HERO[state.mood] || HERO.talk;
   let face;
   if (speakerFile && !speakerFile.includes("rooster")) {
     const voiceOnly = speakerFile.startsWith("voice:");
     face = el("div", `speaker${voiceOnly ? " voice" : ""}${lineNow.thought ? " thinking" : ""}`);
-    if (!voiceOnly) {
+    // lineNow.plate (js/logic.js plates): her lines before "I'm the Cock Gobbler" read "Hattie" (smoke-hidden portrait
+    // while the smoke is up, the clear portrait the moment it clears), same voice id
+    const plateName = (lineNow.plate && lineNow.plate.name) || NAMES[speakerFile] || "";
+    let plateFace = (lineNow.plate && lineNow.plate.portrait) || speakerFile;
+    const plateFallback = lineNow.plate && lineNow.plate.fallback;
+    if (plateFallback && !artUrl(plateFace)) plateFace = plateFallback;
+    const smoky = !voiceOnly && lineNow.plate && lineNow.plate.smoke && pavVeilUp() && artUrl("portrait/hattie-smoke");
+    if (smoky) {
+      const node = smokePlateNode(plateFace, plateFallback);
+      node.setAttribute("aria-label", plateName || "Speaker");
+      face.append(node);
+    } else if (!voiceOnly) {
       const img = el("img");
-      img.alt = NAMES[speakerFile] || "Speaker";
-      mount(img, speakerFile);
+      img.alt = plateName || "Speaker";
+      mount(img, plateFace, plateFallback || null);
       face.append(img);
     }
-    face.append(el("div", "who", `${NAMES[speakerFile] || ""}${lineNow.thought ? " (thinking)" : ""}`));
+    face.append(el("div", "who", `${plateName}${lineNow.thought ? " (thinking)" : ""}`));
   } else {
     face = el("div", "bust");
     const bustImg = el("img");
     bustImg.alt = "Radioactive Rooster";
     mount(bustImg, heroFile);
     face.append(bustImg);
+    talkFlap(face, lineNow);
   }
 
   if (state.mode === "choice" && state.choice && state.choice.set === "crow") {
@@ -343,7 +699,16 @@ function render() {
     stage.append(gauge);
   }
 
-  if (ended && state.ending && ENDINGS[state.ending]) stage.append(cover(ENDINGS[state.ending]));
+  if (ended && state.ending && ENDINGS[state.ending]) {
+    stage.append(cover(ENDINGS[state.ending]));
+    // optional voice for the comic panels, once per ending shown (audio/in/voice/<id>, same ids as dialogue)
+    if (ui.endVoiced !== state.ending) {
+      ui.endVoiced = state.ending;
+      const panels = (ENDINGS[state.ending].panels || []).map(panelVoice);
+      playVoiceSeq(panels.map((p) => p.id));
+      if (panels.some((p) => p.cluck)) setTimeout(() => playCue("henny-cluck"), 900);
+    }
+  } else ui.endVoiced = null;
 
   cabinet.append(stage);
 
@@ -353,6 +718,12 @@ function render() {
   caption.textContent = lineNow ? (lineNow.rap ? lineNow.text.split(" / ").join("\n") : lineNow.text) : "The night is waiting.";
   if (lineNow && lineNow.thought) caption.classList.add("thought");
   if (lineNow && lineNow.rap) caption.classList.add("rap"); // TODO(audio): start/stop Rocco's boom-bap loop here (sound on hold)
+  // Arlong: make it obvious that clicking the text moves the talk on (Hattie's scene especially)
+  const more = lineNow && ui.queue.length && ui.index < ui.queue.length - 1;
+  if (more) {
+    caption.classList.add("more");
+    caption.append(el("span", "advance", `click to continue \u25BC ${ui.index + 1}/${ui.queue.length}`));
+  }
   caption.addEventListener("click", advance);
   const talkRow = el("div", "talkrow");
   talkRow.append(face, caption);
@@ -410,13 +781,13 @@ function render() {
   cabinet.append(exits);
 
   const pending = el("div", "pending");
-  pending.textContent = state.pending ? `Use the ${ITEMS[state.pending].name} on...` : "";
+  pending.textContent = state.pending ? `Use the ${itemOf(state, state.pending).name} on...` : "";
   cabinet.append(pending);
 
   const inv = el("div", "inv");
   if (!state.inv.length) inv.append(el("div", "empty", "Pockets empty."));
   for (const id of state.inv) {
-    const item = ITEMS[id];
+    const item = itemOf(state, id);
     const chip = el("button", `item${state.pending === id ? " held" : ""}`);
     chip.dataset.id = id;
     chip.type = "button";
@@ -434,14 +805,37 @@ function render() {
 
   if (ui.menu) cabinet.append(menuPanel());
   app.append(cabinet);
+  setTension(nightOf(state.room, state.night));
   playBed(state.room);
+}
+
+// Push C PLACEHOLDER talk animation: while Rooster's own spoken line (a quote in his caption) is fresh, the bust flaps
+// between frame A and frame B (portrait/rooster-talk-b when that file lands; until then a dark mouth wedge). He has no
+// front eyes (canon: he sees through the beak nostrils), so the flap only touches the beak.
+const FLAP_MS = 260;
+function talkFlap(face, lineNow) {
+  if (!lineNow || lineNow.thought || !/["“]/.test(lineNow.text || "")) return;
+  const talkMs = Math.min(4200, Math.max(900, (lineNow.text || "").length * 38));
+  const age = performance.now() - ui.lineAt;
+  if (age >= talkMs) return;
+  face.classList.add("talking");
+  face.style.setProperty("--flaps", String(Math.ceil(talkMs / FLAP_MS)));
+  face.style.setProperty("--flap-delay", `${-Math.round(age)}ms`);
+  const b = artUrl("portrait/rooster-talk-b");
+  if (b) {
+    const img = el("img", "talk-b");
+    img.alt = "";
+    img.src = b;
+    face.append(img);
+  } else face.classList.add("no-b");
+  setTimeout(() => { if (ui.lineAt && performance.now() - ui.lineAt >= talkMs) document.querySelectorAll(".bust.talking").forEach((n) => n.classList.remove("talking")); }, talkMs - age + 20);
 }
 
 // Walking hero sprite for rooms with a `hero` entry. Purely visual: game logic and timing are unchanged.
 // Two-frame walk (side idle / side walk), faces the way he moves, front idle when he enters a room.
 const HERO_SPEED = 70; // logical px per second
 const STEP_MS = 160;
-const hero = { room: null, view: null, x: 0, y: 0, tx: 0, ty: 0, face: "front", walking: false, last: 0, t: 0 };
+const hero = { room: null, view: null, x: 0, y: 0, tx: 0, ty: 0, face: "front", walking: false, last: 0, t: 0, stuck: 0 };
 
 function heroArea(room) {
   return roomView(room, (ui.state && ui.state.flags) || {}).walk;
@@ -454,6 +848,9 @@ function heroSize(room) {
 
 function heroFrame(room) {
   const size = heroSize(room);
+  // room.heroHold: { flag, sprite, size } -> his side frame while he holds something (the Yolk at the finish)
+  const hold = room.heroHold && ui.state && ui.state.flags[room.heroHold.flag];
+  if (hold) return `sprite/${room.heroHold.sprite}-${hero.face === "l" ? "l" : "r"}${room.heroHold.size || size}`;
   if (hero.face === "front") return `sprite/rooster-front${size}`;
   const stride = hero.walking && Math.floor(hero.t / STEP_MS) % 2 === 1;
   return `sprite/rooster-${stride ? "walk" : "side"}-${hero.face}${size}`;
@@ -476,15 +873,18 @@ function heroSync(room) {
     }
     return;
   }
+  // room.hero.from[<previous room>]: where he comes in from that room, and the few steps he walks in (Oct 21 note 5)
+  const entry = room.hero.from && hero.room && room.hero.from[hero.room];
   hero.room = room.id;
   hero.view = view;
-  [hero.x, hero.y] = room.hero.at;
+  [hero.x, hero.y] = entry ? entry.at : room.hero.at;
   const area = heroArea(room);
   if (area) [hero.x, hero.y] = clampToArea(area, hero.x, hero.y);
   hero.tx = hero.x;
   hero.ty = hero.y;
   hero.face = "front";
   hero.walking = false;
+  if (entry && entry.walk) setTimeout(() => { if (hero.room === room.id && !hero.walking && ui.state && ui.state.room === room.id && !ui.state.pose) walkTo(room, ...entry.walk); }, 0);
 }
 
 // A seated pose: the sprite's `seat` row (manifest) lands on the rail line `cfg.seat`, centred on `cfg.x`.
@@ -496,23 +896,59 @@ function seatFrame(room, cfg, kind) {
   if (!ui.seatFace) return `${cfg.front || cfg.sit + "-r"}${size}`; // no hop either: he is simply sitting there
   return `${cfg[kind]}-${ui.seatFace}${size}`;
 }
-function seatSprite(node, cfg, sprite) {
-  const id = `sprite/${sprite}`;
+function seatSprite(node, cfg, sprite, room = ui.state && ROOMS[ui.state.room]) {
+  let id = `sprite/${sprite}`;
+  // never invisible: a frame the manifest doesn't know falls back to the front sit, then to his standing front frame
+  const size = room && room.hero && room.hero.depth ? `-h${depthHeight(room.hero, cfg.standY || room.hero.at[1])}` : "";
+  const chain = [id, cfg.front && `sprite/${cfg.front}${size}`, `sprite/rooster-front${size}`].filter(Boolean);
+  id = chain.find((k) => assetInfo(k)) || id;
   const info = assetInfo(id);
   const [, h] = info ? info.size : [28, 31];
   const seatRow = info && info.seat !== undefined ? info.seat : h;
-  placeSprite(node, id, [cfg.x, cfg.seat + (h - seatRow)]);
+  placeSprite(node, id, [cfg.x, cfg.seat + (h - seatRow)], chain[chain.length - 1]);
   node.style.zIndex = actorZ(cfg.seat);
 }
 
 // Sprites sit on their feet: `at` is the bottom-center point in logical px.
-function placeSprite(node, id, at) {
-  const info = assetInfo(id);
+// Double-buffered frame swaps (Oct 21 note 1: Rooster vanished mid-walk on the roof). Frames lazy-load one at a time
+// (no bulk preload: the rate-limit design), and swapping an <img> src to a frame that isn't loaded yet shows nothing
+// until it arrives. So while a sprite already shows a loaded frame, the next one loads off-screen first; the old frame
+// keeps walking (moved, at its own size) until the new one is ready, then they swap in one step. One request per frame.
+const frameReady = new Set();
+const frameLoading = new Set();
+function placeSprite(node, id, at, fallback = null) {
+  node._want = [id, at, fallback];
+  let showId = id;
+  const shown = node.dataset.file;
+  if (shown && shown !== id && node.complete && node.naturalWidth > 0) {
+    const url = urlOf(id);
+    if (!frameReady.has(url)) {
+      showId = shown;
+      if (!frameLoading.has(url)) {
+        frameLoading.add(url);
+        const pre = new Image();
+        const done = () => {
+          frameLoading.delete(url);
+          frameReady.add(url); // loaded, or failed: mount's fallback chain takes it from here
+          if (node.isConnected && node._want) placeSprite(node, ...node._want);
+        };
+        pre.onload = () => (pre.decode ? pre.decode().catch(() => {}).then(done) : done());
+        pre.onerror = done;
+        pre.src = url;
+      } else {
+        // another node is loading this frame; re-check shortly
+        setTimeout(() => { if (node.isConnected && node._want && node._want[0] === id) placeSprite(node, ...node._want); }, 50);
+      }
+    }
+  } else if (shown !== id) {
+    frameReady.add(urlOf(id));
+  }
+  const info = assetInfo(showId);
   const [w, h] = info ? info.size : [48, 64];
   node.style.left = pct(at[0] - w / 2, "x");
   node.style.top = pct(at[1] - h, "y");
   node.style.width = pct(w, "x");
-  if (node.dataset.file !== id) mount(node, id);
+  if (node.dataset.file !== showId) mount(node, showId, showId === id ? fallback : null);
 }
 
 // Overlays and title cutouts: `at` is the top-left point in logical px, size from the manifest.
@@ -550,8 +986,76 @@ setInterval(() => {
 }, 80);
 
 function placeHero(node, room) {
-  placeSprite(node, heroFrame(room), [hero.x, hero.y]);
+  placeSprite(node, heroFrame(room), [hero.x, hero.y], `sprite/rooster-front${heroSize(room)}`);
   node.style.zIndex = actorZ(hero.y);
+  const me = document.querySelector(".stage .spot.self");
+  if (me) placeSelf(me, room);
+  // edge occluders (the hatch) follow him: just over him while he's behind, just under him while he's in front
+  for (const fg of document.querySelectorAll('.world img.fg[data-edge="1"]')) {
+    const o = (room.occluders || []).find((x) => x.id === fg.dataset.id);
+    if (o) fg.style.zIndex = edgeZ(o);
+  }
+}
+
+function edgeZ(o) {
+  return behindOccluder(o, hero.x, hero.y) ? actorZ(hero.y) + 1 : actorZ(hero.y) - 1;
+}
+
+/* ---------- Push A (Oct 24): walk first, then act; flashback layer; neighbour preload ---------- */
+function cancelPendingAct() {
+  ui.pendingAct = null;
+  ui.actToken = (ui.actToken || 0) + 1;
+  hero.onArrive = null;
+}
+
+function walkThen(room, x, y, face, action, lastAct) {
+  cancelPendingAct();
+  const token = ui.actToken;
+  ui.pendingAct = action;
+  const go = () => {
+    if (ui.actToken !== token || ui.pendingAct !== action) return;
+    ui.pendingAct = null;
+    ui.lastAct = lastAct;
+    dispatch(action);
+  };
+  hero.onArrive = go;
+  walkTo(room, x, y, face);
+  if (!hero.walking) { hero.onArrive = null; go(); } // already on his mark
+}
+
+function placeSelf(node, room) {
+  const h = room.hero.depth ? depthHeight(room.hero, hero.y) : room.hero.height || 64;
+  place(node, [hero.x - 0.3 * h, hero.y - h, 0.6 * h, h]);
+}
+
+// Oct 23 item 41: the stunt-night beats play on the Pavilion as it was (bg/pavilion-aged), the crowd gathering a row
+// at a time, and in it, from the stunt night on, the silhouette of the man who rigged it (the mayor's muscle).
+const FLASH_CROWD = [0, 168, 158, 148, 140, 136];
+function flashbackLayer(step) {
+  const layer = el("div", "flash-past");
+  const bg = el("img", "flash-bg"); bg.alt = ""; mount(bg, "bg/pavilion-aged");
+  const sil = el("img", "flash-sil"); sil.alt = "";
+  placeSprite(sil, "sprite/stogie-sil-arms-r-h64", [262, 170]);
+  sil.style.opacity = step >= 3 ? "1" : step === 2 ? "0.55" : "0";
+  const crowd = el("img", "flash-crowd"); crowd.alt = ""; placeAt(crowd, "fg/pavilion--crowd", [0, FLASH_CROWD[step]]);
+  layer.append(bg, sil, crowd);
+  return layer;
+}
+
+const preloaded = new Set();
+function preloadNeighbours(room, state) {
+  const ids = new Set();
+  for (const sp of room.spots || []) if (sp.exit && sp.go && sp.go.room) ids.add(sp.go.room);
+  if (room.id === "midway") ids.add("pavilion");
+  if (room.id === "pavilion") ids.add("midway");
+  for (const id of ids) {
+    if (!ROOMS[id]) continue;
+    const url = urlOf(roomView(ROOMS[id], state.flags).plate);
+    if (!url || preloaded.has(url)) continue;
+    preloaded.add(url);
+    const img = new Image();
+    img.src = url;
+  }
 }
 
 function walkTo(room, x, y, faceOnArrive = null) {
@@ -600,15 +1104,22 @@ function heroTick(now) {
   [hero.x, hero.y] = area ? stepToward(area, before, [hero.tx, hero.ty], stepPx) : [hero.tx, hero.ty];
   const left = Math.hypot(hero.tx - hero.x, hero.ty - hero.y);
   const moved = Math.hypot(hero.x - before[0], hero.y - before[1]);
+  if (moved >= stepPx * 0.05) hero.stuck = 0;
   if (left < 0.5 && hero.path && hero.path.length) {
     [hero.tx, hero.ty] = hero.path.shift(); // next leg of the route
     if (Math.abs(hero.tx - hero.x) >= 1) hero.face = hero.tx > hero.x ? "r" : "l";
-  } else if (left < 0.5 || (dt > 0 && moved < stepPx * 0.05)) {
-    hero.walking = false; // arrived, or slid into an edge
+  } else if (left < 0.5 || (dt > 0 && moved < stepPx * 0.05 && ++hero.stuck >= 3)) {
+    // arrived, or really stuck against an edge (three ticks in a row: one slow frame, e.g. a tab hiccup, isn't a wall)
+    hero.walking = false;
+    hero.stuck = 0;
     if (hero.faceOnArrive) hero.face = hero.faceOnArrive;
+    if (hero.onArrive) { const f = hero.onArrive; hero.onArrive = null; setTimeout(f, 0); }
   }
   const node = document.querySelector(".hero");
   if (node) placeHero(node, room);
+  // Push C: a footstep every other walk frame while he moves
+  hero.stepClock = (hero.stepClock || 0) + dt;
+  if (hero.walking && hero.stepClock >= 2 * STEP_MS) { hero.stepClock = 0; playCue("footstep"); }
   if (hero.walking) requestAnimationFrame(heroTick);
 }
 
@@ -657,7 +1168,7 @@ function vat(rect, state) {
     b.style.left = `${(i * 37) % 84 + 6}%`;
     b.style.bottom = `${8 + ((i * 29) % 50)}%`;
     b.style.animationDelay = `${((i * 0.37) % 1.6).toFixed(2)}s`;
-    b.style.setProperty("--sz", `${9 + ((i * 7) % 10)}px`);
+    b.style.setProperty("--sz", `${9 + ((i * 7) % 10)}`); // unitless: css scales it to the vat (cqw)
     b.style.setProperty("--rise", `${14 + ((i * 13) % 26)}px`);
     node.append(b);
   }
@@ -665,8 +1176,10 @@ function vat(rect, state) {
   return node;
 }
 
-// Comic-cover ending screen (code-drawn; art ids bg/ending-* later).
+// Comic-cover ending screen. end.splash: the Silver Age cover (comicCover); else the code-drawn cover.
 function cover(end) {
+  if (end.final) return finalCover(end);
+  if (end.splash) return comicCover(end);
   const wrap = el("div", `cover tone-${end.tone}`);
   const page = el("div", "cover-page");
   page.append(el("div", "cover-series", end.series));
@@ -688,6 +1201,64 @@ function cover(end) {
       panel.append(el("div", "panel-who", `${p.say}, out loud. He can hear her.`), el("div", "bubble speech", p.text));
       strip.append(panel);
     }
+  }
+  page.append(strip);
+  if (!end.retry) page.append(el("div", "cover-click", "*click.*"));
+  wrap.append(page);
+  return wrap;
+}
+
+// The approved painted cover as the whole final page, letterboxed to the stage; nothing code-drawn on top.
+function finalCover(end) {
+  const wrap = el("div", `cover final tone-${end.tone}`);
+  const img = el("img", "cover-final");
+  img.src = end.final;
+  img.alt = `${end.series}: ${end.title} ${end.art}`;
+  wrap.append(img);
+  if (!end.retry) wrap.append(el("div", "cover-click", "*click.*"));
+  return wrap;
+}
+
+// Silver Age cover (Arlong 2026-10-19): series banner + price/issue corner box, the splash with the issue title and a
+// blurb burst over it, then a strip of inset panels: painted art (or Ben-Day dots), a yellow narration caption, a
+// speech or thought bubble, and an editor's note when Henny speaks out loud.
+function comicCover(end) {
+  const wrap = el("div", `cover comic tone-${end.tone}`);
+  const page = el("div", "cover-page comic");
+  const top = el("div", "cc-banner");
+  const corner = el("div", "cc-corner");
+  corner.append(el("div", "cc-price", "10¢"), el("div", "cc-issue", "No. 1"));
+  top.append(corner, el("div", "cc-series", end.series));
+  page.append(top);
+  const splash = el("div", "cc-splash");
+  const img = el("img", "cc-splash-art");
+  img.alt = end.art;
+  mount(img, end.splash);
+  splash.append(img, el("div", "cc-title", end.title), el("div", "cc-burst", end.blurb));
+  if (end.credit) splash.append(el("div", "cc-credit", end.credit));
+  page.append(splash);
+  const strip = el("div", "cc-panels");
+  for (const raw of end.panels) {
+    const p = typeof raw === "string" ? { text: raw } : raw;
+    const panel = el("div", `cc-panel${p.art ? "" : " dots"}`);
+    if (p.art) {
+      const art = el("img", "cc-panel-art");
+      art.alt = "";
+      mount(art, p.art);
+      panel.append(art);
+    }
+    if (p.say || p.thought) {
+      const who = p.say || p.thought;
+      panel.append(el("div", `cc-bubble ${p.thought ? "thought" : "speech"} noted`, p.text));
+      panel.append(el("div", "cc-note", p.say ? `*${who}, out loud. He can hear her now! -Ed.` : `*${who}, thinking. -Ed.`));
+    } else {
+      // a quote in the narration is spoken: it goes in a bubble, the rest stays in the caption
+      const m = p.text.match(/"([^"]+)"/);
+      const caption = m ? p.text.replace(m[0], "").replace(/\s{2,}/g, " ").replace(/\s+([.,:;!?])/g, "$1").trim() : p.text;
+      if (caption) panel.append(el("div", "cc-caption", caption));
+      if (m) panel.append(el("div", "cc-bubble speech", m[1]));
+    }
+    strip.append(panel);
   }
   page.append(strip);
   if (!end.retry) page.append(el("div", "cover-click", "*click.*"));
@@ -717,18 +1288,36 @@ function menuPanel() {
     }));
     row.append(button("Load", "", () => {
       if (!slot) return;
-      ui.state = slot.data;
+      ui.state = seedNight(slot.data);
       ui.queue = [];
       ui.menu = false;
       render();
     }));
     panel.append(row);
   });
+  panel.append(button(ui.hints ? "Hints: on (hover highlights)" : "Hints: off", "", () => {
+    ui.hints = !ui.hints;
+    try { localStorage.setItem("rr-hints", ui.hints ? "1" : "0"); } catch { /* private mode */ }
+    if (ui.hints) playCue("crow");
+    render();
+  }));
   panel.append(button(ui.spots ? "Hide hotspots" : "Show hotspots", "", () => {
     ui.spots = !ui.spots;
     render();
   }));
   panel.append(artToggle());
+  panel.append(soundPanel());
+  panel.append(el("h2", "", "Placeholder beats"));
+  panel.append(button(ui.coldOpen ? "Cold open: on" : "Cold open: off", "", () => {
+    ui.coldOpen = !ui.coldOpen;
+    try { localStorage.setItem("rr-coldopen", ui.coldOpen ? "1" : "0"); } catch { /* private mode */ }
+    render();
+  }));
+  panel.append(button(ui.nightShift ? "Night colour shift: on" : "Night colour shift: off", "", () => {
+    ui.nightShift = !ui.nightShift;
+    try { localStorage.setItem("rr-nightshift", ui.nightShift ? "1" : "0"); } catch { /* private mode */ }
+    render();
+  }));
   panel.append(button("Title screen", "", () => {
     ui.screen = "title";
     ui.menu = false;
@@ -736,6 +1325,33 @@ function menuPanel() {
     render();
   }));
   return panel;
+}
+
+// Sound settings (Push C): music / effects / voice volume and mute, kept per device (localStorage rr-audio).
+function soundPanel() {
+  const box = el("div", "sound");
+  box.append(el("h2", "", "Sound"));
+  const st = audioSettings();
+  for (const [key, label] of [["music", "Music"], ["sfx", "Effects"], ["voice", "Voice"]]) {
+    const row = el("label", "slider");
+    row.append(el("span", "", label));
+    const input = el("input");
+    input.type = "range";
+    input.min = "0";
+    input.max = "100";
+    input.value = String(Math.round(st[key] * 100));
+    input.dataset.audio = key;
+    input.setAttribute("aria-label", `${label} volume`);
+    input.addEventListener("input", () => setAudio({ [key]: Number(input.value) / 100 }));
+    input.addEventListener("change", () => { if (key === "sfx") playCue("blip"); });
+    row.append(input);
+    box.append(row);
+  }
+  box.append(button(st.muted ? "Sound: muted" : "Sound: on", "", () => {
+    setAudio({ muted: !audioSettings().muted });
+    render();
+  }));
+  return box;
 }
 
 function renderTitle() {
@@ -769,7 +1385,7 @@ function renderTitle() {
   if (slots.length) {
     row.append(button("Continue", "", () => {
       const latest = slots.slice().sort((a, b) => (a.at < b.at ? 1 : -1))[0];
-      ui.state = latest.data;
+      ui.state = seedNight(latest.data);
       ui.screen = "play";
       ui.queue = [];
       render();
@@ -790,7 +1406,21 @@ function startGame() {
   ui.screen = "play";
   ui.queue = [];
   ui.menu = false;
+  resumeAudio();
+  playCue("title-sting");
   render();
+  // Push C PLACEHOLDER opening: the cold open (behind its flag), then SIX HOURS TO MIDNIGHT
+  playBeats([...(ui.coldOpen ? [{ kind: "coldopen" }] : []), ...startBeats(ui.state)]);
+}
+
+// Saves from before Push C have no night clock: seed it, and count the cards for rooms already behind him as shown.
+function seedNight(state) {
+  if (!state) return state;
+  if (!Array.isArray(state.cards)) {
+    state.night = nightOf(state.room, state.night);
+    state.cards = TIME_CARDS.filter((c) => c.on === "start" || (c.on.room && nightOf(c.on.room) <= state.night)).map((c) => c.id);
+  }
+  return state;
 }
 
 function atChoice() {
@@ -799,7 +1429,7 @@ function atChoice() {
 
 function sentenceIdle(state) {
   if (state.mode === "choice" || state.mode === "end") return "";
-  if (state.pending && ITEMS[state.pending]) return `Use the ${ITEMS[state.pending].name} on...`;
+  if (state.pending && ITEMS[state.pending]) return `Use the ${itemOf(state, state.pending).name} on...`;
   const verb = VERBS.find(([id]) => id === state.verb);
   return verb ? verb[1] : "";
 }
@@ -872,7 +1502,13 @@ window.__RR = {
   },
   start: startGame,
   hero: () => ({ ...hero }),
+  // walkthrough drain: a hotspot click walks first, so the action is still pending (or a cutscene is playing)
+  get busy() {
+    return !!(ui.pendingAct || ui.cutscene || beatActive());
+  },
   walkTo: (x, y) => walkTo(ui.state && ROOMS[ui.state.room], x, y),
+  beats: (list) => playBeats(list), // preview a beat: __RR.beats([{ kind: "club" }])
+  audio: () => audioState(),
   act: dispatch,
   advance,
   setArtMode,
@@ -886,5 +1522,12 @@ window.__RR = {
 
 // Live art switch: re-render the current view only. Game state, captions and held items are untouched.
 onArtChange(() => render());
+// a beat that ends hands the voice of the line it covered back, so a line never talks over a time card
+onBeatsDone(() => {
+  if (ui.voiceAfterBeat) { const id = ui.voiceAfterBeat; ui.voiceAfterBeat = null; playVoice(id); }
+});
+// first gesture unlocks WebAudio (autoplay rules)
+window.addEventListener("pointerdown", () => resumeAudio(), { once: true, capture: true });
 renderTitle();
 initArt();
+initAudio();
