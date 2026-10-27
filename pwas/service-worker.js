@@ -2,13 +2,13 @@
 // Games with their own sw.js (moon-axis/, phish-desk/, ...) register a narrower
 // scope, so they are controlled by their own worker, not this one.
 // VERSION is set by scripts/bump-sw.sh (content hash of shared files); run it before every push.
-const VERSION = '20261023-616f1a2e01';
+const VERSION = '20261027-5d12d8bbe7';
 const PREFIX = 'pwas-shared-';
 const CACHE = PREFIX + VERSION;
 const CORE_CACHE = 'pwas-ffmpeg-core-0.12.10';
 const PRECACHE = [
   './', './index.html', './inkblob.css', './sw-register.js', './manifest.webmanifest',
-  './fonts/LilitaOne-Regular.woff2', './boxart/moon-axis-cover.webp', './boxart/moon-axis-unleashed-cover.webp', './boxart/lamprey-cover.webp', './boxart/rooster-timer-cover.webp', './boxart/radioactive-rooster-cover.webp', './fonts/OFL.txt',
+  './fonts/LilitaOne-Regular.woff2', './boxart/moon-axis-cover.webp', './boxart/moon-axis-unleashed-cover.webp', './boxart/lamprey-cover.webp', './boxart/rooster-timer-cover.webp', './boxart/radioactive-rooster-cover.webp', './boxart/yolk-box-cover.webp', './fonts/OFL.txt',
   './games/shelf.css', './brand/superdoop-arcade.svg',
   './TimeTracker.html', './time-manifest.json', './time/app.js', './time/egg.js', './time/rooster.js', './time/time.css',
   './time/icon-192.png', './time/icon-512.png', './time/rooster-sprites.png',
@@ -16,10 +16,10 @@ const PRECACHE = [
   './video-toolbox/icon-192.png', './video-toolbox/icon-512.png', './video-toolbox/LilitaOne-Regular.ttf',
   './video-toolbox/vendor/ffmpeg/index.js', './video-toolbox/vendor/ffmpeg/classes.js', './video-toolbox/vendor/ffmpeg/const.js',
   './video-toolbox/vendor/ffmpeg/errors.js', './video-toolbox/vendor/ffmpeg/types.js', './video-toolbox/vendor/ffmpeg/utils.js', './video-toolbox/vendor/ffmpeg/worker.js',
-  './games/choplifter.html', './games/dazed-map.html', './games/moon-axis-unleashed.html', './games/moon-axis.html', './games/night-lark.html', './games/radioactive-rooster.html', './boxart/radioactive-rooster.svg', './games/phish-desk.html', './games/stick-shift.html', './games/time-tracker.html', './games/video-toolbox.html', './archive/', './archive/archive.json', './archive/archive.css', './archive/thumbs/x-pulse.webp', './archive/thumbs/video-downloader.webp', './boxart/rooster-timer.svg', './boxart/video-toolbox.svg'
+  './games/choplifter.html', './games/dazed-map.html', './games/moon-axis-unleashed.html', './games/moon-axis.html', './games/night-lark.html', './games/radioactive-rooster.html', './boxart/radioactive-rooster.svg', './games/phish-desk.html', './games/stick-shift.html', './games/time-tracker.html', './games/video-toolbox.html', './games/yolk-box.html', './archive/', './archive/archive.json', './archive/archive.css', './archive/thumbs/x-pulse.webp', './archive/thumbs/video-downloader.webp', './boxart/rooster-timer.svg', './boxart/video-toolbox.svg'
 ];
 // Folders that own their own service worker: never touch their requests.
-const OWN_SW = ['/moon-axis/', '/moon-axis-beta/', '/phish-desk-beta/', '/moon-axis-unleashed/', '/phish-desk/', '/choplifter/', '/night-lark/', '/stick-shift/', '/dazed-map/', '/radioactive-rooster/', '/radioactive-rooster-beta/'];
+const OWN_SW = ['/moon-axis/', '/moon-axis-beta/', '/phish-desk-beta/', '/moon-axis-unleashed/', '/phish-desk/', '/choplifter/', '/night-lark/', '/stick-shift/', '/dazed-map/', '/radioactive-rooster/', '/radioactive-rooster-beta/', '/yolk-box/'];
 
 self.addEventListener('install', (e) => {
   // Precache individually so one missing file doesn't abort the install.

@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; worker-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0b1026">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Yolk Box">
+<title>Midnight's Yolk Box</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="brand">
+      <img class="logo" src="icons/icon-64.png" alt="" width="40" height="40">
+      <div class="titles">
+        <h1>Midnight's Yolk Box</h1>
+        <div class="sub">Radioactive Rooster groovebox</div>
+      </div>
+      <div class="dancerbox">
+        <button id="dancer" class="dancer" aria-label="Dancing metronome. Tap to enlarge" aria-expanded="false" aria-controls="dancerPop"><canvas id="dancerCv" width="36" height="40" data-scale="1"></canvas></button>
+        <button id="dancerSw" class="dsw" aria-label="Next dancer" title="Switch dancer">&#8635;</button>
+        <div id="dancerPop" class="dpop" role="group" aria-label="Dancing metronome" hidden>
+          <canvas id="dancerBig" width="144" height="160" data-scale="4"></canvas>
+          <div class="drow">
+            <button id="dancerPrev" class="btn sm" aria-label="Previous dancer">&#9664;</button>
+            <span id="dancerName" class="dname">Radioactive Rooster</span>
+            <button id="dancerNext" class="btn sm" aria-label="Next dancer">&#9654;</button>
+          </div>
+          <div class="drow">
+            <button id="dancerClick" class="btn sm" aria-pressed="false" title="Audible metronome click. Never recorded or exported.">CLICK OFF</button>
+            <button id="dancerClose" class="btn sm" aria-label="Close">&#10005;</button>
+          </div>
+          <div class="dhint">Dances on the beat. The click is never recorded or exported.</div>
+        </div>
+      </div>
+    </div>
+    <div class="pattern">
+      <select id="projSel" aria-label="Song" title="Your songs. Each song has its own workspace and timeline; the brick shelf is shared."></select>
+      <button id="undoBtn" class="btn sm" aria-label="Undo" title="Undo (Ctrl+Z)">&#8630;</button>
+      <button id="redoBtn" class="btn sm" aria-label="Redo" title="Redo (Ctrl+Shift+Z)">&#8631;</button>
+      <button id="filesBtn" class="btn sm" title="Song files: rename, save or load JSON">Files</button>
+      <button id="helpBtn" class="btn sm" aria-label="Show the quick tour" title="Show the quick tour again">?</button>
+    </div>
+  </header>
+
+  <section class="transport" aria-label="Transport">
+    <button id="play" class="btn big play" aria-label="Play">&#9654;</button>
+    <div class="bpm">
+      <button id="bpmDn" class="btn sm" aria-label="Tempo down">&minus;</button>
+      <div id="bpmVal" class="lcd" title="Drag up/down to change tempo">120</div>
+      <button id="bpmUp" class="btn sm" aria-label="Tempo up">+</button>
+      <span class="lbl">BPM</span>
+      <button id="tapBtn" class="btn sm" title="Tap this on the beat a few times to set the tempo">Tap</button>
+    </div>
+    <div id="swingKnob"></div>
+    <div class="beats" title="The beat: 1 2 3 4. The big one is the start of each bar.">
+      <div id="beatLeds"><i></i><i></i><i></i><i></i></div><div id="barNum" class="barnum">BAR -</div>
+    </div>
+    <button id="clickBtn" class="btn sm" title="Metronome click (never recorded)">Click</button>
+    <button id="timingBtn" class="btn sm" title="Timing help: snap to grid, count-in, click volume"><span id="qLbl">Q 1/16</span></button>
+    <button id="rec" class="btn big rec" aria-label="Record"><span class="dot"></span></button>
+    <div id="recTime" class="lcd small">0:00</div>
+    <button id="exportBtn" class="btn">Export</button>
+  </section>
+
+  <section class="wsbar" aria-label="Workspace">
+    <span class="wslbl" title="The workspace is where you edit. It is always unlocked. Save it as a brick to keep it.">WORKSPACE</span>
+    <span id="wsFrom" class="wsfrom">new</span><span id="wsLen" class="wsfrom"></span>
+    <label class="klbl" title="Song key: the pad and the bass both follow it">Key <select id="songKey"></select><select id="songScale" aria-label="Scale"></select></label>
+    <select id="startSel" aria-label="Start from" title="Replace the workspace with a starting point"></select>
+    <button id="wsTrim" class="btn sm" title="Trim: pick exactly which bars to keep">Trim</button>
+    <button id="wsSave" class="btn sm on save" title="Save the workspace as a locked brick on the shelf">Save as brick</button>
+  </section>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-screen="0" data-short="Drums" role="tab" data-name="drums">PAH-KAW B0B<span> Drums</span></button>
+    <button class="tab" data-screen="1" data-short="Bass" role="tab" data-name="bass">YOLK E0E<span> Bass</span></button>
+    <button class="tab" data-screen="2" data-short="Pad" role="tab" data-name="pad">KHAOTIC KOCK<span> Pad</span></button>
+    <button class="tab" data-screen="3" data-short="Mix" role="tab">Coop<span> Mixer</span></button>
+    <button class="tab song" data-screen="4" data-short="Song" role="tab">Bricks<span> &amp; Song</span></button>
+  </nav>
+
+  <main class="viewport" id="viewport">
+    <button class="arrow left" id="prevScr" aria-label="Previous machine">&#9664;</button>
+    <div class="track" id="track">
+      <section class="screen machine drums" id="scrDrums">
+        <div class="plate"><span class="badge" data-name="drums">PAH-KAW B0B</span><span class="desc">Rhythm Coop</span><span id="drumLed" class="led"></span><span class="mtools"><button class="btn sm ms" data-ms="drums:m" title="Mute this machine">M</button><button class="btn sm ms solo" data-ms="drums:s" title="Solo: hear only this machine">S</button><button class="btn sm" data-surprise="drums" title="Surprise me: make a new idea in the song key (undo brings the old one back)">Surprise</button><select class="fromBrick" data-m="drums" aria-label="Load this machine from a brick" title="Mix and match: take just this machine from a saved brick"></select></span></div>
+        <div class="knobrow" id="drumKnobs"></div>
+        <div class="half-toggle"><button class="btn sm on" data-half="0">Steps 1&ndash;8</button><button class="btn sm" data-half="1">9&ndash;16</button>
+          <button class="btn sm clear" id="drumClear">Clear</button></div>
+        <div class="grid" id="drumGrid"></div>
+      </section>
+      <section class="screen machine bass" id="scrBass">
+        <div class="plate"><span class="badge" data-name="bass">YOLK E0E</span><span class="desc">Bass Hatchery</span><span id="bassLed" class="led"></span><span class="mtools"><button class="btn sm ms" data-ms="bass:m" title="Mute this machine">M</button><button class="btn sm ms solo" data-ms="bass:s" title="Solo: hear only this machine">S</button><button class="btn sm" data-surprise="bass" title="Surprise me: make a new idea in the song key (undo brings the old one back)">Surprise</button><select class="fromBrick" data-m="bass" aria-label="Load this machine from a brick" title="Mix and match: take just this machine from a saved brick"></select></span></div>
+        <div class="knobrow" id="bassKnobs"></div>
+        <div class="half-toggle"><button class="btn sm on" data-half="0">Steps 1&ndash;8</button><button class="btn sm" data-half="1">9&ndash;16</button>
+          <button class="btn sm clear" id="bassClear">Clear</button></div>
+        <div class="grid bassgrid" id="bassGrid"></div>
+        <div class="keyhead"><span class="klbl">Notes</span><button class="btn sm" id="inKeyBtn" title="Only show notes in the song key, so everything fits together">In key only</button></div>
+        <div class="keys" id="keys"></div>
+      </section>
+      <section class="screen machine kk" id="scrKK">
+        <div class="plate"><span class="badge" data-name="pad">KHAOTIC KOCK</span><span class="desc">Scramble Pad</span><span id="kkLed" class="led"></span><span class="mtools"><button class="btn sm ms" data-ms="kk:m" title="Mute this machine">M</button><button class="btn sm ms solo" data-ms="kk:s" title="Solo: hear only this machine">S</button><button class="btn sm" data-surprise="kk" title="Surprise me: make a new idea in the song key (undo brings the old one back)">Surprise</button><select class="fromBrick" data-m="kk" aria-label="Load this machine from a brick" title="Mix and match: take just this machine from a saved brick"></select></span></div>
+        <div class="kkwrap">
+          <div class="kktop">
+            <select id="kkPreset" aria-label="KHAOTIC KOCK sound"></select>
+            <button class="btn sm" id="kkArp" aria-pressed="false" title="Arpeggiate the held note (needs a gate)">Arp</button>
+            <button class="btn sm" id="kkHold" aria-pressed="false" title="Latch: keep sounding after you lift">Hold</button>
+          </div>
+          <div class="padbox">
+            <canvas id="kkPad" aria-label="XY pad: X picks the note, Y shapes the sound" role="application"></canvas>
+            <div class="padinfo"><span id="kkNote">touch the pad</span><span id="kkYLbl"></span></div>
+          </div>
+          <div class="kkloop">
+            <span class="klbl">Loop</span>
+            <span class="seg" id="kkBars"><button class="btn sm" data-v="1">1</button><button class="btn sm" data-v="2">2</button><button class="btn sm" data-v="4">4</button><button class="btn sm" data-v="8">8</button></span><span class="klbl">bars</span>
+            <button class="btn sm loopRec" id="kkRec" title="Record a layer; starts on the next bar (or the top of the loop when overdubbing)"><span class="dot"></span> Rec</button>
+            <button class="btn sm" id="kkUndo" title="Remove the last layer">Undo</button>
+            <button class="btn sm" id="kkClear" title="Clear all layers">Clear</button>
+            <div id="kkLayers" class="lcd small" title="Loop layers">0 lyr</div>
+            <div class="loopbar"><div id="kkProg"></div></div>
+          </div>
+          <div class="kkset">
+            <label class="klbl">Key <select id="kkKey"></select></label>
+            <label class="klbl">Scale <select id="kkScale"></select></label>
+            <span class="klbl">Octaves</span><span class="seg" id="kkRange"><button class="btn sm" data-v="1">1</button><button class="btn sm" data-v="2">2</button><button class="btn sm" data-v="3">3</button><button class="btn sm" data-v="4">4</button></span>
+            <span class="klbl">Oct</span><button class="btn sm" id="kkOctDn" aria-label="Octave down">&minus;</button><span id="kkOct" class="lcd small">4</span><button class="btn sm" id="kkOctUp" aria-label="Octave up">+</button>
+            <label class="klbl">Gate <select id="kkGate"></select></label>
+            <div id="kkEcho"></div>
+          </div>
+        </div>
+      </section>
+      <section class="screen machine mixer" id="scrMix">
+        <div class="plate"><span class="badge">COOP MIXER</span><span class="desc">Master Roost</span></div>
+        <div class="knobrow" id="mixKnobs"></div>
+        <div class="meter"><div id="meterL"></div><div id="meterR"></div></div>
+        <div class="voicelevels" id="voiceLevels"></div>
+        <p class="hint">Knobs: drag up/down. Double-tap a knob to reset it. Swipe sideways (or use the tabs) to switch machines.</p>
+        <p class="hint credit">MP3 export uses <a href="vendor/lame.LICENSE.txt" target="_blank" rel="noopener">lamejs 1.2.1</a> (<a href="vendor/LICENSE-LGPL-3.0.txt" target="_blank" rel="noopener">LGPL-3.0</a>), unmodified. &copy; 2026 Michael Azzato. All rights reserved.</p>
+      </section>
+      <section class="screen song" id="scrSong">
+        <div class="plate"><span class="badge">BRICK SHELF</span><span class="desc">Saved bricks are locked. Tap &#9654; to hear one, + to add it to the song.</span></div>
+        <div class="shelf" id="shelf"></div>
+        <div class="plate"><span class="badge">SONG</span><span class="desc" id="songInfo"></span>
+          <span class="mtools"><button class="btn sm" id="songPlay" title="Play the song from the start">&#9654; Song</button><button class="btn sm" id="zoomOut" aria-label="Zoom out">&minus;</button><button class="btn sm" id="zoomIn" aria-label="Zoom in">+</button>
+          <button class="btn sm" id="songMp3b" title="Export the whole song as MP3">MP3</button><button class="btn sm" id="songWavb" title="Export the whole song as WAV">WAV</button></span></div>
+        <div class="timeline" id="timeline"><div class="ruler" id="ruler"></div><div class="lane" id="lane"></div><div class="tlhead" id="tlHead"></div></div>
+        <div class="cliptools" id="clipTools"></div>
+        <p class="hint">Tap a clip to select it. Long-press to select more than one. Drag clips to reorder (on a phone: long-press, then drag). Pinch or use &minus; / + to zoom. Tap the ruler to move the playhead.</p>
+      </section>
+    </div>
+    <button class="arrow right" id="nextScr" aria-label="Next machine">&#9654;</button>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+</div>
+
+<dialog id="exportDlg">
+  <h2>Export</h2>
+  <p class="dsub">Last recording <span id="takeInfo">(none yet)</span></p>
+  <div class="row"><button class="btn" id="takeMp3" disabled>Take &rarr; MP3</button><button class="btn" id="takeWav" disabled>Take &rarr; WAV</button></div>
+  <p class="dsub">Render the current pattern offline</p>
+  <div class="row"><button class="btn" id="bars4Mp3">4 bars &rarr; MP3</button><button class="btn" id="bars4Wav">4 bars &rarr; WAV</button></div>
+  <p class="dsub">The whole song (exact length)</p>
+  <div class="row"><button class="btn" id="songMp3">Song &rarr; MP3</button><button class="btn" id="songWav">Song &rarr; WAV</button></div>
+  <div class="row"><button class="btn sm" id="dlgClose">Close</button></div>
+</dialog>
+
+<dialog id="timingDlg">
+  <h2>Timing help</h2>
+  <label class="frow">Snap recordings to the grid <select id="tQ"></select></label>
+  <label class="frow">Snap strength <input type="range" id="tQs" min="0" max="100" step="5"> <span id="tQsV"></span></label>
+  <label class="frow"><input type="checkbox" id="tCount"> One bar of clicks before recording (count-in)</label>
+  <label class="frow"><input type="checkbox" id="tClick"> Metronome click while playing</label>
+  <label class="frow">Click volume <input type="range" id="tVol" min="0" max="100"></label>
+  <p class="dsub">The click is only for you: it never ends up in recordings or exports.</p>
+  <div class="row"><button class="btn sm" id="tClose">Done</button></div>
+</dialog>
+
+<dialog id="brickDlg">
+  <h2 id="bdTitle">Save as brick</h2>
+  <p class="dsub">A brick is a locked copy of the workspace. Use it as many times as you like in songs.</p>
+  <label class="frow">Name <input id="bdName" maxlength="24" autocomplete="off"></label>
+  <div class="chips" id="bdChips"></div>
+  <div class="swatches" id="bdColors"></div>
+  <label class="frow" id="bdReplaceRow"><input type="checkbox" id="bdReplace"> <span id="bdReplaceLbl">Replace the original brick</span></label>
+  <p class="dsub warn" id="bdWarn"></p>
+  <div class="row"><button class="btn on" id="bdOk">Save brick</button><button class="btn sm" id="bdCancel">Cancel</button></div>
+</dialog>
+
+<dialog id="trimDlg" class="wide">
+  <h2 id="trTitle">Trim</h2>
+  <p class="dsub" id="trSub">Drag the yellow handles to choose what to keep. Tap a note to delete it.</p>
+  <div class="trimtools">
+    <label class="klbl">Snap <select id="trSnap"><option value="4">1 bar</option><option value="1">1 beat</option><option value="0.25">1/16</option></select></label>
+    <span class="klbl">Best</span><span class="seg" id="trBest"><button class="btn sm" data-v="1">1</button><button class="btn sm" data-v="2">2</button><button class="btn sm" data-v="4">4</button><button class="btn sm" data-v="8">8</button></span><span class="klbl">bars</span>
+    <span class="klbl">If not whole bars</span><span class="seg" id="trMode"><button class="btn sm" data-v="pad">Pad with silence</button><button class="btn sm" data-v="cut">Round down</button></span>
+  </div>
+  <div class="trimwrap"><canvas id="trCanvas"></canvas></div>
+  <div class="trimread" id="trRead"></div>
+  <div class="row">
+    <button class="btn sm" id="trPlay">&#9654; Preview</button>
+    <button class="btn sm" id="trQuant">Quantize again</button>
+    <button class="btn sm" id="trOutside">Remove notes outside</button>
+    <button class="btn sm" id="trUndo">&#8630;</button>
+  </div>
+  <div class="row"><button class="btn on" id="trApply">Use trim</button><button class="btn sm" id="trCancel">Cancel</button></div>
+</dialog>
+
+<dialog id="filesDlg">
+  <h2>Song files</h2>
+  <div class="row"><button class="btn sm" id="projRename">Rename song</button><button class="btn sm" id="projDelete">Delete song</button></div>
+  <p class="dsub">Save to a file, or load one back (songs or brick shelves)</p>
+  <div class="row"><button class="btn sm" id="projJson">Song &rarr; JSON</button><button class="btn sm" id="libJson">Brick shelf &rarr; JSON</button><button class="btn sm" id="importBtn">Load JSON&hellip;</button></div>
+  <input type="file" id="importFile" accept="application/json,.json" hidden>
+  <div class="row"><button class="btn sm" id="filesClose">Close</button></div>
+</dialog>
+
+<div id="coach" class="coach" hidden><div class="coachHole" id="coachHole"></div><div class="coachCard" id="coachCard" role="dialog" aria-live="polite"></div></div>
+<div id="tip" class="tip" hidden></div>
+<div id="menu" class="menu" hidden></div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
