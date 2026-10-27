@@ -55,7 +55,7 @@
     <button id="play" class="btn big play" aria-label="Play">&#9654;</button>
     <div class="bpm">
       <button id="bpmDn" class="btn sm" aria-label="Tempo down">&minus;</button>
-      <div id="bpmVal" class="lcd" title="Drag up/down to change tempo">120</div>
+      <div id="bpmVal" class="lcd" title="Slide up or right to speed up, down or left to slow down" aria-label="Tempo in BPM. Slide to change">120</div>
       <button id="bpmUp" class="btn sm" aria-label="Tempo up">+</button>
       <span class="lbl">BPM</span>
       <button id="tapBtn" class="btn sm" title="Tap this on the beat a few times to set the tempo">Tap</button>
@@ -144,7 +144,7 @@
         <div class="meter"><div id="meterL"></div><div id="meterR"></div></div>
         <div class="voicelevels" id="voiceLevels"></div>
         <p class="hint">Knobs: drag up/down. Double-tap a knob to reset it. Swipe sideways (or use the tabs) to switch machines.</p>
-        <p class="hint credit">MP3 export uses <a href="vendor/lame.LICENSE.txt" target="_blank" rel="noopener">lamejs 1.2.1</a> (<a href="vendor/LICENSE-LGPL-3.0.txt" target="_blank" rel="noopener">LGPL-3.0</a>), unmodified. &copy; 2026 Michael Azzato. All rights reserved.</p>
+        <p class="hint credit">MP3 export uses <a href="vendor/lame.LICENSE.txt" target="_blank" rel="noopener">lamejs 1.2.1</a> (<a href="vendor/LICENSE-LGPL-3.0.txt" target="_blank" rel="noopener">LGPL-3.0</a>), unmodified. Source: <a href="https://www.npmjs.com/package/lamejs/v/1.2.1" target="_blank" rel="noopener">npm</a>, <a href="https://github.com/zhuker/lamejs" target="_blank" rel="noopener">GitHub</a>. Based on <a href="https://lame.sourceforge.net/" target="_blank" rel="noopener">LAME</a> (lame.sourceforge.net). &copy; 2026 Michael Azzato. All rights reserved.</p>
       </section>
       <section class="screen song" id="scrSong">
         <div class="plate"><span class="badge">BRICK SHELF</span><span class="desc">Saved bricks are locked. Tap &#9654; to hear one, + to add it to the song.</span></div>
@@ -214,6 +214,19 @@
   <div class="row"><button class="btn on" id="trApply">Use trim</button><button class="btn sm" id="trCancel">Cancel</button></div>
 </dialog>
 
+<dialog id="longDlg">
+  <h2>Song is over 20 minutes</h2>
+  <p class="dsub" id="lgText"></p>
+  <div class="row"><button class="btn on" id="lgOk">Export the first 20 minutes</button><button class="btn sm" id="lgCancel">Cancel</button></div>
+</dialog>
+
+<dialog id="newSongDlg">
+  <h2>Start a new song?</h2>
+  <p class="dsub" id="nsWarn"></p>
+  <label class="frow">Name <input id="nsName" maxlength="40" autocomplete="off" enterkeyhint="done"></label>
+  <div class="row"><button class="btn on" id="nsOk">New song</button><button class="btn sm" id="nsCancel">Cancel</button></div>
+</dialog>
+
 <dialog id="filesDlg">
   <h2>Song files</h2>
   <div class="row"><button class="btn sm" id="projRename">Rename song</button><button class="btn sm" id="projDelete">Delete song</button></div>
@@ -225,6 +238,7 @@
 
 <div id="coach" class="coach" hidden><div class="coachHole" id="coachHole"></div><div class="coachCard" id="coachCard" role="dialog" aria-live="polite"></div></div>
 <div id="tip" class="tip" hidden></div>
+<div id="bpmBubble" class="bpmBubble" aria-hidden="true" hidden>120</div>
 <div id="menu" class="menu" hidden></div>
 <script type="module" src="js/app.js"></script>
 </body>

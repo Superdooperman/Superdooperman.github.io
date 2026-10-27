@@ -2,7 +2,7 @@
 // Games with their own sw.js (moon-axis/, phish-desk/, ...) register a narrower
 // scope, so they are controlled by their own worker, not this one.
 // VERSION is set by scripts/bump-sw.sh (content hash of shared files); run it before every push.
-const VERSION = '20261027-5d12d8bbe7';
+const VERSION = '20261027-878edc0cbf';
 const PREFIX = 'pwas-shared-';
 const CACHE = PREFIX + VERSION;
 const CORE_CACHE = 'pwas-ffmpeg-core-0.12.10';

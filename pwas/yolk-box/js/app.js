@@ -202,7 +202,7 @@ function kkStart(t0) {                      // called by the scheduler on the ba
   if (!L.length) kkAnchor = absStep;
   const spb = 60 / S.bpm, layer = { cfg: cfgOf(S.kk), ev: [] };
   L.push(layer); kkFrom[L.length - 1] = t0 + loopBeats() * spb;
-  kr = { state: 'rec', t0, end: t0 + loopBeats() * spb, spb, layer, idx: L.length - 1 };
+  kr = { state: 'rec', t0, end: t0 + loopBeats() * spb, spb, layer, idx: L.length - 1, full: false, ...kkCount() };
   if (live.down || live.latched) layer.ev.push([0, 0, live.x, live.y]);
   kkUI();
 }
@@ -219,8 +219,20 @@ function kkRecord(k, x, y) {
   if (kr.state !== 'rec') return;
   const now = ctx.currentTime - kkLat();
   if (now >= kr.end) return;
-  const b = Math.max(0, (now - kr.t0) / kr.spb);
-  kr.layer.ev.push([+b.toFixed(4), k, +x.toFixed(4), +y.toFixed(4)]);
+  const b = Math.max(0, (now - kr.t0) / kr.spb), bar = Math.floor(b / 4), inBar = kr.bars[bar] || 0;
+  // caps: keep a little room so a note that is already sounding can still end
+  const room = k === 2 ? 0 : 8;
+  if (kr.total + room >= Z.LIMITS.kkEvents || inBar + room >= Z.LIMITS.kkBarEvents) {
+    if (!kr.full) { kr.full = true; toast(kr.total + room >= Z.LIMITS.kkEvents ? 'Pad loop is full (2000 notes and slides). Undo a layer to record more' : 'That bar is full of slides, so extra ones are skipped. Your notes still play'); }
+    const open = kr.layer.ev.length && kr.layer.ev[kr.layer.ev.length - 1][1] !== 2;
+    if (!(k === 2 && open && kr.total < Z.LIMITS.kkEvents && inBar < Z.LIMITS.kkBarEvents)) return;
+  }
+  kr.layer.ev.push([+b.toFixed(4), k, +x.toFixed(4), +y.toFixed(4)]); kr.total++; kr.bars[bar] = inBar + 1;
+}
+function kkCount() {   // events already in the loop, total and per bar
+  const bars = {}; let total = 0;
+  for (const l of S.kk.loop.layers) for (const e of l.ev) { total++; const b = Math.floor(e[0] / 4); bars[b] = (bars[b] || 0) + 1; }
+  return { total, bars };
 }
 function kkLive(type, x, y) {
   if (!eng || !eng.kk) return;
@@ -251,7 +263,8 @@ function setBars(n) {
   if (L.layers.length && n % old) return toast('Pick a length that is a multiple of ' + old);
   const k = n / old;
   for (const l of L.layers) l.ev = Array.from({ length: k }, (_, r) => l.ev.map((e) => [+(e[0] + r * 4 * old).toFixed(5), e[1], e[2], e[3]])).flat();
-  L.bars = n; kkFrom = L.layers.map(() => 0); kkUI(); changed();
+  L.bars = n; if (Z.capKK(L.layers)) toast('The longer loop had too many notes and slides, so some slides were thinned');
+  kkFrom = L.layers.map(() => 0); kkUI(); changed();
 }
 function kkSet(k, v) {
   if (k === 'root' || k === 'scale') { S.kk[k] = v; buildKeys(); wsUI(); }
@@ -442,12 +455,14 @@ function buildDrumKnobs() {
   box.appendChild(knob('Accent', LVL, () => S.drums.accent, (x) => (S.drums.accent = x), 'yolk'));
 }
 function cellBtn(on, stepI, cls) { const b = document.createElement('button'); b.className = `cell ${cls} ${on ? 'on' : ''} ${stepI % 4 === 0 ? 'beat' : ''}`; b.dataset.step = stepI; b.setAttribute('aria-pressed', !!on); return b; }
+// full names for the short row labels (desktop hover title and screen readers)
+const FULL = { ac: 'Accent', bd: 'Bass Drum', sd: 'Snare Drum', cp: 'Clap', ch: 'Closed Hi-hat', oh: 'Open Hi-hat', lt: 'Low Tom', mt: 'Mid Tom', ht: 'High Tom', rs: 'Rimshot', cb: 'Cowbell', cy: 'Cymbal' };
 function buildDrumGrid() {
   const g = $('#drumGrid'); g.innerHTML = '';
   const rows = [{ id: 'ac', short: 'AC', name: 'Accent' }, ...VOICES];
   for (const v of rows) {
     const r = document.createElement('div'); r.className = 'row' + (v.id === 'ac' ? ' acc' : '') + (v.id === selVoice ? ' sel' : '');
-    const lb = document.createElement('button'); lb.className = 'rlabel'; lb.textContent = v.short; lb.title = v.name;
+    const lb = document.createElement('button'); lb.className = 'rlabel'; lb.textContent = v.short; const full = FULL[v.id] || v.name; lb.title = full; lb.setAttribute('aria-label', full);
     lb.onclick = () => { if (v.id === 'ac') return; selVoice = v.id; buildDrumKnobs(); buildDrumGrid(); if (S.drums.steps[v.id]) audition(v.id); };
     r.appendChild(lb);
     for (let i = 0; i < 16; i++) {
@@ -466,7 +481,7 @@ const BLABEL = { cutoff: 'Cutoff', reso: 'Reso', envmod: 'Env Mod', decay: 'Deca
 function buildBassKnobs() {
   const box = $('#bassKnobs'); box.innerHTML = '';
   const w = document.createElement('div'); w.className = 'wave';
-  w.innerHTML = `<div class="klbl">Wave</div><button class="btn sm" data-w="saw">SAW</button><button class="btn sm" data-w="square">SQR</button>`;
+  w.innerHTML = `<div class="klbl">Wave</div><button class="btn sm" data-w="saw" title="Sawtooth wave" aria-label="Sawtooth wave">SAW</button><button class="btn sm" data-w="square" title="Square wave" aria-label="Square wave">SQR</button>`;
   const drawW = () => $$('button', w).forEach((b) => b.classList.toggle('on', b.dataset.w === S.bass.params.wave));
   $$('button', w).forEach((b) => (b.onclick = () => { S.bass.params.wave = b.dataset.w; drawW(); changed(); })); drawW();
   box.appendChild(w);
@@ -475,10 +490,11 @@ function buildBassKnobs() {
 function noteName(s) { return s.on ? NOTES[s.n] + (s.up ? '\u2191' : s.dn ? '\u2193' : '') : '\u2014'; }
 function buildBassGrid() {
   const g = $('#bassGrid'); g.innerHTML = '';
-  const rows = [['note', 'Note'], ['dn', 'Dn'], ['up', 'Up'], ['acc', 'Acc'], ['sl', 'Slide']];
-  for (const [k, name] of rows) {
+  const rows = [['note', 'Note', 'Note'], ['dn', 'Dn', 'Octave down'], ['up', 'Up', 'Octave up'], ['acc', 'Acc', 'Accent'], ['sl', 'Slide', 'Slide']];
+  for (const [k, name, full] of rows) {
     const r = document.createElement('div'); r.className = 'row b-' + k;
     const lb = document.createElement('div'); lb.className = 'rlabel'; lb.textContent = name; r.appendChild(lb);
+    if (full !== name) lb.title = full;
     for (let i = 0; i < 16; i++) {
       const s = S.bass.steps[i];
       const c = cellBtn(k === 'note' ? s.on : s[k], i, k === 'note' ? 'notecell' : 'flag');
@@ -540,7 +556,7 @@ function startMeter() {
 // ---------------------------------------------------------------- transport, timing help
 let swingK;
 function drawTransport() { $('#bpmVal').textContent = Math.round(S.bpm); swingK && swingK.refresh(); $('#clickBtn').classList.toggle('on', PR.click); dancer && dancer.refresh(); $('#qLbl').textContent = PR.q === 'off' ? 'Q off' : 'Q ' + PR.q; }
-function setBpm(v) { S.bpm = Math.max(60, Math.min(200, Math.round(v))); segCache.clear(); drawTransport(); changed(); }
+function setBpm(v) { S.bpm = Math.max(60, Math.min(300, Math.round(v))); segCache.clear(); drawTransport(); changed(); }
 const taps = [];
 function tapTempo() {
   const now = performance.now(); if (taps.length && now - taps[taps.length - 1] > 2000) taps.length = 0;
@@ -612,12 +628,38 @@ function deleteBrick(id) {
 const usedIn = (id) => Object.values(projects).filter((p) => p.clips.some((c) => c.brick === id)).map((p) => p.name);
 function setClips(clips) { P.clips = clips; saveAll(); commit(); studio.refresh(); }
 const songSegs = (clips = P.clips) => B.songSeq(clips, lib).reduce((a, x) => { if (x.bar === 0) a.push({ st: segState(x.brick), bars: x.brick.bars }); return a; }, []);
+// Song export is capped at 20 minutes (a longer render can run a phone out of memory).
+const EXPORT = { max: 20 * 60 };
+const segsLen = (segs) => segs.reduce((a, g) => a + g.bars * barLen(g.st), 0);
+function capSegs(segs, max = EXPORT.max) {   // keep whole bars from the start until the limit
+  const out = []; let t = 0;
+  for (const g of segs) {
+    const bl = barLen(g.st), fit = Math.min(g.bars, Math.floor((max - t + 1e-6) / bl));
+    if (fit <= 0) break;
+    out.push(fit === g.bars ? g : { ...g, bars: fit }); t += fit * bl;
+    if (fit < g.bars) break;
+  }
+  return out;
+}
+const mmss = (sec) => `${Math.floor(sec / 60)}:${String(Math.round(sec % 60)).padStart(2, '0')}`;
+function askLong(len) {
+  return new Promise((res) => {
+    const d = $('#longDlg'), lim = Math.round(EXPORT.max / 60);
+    $('#lgText').textContent = `This song is ${mmss(len)} long. Exports stop at ${lim} minutes so your device does not run out of memory.`;
+    $('#lgOk').textContent = `Export the first ${lim} minutes`;
+    const done = (v) => { d.onclose = null; d.close(); res(v); };
+    $('#lgOk').onclick = () => done(true); $('#lgCancel').onclick = () => done(false); d.onclose = () => res(false);
+    d.showModal();
+  });
+}
 async function exportSong(fmt) {
   if (!P.clips.length) return toast('Add some bricks to the song first');
+  let segs = songSegs(); const len = segsLen(segs);
+  if (len > EXPORT.max + 1e-6) { if (!(await askLong(len))) return toast('Export cancelled'); segs = capSegs(segs); }
   toast('Rendering the song...');
-  const r = await renderSong(songSegs());
+  const r = await renderSong(segs);
   const b = fmt === 'mp3' ? await mp3Blob(r.L, r.R, r.sr) : wavBlob(r.L, r.R, r.sr);
-  window.YB.lastBlob = b; window.YB.lastRender = { len: r.L.length / r.sr, total: r.total };
+  window.YB.lastBlob = b; window.YB.lastRender = { len: r.L.length / r.sr, total: r.total, capped: len > EXPORT.max + 1e-6 };
   download(b, `yolkbox-${P.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.${fmt}`);
 }
 // projects (songs) and JSON import / export
@@ -630,7 +672,9 @@ function buildProjects() { $('#projSel').innerHTML = Object.values(projects).map
 function jsonDl(obj, name) { const b = new Blob([JSON.stringify(obj, null, 1)], { type: 'application/json' }); window.YB.lastBlob = b; download(b, name); }
 const exportProject = () => jsonDl({ type: 'yolkbox-project', version: 1, project: { ...P, ws: S }, bricks: lib.filter((b) => P.clips.some((c) => c.brick === b.id) || b.id === S.origin) }, `yolkbox-song-${P.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.json`);
 const exportLibrary = () => jsonDl({ type: 'yolkbox-bricks', version: 1, bricks: lib }, `yolkbox-brick-shelf-${stamp()}.json`);
+const CAP_MSG = 'Some pad loops had more notes than the box keeps (2000 per brick, 256 per bar), so extra slides were thinned';
 function importJSON(obj) {
+  Z.takeCapHits();
   if (!obj || typeof obj.type !== 'string' || !/^yolkbox-(project|bricks)$/.test(obj.type)) throw new Error('Not a Yolk Box file');
   let added = 0;
   const pj = obj.type === 'yolkbox-project' && obj.project && typeof obj.project === 'object' ? obj.project : null;
@@ -646,8 +690,8 @@ function importJSON(obj) {
     if (Object.keys(projects).length >= Z.LIMITS.projects) throw new Error('Too many songs (' + Z.LIMITS.projects + ')');
     const ids = new Map(lib.map((b) => [b.id, b.bars])), name = Z.text(pj.name, 'Song') || 'Song';
     const id = B.uid('p'); projects[id] = { id, name: name + (Object.values(projects).some((p) => p.name === name) ? ' (imported)' : ''), clips: Z.capSong(clips.filter((c) => ids.has(c.brick)), ids), ws: merge(pj.ws) };
-    switchProject(id); toast(`Imported song "${projects[id].name}" (+${added} bricks)`);
-  } else { saveAll(); commit(); studio.refresh(); wsUI(); toast(`Imported ${added} brick${added === 1 ? '' : 's'}`); }
+    switchProject(id); toast(`Imported song "${projects[id].name}" (+${added} bricks)` + (Z.takeCapHits() ? '. ' + CAP_MSG : ''));
+  } else { saveAll(); commit(); studio.refresh(); wsUI(); toast(`Imported ${added} brick${added === 1 ? '' : 's'}` + (Z.takeCapHits() ? '. ' + CAP_MSG : '')); }
 }
 
 // replace the workspace. While playing, the switch is queued so it lands exactly on the next bar line.
@@ -724,10 +768,56 @@ function init() {
   buildKK(); refreshAll(); buildKeys();
   $('#play').onclick = () => (playing ? stop() : play());
   $('#rec').onclick = toggleRec;
-  $('#bpmDn').onclick = () => setBpm(S.bpm - 1); $('#bpmUp').onclick = () => setBpm(S.bpm + 1);
-  const bv = $('#bpmVal'); let by = 0, bb = 0;
-  bv.addEventListener('pointerdown', (e) => { e.stopPropagation(); bv.setPointerCapture(e.pointerId); by = e.clientY; bb = S.bpm; });
-  bv.addEventListener('pointermove', (e) => { if (bv.hasPointerCapture(e.pointerId)) setBpm(bb + (by - e.clientY) / 3); });
+  // Tempo on touch screens: hold -/+ to repeat (speeds up), or slide on the number with a readout above the finger.
+  const holdBpm = (btn, dir) => {
+    let id = null, timer = 0, t0 = 0;
+    const stop = () => { clearTimeout(timer); timer = 0; btn.classList.remove('held'); if (id != null && btn.hasPointerCapture(id)) btn.releasePointerCapture(id); id = null; };
+    const tick = () => {
+      const held = performance.now() - t0 - 350;                       // ms since repeating started
+      if (held > 1500) setBpm(dir > 0 ? Math.floor(S.bpm / 5) * 5 + 5 : Math.ceil(S.bpm / 5) * 5 - 5);   // big steps of 5
+      else setBpm(S.bpm + dir);
+      const rate = 8 + 17 * Math.min(1, Math.max(0, held) / 1500);      // 8/s ramping to 25/s
+      timer = setTimeout(tick, 1000 / rate);
+    };
+    btn.addEventListener('pointerdown', (e) => {
+      if (e.button > 0) return; e.preventDefault(); stop();
+      id = e.pointerId; try { btn.setPointerCapture(id); } catch {}
+      btn.classList.add('held'); t0 = performance.now(); setBpm(S.bpm + dir);      // a single tap is exactly 1
+      timer = setTimeout(tick, 350);
+    });
+    for (const ev of ['pointerup', 'pointercancel', 'pointerleave', 'lostpointercapture']) btn.addEventListener(ev, stop);
+    btn.addEventListener('contextmenu', (e) => e.preventDefault());
+    btn.onclick = (e) => { if (e.detail === 0) setBpm(S.bpm + dir); };   // keyboard Enter/Space still works
+  };
+  holdBpm($('#bpmDn'), -1); holdBpm($('#bpmUp'), 1);
+  const bv = $('#bpmVal'), bub = $('#bpmBubble');
+  let drag = null;
+  const bubAt = (x, y) => {   // ~60px above the finger, kept inside the visible screen; beside the finger if there is no room
+    const vv = window.visualViewport, V = vv ? { t: vv.offsetTop, l: vv.offsetLeft, b: vv.offsetTop + vv.height, r: vv.offsetLeft + vv.width } : { t: 0, l: 0, b: innerHeight, r: innerWidth };
+    const w = bub.offsetWidth, h = bub.offsetHeight, m = 8;
+    let top = y - 60 - h, left = x - w / 2, side = false;
+    if (top < V.t + m) { top = V.t + m; if (top + h > y - 24) { side = true; top = Math.min(Math.max(y - h / 2, V.t + m), V.b - m - h); left = x - w - 48 >= V.l + m ? x - w - 48 : x + 48; } }
+    left = Math.min(Math.max(left, V.l + m), V.r - m - w);
+    Object.assign(bub.style, { left: left + 'px', top: top + 'px' }); bub.classList.toggle('side', side);
+  };
+  bv.addEventListener('pointerdown', (e) => {
+    if (e.button > 0) return; e.stopPropagation(); e.preventDefault();
+    try { bv.setPointerCapture(e.pointerId); } catch {}
+    drag = { id: e.pointerId, x: e.clientX, y: e.clientY, b: S.bpm, on: false };
+  });
+  bv.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const d = (e.clientX - drag.x) - (e.clientY - drag.y);          // up or right = faster
+    if (!drag.on && Math.abs(d) < 6) return;
+    if (!drag.on) { drag.on = true; bv.classList.add('dragging'); bub.hidden = false; }
+    const a = Math.abs(d), steps = (a / 5) * (1 + a / 160);          // ~1 BPM per 5px, quicker the further you slide
+    setBpm(drag.b + Math.sign(d) * steps);
+    bub.textContent = Math.round(S.bpm); bubAt(e.clientX, e.clientY);
+  });
+  const endDrag = () => { if (!drag) return; drag = null; bv.classList.remove('dragging'); bub.hidden = true; };
+  for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) bv.addEventListener(ev, endDrag);
+  // no double-tap zoom on the controls (touch-action in CSS does most of it; this covers the rest)
+  for (const el of document.querySelectorAll('.transport, .pattern, .tabs, .wsbar')) el.addEventListener('dblclick', (e) => e.preventDefault());
   bv.addEventListener('wheel', (e) => { e.preventDefault(); setBpm(S.bpm - Math.sign(e.deltaY)); }, { passive: false });
   $$('.tab').forEach((t) => (t.onclick = () => goScreen(+t.dataset.screen)));
   $('#prevScr').onclick = () => goScreen(scr - 1); $('#nextScr').onclick = () => goScreen(scr + 1);
@@ -758,9 +848,27 @@ function init() {
   $('#wsSave').onclick = () => studio.saveDialog();
   $('#wsTrim').onclick = () => studio.openTrim();
   $('#projSel').onchange = (e) => {
-    if (e.target.value === '__new') { const n = (prompt('Name your new song:', 'Song ' + (Object.keys(projects).length + 1)) || '').trim(); if (n) newProject(Z.text(n)); else buildProjects(); return; }
+    if (e.target.value === '__new') { buildProjects(); askNewSong(); return; }
     switchProject(e.target.value);
   };
+  // New song: in-app confirm (the select sits right above the tempo controls, so a slip is easy on a phone)
+  const nsDlg = $('#newSongDlg');
+  function songHasContent() {
+    if (P.clips.length) return true;
+    const d = S.drums.steps; if (Object.values(d).some((a) => Array.isArray(a) && a.some((v) => v))) return true;
+    if (S.bass.steps.some((x) => x && x.on)) return true;
+    return !!(S.kk.loop && S.kk.loop.layers.some((l) => l.ev && l.ev.length));
+  }
+  function askNewSong() {
+    const full = songHasContent();
+    $('#nsWarn').textContent = full ? `"${P.name}" has beats in it. It stays in your song list, and you can switch back to it any time.` : 'Give it a name.';
+    $('#nsName').value = 'Song ' + (Object.keys(projects).length + 1);
+    nsDlg.showModal();
+  }
+  $('#nsCancel').onclick = () => nsDlg.close();
+  $('#nsOk').onclick = () => { const n = Z.text($('#nsName').value.trim()); if (!n) return $('#nsName').focus(); nsDlg.close(); newProject(n); toast(`New song "${n}"`); };
+  $('#nsName').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('#nsOk').click(); } });
+  nsDlg.addEventListener('click', (e) => { if (e.target === nsDlg) nsDlg.close(); });   // tap outside = cancel
   $('#songMp3').onclick = () => exportSong('mp3'); $('#songWav').onclick = () => exportSong('wav');
   $('#projJson').onclick = exportProject; $('#libJson').onclick = exportLibrary;
   $('#importBtn').onclick = () => $('#importFile').click();
@@ -786,6 +894,7 @@ function init() {
   studio.deleteProject = (id) => { if (playing) stop(); delete projects[id]; P = Object.values(projects)[0]; switchProject(P.id); toast('Song deleted'); };
   applyNames(); initDancerUI();
   initSwipe(); goScreen(0); drawPlayhead(); commit(); undoUI(); refreshAll(); saveAll();
+  if (Z.takeCapHits()) setTimeout(() => toast(CAP_MSG), 600);
   studio.coach(false);
   if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js', { scope: './' }).catch(() => {});
 }
@@ -794,11 +903,11 @@ const API = {
   get S() { return S; }, get lib() { return lib; }, get P() { return P; }, get projects() { return projects; }, get PR() { return PR; },
   get playing() { return playing; }, get mode() { return mode; }, get src() { return src; },
   toast, esc, goScreen, ensureAudio, changed, commit, undo, redo, loadState, saveBrick, openBrick, dupBrick, renameBrick, deleteBrick, usedIn, setClips,
-  playSrc, play, stop, exportSong, songSegs, segState, setBars, kkUI, refreshAll, renderSong, renderOffline, get ctx() { return ctx; }, get eng() { return eng; },
+  playSrc, play, stop, exportSong, songSegs, capSegs, segsLen, EXPORT, segState, setBars, kkUI, refreshAll, renderSong, renderOffline, get ctx() { return ctx; }, get eng() { return eng; },
   setWorkspace(st) { const o = S.origin; S = merge(clone(st)); S.origin = o; kkFrom = S.kk.loop.layers.map(() => 0); kkAnchor = absStep - (absStep % 16); if (eng) { eng.kkRelease([1, 2, 3, 4, 5, 6, 7, 8]); if (mode === 'ws') eng.applyState(S, 0, ms); } refreshAll(); changed(); commit(); },
 };
 window.YB = { get state() { return S; }, get kk() { return { kr: kr.state, anchor: kkAnchor, absStep, from: kkFrom.slice(), log: kkAll.slice(), tops: kkTops.slice(), rec: kr.state === 'rec' ? { t0: kr.t0, end: kr.end } : null, layers: S.kk.loop.layers.length, live: { ...live } }; },
-  kkTap: { rec: kkRecBtn, undo: kkUndo, clear: kkClear, set: kkSet }, get ctx() { return ctx; }, get eng() { return eng; }, get uiQ() { return uiQ; }, play, stop, toggleRec, exportTake, exportBars, renderOffline: (bars, st) => renderOffline(st || S, bars), loadState, goScreen, DEMOS, strutPhrase, wavBlob, mp3Blob, get take() { return take; },
+  kkTap: { rec: kkRecBtn, undo: kkUndo, clear: kkClear, set: kkSet, live: kkLive }, get ctx() { return ctx; }, get eng() { return eng; }, get uiQ() { return uiQ; }, play, stop, toggleRec, exportTake, exportBars, renderOffline: (bars, st) => renderOffline(st || S, bars), loadState, goScreen, DEMOS, strutPhrase, wavBlob, mp3Blob, get take() { return take; },
   B, PR, savePrefs, get lib() { return lib; }, get P() { return P; }, get projects() { return projects; }, get H() { return { past: H.past.length, future: H.future.length }; }, get lastSwitch() { return lastSwitch; }, get dancer() { return dancer; }, get playT0() { return playT0; }, get playing() { return playing; }, get mode() { return mode; },
-  get studio() { return studio; }, saveBrick, openBrick, dupBrick, renameBrick, deleteBrick, loadLayer, setClips, exportSong, songSegs, renderSong, undo, redo, commit, surprise, setBars, setMS, tapTempo, playSrc, importJSON, exportProject, exportLibrary, newProject, switchProject, API };
+  get studio() { return studio; }, saveBrick, openBrick, dupBrick, renameBrick, deleteBrick, loadLayer, setClips, exportSong, songSegs, capSegs, segsLen, EXPORT, renderSong, undo, redo, commit, surprise, setBars, setMS, tapTempo, playSrc, importJSON, exportProject, exportLibrary, newProject, switchProject, API };
 init();

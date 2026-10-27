@@ -396,23 +396,100 @@ export function initStudio(A) {
     { sel: '#wsSave', scr: null, h: 'Save it as a brick', t: 'When you like it, press SAVE AS BRICK. Bricks are locked copies, so you can keep experimenting safely.' },
     { sel: '#shelf', scr: 4, h: 'Snap bricks into a song', t: 'On Bricks & Song, tap + on a brick to add it to the song timeline. Tap a clip to repeat, move or duplicate it.' },
   ];
-  let ci = 0;
+  // The card is placed against the *visual* viewport (what is really on screen on a phone, between the
+  // browser's top bar and bottom toolbar, minus safe areas). Target is scrolled to the middle first.
+  let ci = 0, tok = 0, coachOn = false;
+  const ov = $('#coach'), hole = $('#coachHole'), card = $('#coachCard');
+  const M = 12, GAP = 10, PAD = 6;
+  function insets() {
+    const pr = document.createElement('div');
+    pr.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)';
+    document.body.appendChild(pr); const cs = getComputedStyle(pr);
+    const r = { t: parseFloat(cs.paddingTop) || 0, r: parseFloat(cs.paddingRight) || 0, b: parseFloat(cs.paddingBottom) || 0, l: parseFloat(cs.paddingLeft) || 0 };
+    pr.remove(); return r;
+  }
+  function visible() {   // on-screen box in the same coordinates as getBoundingClientRect / position:fixed
+    const vv = window.visualViewport, sa = insets();
+    const top = vv ? vv.offsetTop : 0, left = vv ? vv.offsetLeft : 0, h = vv ? vv.height : innerHeight, w = vv ? vv.width : document.documentElement.clientWidth;
+    return { top: top + sa.t, left: left + sa.l, bottom: top + h - sa.b, right: left + Math.min(w, document.documentElement.clientWidth) - sa.r };
+  }
+  function place() {
+    if (!coachOn) return;
+    const s = STEPS[ci], el = $(s.sel); if (!el) return;
+    const V = visible(), r = el.getBoundingClientRect(), vh = V.bottom - V.top;
+    // highlight: the visible part of the target (never taller than ~45% of the screen), clamped on screen
+    const ht = Math.max(V.top + 2, r.top - PAD), hb = Math.min(V.bottom - 2, r.top + Math.min(r.height, vh * 0.45) + PAD, r.bottom + PAD);
+    const hl = Math.max(V.left + 2, r.left - PAD), hr = Math.min(V.right - 2, r.right + PAD);
+    const showHole = hb - ht > 4 && hr - hl > 4;
+    Object.assign(hole.style, showHole ? { display: '', left: hl + 'px', top: ht + 'px', width: hr - hl + 'px', height: hb - ht + 'px' } : { display: 'none' });
+    // card: fits the screen, scrolls inside if it has to
+    const w = Math.min(380, V.right - V.left - 2 * M);
+    card.style.width = w + 'px'; card.style.maxHeight = Math.max(120, vh - 2 * M) + 'px';
+    const ch = card.offsetHeight;
+    const below = V.bottom - M - (showHole ? hb : V.top) - GAP, above = (showHole ? ht : V.bottom) - GAP - V.top - M;
+    let top, left = null, dock = '';
+    const sideR = V.right - M - hr - GAP, sideL = hl - GAP - V.left - M;
+    if (showHole && ch <= below) top = hb + GAP;
+    else if (showHole && ch <= above) top = ht - GAP - ch;
+    else if (showHole && Math.max(sideR, sideL) >= w) {   // landscape: beside the target
+      left = sideR >= w ? hr + GAP : hl - GAP - w; top = (ht + hb) / 2 - ch / 2; dock = 'side';
+    } else {   // will not fit next to it: dock as a sheet on the side away from the target
+      const mid = showHole ? (ht + hb) / 2 : V.top;
+      if (mid < V.top + vh / 2) { top = V.bottom - M - ch; dock = 'bottom'; } else { top = V.top + M; dock = 'top'; }
+    }
+    top = Math.min(Math.max(top, V.top + M), V.bottom - M - ch);
+    if (left == null) { const cx = showHole ? (hl + hr) / 2 : (V.left + V.right) / 2; left = Math.min(Math.max(cx - w / 2, V.left + M), V.right - M - w); }
+    Object.assign(card.style, { top: top + 'px', left: left + 'px' }); card.dataset.dock = dock;
+    // docked over the target: nudge the page once so the target sits in the free space next to the sheet
+    if ((dock === 'top' || dock === 'bottom') && showHole && !nudged) {
+      const fTop = dock === 'top' ? top + ch + GAP : V.top + M, fBot = dock === 'top' ? V.bottom - M : top - GAP;
+      const tb = r.top - PAD, tbb = Math.min(r.bottom, r.top + Math.min(r.height, vh * 0.45)) + PAD;
+      let d = 0;
+      if (tbb - tb <= fBot - fTop) d = tbb > fBot ? tbb - fBot : tb < fTop ? tb - fTop : 0; else d = tb - fTop;
+      if (Math.abs(d) > 2) { nudged = true; scrollBy({ top: d, behavior: 'auto' }); }
+    }
+  }
+  let nudged = false;
+  let raf = 0; const replace = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(place); };
+  const onKey = (e) => { if (coachOn && e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); endCoach(); } };
+  function listen(on) {
+    const f = on ? 'addEventListener' : 'removeEventListener', vv = window.visualViewport;
+    window[f]('resize', replace); window[f]('orientationchange', replace); window[f]('scroll', replace, true);
+    if (vv) { vv[f]('resize', replace); vv[f]('scroll', replace); }
+    document[f]('keydown', onKey, true);
+  }
+  ov.addEventListener('click', (e) => { if (e.target === ov || e.target === hole) endCoach(); });   // tap on the dimmed backdrop only
   function coach(force) {
     if (!force && localStorage.getItem(LS_COACH)) return;
-    ci = 0; $('#coach').hidden = false; showStep();
+    ci = 0; ov.hidden = false; if (!coachOn) listen(true); coachOn = true; showStep();
+  }
+  function scrollSettled(cb) {   // wait until the page stops scrolling (scrollend where supported, else polling)
+    let last = -1, same = 0, n = 0;
+    const tick = () => { const y = Math.round(scrollY + (document.scrollingElement?.scrollTop || 0)); same = y === last ? same + 1 : 0; last = y; if (same >= 3 || ++n > 50) cb(); else setTimeout(tick, 50); };
+    setTimeout(tick, 50);
   }
   function showStep() {
-    const s = STEPS[ci]; if (s.scr != null) A.goScreen(s.scr);
+    const s = STEPS[ci], my = ++tok; nudged = false; if (s.scr != null) A.goScreen(s.scr);
+    card.innerHTML = `<button class="coX" id="coClose" aria-label="Close tour" title="Close tour">✕</button><div class="cbody"><h3>${ci + 1}. ${s.h}</h3><div>${s.t}</div></div><div class="cbtns"><span class="dots">${ci + 1} / ${STEPS.length}</span><button class="btn sm" id="coSkip">Skip</button>${ci ? '<button class="btn sm" id="coBack">Back</button>' : ''}<button class="btn sm on" id="coNext">${ci === STEPS.length - 1 ? 'Done' : 'Next'}</button></div>`;
+    $('#coClose').onclick = endCoach; $('#coSkip').onclick = endCoach;
+    $('#coNext').onclick = () => (ci === STEPS.length - 1 ? endCoach() : (ci++, showStep()));
+    if (ci) $('#coBack').onclick = () => { ci--; showStep(); };
+    place();
     setTimeout(() => {
-      const el = $(s.sel), r = el.getBoundingClientRect(), hole = $('#coachHole'), card = $('#coachCard');
-      Object.assign(hole.style, { left: r.left - 6 + 'px', top: r.top - 6 + 'px', width: r.width + 12 + 'px', height: Math.min(r.height, innerHeight * 0.45) + 12 + 'px' });
-      card.innerHTML = `<h3>${ci + 1}. ${s.h}</h3><div>${s.t}</div><div class="cbtns"><span class="dots">${ci + 1} / ${STEPS.length}</span><button class="btn sm" id="coSkip">Skip tour</button>${ci ? '<button class="btn sm" id="coBack">Back</button>' : ''}<button class="btn sm on" id="coNext">${ci === STEPS.length - 1 ? 'Done' : 'Next'}</button></div>`;
-      const below = r.top + Math.min(r.height, innerHeight * 0.45) + 18;
-      card.style.top = (below + card.offsetHeight < innerHeight - 8 ? below : Math.max(8, r.top - card.offsetHeight - 18)) + 'px';
-      $('#coSkip').onclick = endCoach; $('#coNext').onclick = () => (ci === STEPS.length - 1 ? endCoach() : (ci++, showStep())); if (ci) $('#coBack').onclick = () => { ci--; showStep(); };
+      if (my !== tok || !coachOn) return;
+      const el = $(s.sel); if (!el) return;
+      const V = visible(), r = el.getBoundingClientRect();
+      const fully = r.top >= V.top + M && r.bottom <= V.bottom - M;
+      if (!fully) {
+        const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        // tall targets: put their top near the top of the screen so the card has room underneath
+        if (r.height > (V.bottom - V.top) * 0.5) scrollBy({ top: r.top - V.top - M - 8, behavior: reduce ? 'auto' : 'smooth' });
+        else el.scrollIntoView({ block: 'center', inline: 'nearest', behavior: reduce ? 'auto' : 'smooth' });
+      }
+      place(); scrollSettled(() => { if (my === tok) place(); });
     }, s.scr != null ? 420 : 30);
   }
-  function endCoach() { $('#coach').hidden = true; localStorage.setItem(LS_COACH, '1'); A.goScreen(0); }
+  function endCoach() { tok++; coachOn = false; listen(false); ov.hidden = true; localStorage.setItem(LS_COACH, '1'); A.goScreen(0); }
   $('#helpBtn').onclick = () => coach(true);
 
   // ---------------------------------------------------------------- long-press tooltips (touch screens have no hover)

@@ -6,7 +6,7 @@ import { KK_PRESETS, KK_SCALES, KK_GATES } from './kk.js';
 import { defaults } from './patterns.js';
 import { uid, BRICK_COLORS } from './bricks.js';
 
-export const LIMITS = { bricks: 500, clips: 1000, projects: 200, layers: 16, events: 20000, bars: 64, songBars: 1024, name: 40, importBytes: 2 * 1024 * 1024 };
+export const LIMITS = { bricks: 500, clips: 1000, projects: 200, layers: 16, events: 20000, kkEvents: 2000, kkBarEvents: 256, bars: 64, songBars: 1024, name: 40, importBytes: 2 * 1024 * 1024 };
 export const ID_RE = /^[a-z]\w{1,40}$/, COLOR_RE = /^#[0-9a-f]{3,8}$/i;
 const isObj = (o) => !!o && typeof o === 'object' && !Array.isArray(o);
 export const num = (v, lo, hi, d) => { v = Number(v); return Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : d; };
@@ -36,7 +36,7 @@ function layer(l, bars, d) {
 // a whole workspace / brick state
 export function state(s) {
   const d = defaults(); s = isObj(s) ? s : {};
-  const o = { ...d, name: text(s.name, d.name), bpm: num(s.bpm, 60, 200, d.bpm), swing: num(s.swing, 0, 1, d.swing) };
+  const o = { ...d, name: text(s.name, d.name), bpm: num(s.bpm, 60, 300, d.bpm), swing: num(s.swing, 0, 1, d.swing) };
   if (okId(s.origin)) o.origin = s.origin;
   const sd = isObj(s.drums) ? s.drums : {}, sb = isObj(s.bass) ? s.bass : {}, sk = isObj(s.kk) ? s.kk : {}, sm = isObj(s.mix) ? s.mix : {};
   const steps = {}, levels = {}, params = {}, mute = {};
@@ -55,6 +55,7 @@ export function state(s) {
   const k = { ...kkCfg(sk, d.kk), hold: bool(sk.hold, d.kk.hold), echo: num(sk.echo, 0, 1, d.kk.echo) };
   const sl = isObj(sk.loop) ? sk.loop : {}, bars = int(sl.bars, 1, LIMITS.bars, d.kk.loop.bars);
   k.loop = { bars, layers: (Array.isArray(sl.layers) ? sl.layers : []).slice(0, LIMITS.layers).map((l) => layer(l, bars, d.kk)).filter(Boolean) };
+  if (capKK(k.loop.layers)) capHits++;
   o.kk = k;
   o.mix = {}; for (const m of Object.keys(d.mix)) o.mix[m] = num(sm[m], 0, 1, d.mix[m]);
   return o;
@@ -102,4 +103,37 @@ export function prefs(p, d) {
   p = isObj(p) ? p : {};
   return { q: oneOf(p.q, ['off', '1/8', '1/16', '1/16T'], d.q), qs: num(p.qs, 0, 1, d.qs), countIn: bool(p.countIn, d.countIn), click: bool(p.click, d.click),
     clickVol: num(p.clickVol, 0, 1, d.clickVol), inKey: bool(p.inKey, d.inKey), dancer: oneOf(p.dancer, ['rooster', 'gobbler', 'yolky'], d.dancer) };
+}
+
+// ---- pad loop event caps: about 2000 events per brick and 256 per bar (all layers together).
+// Slides (move events) are thinned first, evenly, so the notes and their ends stay; only if a bar is still
+// over the cap are whole notes (on ... off) dropped from the end of that bar.
+let capHits = 0;
+export function takeCapHits() { const n = capHits; capHits = 0; return n; }
+function thin(items, max) {            // items: [{ l, e }] in time order; returns the kept subset
+  let over = items.length - max; if (over <= 0) return items;
+  const moves = items.filter((it) => it.e[1] === 1);
+  const drop = new Set();
+  if (moves.length) { const n = Math.min(over, moves.length); for (let i = 0; i < n; i++) drop.add(moves[Math.floor(((i + 0.5) * moves.length) / n)]); over -= n; }
+  let kept = items.filter((it) => !drop.has(it));
+  while (over > 0 && kept.length) {    // drop the last note: its on plus following events of that layer up to its off
+    let i = kept.length - 1; while (i > 0 && kept[i].e[1] !== 0) i--;
+    const L = kept[i].l, out = new Set([kept[i]]);
+    for (let j = i + 1; j < kept.length; j++) if (kept[j].l === L) { out.add(kept[j]); if (kept[j].e[1] === 2) break; }
+    if (out.size === 1 && kept[i].e[1] !== 0) out.add(kept[kept.length - 1]);
+    kept = kept.filter((it) => !out.has(it)); over -= out.size;
+  }
+  return kept;
+}
+export function capKK(layers, perBrick = LIMITS.kkEvents, perBar = LIMITS.kkBarEvents) {
+  let items = []; layers.forEach((l, li) => l.ev.forEach((e) => items.push({ l: li, e })));
+  const before = items.length;
+  const byBar = new Map(); for (const it of items) { const b = Math.floor(it.e[0] / 4); if (!byBar.has(b)) byBar.set(b, []); byBar.get(b).push(it); }
+  if (before <= perBrick && [...byBar.values()].every((a) => a.length <= perBar)) return false;
+  items = [];
+  for (const b of [...byBar.keys()].sort((x, y) => x - y)) items.push(...thin(byBar.get(b).sort((x, y) => x.e[0] - y.e[0]), perBar));
+  items = thin(items.sort((x, y) => x.e[0] - y.e[0]), perBrick);
+  const keep = new Set(items.map((it) => it.e));
+  for (const l of layers) l.ev = l.ev.filter((e) => keep.has(e));
+  return true;
 }
