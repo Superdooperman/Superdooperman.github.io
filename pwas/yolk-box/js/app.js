@@ -82,7 +82,7 @@ function ensureAudio() {
   if (!ctx) {
     ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
     eng = new Engine(ctx);
-    engReady = eng.ready.then(() => { eng.applyState(S); hookRec(); startMeter(); });
+    engReady = eng.ready.then(() => { eng.applyState(S); hookRec(); startMeter(); hmInit(); });
   }
   if (ctx.state !== 'running') ctx.resume();
   return engReady;
@@ -109,7 +109,7 @@ async function play(opts = {}) {
   mode = opts.src ? (opts.src.kind === 'song' ? 'song' : opts.src.kind) : 'ws'; src = opts.src || null; seqPos = opts.from || 0; curSeg = null; endAt = 0; pendQ = [];
   playing = true; step = 0; absStep = 0; kkAnchor = 0; gridT = ctx.currentTime + 0.06; playT0 = gridT; uiQ = []; dancer && dancer.reset(); kkFrom = S.kk.loop.layers.map(() => 0);
   if (mode === 'ws') eng.applyState(S, 0, ms);
-  timer = setInterval(sched, 25); sched();
+  timer = setInterval(sched, 25); sched(); hmStart();
   $('#play').classList.add('on'); $('#play').innerHTML = '&#9632;'; $('#play').setAttribute('aria-label', 'Stop');
   studio && studio.playUI();
 }
@@ -120,7 +120,7 @@ function stop() {
   $('#play').classList.remove('on'); $('#play').innerHTML = '&#9654;'; $('#play').setAttribute('aria-label', 'Play');
   $$('.cell.now').forEach((c) => c.classList.remove('now')); $$('#beatLeds i').forEach((l) => l.classList.remove('on', 'one'));
   if (mode !== 'ws') eng.applyState(S, 0, ms);
-  mode = 'ws'; src = null; studio && studio.playUI();
+  mode = 'ws'; src = null; studio && studio.playUI(); hmRest(); npSet(null);
 }
 // switch what is playing; lands on the next bar line when already playing
 function playSrc(nsrc, from = 0) {
@@ -168,7 +168,7 @@ function sched() {     // lookahead scheduler: one clock for every machine
     } else {
       ls = (cur.bar * 16 + step) % lsteps; eng.scheduleKK(st, ls, gridT);
     }
-    uiQ.push({ step, t, ls, lsteps, songBar: cur ? cur.songBar : -1, clip: cur ? cur.clip : null, countIn: !!(kr.countIn && absStep < 16), wsBar: Math.floor(ls / 16), wsBars: st.kk.loop.bars });
+    uiQ.push({ step, t, ls, lsteps, songBar: cur ? cur.songBar : -1, clip: cur ? cur.clip : null, countIn: !!(kr.countIn && absStep < 16), wsBar: Math.floor(ls / 16), wsBars: st.kk.loop.bars, seg: cur });
     gridT += sd; step = (step + 1) % 16; absStep++;
     if (step === 0 && mode !== 'ws') seqPos++;
   }
@@ -186,6 +186,7 @@ function drawPlayhead() {
       $$('#beatLeds i').forEach((l, j) => { l.classList.toggle('on', j === beat); l.classList.toggle('one', j === beat && beat === 0); l.classList.toggle('count', cur.countIn); });
       $('#barNum').textContent = cur.countIn ? 'COUNT ' + (4 - beat) : cur.songBar >= 0 ? `BAR ${cur.songBar + 1}` : `BAR ${cur.wsBar + 1}/${cur.wsBars}`;
       if (cur.songBar >= 0 && studio) studio.playhead(cur.songBar + cur.step / 16, cur.clip);
+      npSet(cur);
     }
   }
   requestAnimationFrame(drawPlayhead);
@@ -546,6 +547,51 @@ function buildMixer() {
     m.onclick = () => { S.drums.mute[v.id] = !S.drums.mute[v.id]; m.classList.toggle('on'); changed(); };
     w.append(kn, m); vl.appendChild(w);
   }
+}
+// ---------------------------------------------------------------- header egg meter (phones)
+// One small analyser after the limiter. The metronome click goes straight to the speakers (engine.click), so it never
+// reaches this point, the same as recordings. Runs on requestAnimationFrame only while playing, on a phone layout and
+// with the tab visible; nothing is allocated per frame and the eggs are only touched when the lit count changes.
+const HM_TH = [-40, -32, -24, -18, -12, -7, -3, -0.3].map((d) => Math.pow(10, d / 20));   // egg n lights at this peak
+const hm = { an: null, buf: null, eggs: null, lvl: 0, pk: 0, n: 0, hold: 0, holdT: 0, last: 0, raf: 0, frames: 0, mq: matchMedia('(min-width: 360px) and (max-width: 600px)') };
+function hmInit() {
+  hm.an = ctx.createAnalyser(); hm.an.fftSize = 256; hm.an.smoothingTimeConstant = 0; hm.buf = new Float32Array(hm.an.fftSize);
+  eng.limiter.connect(hm.an); hm.eggs = $$('#hMeter i');
+  document.addEventListener('visibilitychange', () => (document.hidden ? hmPause() : hmStart()));
+  hm.mq.addEventListener('change', () => (hm.mq.matches ? hmStart() : hmRest()));
+  if (playing) hmStart();
+}
+function hmStart() { if (hm.an && playing && !document.hidden && hm.mq.matches && !hm.raf) { hm.last = 0; hm.raf = requestAnimationFrame(hmFrame); } }
+function hmPause() { if (hm.raf) cancelAnimationFrame(hm.raf); hm.raf = 0; }
+function hmPaint(n, hold) {
+  if (n === hm.n && hold === hm.hold) return;
+  hm.n = n; hm.hold = hold;
+  for (let i = 0; i < hm.eggs.length; i++) hm.eggs[i].classList.toggle('on', i < n || i === hold - 1);
+}
+function hmRest() { hmPause(); hm.lvl = 0; hm.pk = 0; hm.holdT = 0; if (hm.eggs) hmPaint(0, 0); }
+function hmFrame(now) {
+  hm.raf = 0;
+  if (!playing || document.hidden || !hm.mq.matches) { if (!playing) hmRest(); return; }
+  const b = hm.buf; hm.an.getFloatTimeDomainData(b);
+  let pk = 0; for (let i = 0; i < b.length; i++) { const v = b[i] < 0 ? -b[i] : b[i]; if (v > pk) pk = v; }
+  const dt = hm.last ? Math.min(0.1, (now - hm.last) / 1000) : 0; hm.last = now; hm.frames++;
+  hm.pk = pk; hm.lvl = Math.max(pk, hm.lvl * Math.pow(10, -1.2 * dt));                  // instant attack, falls 24 dB a second
+  let n = 0; while (n < HM_TH.length && hm.lvl >= HM_TH[n]) n++;
+  let hold = hm.hold;
+  if (n >= hold || now > hm.holdT) { hold = n; hm.holdT = now + 700; }                    // peak egg holds for 0.7 s
+  hmPaint(n, hold);
+  hm.raf = requestAnimationFrame(hmFrame);
+}
+// ---------------------------------------------------------------- now playing line (phones): set from the audio-clocked uiQ, like the dancer
+const np = { nm: null, b: -1, n: -1, c: false };
+function npSet(cur) {
+  const el = $('#nowPlay');
+  if (!cur) { np.nm = null; np.b = np.n = -1; if (el.textContent !== 'Stopped') el.textContent = 'Stopped'; return; }
+  const seg = cur.seg, nm = cur.countIn ? 'Count in' : seg ? (seg.brick.name || 'Brick') : 'Workspace';
+  const bb = seg ? seg.bar + 1 : cur.wsBar + 1, bn = seg ? seg.brick.bars : cur.wsBars;
+  if (nm === np.nm && bb === np.b && bn === np.n) return;
+  np.nm = nm; np.b = bb; np.n = bn;
+  el.textContent = cur.countIn ? nm : `${nm}\u00a0· bar\u00a0${bb}/${bn}`;   // wraps as name · / bar n/N
 }
 function startMeter() {
   const sp = ctx.createChannelSplitter(2), aL = ctx.createAnalyser(), aR = ctx.createAnalyser(); aL.fftSize = aR.fftSize = 512;
@@ -912,5 +958,6 @@ const API = {
 window.YB = { get state() { return S; }, get kk() { return { kr: kr.state, anchor: kkAnchor, absStep, from: kkFrom.slice(), log: kkAll.slice(), tops: kkTops.slice(), rec: kr.state === 'rec' ? { t0: kr.t0, end: kr.end } : null, layers: S.kk.loop.layers.length, live: { ...live } }; },
   kkTap: { rec: kkRecBtn, undo: kkUndo, clear: kkClear, set: kkSet, live: kkLive }, get ctx() { return ctx; }, get eng() { return eng; }, get uiQ() { return uiQ; }, play, stop, toggleRec, exportTake, exportBars, renderOffline: (bars, st) => renderOffline(st || S, bars), loadState, goScreen, DEMOS, strutPhrase, wavBlob, mp3Blob, get take() { return take; },
   B, PR, savePrefs, get lib() { return lib; }, get P() { return P; }, get projects() { return projects; }, get H() { return { past: H.past.length, future: H.future.length }; }, get lastSwitch() { return lastSwitch; }, get dancer() { return dancer; }, get playT0() { return playT0; }, get playing() { return playing; }, get mode() { return mode; },
+  get meter() { return { lvl: hm.lvl, pk: hm.pk, lit: hm.n, hold: hm.hold, running: !!hm.raf, frames: hm.frames }; }, get nowPlaying() { return $('#nowPlay').textContent; },
   get studio() { return studio; }, saveBrick, openBrick, dupBrick, renameBrick, deleteBrick, loadLayer, setClips, exportSong, songSegs, capSegs, segsLen, EXPORT, renderSong, undo, redo, commit, surprise, setBars, setMS, tapTempo, playSrc, importJSON, exportProject, exportLibrary, newProject, switchProject, API };
 init();

@@ -314,25 +314,38 @@ dialog.wide { width: min(980px, 96vw); }
 #newSongDlg input { font-size: 16px; }
 /* transport rows are plain wrappers on desktop (display: contents keeps the old flex layout) */
 .trow { display: contents; }
+/* header level meter and now-playing line: phones only */
+.hstat { display: none; }
 /* phones (360-600): header with the 2x dancer spanning two rows and the song picker on a full row of its own;
    transport with the bar eggs as a column on the right and Export at the end of the second row.
    Every control here is at least 44px. */
 @media (min-width: 360px) and (max-width: 600px) {
-  .top { display: grid; position: relative; grid-template-columns: auto auto minmax(0, 1fr) 76px 44px; grid-template-rows: auto auto auto; column-gap: 6px; row-gap: 8px; align-items: center; margin-bottom: 6px; } /* >= 12px from the song picker to the tempo panel */
+  .top { display: grid; position: relative; grid-template-columns: 40px minmax(0, 1fr) 37px 37px 76px 44px; grid-template-rows: auto auto auto; column-gap: 4px; row-gap: 8px; align-items: center; margin-bottom: 6px; } /* >= 12px from the song picker to the tempo panel */
   .top .brand, .top .dancerbox, .top .pattern { display: contents; }
   .pattern { margin-bottom: 0; }
   .top .logo { grid-column: 1; grid-row: 1; justify-self: start; }
-  .top .titles { grid-column: 2 / 4; grid-row: 1; padding-left: 4px; }
+  .top .titles { grid-column: 2; grid-row: 1; padding-left: 2px; min-width: 0; }
   .top h1 { line-height: 1.1; max-width: 12ch; } /* breaks as MIDNIGHT'S / YOLK BOX, never YOLK / BOX */
-  #undoBtn { grid-column: 1; grid-row: 2; } #redoBtn { grid-column: 2; grid-row: 2; } #filesBtn { grid-column: 3; grid-row: 2; justify-self: start; }
-  #undoBtn, #redoBtn, #helpBtn { width: 44px; height: 44px; padding: 0; }
-  #undoBtn, #redoBtn { font-size: 18px; }
-  #filesBtn { min-height: 44px; padding: 0 14px; }
-  #helpBtn { grid-column: 5; grid-row: 2; }
+  /* undo, redo and Files sit right of the title: 34px to the eye, 40x44 to the finger (the ::after pads the hit area) */
+  #undoBtn { grid-column: 3; grid-row: 1; justify-self: start; } #redoBtn { grid-column: 4; grid-row: 1; justify-self: end; }
+  #undoBtn, #redoBtn { position: relative; width: 34px; height: 34px; padding: 0; font-size: 16px; }
+  #filesBtn { position: relative; grid-column: 3 / 5; grid-row: 2; width: 100%; height: 34px; padding: 0; }
+  #undoBtn::after, #redoBtn::after { content: ""; position: absolute; inset: -7px -4px; }
+  #filesBtn::after { content: ""; position: absolute; inset: -7px -2px; }
+  #helpBtn { grid-column: 6; grid-row: 2; width: 44px; height: 44px; padding: 0; }
+  /* egg level meter and now-playing line under the title */
+  .hstat { grid-column: 1 / 3; grid-row: 2; display: flex; align-items: center; gap: 6px; min-width: 0; height: 44px; }
+  .hmeter { display: flex; align-items: flex-end; gap: 2px; flex: none; }
+  .hmeter i { display: block; width: 7px; height: 9px; border-radius: 50% 50% 46% 46% / 58% 58% 42% 42%; background: #3a3216; border: 1px solid #5b4c1c; }
+  .hmeter i.o { background: #3b2410; border-color: #6a3f16; } .hmeter i.r { width: 8px; height: 11px; background: #3a1512; border-color: #6b2620; }
+  .hmeter i.on { background: var(--yolk); border-color: #ffe48a; box-shadow: 0 0 5px var(--yolk); }
+  .hmeter i.o.on { background: #f28a1e; border-color: #ffc07a; box-shadow: 0 0 5px #f28a1e; }
+  .hmeter i.r.on { background: var(--comb); border-color: #ff8a7a; box-shadow: 0 0 6px var(--comb); }
+  .nowplay { flex: 1; min-width: 0; font-size: 10px; line-height: 12px; max-height: 24px; overflow: hidden; color: var(--egg2); letter-spacing: .04em; overflow-wrap: anywhere; }
   .top .pattern select { grid-column: 1 / -1; grid-row: 3; width: 100%; min-width: 0; max-width: none; min-height: 44px; }
-  .top .dancer { grid-column: 4; grid-row: 1 / 3; align-self: stretch; width: 76px; height: auto; min-height: 84px; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; }
+  .top .dancer { grid-column: 5; grid-row: 1 / 3; align-self: stretch; width: 76px; height: auto; min-height: 84px; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; }
   .top .dancer canvas { width: 72px; height: 80px; }
-  .top .dsw { grid-column: 5; grid-row: 1; width: 44px; height: 44px; margin: 0; font-size: 20px; }
+  .top .dsw { grid-column: 6; grid-row: 1; width: 44px; height: 44px; margin: 0; font-size: 20px; }
   .top .dpop { top: calc(100% + 6px); right: 0; }
 
   .transport { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 6px; row-gap: 6px; align-items: center; }
@@ -353,6 +366,7 @@ dialog.wide { width: min(980px, 96vw); }
   #exportBtn { margin-left: auto; min-height: 44px; padding: 0 9px; }
 }
 @media (min-width: 360px) and (max-width: 374px) {
+  .top h1 { font-size: 15px; }
   .transport .btn.big.play { width: 44px; height: 44px; }
   #bpmVal { min-width: 48px; font-size: 20px; } .transport #tapBtn { min-width: 44px; padding: 0 4px; }
   .transport { padding-left: 6px; padding-right: 6px; } .transport .trow2 .btn.sm { padding: 5px 5px; }
