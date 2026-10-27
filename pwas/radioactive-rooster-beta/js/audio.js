@@ -42,7 +42,11 @@ export const CUES = [
 
 // Cues that pick among numbered variants (<cue>-1 .. <cue>-N, never the same one twice running), then fall back to
 // the plain <cue> file, then to another cue's file, then to the synth.
-export const VARIANTS = { "henny-cluck": { max: 6, fallback: "hen-cluck" } };
+// footstep-1..4: Brook's v2 muffled single steps (Oct 27, approved by Arlong; assets/music-drafts/cues-oct27/README.md),
+// footstep = v2 footstep-1 as the fallback.
+export const VARIANTS = { "henny-cluck": { max: 6, fallback: "hen-cluck" }, footstep: { max: 4, fallback: "footstep" } };
+// Per-cue level on top of the sfx slider (Brook's README knob). 1 = as recorded; e.g. 0.7 is about -3 dB.
+export const CUE_MIX = { footstep: 1 };
 const lastVariant = {};
 export function cueFile(kind, cues = manifest.cues, rand = Math.random) {
   const v = VARIANTS[kind];
@@ -248,7 +252,7 @@ export async function playCue(kind) {
   const url = cueFile(kind);
   if (url) {
     try {
-      await element(url, "sfx").play();
+      await element(url, "sfx", CUE_MIX[kind] ?? 1).play();
       return;
     } catch { /* fall through to the synth */ }
   }
@@ -314,17 +318,25 @@ export const THEME_ROOMS = { gate: "midway", midway: "midway", pavilion: "midway
 //     Before the unmasking the club cutaway stays noir.
 //   chase: the Pavilion showdown, from the cut back to the stage after her sign lights up, through the crow-down, the
 //     glide and the cage, until the ending cover.
-export const MOMENT_THEMES = { chase: "chase", gobbler: "club-acid" };
+//   hattie-call / ticket (beta v17 item 7, Brook's Oct 27 drafts, assets/music-drafts/cues-oct27/README.md): line-tagged
+//     moments (js/logic.js line({ music })). hattie-call: "Then the phone lights up" through her phone choice and
+//     reply to DeeJay's off-air line; ticket: "The edges fit" through the flashback to "It's Hattie...". Files:
+//     audio/in/theme-hattie-call.ogg|mp3 and audio/in/theme-ticket-memory.ogg|mp3 (staged Oct 27, Arlong liked them);
+//     a missing file falls back to the room's music (themeFor).
+export const MOMENT_THEMES = { chase: "chase", gobbler: "club-acid", "hattie-call": "hattie-call", ticket: "ticket-memory" };
 // Exact loop lengths in samples at 44.1 kHz (assets/music-drafts/NOTES.md). A decode that comes out longer (mp3
 // padding the decoder didn't trim) loops on these samples only, after any leading decoder silence.
-export const THEME_LOOP = { midway: 2116800, chase: 1159890, "club-acid": 2228211, "club-noir": 2016000 };
+export const THEME_LOOP = { midway: 2116800, chase: 1159890, "club-acid": 2228211, "club-noir": 2016000, "hattie-call": 2016000, "ticket-memory": 1411200 };
 // Per-theme trim in dB on top of the bed level. club-noir -3 dB (Brook: the trumpet + Rhodes may need 2-3 dB under
 // dialogue): it is -23 LUFS like the rest, but -27.3 LUFS in the 0.9-3 kHz speech band against -31.0 for the busiest
 // existing bed (bed-midway-calm) and -37 to -44 for the others; -3 dB puts it level with that bed.
-export const THEME_TRIM_DB = { "club-noir": -3 };
+// hattie-call -3 dB: Brook measured -26.2 LUFS in the speech band, against club-noir's -27.0 before its trim.
+export const THEME_TRIM_DB = { "club-noir": -3, "hattie-call": -3 };
 export const REVEAL_XFADE_S = 0.08; // the acid hit on the smoke clear
 const THEME_GAIN = 0.35; // same level as the beds: under the dialogue
 export const XFADE_S = 1.2; // room-to-room music change
+// A longer hand-back when a line-tagged moment theme ends (Brook's README: 1.2 s is abrupt for these two; 2-2.5 s).
+export const THEME_OUT_S = { "hattie-call": 2.2, "ticket-memory": 2.2 };
 export const HOLD_XFADE_S = 0.35; // a beat borrowing the music (the club cutaway) and handing it back
 const themeData = new Map(); // name -> Promise<{ buffer, url, loopStart, loopEnd } | null>
 const themeResume = {}; // name -> seconds into the loop, kept while a beat borrows the music
@@ -486,6 +498,8 @@ async function switchBed(room, moment = null, fade = XFADE_S, keepPlace = false)
   if (!room) { stopBed(fade); wantBed = null; return; }
   const key = `${room}|${moment || ""}`;
   if (wantBed && wantBed.key === key) return;
+  const outS = bedNow && bedNow.theme && THEME_OUT_S[bedNow.key.slice("theme-".length)];
+  if (outS && fade === XFADE_S) fade = outS; // leaving the phone call / ticket memory: the slower crossfade
   const want = { room, moment, key };
   wantBed = want;
   await initAudio();

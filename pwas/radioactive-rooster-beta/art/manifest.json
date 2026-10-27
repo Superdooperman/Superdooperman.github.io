@@ -152,7 +152,7 @@
     0
    ],
    "legacy": "bg-midway.jpg",
-   "source": "Brook 2026-10-26 midway-sign-v1 (B3/sign-cut-v2 design): club sign painted PRE-REVEAL (hawk + THE COCK lit, GOBBLER a faint dead ghost); fx/clubsign-lit-g1..g7 light GOBBLER"
+   "source": "Brook 2026-10-26 midway-sign-v1 (B3/sign-cut-v2 design): club sign painted PRE-REVEAL (hawk + THE COCK lit, GOBBLER a faint dead ghost); fx/clubsign-lit-g1..g7 light GOBBLER; Brook 2026-10-27 midway-rope-v2: CLEAN PLATE, the painted rope removed (rope is now only fg/midway--rope / --rope-open)"
   },
   "bg/pavilion": {
    "kind": "bg",
@@ -7258,8 +7258,21 @@
     0,
     0
    ],
-   "base": 179,
-   "source": "tools/sprites/cut_push_a.py (rope-hot-oil-arlong.png (Arlong, item 46), scale 0.08, back post foot at (256,146), front post foot at (303,179))"
+   "base": 177,
+   "source": "Brook 2026-10-27 assets/art-placeholder/midway-rope-v2 (rope-hot-oil-arlong.png re-cut at s=0.0696, closed; tight 60x77 at top-left (252,101); posts' feet (261,149), (302,177)); approved by Arlong Oct 27"
+  },
+  "fg/midway--rope-open": {
+   "kind": "fg",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "base": 177,
+   "source": "Brook 2026-10-27 assets/art-placeholder/midway-rope-v2 (open: rope unhooked from the front post, HOT OIL sign on the planks; same canvas as closed); approved by Arlong Oct 27"
   },
   "fx/closeup-gloves": {
    "kind": "fx",
@@ -7427,7 +7440,7 @@
     28,
     112
    ],
-   "source": "tools/sprites/cut_oct21.py (hattie-chain-sprites-v1.jpg)"
+   "source": "Brook 2026-10-27 hattie-chain-pose (one-hand chain hold, src-hattie-chain-onehand.jpg; Arlong-approved drop-in, rebuild with assets/art-placeholder/hattie-chain-pose/build_hattie_chain_pose.py). Guarded by tools/sprites/keep_dropins.py: cut_oct21.py won't re-cut it"
   },
   "sprite/hattie-chain-l-h52": {
    "kind": "sprite",
@@ -7439,7 +7452,7 @@
     28,
     112
    ],
-   "source": "tools/sprites/cut_oct21.py (hattie-chain-sprites-v1.jpg)"
+   "source": "Brook 2026-10-27 hattie-chain-pose (one-hand chain hold, src-hattie-chain-onehand.jpg; Arlong-approved drop-in, rebuild with assets/art-placeholder/hattie-chain-pose/build_hattie_chain_pose.py). Guarded by tools/sprites/keep_dropins.py: cut_oct21.py won't re-cut it"
   },
   "sprite/hattie-flinch-r-h52": {
    "kind": "sprite",
@@ -11306,6 +11319,18 @@
     180
    ],
    "source": "Brook's club sign cut sign-cut-v2 (Arlong liked it 2026-10-26), 320x180 at 0,0: gobbler lit tube pixels, alpha 0/255, normal blend, box 183,88-285,132. Staged from assets/art-placeholder/club/sign-cut/gobbler-lit.png by tools/art_files.py (js/beats.js signCutArt)"
+  },
+  "fx/insert-note-clarion": {
+   "kind": "fx",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "Brook 2026-10-27 assets/art-placeholder/insert-note-clarion (full-frame bucket note on the Clarion, text from js/logic.js readNote); approved by Arlong Oct 27"
   }
  }
 }

@@ -489,6 +489,8 @@ function runOne(beat) {
     const build = BUILD[beat.kind];
     if (!build) { resolve(); return; }
     const node = build(beat);
+    // a line read over the beat (the Pavilion sign cut's narration, Arlong 2026-10-27), in the game's caption box
+    if (beat.caption) node.append(el("div", "beat-caption", beat.caption));
     document.body.append(node);
     const timers = SOUND[beat.kind](beat);
     const ms = (beat.kind === "club" && beat.veil === "whisk" ? BEAT_MS.clubWhisk : BEAT_MS[beat.kind]) || 2000;

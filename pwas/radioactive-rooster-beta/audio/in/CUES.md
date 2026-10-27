@@ -24,6 +24,7 @@ Lengths are those of Brook's current placeholders. A replacement can be a little
 | `turnstile` | one-shot | 0.8 s | Gate to Midway, and the turnstile spot |
 | `clock-tick` | one-shot | 1.0 s | Each time card (three ticks, one a second) |
 | `cutaway` | one-shot | 0.6 s | Cold open and club cutaway start |
+| `chain-creak` | one-shot | ~0.8 s | Beta v17: the cage swinging on its chain in the hot sauce toss (twice: the bottle passing over, her release). **In (Oct 27, Arlong-approved):** Brook's `cues-oct27/chain-creak` (the 0.8 s `cage-sway-short`), staged +5 dB (-23.1 -> about -18.5 LUFS, peak -2 dBFS) because it came in ~7 dB under the other one-shots and CUE_MIX can't lift an `<audio>` past volume 1. Re-stage from `assets/music-drafts/cues-oct27/`: `ffmpeg -i chain-creak.ogg -af volume=5dB -c:a libvorbis -q:a 5 audio/in/chain-creak.ogg` (and the mp3), then `python3 tools/audio_files.py` |
 | `ring-toss` | one-shot | 1.3 s | The ring-toss choice |
 | `hen-cluck` | one-shot | 1.4 s | Entering the fence yard (the yard hens) |
 | `neon-sputter` | one-shot | 1.45 s | Club cutaway: the stogie henchman's smack on the sign, at 1.8 s, with GOBBLER's 0.5 s flicker (`SIGN_MS.smack` in `js/beats.js`). **Brook's synthesized placeholder, approved by Arlong 2026-10-25** (`assets/audio-placeholder/neon-sputter.*`; WAV/OGG/MP3 staged, OGG plays) |

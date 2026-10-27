@@ -4,13 +4,18 @@
  "cues": {
   "blip": "mp3",
   "bonk": "mp3",
+  "chain-creak": "ogg",
   "click": "mp3",
   "clock-tick": "mp3",
   "crow": "mp3",
   "cutaway": "mp3",
   "ding": "mp3",
   "door": "mp3",
-  "footstep": "mp3",
+  "footstep-1": "ogg",
+  "footstep-2": "ogg",
+  "footstep-3": "ogg",
+  "footstep-4": "ogg",
+  "footstep": "ogg",
   "geiger": "mp3",
   "ghost-scare": "mp3",
   "goat-bleat": "mp3",
@@ -61,7 +66,15 @@
    "ogg",
    "mp3"
   ],
+  "theme-hattie-call": [
+   "ogg",
+   "mp3"
+  ],
   "theme-midway": [
+   "ogg",
+   "mp3"
+  ],
+  "theme-ticket-memory": [
    "ogg",
    "mp3"
   ]

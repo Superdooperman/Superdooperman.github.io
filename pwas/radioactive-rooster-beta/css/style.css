@@ -574,6 +574,9 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 
 /* cutscenes (js/main.js playCutscene): input locked, a short screen shake on impacts */
 .cs-block { position: fixed; inset: 0; z-index: 10000; cursor: wait; }
+/* cutscene fx slots (js/main.js cutsceneFx): Brook's strips, else code-drawn droplets */
+.world .cs-strip { position: absolute; pointer-events: none; background-repeat: no-repeat; background-size: calc(var(--frames) * 100%) 100%; image-rendering: pixelated; }
+.world .cs-drop { position: absolute; pointer-events: none; border-radius: 50%; }
 .world.shake { animation: world-shake 0.35s linear; }
 @keyframes world-shake { 0%, 100% { transform: none; } 20% { transform: translate(-1.2%, 0.6%); } 40% { transform: translate(1%, -0.8%); } 60% { transform: translate(-0.7%, 0.4%); } 80% { transform: translate(0.4%, -0.3%); } }
 
@@ -591,6 +594,17 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 /* Oct 21 items 15/20: the stunt-night flashback at the joined ticket: the scene goes old-photo sepia */
 .world.flashback { filter: sepia(0.85) contrast(1.08) brightness(0.92); }
 .world.flashback::after { content: ""; position: absolute; inset: 0; z-index: 990; pointer-events: none; box-shadow: inset 0 0 40px 12px rgba(40, 22, 6, 0.75); }
+
+/* beta v17 item 6: the flashback dissolves in and out (js/main.js flashFade; --flash-delay keeps a re-render in step) */
+.world.flash-in { animation: flash-sepia-in 0.9s ease-in-out both; animation-delay: var(--flash-delay, 0ms); }
+.world.flash-in::after { animation: flash-fade-in 0.9s ease-in-out both; animation-delay: var(--flash-delay, 0ms); }
+.world.flash-out { animation: flash-sepia-out 0.9s ease-in-out both; animation-delay: var(--flash-delay, 0ms); }
+@keyframes flash-sepia-in { from { filter: none; } to { filter: sepia(0.85) contrast(1.08) brightness(0.92); } }
+@keyframes flash-sepia-out { from { filter: sepia(0.85) contrast(1.08) brightness(0.92); } to { filter: none; } }
+@keyframes flash-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes flash-fade-out { from { opacity: 1; } to { opacity: 0; } }
+.world .flash-past.dissolve-in { animation: flash-fade-in 0.9s ease-in-out both; }
+.world .flash-past.dissolve-out { animation: flash-fade-out 0.9s ease-in-out both; }
 
 /* Push A (Oct 24) */
 /* item 31: a new room fades in from black instead of popping (its neighbours' plates are preloaded) */
@@ -616,6 +630,10 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
   opacity: 0; transition: opacity .25s ease-out;
 }
 .beat.beat-in { opacity: 1; }
+.beat .beat-caption {
+  position: absolute; left: 50%; bottom: 3vh; transform: translateX(-50%); width: min(92vw, 60em); box-sizing: border-box;
+  background: var(--cream); color: var(--ink); border: 3px solid var(--ink); padding: 10px 12px; line-height: 1.35; text-align: left;
+}
 .beat.beat-out { opacity: 0; }
 .beat .beat-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
 .beat-stage { position: relative; width: min(100vw, calc(100vh * 16 / 9)); aspect-ratio: 16 / 9; overflow: hidden; background: #111; }
@@ -777,3 +795,15 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 
 /* Hattie's smoke portrait (js/main.js smokePlateNode): Brook's 64x64 strips, stepped in lockstep with the Pavilion smoke */
 .speaker .portrait-smoke { display: block; width: 100%; aspect-ratio: 1; background-color: var(--cream); background-repeat: no-repeat; background-size: calc(var(--frames, 1) * 100%) 100%; image-rendering: pixelated; }
+
+/* beta v17: full-screen insert (js/main.js showInsert): a note or clue board over everything, fades in and out */
+.insert {
+  position: fixed; inset: 0; z-index: 9000; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; padding: 4vmin; background: rgba(5, 5, 8, 0.88); opacity: 0; pointer-events: none; /* clicks: js/main.js showInsert */
+  transition: opacity var(--insert-fade, 400ms) ease-in-out;
+}
+.insert.on { opacity: 1; }
+/* fitted to the screen whatever its size: a 320x180 pixel insert scales up (pixelated), a big painting scales down */
+.insert .insert-art { width: min(94vw, calc(82vh * 16 / 9)); height: auto; max-height: 82vh; object-fit: contain; image-rendering: pixelated; box-shadow: 0 6px 30px rgba(0,0,0,.6); }
+.insert .insert-caption { max-width: 60em; color: #f3ead2; font: 600 clamp(14px, 2.2vmin, 22px)/1.4 Georgia, serif; text-align: center; }
+.insert .insert-hint { color: rgba(243, 234, 210, 0.5); font: 11px/1 ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; }

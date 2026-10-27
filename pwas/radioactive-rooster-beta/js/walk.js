@@ -247,7 +247,9 @@ function seqFrame(seq, since, at) {
 }
 
 export function castFrame(c, { line = null, since = Infinity, now = 0, lastAct = null, speakers = {} } = {}) {
-  const cue = line && line.cue && c.cues && c.cues[line.cue];
+  let cue = line && line.cue && c.cues && c.cues[line.cue];
+  // since < 0: the line is up but its cue hasn't started (a cutscene holds it for its hit): poses wait, walks sit at their start
+  if (cue && since < 0 && !cue.walk) cue = null;
   if (cue && typeof cue === "string") return { sprite: cue, at: c.at };
   if (cue && !cue.walk && cue.seq) return seqFrame(cue.seq, since, cue.at || c.at);
   if (cue && !cue.walk) return { sprite: cue.sprite, at: cue.at || c.at }; // a held pose somewhere else: { sprite, at }

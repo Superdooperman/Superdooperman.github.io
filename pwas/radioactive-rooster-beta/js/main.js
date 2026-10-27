@@ -70,6 +70,16 @@ function resumeSlot(slot) {
 // `fallback`: another asset to show if this one is unknown or fails to load, so a missing frame never leaves an
 // empty image (Rooster must never vanish). An id the manifest doesn't know yet (stale manifest) is tried directly as
 // art/pixel/<id>.png first.
+// An occluder's cutout for this plate; one with `open: { flag, id }` swaps to that cutout once the flag is set and its
+// file is in (the Midway rope, open after pavilion_in). Same base and edge either way.
+function occluderFile(o, plate, flags) {
+  if (o.open && flags[o.open.flag]) {
+    const alt = occluderAsset(plate, o.open.id);
+    if (assetInfo(alt)) return alt;
+  }
+  return occluderAsset(plate, o.id);
+}
+
 function urlOf(file) {
   // only for ids the manifest doesn't know (a stale manifest); a known id with a placeholder keeps its placeholder
   if (!assetInfo(file) && /^(sprite|item|fg|fx|overlay|bg)\//.test(file)) return `art/pixel/${file}.png`;
@@ -112,13 +122,21 @@ function showLine(entry) {
     playCutscene(entry.cutscene, () => showLine(entry));
     return;
   }
-  // Usopp 2026-10-25: the cut to the club sign (GOBBLER sputters and lights as one tube, Arlong 2026-10-26) plays first, then back here
-  if (entry.signCut && !entry.played) {
-    entry.played = true;
-    playBeats([{ kind: "sign" }]).then(() => showLine(entry));
+  // a full-screen insert (showInsert) first, then the line
+  if (entry.insert && !entry.insertShown) {
+    entry.insertShown = true;
+    showInsert(entry.insert).then(() => showLine(entry));
     return;
   }
+  // Usopp 2026-10-25: the cut to the club sign (GOBBLER sputters and lights as one tube, Arlong 2026-10-26).
+  // Arlong 2026-10-27: its narration is read DURING the close-up, not after the cut fades: the beat carries the line
+  // as its own caption (js/beats.js runOne), and the line is shown now underneath, so it's already up when the cut ends.
+  if (entry.signCut && !entry.played) {
+    entry.played = true;
+    playBeats([{ kind: "sign", caption: entry.text }]);
+  }
   ui.lineAt = performance.now();
+  if (ui.cueAt && ui.cueAt.line !== entry) ui.cueAt = null; // a cue started by this line's cutscene keeps its clock
   if (entry.mood) ui.state.mood = entry.mood;
   if (entry.sound) playCue(entry.sound);
   else if (entry.speaker === SPEAKER.goat && !hasVoice(entry.id)) playCue("goat-bleat"); // Mortgage's "meeeeeh."
@@ -340,8 +358,12 @@ function playCutscene(name, done) {
     const node = el("img", "overlay cs-prop"); node.alt = ""; node.style.zIndex = 950; placeAt(node, p.art, at);
     if (p.show) node.style.visibility = "hidden";
     world.append(node);
-    return { ...p, at, node };
+    // apexY: the lob clears that height at its top (the sauce bottle goes over the cage), whatever his fist height
+    const arc = p.arc && p.apexY !== undefined ? [p.arc[0], p.arc[1], p.arc[2], Math.max(p.arc[3], (at[1] + p.arc[2][1]) / 2 - p.apexY)] : p.arc;
+    return { ...p, at, arc, node };
   });
+  if (cs.cueOnHit) ui.cueAt = { line: currentLine(), t: Infinity }; // the line's cue waits for the hit
+  const fxRun = cutsceneFx(cs, world);
   const fired = new Set();
   const t0 = performance.now();
   const tint = world.querySelector(".cast") && world.querySelector(".cast").style.filter;
@@ -388,6 +410,7 @@ function playCutscene(name, done) {
       if (ev.fx) { const n = el("img", "fx-pop"); n.alt = ""; placeAt(n, ev.fx, ev.at); world.append(n); setTimeout(() => n.remove(), FX_MS + 100); }
       if (ev.shake) { world.classList.remove("shake"); void world.offsetWidth; world.classList.add("shake"); setTimeout(() => world.classList.remove("shake"), ev.shake); }
     });
+    fxRun.tick(t);
     if (t >= cs.ms) { finish(); return; }
     requestAnimationFrame(tick);
   };
@@ -397,6 +420,7 @@ function playCutscene(name, done) {
     over = true;
     for (const a of Object.values(actors)) { a.node.remove(); if (a.real) a.real.style.visibility = ""; }
     for (const p of props) p.node.remove();
+    fxRun.finish();
     block.remove();
     if (cs.end && cs.end.hero && room.hero) { hero.x = hero.tx = cs.end.hero[0]; hero.y = hero.ty = cs.end.hero[1]; hero.path = []; hero.walking = false; hero.face = cs.end.face || "front"; }
     else if (cs.faceTo !== undefined && room.hero) hero.face = f;
@@ -404,6 +428,131 @@ function playCutscene(name, done) {
     done();
   }
   requestAnimationFrame(tick);
+}
+
+/* ---------- Cutscene fx slots (beta v17, Arlong Oct 27: the hot sauce toss) ----------
+ * cs.slots: [{ slot, art, t, at | path, frames?, frameMs?, anchor?, ms?, z?, placeholder }] named sprite strips Brook
+ * paints. With its art in the manifest a slot plays the strip: one frame is the manifest `size`, `frames` across
+ * (slot.frames, else manifest frames), `frameMs` each (slot, else manifest frameMs, else 70), drawn with the
+ * manifest `anchor` (or slot.anchor) on `at`. `path: { from, to, height, ms }` moves it along a lob (the oil blob,
+ * its frames looping) instead. Without the art, code-drawn droplets stand in (placeholder: "burst" | "blob" |
+ * "spray" | "puff"). Also, all on the same clock:
+ * slot.face ("l" | "r") points a placeholder spray / puff the way she faces.
+ *   cs.hit: ms, the impact; the line's cue (cs.cueOnHit) starts there, so her chain release syncs to the hit
+ *   cs.recoil: { spot, t, ms, px: [dx, dy] }: a cast member knocked back and settling
+ *   cs.sway: { match, kicks: [[t, deg]], period, decay, creak }: a pendulum on a hanging prop (the cage + its chain,
+ *     one sprite), pivoting at the sprite's top (the chain's top); `creak` plays the sound slot on each kick;
+ *     `drop: { t, ms, by: [dx, dy] }` lowers it during the beat (the cage drop on her release).
+ * The sway keeps running after the beat until it has died out (ui.sway), so the drop low over the oil settles. */
+const PLACEHOLDER_OIL = ["#ffcf5a", "#f0962e", "#c85a17", "#7a3210"];
+function cutsceneFx(cs, world) {
+  const nodes = [];
+  const rand = (() => { let x = 7; return () => ((x = (x * 16807) % 2147483647) / 2147483647); })(); // same drops every time
+  const runs = (cs.slots || []).map((sl) => ({ ...sl, started: false, done: false, parts: [] }));
+  const lob = (pth, u) => [pth.from[0] + (pth.to[0] - pth.from[0]) * u, pth.from[1] + (pth.to[1] - pth.from[1]) * u - 4 * (pth.height || 0) * u * (1 - u)];
+  const drop = (sz, color, z) => { const d = el("div", "cs-drop"); d.style.width = pct(sz, "x"); d.style.height = pct(sz, "y"); d.style.background = color; d.style.zIndex = z; world.append(d); nodes.push(d); return d; };
+  const put = (d, x, y, sz) => { d.style.left = pct(x - sz / 2, "x"); d.style.top = pct(y - sz / 2, "y"); };
+  const start = (r) => {
+    r.started = true;
+    const info = r.art && assetInfo(r.art);
+    const url = info && info.pixel !== false && artUrl(r.art);
+    const z = r.z || 960;
+    if (url) { // Brook's strip
+      const n = r.frames || info.frames || 1;
+      const node = el("div", "cs-strip");
+      node.dataset.slot = r.slot;
+      node.style.backgroundImage = `url("${url}")`;
+      node.style.setProperty("--frames", String(n));
+      node.style.width = pct(info.size[0], "x"); node.style.height = pct(info.size[1], "y"); node.style.zIndex = z;
+      world.append(node); nodes.push(node);
+      r.strip = { node, n, ms: r.frameMs || info.frameMs || 70, anchor: r.anchor || info.anchor || [0, 0], size: info.size };
+      return;
+    }
+    // placeholder droplets (code-drawn until the strip is in)
+    const kind = r.placeholder || "burst";
+    const count = kind === "blob" ? 7 : kind === "puff" ? 6 : kind === "spray" ? 16 : 18;
+    for (let i = 0; i < count; i++) {
+      const sz = kind === "blob" ? (i ? 2.5 : 5) : kind === "puff" ? 3 + rand() * 3 : 1.5 + rand() * 2;
+      const color = kind === "puff" ? (i % 3 === 2 ? "#6e6266" : i % 2 ? "#ffd060" : "#ff8a2a") : PLACEHOLDER_OIL[i % PLACEHOLDER_OIL.length];
+      const d = drop(sz, color, z);
+      d.dataset.slot = r.slot;
+      const a = kind === "burst" ? -Math.PI / 2 + (rand() - 0.5) * 1.6 : kind === "spray" ? Math.PI * (r.face === "r" ? 0.15 : 0.85) + (rand() - 0.5) * 2.4 : (r.face === "r" ? -0.35 : Math.PI + 0.35) + (rand() - 0.5) * 0.6; // puff: out of her mouth, up and her way (face, default "l")
+      const v = kind === "burst" ? 50 + rand() * 60 : kind === "spray" ? 25 + rand() * 45 : 14 + rand() * 16;
+      r.parts.push({ d, sz, vx: Math.cos(a) * v, vy: Math.sin(a) * v, lag: i * 35 });
+    }
+  };
+  const tickSlot = (r, t) => {
+    const age = t - r.t;
+    const life = r.ms || (r.path ? r.path.ms : r.strip ? r.strip.n * r.strip.ms : 600);
+    if (age >= life) { r.done = true; for (const p of r.parts) p.d.remove(); if (r.strip) r.strip.node.remove(); return; }
+    if (r.strip) {
+      const { node, n, ms, anchor, size } = r.strip;
+      const frame = r.path ? Math.floor(age / ms) % n : Math.min(n - 1, Math.floor(age / ms));
+      const at = r.path ? lob(r.path, Math.min(1, age / r.path.ms)) : r.at;
+      node.style.left = pct(at[0] - anchor[0], "x"); node.style.top = pct(at[1] - anchor[1], "y");
+      node.style.backgroundPosition = `${n > 1 ? (frame / (n - 1)) * 100 : 0}% 0`;
+      node.dataset.frame = String(frame + 1);
+      void size;
+      return;
+    }
+    const s = age / 1000;
+    for (const p of r.parts) {
+      if (r.path) { // the blob and its trailing drips follow the lob
+        const u = Math.max(0, Math.min(1, (age - p.lag) / r.path.ms));
+        const [x, y] = lob(r.path, u);
+        put(p.d, x, y + (p.lag ? 1 : 0), p.sz);
+        p.d.style.opacity = u >= 1 ? "0" : "1";
+        continue;
+      }
+      const g = r.placeholder === "puff" ? -18 : 160; // puffs rise, oil falls
+      const x = r.at[0] + p.vx * s, y = r.at[1] + p.vy * s + 0.5 * g * s * s;
+      put(p.d, x, y, p.sz * (r.placeholder === "puff" ? 1 + s * 2 : 1));
+      p.d.style.opacity = String(Math.max(0, 1 - age / life));
+    }
+  };
+  // sway: a damped pendulum, one sum of kicks
+  const sw = cs.sway;
+  const swayNode = () => sw && [...world.querySelectorAll("img.cast")].find((n) => (n.dataset.file || "").startsWith(sw.match));
+  const swayDeg = (t) => (sw ? sw.kicks.reduce((sum, [tk, deg]) => (t < tk ? sum : sum + deg * Math.exp(-(t - tk) / (sw.decay || 900)) * Math.sin((2 * Math.PI * (t - tk)) / (sw.period || 1300))), 0) : 0);
+  const kicked = new Set();
+  let recoilNode = null, hitDone = false;
+  return {
+    tick(t) {
+      for (const r of runs) { if (r.done || t < r.t) continue; if (!r.started) start(r); tickSlot(r, t); }
+      if (cs.hit !== undefined && !hitDone && t >= cs.hit) {
+        hitDone = true;
+        if (cs.cueOnHit) ui.cueAt = { line: currentLine(), t: performance.now() };
+      }
+      const rc = cs.recoil;
+      if (rc && t >= rc.t) {
+        recoilNode = recoilNode || world.querySelector(`img.cast[data-spot="${rc.spot}"]`);
+        const u = Math.min(1, (t - rc.t) / rc.ms), k = u < 0.25 ? u / 0.25 : 1 - (u - 0.25) / 0.75;
+        if (recoilNode) recoilNode.style.translate = u >= 1 ? "" : `${pct(rc.px[0] * k, "x")} ${pct(rc.px[1] * k, "y")}`;
+      }
+      if (sw) {
+        sw.kicks.forEach(([tk], i) => { if (t >= tk && !kicked.has(i)) { kicked.add(i); if (sw.creak) playCue(sw.creak); } });
+        const n = swayNode();
+        if (n) {
+          n.style.transformOrigin = "50% 0"; n.style.rotate = `${swayDeg(t).toFixed(2)}deg`;
+          // the drop on the hit, while the beat still shows the cage it started with (the line's own cue walk ends
+          // in the same place when the scene re-renders after the beat)
+          const d = sw.drop, u = d && t >= d.t ? Math.min(1, (t - d.t) / d.ms) : 0;
+          if (d) n.style.translate = u ? `${pct(d.by[0] * u, "x")} ${pct(d.by[1] * u * u, "y")}` : "";
+        }
+      }
+    },
+    finish() {
+      for (const n of nodes) n.remove();
+      if (recoilNode) recoilNode.style.translate = "";
+      if (!sw) return;
+      // let the pendulum die out after the beat (the cast ticker re-finds the cage after the next render)
+      const t1 = performance.now() - cs.ms;
+      const end = Math.max(...sw.kicks.map(([tk]) => tk)) + 4 * (sw.decay || 900);
+      ui.sway = { tick() { const t = performance.now() - t1; const n = [...document.querySelectorAll(".world img.cast")].find((x) => (x.dataset.file || "").startsWith(sw.match)); if (t >= end) { if (n) n.style.rotate = ""; ui.sway = null; return; } if (n) { n.style.transformOrigin = "50% 0"; n.style.rotate = `${swayDeg(t).toFixed(2)}deg`; } } };
+      const step = () => { if (!ui.sway) return; ui.sway.tick(); requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    },
+  };
 }
 
 function roomOf(state) {
@@ -417,9 +566,9 @@ function render() {
     return;
   }
   titleIntro.played = false; // the fade plays again next time the title comes up
-  const state = ui.state;
-  const room = roomOf(state);
   const lineNow = currentLine();
+  const state = shownState(ui.state, lineNow);
+  const room = roomOf(state);
   const atEndOfQueue = !lineNow || ui.index >= ui.queue.length - 1;
   const choosing = state.mode === "choice" && atEndOfQueue && ui.queue.length > 0;
   const ended = state.mode === "end" && atEndOfQueue;
@@ -523,6 +672,8 @@ function render() {
   const fxPop = realPlate && fxNode(state);
   if (fxPop) world.append(fxPop);
   world.classList.toggle("flashback", !!(lineNow && lineNow.flashback)); // Oct 21 items 15/20
+  const fb = flashFade(lineNow); // beta v17 item 6: dissolve into and out of the flashback, never a hard cut
+  if (fb.sepia) { world.classList.add(`flash-${fb.sepia}`); world.style.setProperty("--flash-delay", fb.delay); }
   // Push C PLACEHOLDER colour shift: dusk blue -> deep night -> hot-oil red at the Pavilion, one driver with the music
   if (ui.nightShift) {
     const tint = nightTint(nightOf(state.room, state.night));
@@ -532,7 +683,8 @@ function render() {
     const nightTag = el("div", "night-tag", "PLACEHOLDER tint");
     world.append(nightTag);
   }
-  if (lineNow && lineNow.flashback && lineNow.flashStep >= 1 && lineNow.flashStep <= 5) world.append(flashbackLayer(lineNow.flashStep));
+  if (fb.kind === "past") world.append(flashbackLayer(lineNow.flashStep, fb.past === "in" ? fb.delay : null));
+  else if (fb.past === "out") world.append(flashbackLayer(5, fb.delay, true)); // the past Pavilion dissolves back to the room
   // Oct 23 item 31: a new room fades in (never a black flash while its art loads), and its neighbours' plates preload
   if (ui.shownRoom !== state.room) {
     if (ui.shownRoom) stage.classList.add("fadein");
@@ -540,7 +692,7 @@ function render() {
     preloadNeighbours(room, state);
   }
   // Oct 21 item 4: inventory Look holds the item up close in his gloves at the bottom of the screen
-  if (lineNow && lineNow.closeup && !lineNow.big) {
+  if (lineNow && lineNow.closeup && !lineNow.big && ui.closeupDismissed !== lineNow) {
     const box = el("div", "closeup");
     const gloves = el("img", "closeup-gloves"); gloves.alt = ""; placeAt(gloves, "fx/closeup-gloves", [70, 103]);
     const held = el("img", "closeup-item"); held.alt = ""; mount(held, lineNow.closeup);
@@ -585,7 +737,7 @@ function render() {
   // tie goes to the scenery; see walk.js behind(). Only over real art (cutouts are cut from the pixel plates).
   if (room.occluders && realPlate) {
     for (const o of room.occluders) {
-      const id = occluderAsset(view.plate, o.id);
+      const id = occluderFile(o, view.plate, state.flags);
       if (!assetInfo(id)) continue;
       // A sloped object (the rooftop hatch, seen corner-on) has an `edge`: one node, wholly over or under him by his
       // feet against that edge (edgeZ, re-checked every step in placeHero).
@@ -625,6 +777,7 @@ function render() {
       hit.addEventListener("pointerleave", () => setSentence(null));
       hit.addEventListener("click", () => {
         if (ui.cutscene) return;
+        if (spot.id !== "cutout") standUp(room); // item 1: out of the gate squat before he walks anywhere
         const now = ui.state;
         const action = { t: "hotspot", id: spot.id };
         const lastAct = { spot: spot.id, verb: now.pending ? "item" : now.verb };
@@ -668,9 +821,11 @@ function render() {
   }
   // Oct 23 item 29: click anywhere on the floor and he walks there (SCUMM); blocked, he gets as close as he can
   stage.addEventListener("click", (ev) => {
-    if (ev.target !== stage || ui.cutscene || !room.hero || ui.state.mode === "choice" || ui.state.mode === "end" || ui.state.pose) return;
+    if (ev.target !== stage || ui.cutscene || !room.hero || ui.state.mode === "choice" || ui.state.mode === "end") return;
     const r = world.getBoundingClientRect(); // the scene box (the stage adds a frame border)
     if (!r.width) return;
+    standUp(room); // item 1: a click off the gate cutout stands him up and walks him there (he used to stay crouched)
+    if (ui.state.pose) return; // the rail seat keeps its own way down (its spots)
     cancelPendingAct();
     walkTo(room, ((ev.clientX - r.left) / r.width) * SCENE.w, ((ev.clientY - r.top) / r.height) * SCENE.h);
   });
@@ -830,6 +985,9 @@ function render() {
   if (ui.menu) cabinet.append(menuPanel());
   app.append(cabinet);
   setTension(nightOf(state.room, state.night));
+  // Beta v17: decode the line-tagged themes a room ahead, so they start on their line, not a decode later
+  if (state.room === "wkuk") preloadTheme(MOMENT_THEMES["hattie-call"]); // the geiger slot's phone call
+  if (state.inv.includes("half") && state.inv.includes("stub")) preloadTheme(MOMENT_THEMES.ticket); // he can join them now
   playBed(state.room, musicMoment(state, ended));
 }
 
@@ -841,6 +999,10 @@ function render() {
 // Pavilion ending cover (all five endings) goes back to the acid theme, the finale's own music. Saves already past
 // the unmasking get the right one straight away.
 function musicMoment(state, ended) {
+  // beta v17 item 7: a line's own music moment (Hattie's radio call, the joined ticket), and Hattie's phone choice
+  const cur = currentLine();
+  if (cur && cur.music && !ended) return cur.music;
+  if (state.mode === "choice" && state.choice && state.choice.id === "phone") return "hattie-call";
   if (state.room !== "pavilion") return null;
   if (ended) return "gobbler";
   if (!state.flags.unmasked || (ui.pavVeil && !ui.pavVeil.cleared)) return null;
@@ -882,7 +1044,8 @@ function talkFlap(face, lineNow) {
 // Two-frame walk (side idle / side walk), faces the way he moves, front idle when he enters a room.
 const HERO_SPEED = 70; // logical px per second
 const STEP_MS = 160;
-const hero = { room: null, view: null, x: 0, y: 0, tx: 0, ty: 0, face: "front", walking: false, last: 0, t: 0, stuck: 0 };
+const FOOTSTEP_MS = 390; // one footfall (Brook's README: 380-400 ms; Arlong Oct 27: 390)
+const hero = { room: null, view: null, x: 0, y: 0, tx: 0, ty: 0, face: "front", walking: false, last: 0, t: 0, stuck: 0, stepClock: 0, stepped: false, raf: 0 };
 
 function heroArea(room) {
   return roomView(room, (ui.state && ui.state.flags) || {}).walk;
@@ -931,6 +1094,9 @@ function heroSync(room) {
   hero.ty = hero.y;
   hero.face = "front";
   hero.walking = false;
+  // New room: drop the old room's walk loop and footstep clock, so nothing carries over the cut (Chopper N1)
+  cancelAnimationFrame(hero.raf);
+  hero.stepClock = 0;
   if (entry && entry.walk) setTimeout(() => { if (hero.room === room.id && !hero.walking && ui.state && ui.state.room === room.id && !ui.state.pose) walkTo(room, ...entry.walk); }, 0);
 }
 
@@ -941,6 +1107,9 @@ const POSE_BEAT_MS = 260;
 function seatFrame(room, cfg, kind) {
   const size = room.hero && room.hero.depth ? `-h${depthHeight(room.hero, cfg.standY || room.hero.at[1])}` : sizeTag(room.hero || {});
   if (!ui.seatFace) return `${cfg.front || cfg.sit + "-r"}${size}`; // no hop either: he is simply sitting there
+  // Beta v17 item 3 (Arlong Oct 27): on the rail he sits in the front-view puffed sit; the side hop (the way he came)
+  // is only the one beat of getting up there and back down.
+  if (kind === "sit" && cfg.front) return `${cfg.front}${size}`;
   return `${cfg[kind]}-${ui.seatFace}${size}`;
 }
 function seatSprite(node, cfg, sprite, room = ui.state && ROOMS[ui.state.room]) {
@@ -1017,7 +1186,10 @@ function placeAt(node, id, at) {
 const castNodes = new Map();
 
 function placeCast(node, c, now) {
-  const { sprite, at } = castFrame(c, { line: currentLine(), since: now - ui.lineAt, now, lastAct: ui.lastAct, speakers: SPEAKER });
+  const line = currentLine();
+  // a cutscene can start the line's cue at its own moment (sauce_toss: the chain release on the oil's hit), ui.cueAt
+  const since = now - (ui.cueAt && ui.cueAt.line === line ? ui.cueAt.t : ui.lineAt);
+  const { sprite, at } = castFrame(c, { line, since, now, lastAct: ui.lastAct, speakers: SPEAKER });
   placeSprite(node, `sprite/${sprite}${sizeTag(c)}`, at);
   node.style.zIndex = actorZ(at[1]);
 }
@@ -1046,6 +1218,44 @@ function placeHero(node, room) {
 
 function edgeZ(o) {
   return behindOccluder(o, hero.x, hero.y) ? actorZ(hero.y) + 1 : actorZ(hero.y) - 1;
+}
+
+// What the scene draws, which can lag the game state while a line plays it out (beta v17):
+//   line.pose: a held pose for this line only (the gate cutout squat while the guard stamps); he stands back up when
+//     the line ends, or straight away if a click sends him somewhere (standUp).
+//   line.holdFlags (+ holdMs): those flags are drawn unset for the line (or its first holdMs), e.g. the Pavilion rope
+//     stays up and locked until Pip's hand is on the padlock; then one re-render shows it, with the padlock click.
+// Only the drawing: clicks, saves and the walk use ui.state.
+function shownState(s, lineNow) {
+  if (!s || !lineNow) return s;
+  const pose = !s.pose && lineNow.pose && ui.poseDropped !== lineNow ? lineNow.pose : null;
+  let held = lineNow.holdFlags ? lineNow.holdFlags.filter((f) => s.flags[f]) : [];
+  if (held.length && lineNow.holdMs !== undefined) {
+    const left = lineNow.holdMs - (performance.now() - ui.lineAt);
+    if (left <= 0) held = [];
+    else if (ui.holdTimer !== lineNow) {
+      ui.holdTimer = lineNow;
+      setTimeout(() => { if (currentLine() === lineNow) { playCue("click"); render(); } }, left + 10);
+    }
+  }
+  if (!pose && !held.length) return s;
+  const flags = { ...s.flags };
+  for (const f of held) delete flags[f];
+  return { ...s, flags, ...(pose ? { pose } : {}) };
+}
+
+// Beta v17 item 1 (Arlong Oct 27: stuck behind the fairground cutout; clicks off it played footsteps but he never
+// moved). Root cause: the gate cutout sets the legacy squat pose ([left, top, width] in room.poseAt), and only a room
+// change cleared it; while posed the floor click was ignored and a hotspot click walked his hidden sprite (footsteps,
+// nothing on screen). A legacy pose is a held crouch, not a seat: any click that takes him somewhere stands him up
+// first (logic action "stand", no line). He pops up where the squat was: his standing sprite takes over at his feet.
+function standUp(room) {
+  const s = ui.state;
+  const lineNow = currentLine();
+  if (lineNow && lineNow.pose && ui.poseDropped !== lineNow && !s.pose) { ui.poseDropped = lineNow; render(); return; }
+  if (!s || !s.pose || !room.poseAt || !Array.isArray(room.poseAt[s.pose])) return;
+  ui.state = act(s, { t: "stand" }).state;
+  render();
 }
 
 /* ---------- Push A (Oct 24): walk first, then act; flashback layer; neighbour preload ---------- */
@@ -1078,8 +1288,35 @@ function placeSelf(node, room) {
 // Oct 23 item 41: the stunt-night beats play on the Pavilion as it was (bg/pavilion-aged), the crowd gathering a row
 // at a time, and in it, from the stunt night on, the silhouette of the man who rigged it (the mayor's muscle).
 const FLASH_CROWD = [0, 168, 158, 148, 140, 136];
-function flashbackLayer(step) {
-  const layer = el("div", "flash-past");
+// Beta v17 item 6 (Arlong Oct 27: the joined-ticket flashback cut in abruptly, and the past Pavilion jumped over the
+// room he's standing in). Each line is a fresh render, so the fades are CSS animations keyed to the line's first
+// render with a negative delay (re-renders mid-line pick up where the fade is): the sepia eases in on the first
+// flashback line and out after the last; the past Pavilion dissolves in over the sepia room, and back out to it.
+const FLASH_FADE_MS = 900;
+function flashKind(l) {
+  if (!l || !l.flashback) return null;
+  return l.flashStep >= 1 && l.flashStep <= 5 ? "past" : "sepia";
+}
+function flashFade(lineNow) {
+  if (ui.fbLine !== lineNow) {
+    ui.fbPrev = ui.fbLine === undefined ? null : flashKind(ui.fbLine);
+    ui.fbLine = lineNow;
+    ui.fbAt = performance.now();
+  }
+  const kind = flashKind(lineNow), prev = ui.fbPrev;
+  const age = performance.now() - ui.fbAt;
+  const out = { kind, sepia: null, past: null, delay: `${-Math.round(age)}ms` };
+  if (age >= FLASH_FADE_MS) return out;
+  if (kind && !prev) out.sepia = "in";
+  if (!kind && prev) out.sepia = "out";
+  if (kind === "past" && prev !== "past") out.past = "in";
+  if (kind !== "past" && prev === "past") out.past = "out";
+  return out;
+}
+
+function flashbackLayer(step, fadeDelay = null, fadeOut = false) {
+  const layer = el("div", `flash-past${fadeDelay !== null ? (fadeOut ? " dissolve-out" : " dissolve-in") : ""}`);
+  if (fadeDelay !== null) layer.style.animationDelay = fadeDelay;
   const bg = el("img", "flash-bg"); bg.alt = ""; mount(bg, "bg/pavilion-aged");
   const sil = el("img", "flash-sil"); sil.alt = "";
   placeSprite(sil, "sprite/stogie-sil-arms-r-h64", [262, 170]);
@@ -1132,8 +1369,13 @@ function walkTo(room, x, y, faceOnArrive = null) {
   if (hero.walking) return;
   hero.walking = true;
   hero.t = 0;
+  // Each walk starts its own footstep beat: first step FOOTSTEP_MS in, nothing carried from the last walk (Chopper N1).
+  hero.stepClock = 0;
+  hero.stepped = false;
   hero.last = performance.now();
-  requestAnimationFrame(heroTick);
+  // One walk loop only: a stopped walk (room change, cutscene end) can leave a frame queued that would run beside this one.
+  cancelAnimationFrame(hero.raf);
+  hero.raf = requestAnimationFrame(heroTick);
 }
 
 function heroTick(now) {
@@ -1159,15 +1401,20 @@ function heroTick(now) {
     // arrived, or really stuck against an edge (three ticks in a row: one slow frame, e.g. a tab hiccup, isn't a wall)
     hero.walking = false;
     hero.stuck = 0;
+    // A walk too short for a full beat still gets one footfall as he plants (no silent short walks).
+    if (!hero.stepped) { hero.stepped = true; playCue("footstep"); }
     if (hero.faceOnArrive) hero.face = hero.faceOnArrive;
     if (hero.onArrive) { const f = hero.onArrive; hero.onArrive = null; setTimeout(f, 0); }
   }
   const node = document.querySelector(".hero");
   if (node) placeHero(node, room);
   // Push C: a footstep every other walk frame while he moves
-  hero.stepClock = (hero.stepClock || 0) + dt;
-  if (hero.walking && hero.stepClock >= 2 * STEP_MS) { hero.stepClock = 0; playCue("footstep"); }
-  if (hero.walking) requestAnimationFrame(heroTick);
+  hero.stepClock += dt;
+  // Beta v17 (Arlong approved Brook's v2 steps, Oct 27): one single-step file every FOOTSTEP_MS, a relaxed noir stroll.
+  // Its own clock, apart from STEP_MS (the walk animation frames are unchanged).
+  // Carry the overshoot so frame rounding does not stretch the beat (60 fps rounded 390 up to 400).
+  if (hero.walking && hero.stepClock >= FOOTSTEP_MS) { hero.stepClock = Math.min(hero.stepClock - FOOTSTEP_MS, FOOTSTEP_MS / 2); hero.stepped = true; playCue("footstep"); }
+  if (hero.walking) hero.raf = requestAnimationFrame(heroTick);
 }
 
 function place(node, rect) {
@@ -1523,7 +1770,61 @@ function button(text, className, onClick) {
   return node;
 }
 
+// Beta v17 item 5 (Arlong Oct 27): the inventory Look close-up (the item in his gloves) goes away on any other click
+// on screen, not only when the caption moves on. Capture phase, and the node is just removed (no re-render), so the
+// click itself still lands on whatever was under it; a new Look makes a new line, so it shows again.
+document.addEventListener("pointerdown", () => {
+  const l = currentLine();
+  if (!l || !l.closeup || ui.closeupDismissed === l) return;
+  ui.closeupDismissed = l;
+  document.querySelectorAll(".world .closeup").forEach((n) => n.remove());
+}, true);
+
+// Full-screen insert (Usopp, beta v17): an image over the whole screen (a note, a clue board), fading in and out, with
+// an optional caption; a click or a key dismisses it. Separate from the gloves close-up (lineNow.closeup). Mechanism
+// only, no content wired yet (Brook is painting the bucket note + clarion and the conspiracy board). Two ways in:
+//   showInsert({ art, caption, fadeMs }) -> Promise (resolves once it has faded out); art = an art id or a file.
+//   a line with insert: { art, caption } shows it before the line (like a cutscene), then the line.
+// Dev check: ?insert (a placeholder image), or __RR.insert({ art, caption }) from the console.
+const INSERT_FADE_MS = 400;
+function showInsert({ art, caption = "", fadeMs = INSERT_FADE_MS } = {}) {
+  if (ui.insert) ui.insert.close(true);
+  return new Promise((resolve) => {
+    const box = el("div", "insert");
+    box.style.setProperty("--insert-fade", `${fadeMs}ms`);
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-label", caption || "Close-up");
+    const img = el("img", "insert-art"); img.alt = caption || "";
+    if (art && /\//.test(art) && /\.(png|jpe?g|svg|webp|gif)$/i.test(art)) img.src = art; // a file path as it is
+    else if (art) mount(img, art); // an art id (or a legacy placeholder name)
+    box.append(img);
+    if (caption) box.append(el("div", "insert-caption", caption));
+    box.append(el("div", "insert-hint", "click to close"));
+    let done = false;
+    // Any click anywhere closes it and does nothing else. The layer itself lets the pointer through (CSS
+    // pointer-events: none), so the click is caught on window in the capture phase and swallowed there.
+    const swallow = (ev) => { ev.stopPropagation(); ev.preventDefault(); };
+    const onClick = (ev) => { swallow(ev); if (done) window.removeEventListener("click", onClick, true); };
+    const onDown = (ev) => { swallow(ev); close(); };
+    window.addEventListener("pointerdown", onDown, true);
+    window.addEventListener("click", onClick, true);
+    const close = (now = false) => {
+      if (done) return;
+      done = true;
+      window.removeEventListener("pointerdown", onDown, true);
+      setTimeout(() => window.removeEventListener("click", onClick, true), 1000); // if the press's click never comes (a key)
+      if (ui.insert && ui.insert.box === box) ui.insert = null;
+      box.classList.remove("on");
+      setTimeout(() => { box.remove(); resolve(); }, now ? 0 : fadeMs);
+    };
+    ui.insert = { box, close };
+    document.body.append(box);
+    requestAnimationFrame(() => requestAnimationFrame(() => box.classList.add("on")));
+  });
+}
+
 document.addEventListener("keydown", (event) => {
+  if (ui.insert) { event.preventDefault(); ui.insert.close(); return; } // a key closes the insert, and does nothing else
   if (ui.screen === "title" && !titleIntro.played) finishTitleIntro(); // any key shows the whole title at once
   if ((event.key === "g" || event.key === "G") && ui.screen === "title") {
     setArtMode(artMode() === "pixel" ? "fancy" : "pixel");
@@ -1577,6 +1878,7 @@ window.__RR = {
   },
   walkTo: (x, y) => walkTo(ui.state && ROOMS[ui.state.room], x, y),
   beats: (list) => playBeats(list), // preview a beat: __RR.beats([{ kind: "club" }])
+  insert: (opts) => showInsert(opts), // preview a full-screen insert: __RR.insert({ art: "bg/wkuk", caption: "..." })
   audio: () => audioState(),
   act: dispatch,
   advance,
@@ -1588,6 +1890,11 @@ window.__RR = {
     render();
   },
 };
+
+// Dev-only check of the insert layer (no game content uses it yet): ?insert shows a placeholder image and caption.
+if (new URLSearchParams(location.search).has("insert")) {
+  showInsert({ art: "art/placeholders/cast-sheet.jpg", caption: "PLACEHOLDER insert: click or press a key to close." });
+}
 
 // Live art switch: re-render the current view only. Game state, captions and held items are untouched.
 onArtChange(() => render());

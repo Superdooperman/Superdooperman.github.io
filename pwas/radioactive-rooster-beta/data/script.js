@@ -498,6 +498,9 @@ const PIP_UNLOCK = {
     ...walkSeq([...PIP_PATH].reverse(), { r: ["pip-walk-r", "pip-side-r"], l: ["pip-walk-l", "pip-side-l"] }),
     ["pip-front", 1, [122, 140]]],
 };
+// Beta v17 item 2: the rope stays up and padlocked (the closed plate) until her hand is on the lock: the open plate
+// shows this far into the pip_unlock line, partway through her reach (js/logic.js pipUnlocks holdMs, js/main.js shownState).
+export const PIP_UNLOCK_OPEN_MS = PIP_UNLOCK.seq.slice(0, PIP_UNLOCK.seq.findIndex(([f]) => f === "pip-reach-r")).reduce((t, [, ms]) => t + ms, 0) + 450;
 
 export const ROOMS = {
   hq: {
@@ -743,6 +746,7 @@ export const ROOMS = {
         id: "birds",
         name: "yard roosters",
         rect: [49, 92, 40, 18],
+        stand: [72, 113], beside: false, // beta v17 item 3: same spot as the rail (Use = sit on the rail with them)
         useItem: { photo: { say: "He holds the photo out to the yard roosters. One pecks the signature, decides it isn't corn, and goes back to standing like a rooster. Brutal crowd." } }, // he keeps the stack: everybody gets one
         look: "Round. Cheeks full. Quiet. Employed. That's the whole job and they're good at it.",
         talk: "They're busy looking like roosters. It's a skilled trade.",
@@ -756,6 +760,7 @@ export const ROOMS = {
         name: "top rail",
         rect: [0, 84, 246, 11],
         stand: [72, 113],
+        beside: false, // beta v17 item 3: straight to his spot at the rail (the rect is the whole rail; "beside" it was a detour to its end and back)
         look: "A rail worn smooth by honest poultry. It has never held a utility belt.",
         use: { special: "squat_rail" },
         push: "The rail is already committed.",
@@ -1419,8 +1424,14 @@ export const ROOMS = {
     name: "Midway, 11:40",
     plate: "bg-midway.jpg",
     hero: { at: [180, 152], height: 104, depth: { horizon: 105 } }, // depth: 104 at y 152 (booth counter at his belt), smaller toward the railing
-    walk: [[[20, 151], [84, 149], [88, 141], [252, 141], [250, 146], [290, 177], [20, 177]]], // boardwalk up to the railing posts (bases y 130-145), past the booth's right corner (booth occludes him behind y 147); the Pavilion rope (Arlong's painted rope, Oct 24 item 46: back post foot (256,146), front post foot (303,179)) is off limits, he stops on its near side // booth counter top y 103, booth floor y 147 (~44 px): counter meets his belt
-    occluders: [{ id: "booth", base: 147 }, { id: "rope", base: 179, edge: [[256, 146], [303, 179]] }], // + Oct 24 item 46: Arlong's HOT OIL rope as a foreground cutout (tools/sprites/cut_push_a.py rope()), in front of anyone on its far side // the booth front; its counter window is open (the kids stand behind the counter)
+    walk: [[[20, 151], [84, 149], [88, 141], [252, 141], [255, 148], [296, 177], [20, 177]]], // boardwalk up to the railing posts (bases y 130-145), past the booth's right corner (booth occludes him behind y 147); the Pavilion rope (Arlong's painted rope, Oct 24 item 46: back post foot (256,146), front post foot (303,179)) is off limits, he stops on its near side // booth counter top y 103, booth floor y 147 (~44 px): counter meets his belt
+    // Beta v17 (Arlong Oct 27): once he's been let into the Pavilion (pavilion_in) the rope occluder shows its open
+    // cutout fg/midway--rope-open instead (js/main.js occluderFile), when that file is in the art manifest; until
+    // then the closed one. Brook's midway-rope-v2 (approved by Arlong Oct 27; assets/art-placeholder/midway-rope-v2/
+    // README.md): bg/midway is a CLEAN plate now, the rope is only these cutouts (`own`: not cut from the plate),
+    // placed on full 320x180 canvases (tight sprite top-left (252,101)), no scaling in code. Posts' feet (261,149) and
+    // (302,177); the walk edge [255,148]-[296,177] hugs the rope line.
+    occluders: [{ id: "booth", base: 147 }, { id: "rope", base: 177, edge: [[261, 149], [302, 177]], own: true, open: { flag: "pavilion_in", id: "rope-open" } }], // + Oct 24 item 46: Arlong's HOT OIL rope as a foreground cutout (tools/sprites/cut_push_a.py rope()), in front of anyone on its far side // the booth front; its counter window is open (the kids stand behind the counter)
     // Oct 23 items 33/42: "fix the clock" plays: he walks round behind Corny to the post, shinnies up it hand over hand
     // (sit v2 frames: rooster-shimmy-a/b, each with its glove on the post, manifest `post`), nudges the minute hand,
     // slides back down and walks back to his mark.
@@ -1657,11 +1668,29 @@ export const ROOMS = {
       },
       // Oct 23 item 40: the hot sauce toss. From wherever he stands he raises Ned's bottle like the matador, lobs it in
       // an arc into the vat, SPLASH, and the spicy oil hits her in the face ({f}: facing the vat, faceTo x).
+      // Arlong 2026-10-27 (his sketch): the bottle lobs OVER the cage into the vat, SPLASH, a blob of oil shoots back
+      // up and right into her mouth, she recoils, drops the chain on the hit (the line's cage_jog cue: her flinch + the
+      // cage drop, held for cs.hit) and coughs fire. The cage + its chain (one sprite) swing from the chain's top: a
+      // nudge as the bottle passes over, a jolt on her release, dying out low over the oil. Four sprite slots for Brook
+      // (assets/PLACEHOLDERS.md "Hot sauce toss"): code-drawn droplets stand in until each strip is in the manifest.
+      // Points (measured on screen): the vat's oil surface ~y 61; her mouth on Brook's Oct 27 one-hand chain pose
+      // (hattie-chain-l h52 at [205, 110], sprite px ~(22, 67)) ~(199, 65), and on her flinch (from the hit) ~(201, 62), where the fire puff starts; the old pose's mouth was ~(198, 54).
       sauce_toss: {
-        ms: 2100, faceTo: 56,
+        ms: 3200, faceTo: 56,
         hero: [[0, "rooster-sauce-raise-{f}", null], [650, "rooster-matador-raise-{f}", null], [1500, "rooster-matador-flourish-{f}", null]],
-        props: [{ art: "fx/sauce-bottle", at: "hero", show: 650, arc: [650, 700, [50, 62], 46], gone: 1350 }],
-        events: [[1350, { fx: "fx/oil-splash-a", at: [6, 28] }], [1350, { shake: 350 }], [1380, { sound: "bonk" }], [1650, { fx: "fx/oil-splash-b", at: [160, 46] }]],
+        // apexY 2: the lob tops out above the cage (its body tops out at y ~8 at [88, 62]) and drops into the vat
+        props: [{ art: "fx/sauce-bottle", at: "hero", show: 650, arc: [650, 800, [52, 64], 46], apexY: 2, gone: 1450 }],
+        slots: [
+          { slot: "splash", art: "fx/oil-splash-vat", t: 1450, at: [52, 62], frames: 6, frameMs: 70, placeholder: "burst" },
+          { slot: "blob", art: "fx/oil-blob", t: 1530, path: { from: [64, 61], to: [199, 65], height: 34, ms: 560 }, frames: 4, frameMs: 60, placeholder: "blob" },
+          { slot: "spray", art: "fx/oil-face-spray", t: 2090, at: [199, 65], frames: 5, frameMs: 70, face: "l", placeholder: "spray" },
+          { slot: "firepuff", art: "fx/fire-puff", t: 2450, at: [198, 62], frames: 6, frameMs: 90, ms: 700, face: "l", placeholder: "puff" },
+        ],
+        hit: 2090, cueOnHit: true,
+        recoil: { spot: "gobbler", t: 2090, ms: 320, px: [4, -1] },
+        sway: { match: "sprite/cage-egg", kicks: [[1000, 1.2], [2090, 4]], period: 1300, decay: 900, creak: "chain-creak",
+          drop: { t: 2090, ms: 500, by: [0, 10] } }, // [88, 62] -> [88, 72], the cage_jog walk's span
+        events: [[1450, { shake: 250 }], [1470, { sound: "bonk" }], [2090, { shake: 200 }]],
       },
       // the catch: the Yolk drops out of the cage into the rubber basket (he stands left of the low cage, ~(58, 149), facing it)
       catch: {
