@@ -52,6 +52,7 @@
   </header>
 
   <section class="transport" aria-label="Transport">
+    <div class="trow trow1">
     <button id="play" class="btn big play" aria-label="Play">&#9654;</button>
     <div class="bpm">
       <button id="bpmDn" class="btn sm" aria-label="Tempo down">&minus;</button>
@@ -61,14 +62,17 @@
       <button id="tapBtn" class="btn sm" title="Tap this on the beat a few times to set the tempo">Tap</button>
     </div>
     <div id="swingKnob"></div>
+    </div>
     <div class="beats" title="The beat: 1 2 3 4. The big one is the start of each bar.">
       <div id="beatLeds"><i></i><i></i><i></i><i></i></div><div id="barNum" class="barnum">BAR -</div>
     </div>
+    <div class="trow trow2">
     <button id="clickBtn" class="btn sm" title="Metronome click (never recorded)">Click</button>
     <button id="timingBtn" class="btn sm" title="Timing help: snap to grid, count-in, click volume"><span id="qLbl">Q 1/16</span></button>
     <button id="rec" class="btn big rec" aria-label="Record"><span class="dot"></span></button>
     <div id="recTime" class="lcd small">0:00</div>
     <button id="exportBtn" class="btn">Export</button>
+    </div>
   </section>
 
   <section class="wsbar" aria-label="Workspace">

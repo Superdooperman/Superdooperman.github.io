@@ -384,7 +384,7 @@ function hookRec() {
   eng.tap.port.onmessage = (e) => { if (e.data.L && rec.on) { rec.L.push(e.data.L); rec.R.push(e.data.R); } };
 }
 const join = (arr) => { const n = arr.reduce((a, b) => a + b.length, 0), o = new Float32Array(n); let p = 0; for (const a of arr) { o.set(a, p); p += a.length; } return o; };
-async function toggleRec() {
+async function toggleRec(auto = false) {
   await ensureAudio();
   if (!rec.on) {
     rec = { on: true, L: [], R: [], t0: ctx.currentTime }; eng.tap.port.postMessage('start');
@@ -393,13 +393,16 @@ async function toggleRec() {
     rec.on = false; eng.tap.port.postMessage('stop');
     await new Promise((r) => setTimeout(r, 60));
     take = { L: join(rec.L), R: join(rec.R), sr: ctx.sampleRate };
+    const cap = Math.floor(EXPORT.max * take.sr); if (take.L.length > cap) take = { ...take, L: take.L.slice(0, cap), R: take.R.slice(0, cap) };
     $('#rec').classList.remove('on');
     const secs = take.L.length / take.sr;
     $('#takeInfo').textContent = `(${secs.toFixed(1)} s)`; $('#takeMp3').disabled = $('#takeWav').disabled = secs < 0.05;
-    toast(`Take captured: ${secs.toFixed(1)} s. Export it from the Export menu.`);
+    if (auto) { const m = EXPORT.max / 60, len = m >= 1 ? `${+m.toFixed(1)} minute${m === 1 ? '' : 's'}` : `${EXPORT.max} seconds`;
+      toast(`Recording stopped at ${len}, the longest take the box keeps. Export it from the Export menu.`); }
+    else toast(`Take captured: ${secs.toFixed(1)} s. Export it from the Export menu.`);
   }
 }
-setInterval(() => { if (rec.on && ctx) { const s = Math.floor(ctx.currentTime - rec.t0); $('#recTime').textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; } }, 250);
+setInterval(() => { if (rec.on && ctx) { if (ctx.currentTime - rec.t0 >= EXPORT.max && !rec.capped) { rec.capped = true; toggleRec(true); return; } const s = Math.floor(ctx.currentTime - rec.t0); $('#recTime').textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; } }, 250);
 const stamp = () => new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '');
 const slug = () => S.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'pattern';
 async function exportTake(fmt) {

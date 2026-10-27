@@ -312,19 +312,48 @@ dialog.wide { width: min(980px, 96vw); }
 .bpmBubble::after { content: "BPM"; display: block; font-size: 11px; color: var(--egg2); text-shadow: none; margin-top: 2px; }
 #newSongDlg { width: min(360px, calc(100vw - 24px)); }
 #newSongDlg input { font-size: 16px; }
-/* phone header: dancer at 2x spans both header rows on the right; switch and help get 44px targets */
+/* transport rows are plain wrappers on desktop (display: contents keeps the old flex layout) */
+.trow { display: contents; }
+/* phones (360-600): header with the 2x dancer spanning two rows and the song picker on a full row of its own;
+   transport with the bar eggs as a column on the right and Export at the end of the second row.
+   Every control here is at least 44px. */
 @media (min-width: 360px) and (max-width: 600px) {
-  .top { display: grid; position: relative; grid-template-columns: 40px minmax(0, 1fr) auto auto auto 76px 44px; grid-template-rows: auto auto; column-gap: 6px; row-gap: 8px; align-items: center; }
+  .top { display: grid; position: relative; grid-template-columns: auto auto minmax(0, 1fr) 76px 44px; grid-template-rows: auto auto auto; column-gap: 6px; row-gap: 8px; align-items: center; margin-bottom: 6px; } /* >= 12px from the song picker to the tempo panel */
   .top .brand, .top .dancerbox, .top .pattern { display: contents; }
-  .top .logo { grid-column: 1; grid-row: 1; }
-  .top .titles { grid-column: 2 / 6; grid-row: 1; padding-left: 4px; }
+  .pattern { margin-bottom: 0; }
+  .top .logo { grid-column: 1; grid-row: 1; justify-self: start; }
+  .top .titles { grid-column: 2 / 4; grid-row: 1; padding-left: 4px; }
   .top h1 { line-height: 1.1; max-width: 12ch; } /* breaks as MIDNIGHT'S / YOLK BOX, never YOLK / BOX */
-  .top .pattern select { grid-column: 1 / 3; grid-row: 2; width: 100%; min-width: 0; max-width: none; }
-  #undoBtn { grid-column: 3; grid-row: 2; } #redoBtn { grid-column: 4; grid-row: 2; } #filesBtn { grid-column: 5; grid-row: 2; }
-  #helpBtn { grid-column: 7; grid-row: 2; width: 44px; height: 44px; padding: 0; }
-  .top .dancer { grid-column: 6; grid-row: 1 / 3; align-self: stretch; width: 76px; height: auto; min-height: 84px; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; }
+  #undoBtn { grid-column: 1; grid-row: 2; } #redoBtn { grid-column: 2; grid-row: 2; } #filesBtn { grid-column: 3; grid-row: 2; justify-self: start; }
+  #undoBtn, #redoBtn, #helpBtn { width: 44px; height: 44px; padding: 0; }
+  #undoBtn, #redoBtn { font-size: 18px; }
+  #filesBtn { min-height: 44px; padding: 0 14px; }
+  #helpBtn { grid-column: 5; grid-row: 2; }
+  .top .pattern select { grid-column: 1 / -1; grid-row: 3; width: 100%; min-width: 0; max-width: none; min-height: 44px; }
+  .top .dancer { grid-column: 4; grid-row: 1 / 3; align-self: stretch; width: 76px; height: auto; min-height: 84px; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; }
   .top .dancer canvas { width: 72px; height: 80px; }
-  .top .dsw { grid-column: 7; grid-row: 1; width: 44px; height: 44px; margin: 0; font-size: 20px; }
+  .top .dsw { grid-column: 5; grid-row: 1; width: 44px; height: 44px; margin: 0; font-size: 20px; }
   .top .dpop { top: calc(100% + 6px); right: 0; }
-  .top { margin-bottom: 2px; } /* keeps >= 12px between the song picker and the tempo panel */
+
+  .transport { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 6px; row-gap: 6px; align-items: center; }
+  .transport .trow { display: flex; align-items: center; gap: 4px; min-width: 0; }
+  .transport .trow > * { flex: none; }
+  .transport .trow1 { grid-column: 1; grid-row: 1; justify-content: space-between; }
+  .transport .trow2 { grid-column: 1; grid-row: 2; }
+  .transport .beats { grid-column: 2; grid-row: 1 / 3; align-self: center; gap: 4px; }
+  .transport .beats #beatLeds { flex-direction: column; align-items: center; gap: 5px; }
+  .transport .beats #beatLeds i:first-child { margin-top: 0; }
+  .transport .barnum { white-space: nowrap; font-size: 10px; }
+  .transport .btn.big.play { width: 48px; height: 48px; }
+  .transport .bpm .btn.sm { min-width: 44px; min-height: 44px; padding: 0; }
+  .transport #tapBtn { min-width: 46px; padding: 0 6px; }
+  #bpmVal { min-width: 52px; padding: 4px 4px; }
+  #swingKnob .knob { width: 46px; } #swingKnob .dial { width: 44px; height: 44px; } #swingKnob .cap { width: 32px; height: 32px; }
+  .transport .trow2 .btn.sm { min-height: 44px; }
+  #exportBtn { margin-left: auto; min-height: 44px; padding: 0 9px; }
+}
+@media (min-width: 360px) and (max-width: 374px) {
+  .transport .btn.big.play { width: 44px; height: 44px; }
+  #bpmVal { min-width: 48px; font-size: 20px; } .transport #tapBtn { min-width: 44px; padding: 0 4px; }
+  .transport { padding-left: 6px; padding-right: 6px; } .transport .trow2 .btn.sm { padding: 5px 5px; }
 }

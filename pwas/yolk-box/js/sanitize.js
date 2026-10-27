@@ -6,7 +6,7 @@ import { KK_PRESETS, KK_SCALES, KK_GATES } from './kk.js';
 import { defaults } from './patterns.js';
 import { uid, BRICK_COLORS } from './bricks.js';
 
-export const LIMITS = { bricks: 500, clips: 1000, projects: 200, layers: 16, events: 20000, kkEvents: 2000, kkBarEvents: 256, bars: 64, songBars: 1024, name: 40, importBytes: 2 * 1024 * 1024 };
+export const LIMITS = { bricks: 500, clips: 1000, projects: 200, layers: 16, events: 20000, kkRawLayer: 8000, kkEvents: 2000, kkBarEvents: 256, bars: 64, songBars: 1024, name: 40, importBytes: 2 * 1024 * 1024 };
 export const ID_RE = /^[a-z]\w{1,40}$/, COLOR_RE = /^#[0-9a-f]{3,8}$/i;
 const isObj = (o) => !!o && typeof o === 'object' && !Array.isArray(o);
 export const num = (v, lo, hi, d) => { v = Number(v); return Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : d; };
@@ -27,7 +27,7 @@ function kkCfg(c, d) {
 }
 function layer(l, bars, d) {
   if (!isObj(l)) return null;
-  const lb = 4 * bars, ev = (Array.isArray(l.ev) ? l.ev : []).slice(0, LIMITS.events)
+  const lb = 4 * bars, ev = (Array.isArray(l.ev) ? l.ev : []).slice(0, LIMITS.kkRawLayer) // hard cap before any sort or thinning
     .filter((e) => Array.isArray(e) && e.length >= 4)
     .map((e) => [num(e[0], 0, lb, 0), int(e[1], 0, 2, 1), num(e[2], 0, 1, 0.5), num(e[3], 0, 1, 0.5)]);
   return { cfg: kkCfg(l.cfg, d), ev };
@@ -110,19 +110,32 @@ export function prefs(p, d) {
 // over the cap are whole notes (on ... off) dropped from the end of that bar.
 let capHits = 0;
 export function takeCapHits() { const n = capHits; capHits = 0; return n; }
+// Linear time: drops are flagged in one array and the list is filtered once at the end. Same result as the
+// old drop-and-refilter loop (which went quadratic on crafted files): spread the move drops evenly, then take
+// notes off the end, each with the rest of its layer's events up to its off.
 function thin(items, max) {            // items: [{ l, e }] in time order; returns the kept subset
-  let over = items.length - max; if (over <= 0) return items;
-  const moves = items.filter((it) => it.e[1] === 1);
-  const drop = new Set();
-  if (moves.length) { const n = Math.min(over, moves.length); for (let i = 0; i < n; i++) drop.add(moves[Math.floor(((i + 0.5) * moves.length) / n)]); over -= n; }
-  let kept = items.filter((it) => !drop.has(it));
-  while (over > 0 && kept.length) {    // drop the last note: its on plus following events of that layer up to its off
-    let i = kept.length - 1; while (i > 0 && kept[i].e[1] !== 0) i--;
-    const L = kept[i].l, out = new Set([kept[i]]);
-    for (let j = i + 1; j < kept.length; j++) if (kept[j].l === L) { out.add(kept[j]); if (kept[j].e[1] === 2) break; }
-    if (out.size === 1 && kept[i].e[1] !== 0) out.add(kept[kept.length - 1]);
-    kept = kept.filter((it) => !out.has(it)); over -= out.size;
+  const n = items.length; let over = n - max; if (over <= 0) return items;
+  const dead = new Uint8Array(n); let alive = n;
+  const moves = []; for (let i = 0; i < n; i++) if (items[i].e[1] === 1) moves.push(i);
+  if (moves.length) { const k = Math.min(over, moves.length); for (let i = 0; i < k; i++) dead[moves[Math.floor(((i + 0.5) * moves.length) / k)]] = 1; over -= k; alive -= k; }
+  if (over > 0) {
+    // per-layer index lists with a "next alive" skip, so following a note to its off never rescans
+    const lists = new Map(), pos = new Int32Array(n);
+    for (let i = 0; i < n; i++) { let a = lists.get(items[i].l); if (!a) lists.set(items[i].l, (a = [])); pos[i] = a.length; a.push(i); }
+    const skip = new Map(); for (const [L, a] of lists) { const nx = new Int32Array(a.length + 1); for (let k = 0; k <= a.length; k++) nx[k] = k + 1; skip.set(L, nx); }
+    const nextAlive = (a, nx, k) => { let r = k; while (r < a.length && dead[a[r]]) r = nx[r]; while (k < r && k < a.length) { const t = nx[k]; nx[k] = r; k = t; } return r; };
+    let f = 0, q = n - 1, p = n - 1;   // first alive, last alive, backward pointer for the last note-on
+    while (over > 0 && alive > 0) {
+      while (dead[f]) f++; while (dead[q]) q--; if (p < f) p = f;
+      while (p > f && (dead[p] || items[p].e[1] !== 0)) p--;
+      const i = p, L = items[i].l, a = lists.get(L), nx = skip.get(L);
+      dead[i] = 1; let size = 1;
+      for (let k = nextAlive(a, nx, pos[i] + 1); k < a.length; k = nextAlive(a, nx, k + 1)) { dead[a[k]] = 1; size++; if (items[a[k]].e[1] === 2) break; }
+      if (size === 1 && items[i].e[1] !== 0 && q !== i) { dead[q] = 1; size++; }
+      over -= size; alive -= size; p = i - 1;
+    }
   }
+  const kept = []; for (let i = 0; i < n; i++) if (!dead[i]) kept.push(items[i]);
   return kept;
 }
 export function capKK(layers, perBrick = LIMITS.kkEvents, perBar = LIMITS.kkBarEvents) {
@@ -131,7 +144,7 @@ export function capKK(layers, perBrick = LIMITS.kkEvents, perBar = LIMITS.kkBarE
   const byBar = new Map(); for (const it of items) { const b = Math.floor(it.e[0] / 4); if (!byBar.has(b)) byBar.set(b, []); byBar.get(b).push(it); }
   if (before <= perBrick && [...byBar.values()].every((a) => a.length <= perBar)) return false;
   items = [];
-  for (const b of [...byBar.keys()].sort((x, y) => x - y)) items.push(...thin(byBar.get(b).sort((x, y) => x.e[0] - y.e[0]), perBar));
+  for (const b of [...byBar.keys()].sort((x, y) => x - y)) for (const it of thin(byBar.get(b).sort((x, y) => x.e[0] - y.e[0]), perBar)) items.push(it);
   items = thin(items.sort((x, y) => x.e[0] - y.e[0]), perBrick);
   const keep = new Set(items.map((it) => it.e));
   for (const l of layers) l.ev = l.ev.filter((e) => keep.has(e));
