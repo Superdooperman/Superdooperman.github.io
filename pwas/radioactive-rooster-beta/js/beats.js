@@ -105,7 +105,8 @@ const GLOVE_FLICK = `<svg viewBox="0 0 20 14" aria-hidden="true"><path d="M2 9 C
 
 // smokeVeil (Arlong 2026-10-25): a reusable cigarette-smoke veil that hides Hattie's mask and face until the Pavilion
 // unmasking (VEIL.flag in js/logic.js, right after the hero choice); only the holder's ember glows through. state "thick" (before the reveal), "whisk" (thick,
-// then .clear() waits for the drift loop to come round to frame 01, which equals clear frame 01, and plays the clear
+// then .clear() waits for the drift loop to come round to frame 01, which equals clear frame 01 (clear({ now: true }), the
+// Pavilion reveal: starts at once; .finish() ends a clear on the spot), and plays the clear
 // strip once with the gloved flick and the smoke-whoosh cue on its first frame; its sax note lands ~0.72 s in as the
 // mask shows) or "open" (after the payoff: no smoke). Art: Brook's strips club/smoke-drift (12 x 320x180, 180 ms a
 // frame, loop) and club/smoke-clear (8 frames, per-frame ms in the manifest, last frame clear); frame counts come from
@@ -132,6 +133,7 @@ function steppedStrip(id, cls) {
   const api = {
     node, n, frame: () => i,
     stop() { stopped = true; clearTimeout(timer); },
+    last() { stopped = true; clearTimeout(timer); i = n - 1; show(); }, // jump to the last frame and stay there
     // loop: forever; once: to the last frame, then resolve. onFrame(i) after each step.
     run(loop, onFrame) {
       return new Promise((resolve) => {
@@ -154,7 +156,7 @@ function steppedStrip(id, cls) {
 export function smokeVeil(state = "thick", opts = {}) {
   const veil = el("div", `smoke-veil veil-${state}`);
   veil.dataset.veil = state;
-  if (state === "open") return { node: veil, clear: () => Promise.resolve() };
+  if (state === "open") return { node: veil, clear: () => Promise.resolve(), finish: () => Promise.resolve() };
   const drift = el("div", "veil-drift");
   const glove = svg(GLOVE_FLICK, "veil-glove");
   veil.append(drift, el("div", "veil-ember"), glove);
@@ -179,28 +181,42 @@ export function smokeVeil(state = "thick", opts = {}) {
       drift.append(b);
     }
   }
-  const done = () => { veil.classList.add("veil-gone"); veil.dataset.veil = "open"; if (opts.onFrame) opts.onFrame("done", -1); };
+  let gone = false, endNow = null;
+  const done = () => { if (gone) return; gone = true; veil.classList.add("veil-gone"); veil.dataset.veil = "open"; if (opts.onFrame) opts.onFrame("done", -1); };
   const start = () => { playCue("smoke-whoosh"); veil.classList.add("veil-flick", "veil-clearing"); };
   let cleared = null;
-  const clear = () => cleared || (cleared = new Promise((resolve) => {
+  // clear({ now }): now = start the clear strip on this tick, cutting the drift loop short (the Pavilion reveal,
+  // Chopper 2026-10-26: waiting for drift frame 01 cost up to 2 s); else wait for frame 01 (== clear frame 01, no pop).
+  const clear = ({ now = false } = {}) => cleared || (cleared = new Promise((resolve) => {
+    const end = () => { endNow = null; done(); resolve(); };
     if (!useArt) { // procedural: flick + whoosh + blobs streak right (~1 s)
       start();
-      setTimeout(() => { done(); resolve(); }, 1000);
+      const t = setTimeout(end, 1000);
+      endNow = () => { clearTimeout(t); end(); };
       return;
     }
-    // no pop: switch to the clear strip only when the drift loop is on frame 01 (== clear frame 01)
+    let once = null, hold = null;
     const swap = () => {
       if (!veil.isConnected) { resolve(); return; }
       loop.stop();
-      const once = steppedStrip(`${ids}-clear`, "veil-strip");
+      once = steppedStrip(`${ids}-clear`, "veil-strip");
       drift.replaceChildren(once.node);
       start();
       if (opts.onFrame) opts.onFrame("clear", 0);
-      once.run(false, (i) => { if (opts.onFrame) opts.onFrame("clear", i); }).then(() => setTimeout(() => { done(); resolve(); }, frameMs(assetInfo(`${ids}-clear`), once.n - 1)));
+      once.run(false, (i) => { if (opts.onFrame) opts.onFrame("clear", i); }).then(() => { if (endNow) hold = setTimeout(end, frameMs(assetInfo(`${ids}-clear`), once.n - 1)); });
     };
-    if (loop.frame() === 0) swap(); else atFrame1 = swap;
+    // finish(): the clear's last frame and "done" right now (the player moved on before the clear finished)
+    endNow = () => {
+      clearTimeout(hold);
+      if (!once) { atFrame1 = null; swap(); }
+      if (once) { once.last(); if (opts.onFrame) opts.onFrame("clear", once.n - 1); }
+      end();
+    };
+    if (now || loop.frame() === 0) swap(); else atFrame1 = swap;
   }));
-  return { node: veil, clear };
+  // finish(): end the clear immediately (starting it if needed); resolves clear()'s promise
+  const finish = () => { const p = clear({ now: true }); if (endNow) endNow(); return p; };
+  return { node: veil, clear, finish };
 }
 
 function clubNode(beat = {}) {
@@ -384,9 +400,11 @@ const BUILD = { card: cardNode, club: clubNode, coldopen: coldOpenNode, potato: 
 const SOUND = {
   card: () => { playCue("clock-tick"); return [setTimeout(() => playCue("clock-tick"), 1000), setTimeout(() => playCue("clock-tick"), 2000)]; },
   club: (b) => {
-    playCue("cutaway"); loopCue("neon-hum"); holdBed("club"); // thin flaky hum: the dark-letters sign
+    playCue("cutaway"); loopCue("neon-hum"); // thin flaky hum: the dark-letters sign
+    holdBed("club", b.unmasked ? "gobbler" : null); // the club's music: noir before the unmasking, the acid theme after
     return b.smack && b.sign && !Object.values(b.sign).every(Boolean) ? [setTimeout(() => playCue("neon-sputter"), SIGN_MS.smack)] : [];
   },
+  // the sign cut keeps the Pavilion's music: the acid theme from the smoke clear on (js/main.js musicMoment)
   sign: () => { signStop = cueThenLoop("neon-lightup", "neon-hum-full", SIGN_MS.lightup); return []; },
   potato: () => { playCue("potato-cannon"); return [setTimeout(() => playCue("potato-flight"), 500), setTimeout(() => playCue("potato-impact"), 2600)]; },
   carny: () => [setTimeout(() => playCue("ghost-scare"), 2400)],

@@ -88,7 +88,8 @@ export function signParts(s, variant = SIGN_VARIANT) {
 export function clubBeat(s, veil) {
   const v = veil || (veilLifted(s) ? "open" : "thick");
   const sign = signParts(s);
-  return { kind: "club", veil: v, sign, smack: !Object.values(sign).every(Boolean) };
+  // unmasked: the club plays Brook's acid club-theme from the unmasking on, the noir groove before it (js/beats.js)
+  return { kind: "club", veil: v, sign, smack: !Object.values(sign).every(Boolean), unmasked: veilLifted(s) };
 }
 
 function lookClubSign(s, out) {

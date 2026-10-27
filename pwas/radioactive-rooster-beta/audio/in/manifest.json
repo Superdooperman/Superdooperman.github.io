@@ -48,5 +48,23 @@
   "bed-midway-calm": "mp3",
   "bed-midway-tense": "mp3"
  },
+ "themes": {
+  "theme-chase": [
+   "ogg",
+   "mp3"
+  ],
+  "theme-club-acid": [
+   "ogg",
+   "mp3"
+  ],
+  "theme-club-noir": [
+   "ogg",
+   "mp3"
+  ],
+  "theme-midway": [
+   "ogg",
+   "mp3"
+  ]
+ },
  "voice": {}
 }

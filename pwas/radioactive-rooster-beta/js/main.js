@@ -1,6 +1,6 @@
 import { COLD_OPEN, ENDINGS, NAMES, ROOMS, SCENE, SPEAKER, TIME_CARDS, TITLE } from "../data/script.js";
 import { artMode, artUrl, assetInfo, fancyCount, initArt, onArtChange, setArtMode } from "./art.js";
-import { audioSettings, audioState, hasVoice, initAudio, playBed, playCue, playVoice, playVoiceSeq, resumeAudio, setAudio, setTension, stopVoice } from "./audio.js";
+import { audioSettings, audioState, hasVoice, initAudio, MOMENT_THEMES, playBed, playCue, playVoice, playVoiceSeq, preloadTheme, resumeAudio, REVEAL_XFADE_S, setAudio, setTension, stopVoice } from "./audio.js";
 import { beatActive, onBeatsDone, playBeats, smokeVeil } from "./beats.js";
 import { clampToArea, findPath, parseFlagOverride, roomView, stepToward, depthHeight, actorZ, occluderZ, occluderAsset, occluderBase, spriteFilter, castFrame, standFor, behindOccluder } from "./walk.js";
 import { act, choicesFor, HERO, ITEMS, itemOf, maxHeat, newGame, nightOf, nightTint, panelVoice, preview, signLetters, signLevel, signParts, spotsFor, startBeats, vatState, veilLifted, visible } from "./logic.js";
@@ -93,6 +93,9 @@ function currentLine() {
 
 function showLine(entry) {
   if (!entry) return;
+  // Chopper 2026-10-26: the player moved past the whisk line before the smoke finished clearing: finish it now, so
+  // her reveal (portrait cut + the acid theme, on the veil's "done") can't be skipped
+  if (entry.veil !== "whisk" && ui.pavVeil && ui.pavVeil.clearing && !ui.pavVeil.cleared) ui.pavVeil.veil.finish();
   // a line with a cutscene plays its beat first (input locked), then shows; the queue waits for it
   if (entry.cutscene && !entry.played) {
     entry.played = true;
@@ -118,7 +121,7 @@ function showLine(entry) {
   if (entry.veil === "whisk" && ui.pavVeil && !ui.pavVeil.clearing) { // the Pavilion unmasking: the smoke whisks off her mask
     const v = ui.pavVeil;
     v.clearing = true;
-    v.veil.clear().then(() => { v.cleared = true; v.wrap.remove(); syncSmokePlate(); });
+    v.veil.clear({ now: true }).then(() => { v.cleared = true; v.wrap.remove(); syncSmokePlate(); syncMusic(REVEAL_XFADE_S); });
   }
 }
 
@@ -183,7 +186,12 @@ function pavilionVeil(state, world) {
     const pv = { wrap, veil: null, clearing: false, cleared: false, phase: "drift", frame: 0 };
     ui.pavVeil = pv;
     // her portrait smoke steps on the stage smoke's own tick (syncSmokePlate)
-    const veil = smokeVeil("thick", { ids: PAV_VEIL.ids, onFrame: (phase, i) => { pv.phase = phase; pv.frame = i; if (phase === "done") pv.cleared = true; if (ui.pavVeil === pv) syncSmokePlate(); } });
+    preloadTheme(MOMENT_THEMES.gobbler); // her reveal hits on the smoke clear: decoded ahead
+    const veil = smokeVeil("thick", { ids: PAV_VEIL.ids, onFrame: (phase, i) => {
+      pv.phase = phase; pv.frame = i;
+      if (phase === "done") pv.cleared = true;
+      if (ui.pavVeil === pv) { syncSmokePlate(); if (phase === "done") syncMusic(REVEAL_XFADE_S); } // the acid theme on the clear
+    } });
     pv.veil = veil;
     wrap.append(veil.node);
     const [x, y, w, h] = art ? PAV_VEIL.box : PAV_VEIL.fallbackBox;
@@ -806,7 +814,30 @@ function render() {
   if (ui.menu) cabinet.append(menuPanel());
   app.append(cabinet);
   setTension(nightOf(state.room, state.night));
-  playBed(state.room);
+  playBed(state.room, musicMoment(state, ended));
+}
+
+// The Pavilion's music (Arlong 2026-10-26, js/audio.js MOMENT_THEMES). While her smoke veil is up the midway theme
+// plays on (she's still Hawkeye Hattie in the smoke). Her first reveal: Brook's acid club-theme ("gobbler") starts the
+// instant the stage smoke is gone (the veil: "whisk" line; smokeVeil's "done" frame, the same moment her portrait cuts
+// to portrait/gobbler), never before. It carries her speech and the sign cut to her lit club; the chase-theme takes the
+// showdown from the cut back to the stage (the signCut line) through the crow-down, the glide and the cage; every
+// Pavilion ending cover (all five endings) goes back to the acid theme, the finale's own music. Saves already past
+// the unmasking get the right one straight away.
+function musicMoment(state, ended) {
+  if (state.room !== "pavilion") return null;
+  if (ended) return "gobbler";
+  if (!state.flags.unmasked || (ui.pavVeil && !ui.pavVeil.cleared)) return null;
+  const k = ui.queue.findIndex((l) => l.signCut);
+  if (k >= 0 && (ui.index < k || (ui.index === k && (!ui.queue[k].played || beatActive())))) return "gobbler";
+  return "chase";
+}
+function syncMusic(fade) {
+  const state = ui.state;
+  if (!state) return;
+  const lineNow = currentLine();
+  const ended = state.mode === "end" && (!lineNow || ui.index >= ui.queue.length - 1);
+  playBed(state.room, musicMoment(state, ended), fade);
 }
 
 // Push C PLACEHOLDER talk animation: while Rooster's own spoken line (a quote in his caption) is fresh, the bust flaps

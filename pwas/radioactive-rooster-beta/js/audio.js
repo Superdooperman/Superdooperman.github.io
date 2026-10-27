@@ -65,13 +65,13 @@ export const LOOPED_CUES = ["neon-hum", "neon-hum-full"]; // sustained while the
 let ctx = null;
 let master = null; // gain nodes: master -> (music, sfx, voice)
 const bus = {};
-let manifest = { cues: {}, beds: {}, voice: {} }; // name -> ext
+let manifest = { cues: {}, beds: {}, themes: {}, voice: {} }; // name -> ext (themes: name -> [ext, ...], best first)
 let manifestReady = null;
 const settings = loadSettings();
 const listeners = new Set();
 let tension = 0;
-let wantBed = null; // { room, area }
-let bedNow = null; // { key, calm, tense, synth }
+let wantBed = null; // { room, moment, key }
+let bedNow = null; // { key, calm, tense, synth } or { key: "theme-<name>", theme }
 let voiceNow = null;
 let voiceSeq = null;
 const loops = new Map(); // looped cue name -> stop()
@@ -107,7 +107,7 @@ export function initAudio() {
   if (!manifestReady) {
     manifestReady = fetch("audio/in/manifest.json")
       .then((r) => (r.ok ? r.json() : null))
-      .then((m) => { if (m) manifest = { cues: m.cues || {}, beds: m.beds || {}, voice: m.voice || {} }; })
+      .then((m) => { if (m) manifest = { cues: m.cues || {}, beds: m.beds || {}, themes: m.themes || {}, voice: m.voice || {} }; })
       .catch(() => { /* no manifest: stand-ins only */ });
   }
   return manifestReady;
@@ -298,6 +298,151 @@ export function stopLoop(kind) {
   if (stop) { stop(); loops.delete(kind); }
 }
 
+/* ---------- music themes: Brook's single seamless loops (Arlong approved midway + chase, 2026-10-26) ---------- */
+
+// audio/in/theme-<name>.ogg|mp3. A theme beats the calm/tense bed of the same rooms (one layer, so no tension
+// crossfade there). Themes play from a decoded Web Audio buffer (AudioBufferSourceNode.loop over the exact loop) and
+// not <audio loop>, which can leave a gap at the seam (Safari, and the mp3's encoder padding). The ogg first; the mp3
+// where the browser can't play ogg or the ogg fails to decode (older iOS Safari).
+// club-noir: the club cutaway (holdBed("club")) before the unmasking. Brook's lounge groove (Arlong 2026-10-26).
+export const THEME_ROOMS = { gate: "midway", midway: "midway", pavilion: "midway", club: "club-noir" }; // the carnival rooms + the club
+// Moments that override the room's music (main.js musicMoment; js/beats.js holdBed). Arlong 2026-10-26:
+//   gobbler: Brook's acid club-theme, the Cock Gobbler's own music. (1) Her first reveal: it starts the instant the
+//     Pavilion smoke veil is gone (the veil: "whisk" line, js/logic.js UNMASK_LINES), not before; (2) the Pavilion
+//     finale: from that reveal on (her speech and the cut to her lit club sign ride on it), and on every Pavilion
+//     ending cover; (3) the club cutaway once the unmasked flag is set (js/beats.js holdBed("club", "gobbler")).
+//     Before the unmasking the club cutaway stays noir.
+//   chase: the Pavilion showdown, from the cut back to the stage after her sign lights up, through the crow-down, the
+//     glide and the cage, until the ending cover.
+export const MOMENT_THEMES = { chase: "chase", gobbler: "club-acid" };
+// Exact loop lengths in samples at 44.1 kHz (assets/music-drafts/NOTES.md). A decode that comes out longer (mp3
+// padding the decoder didn't trim) loops on these samples only, after any leading decoder silence.
+export const THEME_LOOP = { midway: 2116800, chase: 1159890, "club-acid": 2228211, "club-noir": 2016000 };
+// Per-theme trim in dB on top of the bed level. club-noir -3 dB (Brook: the trumpet + Rhodes may need 2-3 dB under
+// dialogue): it is -23 LUFS like the rest, but -27.3 LUFS in the 0.9-3 kHz speech band against -31.0 for the busiest
+// existing bed (bed-midway-calm) and -37 to -44 for the others; -3 dB puts it level with that bed.
+export const THEME_TRIM_DB = { "club-noir": -3 };
+export const REVEAL_XFADE_S = 0.08; // the acid hit on the smoke clear
+const THEME_GAIN = 0.35; // same level as the beds: under the dialogue
+export const XFADE_S = 1.2; // room-to-room music change
+export const HOLD_XFADE_S = 0.35; // a beat borrowing the music (the club cutaway) and handing it back
+const themeData = new Map(); // name -> Promise<{ buffer, url, loopStart, loopEnd } | null>
+const themeResume = {}; // name -> seconds into the loop, kept while a beat borrows the music
+
+export const themeGain = (name) => THEME_GAIN * 10 ** ((THEME_TRIM_DB[name] || 0) / 20);
+
+// Fetch and decode a theme ahead of its moment (the acid hit on the smoke clear can't wait for a decode).
+export function preloadTheme(name) {
+  if (ctx && manifest.themes[`theme-${name}`]) loadTheme(name);
+}
+// Decoded on the first gesture (Chopper 2026-10-26): the club cutaway's noir and the reveal's acid, so neither waits
+// on a decode (noir came in ~120 ms late). Fetch + decode only: nothing plays until a bed asks for it.
+const EARLY_THEMES = ["club-noir", "club-acid"];
+let earlyThemes = false;
+function preloadEarlyThemes() {
+  if (earlyThemes || !ctx) return;
+  earlyThemes = true;
+  (manifestReady || initAudio()).then(() => EARLY_THEMES.forEach(preloadTheme));
+}
+
+function oggOk() {
+  try { return typeof Audio === "undefined" || !!new Audio().canPlayType('audio/ogg; codecs="vorbis"'); } catch { return true; }
+}
+
+// Which theme a room (or moment) plays, if its file is in the manifest.
+export function themeFor(room, moment, themes = manifest.themes) {
+  const m = moment && MOMENT_THEMES[moment];
+  if (m && themes[`theme-${m}`]) return m;
+  const r = THEME_ROOMS[room];
+  return r && themes[`theme-${r}`] ? r : null;
+}
+
+// The files to try for a theme, in order: as the manifest lists them (ogg, mp3), mp3 first if ogg can't play here.
+export function themeUrls(name, themes = manifest.themes, canOgg = oggOk()) {
+  const exts = [...(themes[`theme-${name}`] || [])];
+  if (!canOgg) exts.sort((a, b) => (a === "ogg") - (b === "ogg"));
+  return exts.map((e) => `audio/in/theme-${name}.${e}`);
+}
+
+// Loop points for a decoded buffer: the exact loop length, after any near-silent decoder lead-in (the tracks start
+// on sound at sample 0, so leading silence can only be mp3 encoder delay).
+export function themeLoopPoints(name, length, rate, lead = 0) {
+  const want = THEME_LOOP[name] ? Math.round((THEME_LOOP[name] * rate) / 44100) : length;
+  if (length <= want) return { loopStart: 0, loopEnd: length / rate };
+  const start = Math.min(lead, length - want);
+  return { loopStart: start / rate, loopEnd: (start + want) / rate };
+}
+
+function decode(buf) {
+  return new Promise((ok, fail) => {
+    const p = ctx.decodeAudioData(buf, ok, fail); // callback form for older Safari, promise form elsewhere
+    if (p && p.catch) p.catch(fail);
+  });
+}
+
+function loadTheme(name) {
+  if (!themeData.has(name)) {
+    themeData.set(name, (async () => {
+      if (!context()) return null;
+      for (const url of themeUrls(name)) {
+        try {
+          const r = await fetch(url);
+          if (!r.ok) continue;
+          const buffer = await decode(await r.arrayBuffer());
+          const ch = buffer.getChannelData(0);
+          let lead = 0;
+          while (lead < ch.length && lead < 4096 && Math.abs(ch[lead]) < 1e-4) lead += 1;
+          return { buffer, url, ...themeLoopPoints(name, buffer.length, buffer.sampleRate, lead) };
+        } catch { /* next format */ }
+      }
+      return null;
+    })());
+  }
+  return themeData.get(name);
+}
+
+function startTheme(name, data, fade) {
+  const gain = ctx.createGain();
+  gain.connect(bus.music);
+  const src = ctx.createBufferSource();
+  src.buffer = data.buffer;
+  src.loop = true;
+  src.loopStart = data.loopStart;
+  src.loopEnd = data.loopEnd;
+  src.connect(gain);
+  const len = data.loopEnd - data.loopStart;
+  const into = (themeResume[name] || 0) % len;
+  delete themeResume[name];
+  const now = ctx.currentTime; // frozen until the first gesture resumes the context: nothing sounds before that
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.linearRampToValueAtTime(themeGain(name), now + Math.max(0.02, fade));
+  src.start(now, data.loopStart + into);
+  return { name, src, gain, len, startedAt: now - into, url: data.url };
+}
+
+function stopTheme(t, fade, keepPlace) {
+  const now = ctx.currentTime;
+  if (keepPlace) themeResume[t.name] = (now - t.startedAt) % t.len;
+  t.gain.gain.cancelScheduledValues(now);
+  t.gain.gain.setValueAtTime(t.gain.gain.value, now);
+  t.gain.gain.linearRampToValueAtTime(0.0001, now + Math.max(0.02, fade));
+  try { t.src.stop(now + fade + 0.05); } catch { /* already stopped */ }
+  setTimeout(() => { try { t.src.disconnect(); t.gain.disconnect(); } catch { /* */ } }, (fade + 0.3) * 1000);
+}
+
+// <audio> beds fading out on a room change: off the volume bus (applyVolumes would reset them), stepped to 0, removed.
+function fadeOutEl(a, fade) {
+  if (!a) return;
+  delete a.dataset.bus;
+  const from = a.volume, t0 = performance.now(), ms = fade * 1000;
+  if (!ms || !from) { a.remove(); return; }
+  const id = setInterval(() => {
+    const k = Math.min(1, (performance.now() - t0) / ms);
+    a.volume = Math.max(0, from * (1 - k));
+    if (k >= 1) { clearInterval(id); a.remove(); }
+  }, 40);
+}
+
 /* ---------- music: calm + tense layers, crossfaded by tension ---------- */
 
 // Which files a room plays: a room bed beats its area bed; calm/tense pairs beat a single bed (which is then both).
@@ -320,36 +465,51 @@ export function crossfade(t) {
 
 // A beat can borrow the music (the club cutaway plays the club bed); room changes wait until it lets go.
 let heldBy = null;
-let roomBed = null;
-export function holdBed(room) {
+let roomBed = null; // { room, moment }
+export function holdBed(room, moment = null) {
   heldBy = room;
-  switchBed(room);
+  switchBed(room, moment, HOLD_XFADE_S, true); // the room's theme keeps its place for the hand-back
 }
 export function releaseBed() {
   heldBy = null;
-  if (roomBed) switchBed(roomBed);
+  if (roomBed) switchBed(roomBed.room, roomBed.moment, HOLD_XFADE_S);
 }
 
-export function playBed(room) {
-  roomBed = room;
+// moment: an override for this room's music right now (MOMENT_THEMES; main.js musicMoment), else null.
+export function playBed(room, moment = null, fade = XFADE_S) {
+  roomBed = { room, moment };
   if (heldBy) return Promise.resolve();
-  return switchBed(room);
+  return switchBed(room, moment, fade);
 }
 
-async function switchBed(room) {
-  if (!room) { stopBed(); wantBed = null; return; }
-  if (wantBed && wantBed.room === room) return;
-  wantBed = { room };
+async function switchBed(room, moment = null, fade = XFADE_S, keepPlace = false) {
+  if (!room) { stopBed(fade); wantBed = null; return; }
+  const key = `${room}|${moment || ""}`;
+  if (wantBed && wantBed.key === key) return;
+  const want = { room, moment, key };
+  wantBed = want;
   await initAudio();
-  if (!wantBed || wantBed.room !== room) return;
+  if (wantBed !== want) return;
+  const theme = themeFor(room, moment);
+  if (theme) {
+    if (bedNow && bedNow.key === `theme-${theme}`) return; // gate -> midway -> pavilion: the same loop runs on
+    const data = await loadTheme(theme); // the old music plays on while this decodes
+    if (wantBed !== want) return;
+    if (data) {
+      stopBed(fade, keepPlace);
+      bedNow = { key: `theme-${theme}`, calmUrl: data.url, theme: startTheme(theme, data, fade) };
+      return;
+    } // nothing decodable: the room's bed below
+  }
   const files = bedFiles(room);
   if (bedNow && bedNow.key === files.key && bedNow.calmUrl === files.calm) { mixBed(); return; }
-  stopBed();
+  stopBed(fade, keepPlace);
   if (files.calm) {
     const calm = element(files.calm, "music", 0, true);
     const tense = files.tense !== files.calm ? element(files.tense, "music", 0, true) : null;
-    bedNow = { key: files.key, calmUrl: files.calm, calm, tense };
+    bedNow = { key: files.key, calmUrl: files.calm, calm, tense, fadeIn: { t0: performance.now(), ms: fade * 1000 } };
     mixBed();
+    const ramp = setInterval(() => { if (!bedNow || bedNow.calm !== calm || bedFade() >= 1) clearInterval(ramp); mixBed(); }, 40);
     calm.play().catch(() => { /* waits for a gesture: resumeAudio() retries */ });
     if (tense) tense.play().catch(() => {});
   } else {
@@ -357,18 +517,25 @@ async function switchBed(room) {
   }
 }
 
-function stopBed() {
+function stopBed(fade = 0, keepPlace = false) {
   if (!bedNow) return;
-  if (bedNow.calm) bedNow.calm.remove();
-  if (bedNow.tense) bedNow.tense.remove();
+  if (bedNow.theme) stopTheme(bedNow.theme, fade, keepPlace);
+  fadeOutEl(bedNow.calm, fade);
+  fadeOutEl(bedNow.tense, fade);
   if (bedNow.synth) bedNow.synth.stop();
   bedNow = null;
+}
+
+// 0..1 fade-in of an <audio> bed after a room change
+function bedFade() {
+  const f = bedNow && bedNow.fadeIn;
+  return !f || !f.ms ? 1 : Math.min(1, (performance.now() - f.t0) / f.ms);
 }
 
 function mixBed() {
   if (!bedNow || !bedNow.calm) return;
   const w = crossfade(tension);
-  const base = 0.35; // beds sit under the dialogue (old bed volume)
+  const base = 0.35 * bedFade(); // beds sit under the dialogue (old bed volume)
   if (bedNow.tense) {
     // Brook's calm/tense pairs are sample-aligned: keep the tense layer on the calm one's clock
     if (!bedNow.calm.paused && Math.abs(bedNow.tense.currentTime - bedNow.calm.currentTime) > 0.08) bedNow.tense.currentTime = bedNow.calm.currentTime;
@@ -433,13 +600,15 @@ export function getTension() {
 // Call from a user gesture: unlocks WebAudio and retries any bed that autoplay refused.
 export function resumeAudio() {
   context();
+  preloadEarlyThemes();
   if (bedNow) {
+    if (bedNow.theme) return; // a theme starts with the context: context() above resumed it
     if (bedNow.calm && bedNow.calm.paused) bedNow.calm.play().catch(() => {});
     if (bedNow.tense && bedNow.tense.paused) bedNow.tense.play().catch(() => {});
   } else if (wantBed) {
-    const room = wantBed.room;
+    const { room, moment } = wantBed;
     wantBed = null;
-    switchBed(room);
+    switchBed(room, moment);
   }
 }
 
@@ -492,5 +661,15 @@ export function stopVoice() {
 
 // Debug/inspection hook for the playtest scripts.
 export function audioState() {
-  return { tension, bed: bedNow && { key: bedNow.key, file: bedNow.calmUrl, synth: !!bedNow.synth }, settings: { ...settings }, loops: [...loops.keys()] };
+  const t = bedNow && bedNow.theme;
+  const theme = t && {
+    name: t.name, url: t.url, loop: t.src.loop, loopStart: t.src.loopStart, loopEnd: t.src.loopEnd,
+    samples: t.src.buffer.length, rate: t.src.buffer.sampleRate, gain: t.gain.gain.value, target: themeGain(t.name),
+    at: ctx.state === "running" ? (ctx.currentTime - t.startedAt) % t.len : null,
+  };
+  return {
+    tension, ctx: ctx ? ctx.state : null, held: heldBy, want: wantBed && { room: wantBed.room, moment: wantBed.moment },
+    bed: bedNow && { key: bedNow.key, file: bedNow.calmUrl, synth: !!bedNow.synth, theme },
+    settings: { ...settings }, loops: [...loops.keys()],
+  };
 }
