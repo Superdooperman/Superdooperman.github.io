@@ -106,8 +106,8 @@ function portraitFor(id) {
   const key = PORT_KEY[speakerOf(id)];
   if (!key) return null;
   return isCloseCue(id)
-    ? `../moon-axis/img/portraits/port_${key}_close.png`
-    : `../moon-axis/img/portraits/port_${key}.png`;
+    ? `../moon-axis/img/portraits/port_${key}_close.webp`
+    : `../moon-axis/img/portraits/port_${key}.webp`;
 }
 
 const Vox = (() => {
@@ -253,7 +253,7 @@ const Vox = (() => {
       ensure();
       if (preloadPromise) return preloadPromise;
       const ports = ['cat', 'hale', 'fork', 'rabe', 'sichel', 'geist', 'mond']
-        .flatMap((k) => [`../moon-axis/img/portraits/port_${k}.png`, `../moon-axis/img/portraits/port_${k}_close.png`]);
+        .flatMap((k) => [`../moon-axis/img/portraits/port_${k}.webp`, `../moon-axis/img/portraits/port_${k}_close.webp`]);
       preloadPromise = Promise.all([
         ...IDS.map(async (id) => {
           try {
