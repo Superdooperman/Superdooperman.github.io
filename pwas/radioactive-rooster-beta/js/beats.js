@@ -13,15 +13,38 @@ import { CLUB_SIGN, GOBBLER_DIM, SIGN_VARIANT } from "../data/script.js";
 
 export const BEAT_MS = { card: 2600, club: 4400, clubWhisk: 5400, coldopen: 5600, potato: 3200, carny: 4200, sign: 4600 };
 // Club sign timings (Hawkeye pass 2026-10-25), synced to Brook's placeholder cues:
-// club: the stogie henchman's smack lands at smack ms; the dark parts sputter for sputter ms (neon-sputter starts with it).
-// sign: neon-lightup (2.6 s) flickers 0.14-0.9 s and snaps on at 0.95 s, so the dark letters come on one by one across
-// that window (letters[i] ms), the full name snaps bright at snap ms, and neon-hum-full loops from when the cue ends.
-export const SIGN_MS = { smack: 1800, sputter: 500, thecock: 140, letters: [200, 305, 410, 515, 620, 725, 830], snap: 950, lightup: 2600 };
+// club: the stogie henchman's smack lands at smack ms; THE COCK sputters for sputter ms (neon-sputter starts with it).
+// sign: neon-lightup (2.6 s) crackles 0.14-0.9 s and snaps on at 0.95 s. GOBBLER is one continuous tube (Arlong
+// 2026-10-26), so the whole word sputters together: lit during each gobbler [on, off] window (each one sits on a crackle
+// in neon-lightup), dark between, then lit for good at snap ms with the glow; neon-hum-full loops from when the cue ends.
+export const SIGN_MS = { smack: 1800, sputter: 500, thecock: 140, gobbler: [[140, 170], [320, 370], [530, 570], [680, 740], [860, 890]], snap: 950, lightup: 2600 };
+// The redrawn sign cut (Brook's sign-cut-v2, liked by Arlong 2026-10-26; follows the club-B3 neon, one red-orange
+// colour): 320x180 layers at 0,0, staged from assets/art-placeholder/club/sign-cut/ by tools/art_files.py. base (every
+// tube dead, GOBBLER a faint ghost), then each part's glow (screen; the fade is in the file's alpha), then each part's
+// lit tube (normal). A part flickers by toggling its glow and lit together; GOBBLER is one layer, so the whole word
+// moves at once. Until base + GOBBLER lit exist the cut zooms bg/midway (pre-reveal plate) with GOBBLER's lit patches.
+const SIGN_CUT_PARTS = ["hawk", "thecock", "gobbler"];
+function signCutArt() {
+  const ids = { base: "signcut/base" };
+  for (const p of SIGN_CUT_PARTS) ids[p] = { glow: `signcut/${p}-glow`, lit: `signcut/${p}-lit` };
+  return ids;
+}
+// Decode the sign-cut layers ahead (called when the Pavilion's veil goes up), so the cut's first frame is complete.
+export function preloadSignCut() {
+  const ids = signCutArt();
+  for (const id of [ids.base, ...SIGN_CUT_PARTS.flatMap((p) => [ids[p].glow, ids[p].lit])]) if (artUrl(id)) new Image().src = artUrl(id);
+}
 // Brook's henchman frames (sprite/stogie-sil-smack-l-h72-*): each pose shows from its ms (from the club node's start)
 // until the next; idle from the walk-in, the hit spans the impact at SIGN_MS.smack, settle holds to the end of the beat.
 export const HENCH_FRAMES = [["idle", 0], ["windup", 1480], ["wind", 1580], ["swing", 1720], ["hit", 1750], ["settle", 1850]]; // windup: Brook's arm-fix in-between (2026-10-25)
-// Lit-letter cutouts of Brook's B3 (tools/neon/club_sign_parts.py) that flash over the club plate while a part sputters.
-const SIGN_LIT_ART = { thecock: "club/sign-thecock-lit", gobbler: "club/sign-gobbler-lit" };
+// Lit-letter cutouts of Brook's B3 (tools/neon/club_sign_parts.py). Before the reveal only THE COCK ever sputters
+// (Arlong 2026-10-26: GOBBLER stays dark until the sign cut, the smack must not give it away): dark THE COCK (variant A)
+// flashes its lit cutout and dies again; lit THE COCK (variant B) blinks out under a code-side dead mask and comes back.
+const SIGN_LIT_ART = { thecock: "club/sign-thecock-lit" };
+// Stand-in dead THE COCK over the lit plate (until Brook paints a dead THE COCK layer): near-black masked by the lit
+// cutout's alpha, nudged 1 plate px each way so the tube glow goes too; the wrapper's opacity is the dim (.78 matches
+// the plate's GOBBLER ghost).
+const DEAD_NUDGE = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]];
 // GOBBLER's tubes on the 320x180 club plate (for the GOBBLER_DIM box), in % of the plate.
 const GOBBLER_BOX = { left: 38.5, top: 37, width: 20, height: 17 };
 // Preview-only beats: never triggered by the story (Push B is not approved yet). __RR.beats([{ kind: "potato" }]).
@@ -237,9 +260,19 @@ function clubNode(beat = {}) {
       Object.assign(dim.style, { left: `${GOBBLER_BOX.left}%`, top: `${GOBBLER_BOX.top}%`, width: `${GOBBLER_BOX.width}%`, height: `${GOBBLER_BOX.height}%`, background: `rgba(6,2,8,${GOBBLER_DIM})` });
       stage.append(dim);
     }
-    for (const p of dark) {
-      const lit = SIGN_LIT_ART[p] && art(SIGN_LIT_ART[p], "beat-bg club-sign-flash");
+    if (beat.smack && !sign.thecock) { // variant A: THE COCK's lit letters flash and die again (GOBBLER never flashes)
+      const lit = art(SIGN_LIT_ART.thecock, "beat-bg club-sign-flash");
       if (lit) stage.append(lit);
+    } else if (beat.smack && !sign.gobbler && artUrl(SIGN_LIT_ART.thecock)) { // variant B: THE COCK blinks out, recovers
+      const dead = el("div", "club-sign-dead");
+      dead.dataset.id = "club/sign-thecock-dead (code stand-in)";
+      for (const [dx, dy] of DEAD_NUDGE) {
+        const m = el("div", "club-sign-dead-mask");
+        m.style.maskImage = m.style.webkitMaskImage = `url("${artUrl(SIGN_LIT_ART.thecock)}")`;
+        m.style.transform = `translate(${(dx * 100) / 320}%, ${(dy * 100) / 180}%)`;
+        dead.append(m);
+      }
+      stage.append(dead);
     }
   }
   else {
@@ -261,8 +294,8 @@ function clubNode(beat = {}) {
   // Arlong 2026-10-24: she says NOTHING here (her voice would give the twist away). Only a smoke wisp off the holder
   // and a small gloved flick of ash; Gizzard's piano (the club bed) carries the scene.
   stage.append(el("div", "club-smoke"), el("div", "club-smoke s2"), svg(GLOVE_FLICK, "club-gesture"));
-  // Usopp 2026-10-25: a stogie henchman walks up and smacks the sign; the dark letters sputter about half a second and
-  // die again (the hawk stays lit). Brook's six smack frames (HENCH_FRAMES); the SVG stand-in only if they're missing.
+  // Usopp 2026-10-25: a stogie henchman walks up and smacks the sign (the hawk stays lit). Arlong 2026-10-26: he's
+  // trying to get it to work, so THE COCK sputters for half a second and stays on; GOBBLER stays dark the whole time. Brook's six smack frames (HENCH_FRAMES); the SVG stand-in only if they're missing.
   if (beat.smack && dark.length) {
     const ids = HENCH_FRAMES.map(([pose]) => `sprite/stogie-sil-smack-l-h72-${pose}`);
     if (ids.every((id) => artUrl(id))) { // Brook's frames: one pixelated img, src swapped on the timeline (all preloaded)
@@ -293,34 +326,74 @@ const HENCH = `<svg viewBox="0 0 60 120" aria-hidden="true"><g fill="#0d0a10" st
 <rect x="38" y="31" width="9" height="3" fill="#4a2a18"/><circle cx="47.5" cy="32.5" r="1.6" fill="#ff7a1a" class="hench-ember"/>
 <g class="hench-arm"><path d="M20 44 L4 30 L1 33 L16 50 Z" fill="#0d0a10" stroke="#7a1414" stroke-width="1.2"/><circle cx="2.5" cy="31" r="3.4" fill="#0d0a10" stroke="#7a1414" stroke-width="1.2"/></g></svg>`;
 
-// The cut after Hattie's Pavilion speech (Usopp 2026-10-25): the club sign across the boardwalk, close on the Midway
-// plate. The dead-tube patches (the variant's dark parts) come off letter by letter in sync with neon-lightup, the full
-// name snaps on and holds over neon-hum-full, then back to the Pavilion. Flag CLUB_SIGN.lit keeps it lit afterwards.
+// One neon tube's timeline as stepped Web Animations keyframes (no fades): lit during each [on, off] window (ms from the
+// cut's start), dark between, lit for good from onMs. dead: the node is a dead-tube patch over lit art (flipped).
+// Toggles visibility by default (keeps the glows' screen blend in the plate's stacking context), opacity for the patches.
+function tubeFlicker(node, windows, onMs, { dead = false, prop = "visibility" } = {}) {
+  const [on, off] = prop === "opacity" ? [1, 0] : ["visible", "hidden"];
+  const lit = dead ? off : on, dark = dead ? on : off;
+  const total = onMs + 1;
+  const kf = [{ offset: 0, [prop]: dark }];
+  for (const [a, z] of windows) kf.push({ offset: a / total, [prop]: lit }, { offset: z / total, [prop]: dark });
+  kf.push({ offset: onMs / total, [prop]: lit }, { offset: 1, [prop]: lit });
+  return node.animate(kf.map((k) => ({ ...k, easing: "steps(1, end)" })), { duration: total, fill: "both" });
+}
+
+// The cut after Hattie's Pavilion speech (Usopp 2026-10-25): the club sign across the boardwalk. The dark parts light
+// in sync with neon-lightup: THE COCK (variant A only; lit from the start in B) on its own blip, then GOBBLER as one tube
+// (SIGN_MS.gobbler); the full name holds over neon-hum-full, then back to the Pavilion. Flag CLUB_SIGN.lit keeps it lit.
+// Brook's sign-cut-v2 layers (signCutArt) when present, else the Midway plate close-up with his dead-tube patches.
 function signNode() {
   const node = el("div", "beat beat-sign");
   node.dataset.beat = "sign";
   const stage = el("div", "beat-stage");
   const zoom = el("div", "sign-zoom");
-  const bg = art("bg/midway", "beat-bg");
-  if (bg) zoom.append(bg);
-  else zoom.append(el("div", "gb sign-gb"));
   const before = CLUB_SIGN.before[SIGN_VARIANT] || CLUB_SIGN.before.A;
-  const patches = [];
-  const patch = (id, ms) => {
-    const info = assetInfo(id);
-    const img = art(id, "sign-patch");
-    if (!img || !info || !info.at) return;
-    Object.assign(img.style, { left: `${(info.at[0] / 320) * 100}%`, top: `${(info.at[1] / 180) * 100}%`, width: `${(info.size[0] / 320) * 100}%`, height: `${(info.size[1] / 180) * 100}%` });
-    img.style.setProperty("--on-ms", `${ms}ms`);
-    zoom.append(img);
-    patches.push(img);
-  };
-  if (!before.thecock) patch("fx/clubsign-dark-thecock", SIGN_MS.thecock);
-  if (!before.gobbler) SIGN_MS.letters.forEach((ms, i) => patch(`fx/clubsign-dark-g${i + 1}`, ms));
+  const ids = signCutArt();
+  const redrawn = !!(artUrl(ids.base) && artUrl(ids.gobbler.lit));
+  if (redrawn) {
+    node.classList.add("sign-redrawn");
+    zoom.append(art(ids.base, "beat-bg"));
+    const layers = { hawk: [], thecock: [], gobbler: [] };
+    for (const kind of ["glow", "lit"]) for (const p of SIGN_CUT_PARTS) { // all glows over the base, then all lit tubes
+      const img = art(ids[p][kind], kind === "glow" ? "beat-bg sign-halo" : "beat-bg sign-lit");
+      if (!img) continue;
+      img.dataset.part = p;
+      zoom.append(img);
+      layers[p].push(img);
+    }
+    // THE COCK: the dead-patch's tube-on blip (lit 36 ms, dark 27 ms, then on); GOBBLER: the shared one-tube timeline
+    if (!before.thecock) layers.thecock.forEach((img) => tubeFlicker(img, [[SIGN_MS.thecock, SIGN_MS.thecock + 36]], SIGN_MS.thecock + 63));
+    if (!before.gobbler) layers.gobbler.forEach((img) => tubeFlicker(img, SIGN_MS.gobbler, SIGN_MS.snap));
+  } else {
+    const bg = art("bg/midway", "beat-bg");
+    if (bg) zoom.append(bg);
+    else zoom.append(el("div", "gb sign-gb"));
+    const patch = (id, parent, ms) => {
+      const info = assetInfo(id);
+      const img = art(id, "sign-patch");
+      if (!img || !info || !info.at) return;
+      Object.assign(img.style, { left: `${(info.at[0] / 320) * 100}%`, top: `${(info.at[1] / 180) * 100}%`, width: `${(info.size[0] / 320) * 100}%`, height: `${(info.size[1] / 180) * 100}%` });
+      if (ms != null) img.style.setProperty("--on-ms", `${ms}ms`); else img.classList.add("sign-patch-held");
+      parent.append(img);
+    };
+    if (!before.thecock) patch("fx/clubsign-dark-thecock", zoom, SIGN_MS.thecock);
+    if (!before.gobbler) {
+      // the plate's GOBBLER is dead (Brook's midway-sign-v1): all seven lit letter patches in one group on one timeline
+      // (tube-lit, the inverse of the dead patch's tube-on), so the tube sputters and lights as a whole word
+      const tube = el("div", "sign-tube");
+      tube.dataset.part = "gobbler";
+      for (let i = 1; i <= 7; i += 1) patch(`fx/clubsign-lit-g${i}`, tube, null);
+      zoom.append(tube);
+      tubeFlicker(tube, SIGN_MS.gobbler, SIGN_MS.snap, { prop: "opacity" });
+    }
+  }
   node.style.setProperty("--snap-ms", `${SIGN_MS.snap}ms`);
-  stage.append(zoom, el("div", "sign-glow"));
+  stage.append(zoom);
+  if (!redrawn) stage.append(el("div", "sign-glow")); // the redrawn art carries its own glow layers
   node.append(stage);
-  tag(node, "club sign cut (Midway plate close-up; Brook's dead-tube patches)");
+  // real art (sign-cut-v2): no PLACEHOLDER caption; the Midway fallback keeps its tag
+  if (!redrawn) tag(node, "club sign cut (Midway plate close-up; Brook's midway-sign-v1 lit patches; GOBBLER one tube)");
   return node;
 }
 

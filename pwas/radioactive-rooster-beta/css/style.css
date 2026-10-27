@@ -311,6 +311,13 @@ button.on {
   background: #120a16;
 }
 
+.title-frame {
+  /* the whole 16:9 cover fits the viewport height too (phone landscape 844x390) */
+  width: min(100%, calc((100vh - 32px - 8px) * 16 / 9));
+  width: min(100%, calc((100svh - 32px - 8px) * 16 / 9));
+  margin: 0 auto;
+}
+
 .title-frame img {
   display: block;
   width: 100%;
@@ -320,30 +327,78 @@ button.on {
 
 .title-art { position: relative; }
 
-.title-frame .title-cast {
+/* Brook's text layers, 320x180 like the scene and aligned at 0,0 */
+.title-frame .title-layer {
   position: absolute;
-  aspect-ratio: auto;
-  height: auto;
+  inset: 0;
+  height: 100%;
   pointer-events: none;
 }
 
-.title-copy {
-  text-align: center;
-  padding: 12px 8px 0;
+/* Menu bottom-right over the water (Usopp): clear of the logo, Rooster (centre-left) and the Hawk (upper right). */
+.title-menu {
+  position: absolute;
+  right: 2.2%;
+  bottom: 4%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
 }
-
-.title-copy h1 {
+.title-menu .title-actions { margin: 0; flex-direction: column; align-items: stretch; gap: clamp(4px, 0.8vw, 8px); }
+.title-menu .title-actions button {
+  min-width: clamp(96px, 14vw, 170px);
+  padding: clamp(4px, 0.9vw, 9px) clamp(10px, 1.6vw, 18px);
+  font-size: clamp(13px, 1.5vw, 18px);
+  box-shadow: 3px 3px 0 #000;
+}
+.title-menu .beta {
   margin: 0;
-  font-family: "Arial Black", Impact, sans-serif;
-  font-size: clamp(28px, 5vw, 64px);
-  letter-spacing: 0.04em;
-  color: var(--yolk);
+  font-size: 9px;
+  padding: 0 4px;
+  background: rgba(0, 0, 0, 0.45);
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.14em;
 }
 
-.sub {
-  margin: 4px 0 0;
-  font-size: clamp(16px, 2vw, 24px);
-  text-shadow: 2px 2px 0 #000;
+/* Accessible title text, visually hidden: the logo art says it on screen, so the title never shows twice. */
+.vh {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The fade-in: scene, then the logo, then the subtitle, then the menu. Any key/tap swaps .intro for .shown. */
+@keyframes title-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes title-logo-in { from { opacity: 0; transform: scale(1.04); } to { opacity: 1; transform: none; } }
+.title-screen.intro .title-frame > .title-art > img:first-child { animation: title-in 0.6s ease-out both; }
+.title-screen.intro .title-logo { animation: title-logo-in 0.9s ease-out 0.5s both; transform-origin: 25% 25%; }
+.title-screen.intro .title-sub { animation: title-in 0.7s ease-out 1.4s both; }
+.title-screen.intro .title-menu { animation: title-in 0.5s ease-out 2.2s both; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) {
+  .title-screen.intro .title-frame img, .title-screen.intro .title-menu { animation: none; }
+}
+
+.next-issue {
+  margin: 8px auto 0;
+  max-width: 46rem;
+  padding: 6px 12px;
+  background: var(--yolk);
+  color: #141018;
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 #000;
+  font: italic 700 clamp(13px, 1.6vw, 17px)/1.3 Georgia, "Times New Roman", serif;
+  transform: rotate(-0.6deg);
+}
+.next-issue .ni-label {
+  font: normal 900 1.05em/1 "Arial Black", Impact, sans-serif;
+  color: var(--comb);
+  letter-spacing: 0.06em;
+  margin-right: 4px;
 }
 
 .logline, .how {
@@ -368,7 +423,6 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
   background: var(--comb); color: #fff; font: 700 12px/1.4 "Arial Black", Impact, sans-serif;
   letter-spacing: 0.08em; vertical-align: middle;
 }
-.title-copy .beta { font-size: 16px; }
 .art-toggle { margin-left: 0; }
 .plate { object-fit: fill; }
 
@@ -683,13 +737,16 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 .pav-veil-art .veil-glove { left: 62.5%; top: 34.8%; width: 2.4%; } /* the same spot over her head as the fallback box */
 .beat-club.on-art .club-smoke { display: none; } /* B3 paints its own wisp; Brook's smoke strips do the rest */
 
-/* Club sign (Hawkeye pass 2026-10-25, js/beats.js). The smack: dark parts sputter ~0.5 s, then die again. */
+/* Club sign (Hawkeye pass 2026-10-25, js/beats.js). The smack (Arlong 2026-10-26): THE COCK sputters ~0.5 s and
+   stays on (variant A: its dark letters flash and die again); GOBBLER never lights before the reveal. */
 .beat-club .club-sign-flash { opacity: 0; mix-blend-mode: screen; pointer-events: none; }
 .beat-club.smacked .club-sign-flash { animation: sign-sputter var(--sputter-ms, 500ms) steps(1, end) forwards; }
 @keyframes sign-sputter { 0% { opacity: 1; } 12% { opacity: .15; } 22% { opacity: .95; } 36% { opacity: 0; } 48% { opacity: .85; } 62% { opacity: .25; } 74% { opacity: 1; } 88% { opacity: .1; } 100% { opacity: 0; } }
 .beat-club .club-gob-dim { position: absolute; filter: blur(3px); pointer-events: none; }
-.beat-club.smacked .club-gob-dim { animation: dim-lift var(--sputter-ms, 500ms) steps(1, end); }
-@keyframes dim-lift { 0%, 99% { opacity: 0; } 100% { opacity: 1; } }
+.beat-club .club-sign-dead { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
+.beat-club .club-sign-dead-mask { position: absolute; inset: 0; background: #060208; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.beat-club.smacked .club-sign-dead { animation: sign-recover var(--sputter-ms, 500ms) steps(1, end) forwards; }
+@keyframes sign-recover { 0% { opacity: .78; } 12% { opacity: .1; } 22% { opacity: .78; } 36% { opacity: .3; } 48% { opacity: .78; } 62% { opacity: 0; } 74% { opacity: .6; } 88% { opacity: 0; } 100% { opacity: 0; } }
 .club-hench { position: absolute; left: 54%; top: 27%; width: 12.5%; opacity: 0; animation: hench-in 700ms ease-out 500ms forwards; filter: drop-shadow(0 0 3px rgba(200,30,30,.35)); }
 .club-hench svg { width: 100%; height: auto; display: block; overflow: visible; }
 .club-hench .hench-arm { transform-box: fill-box; transform-origin: 100% 85%; transform: rotate(-35deg); animation: hench-smack 260ms ease-in calc(var(--smack-ms, 1800ms) - 160ms) forwards; }
@@ -698,12 +755,22 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 .club-hench.club-hench-art { left: 51.5625%; top: 30.556%; width: 17.5%; height: 40%; filter: none; image-rendering: pixelated; display: block; }
 @keyframes hench-in { from { opacity: 0; transform: translateX(40%); } to { opacity: 1; transform: none; } }
 @keyframes hench-smack { 0% { transform: rotate(-35deg); } 60% { transform: rotate(12deg); } 100% { transform: rotate(4deg); } }
-/* The cut to the sign after the Pavilion speech: Midway plate close on the club sign; patches come off letter by letter. */
+/* The cut to the sign after the Pavilion speech: Midway plate close on the club sign (fallback when sign-cut-v2 is
+   missing). THE COCK's dead patch blips off on tube-on (variant A); the plate's GOBBLER is dead, and its seven lit
+   patches sit in one .sign-tube that js/beats.js tubeFlicker steps on as one word (the inverse of tube-on).
+   Zoom origin (237,18): midway-sign-v1's hawk reaches y20, so the close-up keeps y~11-83 in frame. */
 .beat-sign .beat-stage { background: #05040a; }
-.beat-sign .sign-zoom { position: absolute; inset: 0; transform-origin: 74% 24%; transform: scale(2.6); animation: sign-push var(--beat-ms) ease-out forwards; }
+.beat-sign .sign-zoom { position: absolute; inset: 0; transform-origin: 74% 10%; transform: scale(2.6); animation: sign-push var(--beat-ms) ease-out forwards; }
 @keyframes sign-push { from { transform: scale(2.5); } to { transform: scale(2.75); } }
 .beat-sign .sign-patch { position: absolute; image-rendering: pixelated; animation: tube-on 90ms steps(1, end) var(--on-ms) forwards; }
 @keyframes tube-on { 0% { opacity: 0; } 40% { opacity: 1; } 70% { opacity: 0; } 100% { opacity: 0; } }
+.beat-sign .sign-tube { position: absolute; inset: 0; pointer-events: none; }
+.beat-sign .sign-patch.sign-patch-held { animation: none; }
+/* The redrawn sign cut (Brook's sign-cut-v2): full 320x180 layers, no close-up zoom, only a slow push toward the sign;
+   glows screen-blend over the base (their fade is baked into the alpha), lit tubes in normal blend (js/beats.js signNode) */
+.beat-sign.sign-redrawn .sign-zoom { transform-origin: 73% 40%; transform: none; animation-name: sign-push-art; }
+.beat-sign .sign-halo { mix-blend-mode: screen; }
+@keyframes sign-push-art { from { transform: scale(1); } to { transform: scale(1.04); } }
 .beat-sign .sign-glow { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at 50% 55%, rgba(255,40,40,.28), transparent 50%); animation: sign-snap 700ms ease-out var(--snap-ms, 950ms) forwards; }
 @keyframes sign-snap { 0% { opacity: 0; } 25% { opacity: 1; } 100% { opacity: .55; } }
 .beat-sign .gb.sign-gb { inset: 0; background: #1a1424; }

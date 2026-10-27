@@ -25,7 +25,31 @@
     0
    ],
    "legacy": "bg-title.jpg",
-   "source": "tools/bg/pixelate.py (box 1280x720 -> 320x180, unsharp, Bayer dither, 48-colour palette) from the painted bg-title.jpg; 4x nearest copy in art/pixel-4x/bg/"
+   "source": "tools/bg/pixelate.py title: Brook's layered cover (2026-10-26, logo painted out) 1672x941 -> 1280x720 tools/bg/src/title-bg.png -> 320x180, unsharp, Bayer dither, 48-colour palette shared with bg/title-logo + bg/title-sub; 4x nearest copy in art/pixel-4x/bg/"
+  },
+  "bg/title-logo": {
+   "kind": "overlay",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/bg/pixelate.py title: Brook's \"RADIOACTIVE ROOSTER\" logo layer (transparent, aligned to bg/title at 0,0, 1-bit alpha, the title palette); faded in by js/main.js renderTitle; 4x nearest copy in art/pixel-4x/bg/"
+  },
+  "bg/title-sub": {
+   "kind": "overlay",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "source": "tools/bg/pixelate.py title: Brook's \"THE YOLK OF MIDNIGHT\" subtitle layer (transparent, aligned to bg/title at 0,0, 1-bit alpha, the title palette); faded in by js/main.js renderTitle; 4x nearest copy in art/pixel-4x/bg/"
   },
   "bg/hq": {
    "kind": "bg",
@@ -127,7 +151,8 @@
     0,
     0
    ],
-   "legacy": "bg-midway.jpg"
+   "legacy": "bg-midway.jpg",
+   "source": "Brook 2026-10-26 midway-sign-v1 (B3/sign-cut-v2 design): club sign painted PRE-REVEAL (hawk + THE COCK lit, GOBBLER a faint dead ghost); fx/clubsign-lit-g1..g7 light GOBBLER"
   },
   "bg/pavilion": {
    "kind": "bg",
@@ -11021,9 +11046,9 @@
     216,
     48
    ],
-   "source": "Brook 2026-10-25 (assets/art-placeholder/midway-sign/, generator /workspace/brook-art/clubsign_patches.py): dead-tube ghost patch over bg/midway, re-rendered with tools/bg/next_signs.club(); replaces the tools/neon/club_sign_parts.py placeholder (THE COCK, variant A only)"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/): THE COCK dead over the v1 pre-reveal bg/midway (variant A only; rows 57-60 left clear for the g boxes)"
   },
-  "fx/clubsign-dark-g1": {
+  "fx/clubsign-lit-g1": {
    "kind": "overlay",
    "size": [
     8,
@@ -11033,9 +11058,9 @@
     215,
     57
    ],
-   "source": "Brook 2026-10-25 (assets/art-placeholder/midway-sign/, generator /workspace/brook-art/clubsign_patches.py): dead-tube ghost patch over bg/midway, re-rendered with tools/bg/next_signs.club(); replaces the tools/neon/club_sign_parts.py placeholder"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Arlong OK)"
   },
-  "fx/clubsign-dark-g2": {
+  "fx/clubsign-lit-g2": {
    "kind": "overlay",
    "size": [
     9,
@@ -11045,9 +11070,9 @@
     220,
     57
    ],
-   "source": "Brook 2026-10-25 (assets/art-placeholder/midway-sign/, generator /workspace/brook-art/clubsign_patches.py): dead-tube ghost patch over bg/midway, re-rendered with tools/bg/next_signs.club(); replaces the tools/neon/club_sign_parts.py placeholder"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Arlong OK)"
   },
-  "fx/clubsign-dark-g3": {
+  "fx/clubsign-lit-g3": {
    "kind": "overlay",
    "size": [
     9,
@@ -11057,9 +11082,9 @@
     226,
     57
    ],
-   "source": "Brook 2026-10-25 (assets/art-placeholder/midway-sign/, generator /workspace/brook-art/clubsign_patches.py): dead-tube ghost patch over bg/midway, re-rendered with tools/bg/next_signs.club(); replaces the tools/neon/club_sign_parts.py placeholder"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Arlong OK)"
   },
-  "fx/clubsign-dark-g4": {
+  "fx/clubsign-lit-g4": {
    "kind": "overlay",
    "size": [
     9,
@@ -11069,9 +11094,9 @@
     232,
     57
    ],
-   "source": "Brook 2026-10-25 (assets/art-placeholder/midway-sign/, generator /workspace/brook-art/clubsign_patches.py): dead-tube ghost patch over bg/midway, re-rendered with tools/bg/next_signs.club(); replaces the tools/neon/club_sign_parts.py placeholder"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Arlong OK)"
   },
-  "fx/clubsign-dark-g5": {
+  "fx/clubsign-lit-g5": {
    "kind": "overlay",
    "size": [
     9,
@@ -11081,9 +11106,9 @@
     238,
     57
    ],
-   "source": "Brook 2026-10-25 (assets/art-placeholder/midway-sign/, generator /workspace/brook-art/clubsign_patches.py): dead-tube ghost patch over bg/midway, re-rendered with tools/bg/next_signs.club(); replaces the tools/neon/club_sign_parts.py placeholder"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Arlong OK)"
   },
-  "fx/clubsign-dark-g6": {
+  "fx/clubsign-lit-g6": {
    "kind": "overlay",
    "size": [
     9,
@@ -11093,9 +11118,9 @@
     244,
     57
    ],
-   "source": "Brook 2026-10-25 (assets/art-placeholder/midway-sign/, generator /workspace/brook-art/clubsign_patches.py): dead-tube ghost patch over bg/midway, re-rendered with tools/bg/next_signs.club(); replaces the tools/neon/club_sign_parts.py placeholder"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Arlong OK)"
   },
-  "fx/clubsign-dark-g7": {
+  "fx/clubsign-lit-g7": {
    "kind": "overlay",
    "size": [
     8,
@@ -11105,7 +11130,7 @@
     250,
     57
    ],
-   "source": "Brook 2026-10-25 (assets/art-placeholder/midway-sign/, generator /workspace/brook-art/clubsign_patches.py): dead-tube ghost patch over bg/midway, re-rendered with tools/bg/next_signs.club(); replaces the tools/neon/club_sign_parts.py placeholder"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Arlong OK)"
   },
   "pavilion/smoke-drift": {
    "kind": "fx",
@@ -11225,6 +11250,62 @@
     72
    ],
    "source": "PLACEHOLDER (Brook, 2026-10-25; may serve as final): the club henchman's smack, pose 'settle', facing left (the sign is to his upper-left). h72 re-cut of stogie-guy-sprites-v1.jpg, silhouette fill (26,18,24), red-neon rim (82,22,30), ember (255,140,40). Staged from assets/art-placeholder/henchman/sprite/ (generator build_smack_frames.py there). js/beats.js clubNode at stage (165,55), feet (193,127); frames swapped on SIGN_MS.hench."
+  },
+  "signcut/base": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "source": "Brook's club sign cut sign-cut-v2 (Arlong liked it 2026-10-26), 320x180 at 0,0: dead sign, every tube unlit, GOBBLER a faint ghost (RGB, normal blend). Staged from assets/art-placeholder/club/sign-cut/base.png by tools/art_files.py (js/beats.js signCutArt)"
+  },
+  "signcut/hawk-glow": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "source": "Brook's club sign cut sign-cut-v2 (Arlong liked it 2026-10-26), 320x180 at 0,0: hawk glow, #d63a22 stepped alpha, screen blend, box 181,0-279,78. Staged from assets/art-placeholder/club/sign-cut/hawk-glow.png by tools/art_files.py (js/beats.js signCutArt)"
+  },
+  "signcut/hawk-lit": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "source": "Brook's club sign cut sign-cut-v2 (Arlong liked it 2026-10-26), 320x180 at 0,0: hawk lit tube pixels, alpha 0/255, normal blend, box 193,6-267,75. Staged from assets/art-placeholder/club/sign-cut/hawk-lit.png by tools/art_files.py (js/beats.js signCutArt)"
+  },
+  "signcut/thecock-glow": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "source": "Brook's club sign cut sign-cut-v2 (Arlong liked it 2026-10-26), 320x180 at 0,0: thecock glow, #d63a22 stepped alpha, screen blend, box 173,61-282,99. Staged from assets/art-placeholder/club/sign-cut/thecock-glow.png by tools/art_files.py (js/beats.js signCutArt)"
+  },
+  "signcut/thecock-lit": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "source": "Brook's club sign cut sign-cut-v2 (Arlong liked it 2026-10-26), 320x180 at 0,0: thecock lit tube pixels, alpha 0/255, normal blend, box 185,69-270,97. Staged from assets/art-placeholder/club/sign-cut/thecock-lit.png by tools/art_files.py (js/beats.js signCutArt)"
+  },
+  "signcut/gobbler-glow": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "source": "Brook's club sign cut sign-cut-v2 (Arlong liked it 2026-10-26), 320x180 at 0,0: gobbler glow, #d63a22 stepped alpha, screen blend, box 171,87-296,144. Staged from assets/art-placeholder/club/sign-cut/gobbler-glow.png by tools/art_files.py (js/beats.js signCutArt)"
+  },
+  "signcut/gobbler-lit": {
+   "kind": "bg",
+   "size": [
+    320,
+    180
+   ],
+   "source": "Brook's club sign cut sign-cut-v2 (Arlong liked it 2026-10-26), 320x180 at 0,0: gobbler lit tube pixels, alpha 0/255, normal blend, box 183,88-285,132. Staged from assets/art-placeholder/club/sign-cut/gobbler-lit.png by tools/art_files.py (js/beats.js signCutArt)"
   }
  }
 }

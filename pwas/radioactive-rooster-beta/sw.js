@@ -1,5 +1,5 @@
 // Radioactive Rooster BETA service worker. Own prefix "rr-beta-" so it never touches other games.
-const VERSION = "14";
+const VERSION = "16";
 const CORE_CACHE = `rr-beta-core-v${VERSION}`;
 const PIXEL_CACHE = `rr-beta-pixel-v${VERSION}`;
 const FANCY_CACHE = `rr-beta-fancy-v${VERSION}`;
@@ -64,9 +64,10 @@ self.addEventListener("fetch", (event) => {
     return;
   }
   // Art: cache-first. Fetched once, the first time a room shows it (no bulk precache: 2026-10-21 rate limit); art
-  // files are versioned by the cache name, so a new SW version refetches them lazily. Only 200s are cached.
+  // files are versioned by the cache name, so a new SW version refetches them lazily. The miss fetch revalidates (no-cache) so an
+  // HTTP-cached copy of the old version's art can't get stored under the new cache (Chopper, v15). Only 200s are cached.
   event.respondWith(
-    caches.open(name).then((cache) => cache.match(req).then((hit) => hit || fetch(req).then((res) => {
+    caches.open(name).then((cache) => cache.match(req).then((hit) => hit || fetch(req, { cache: "no-cache" }).then((res) => {
       if (res.ok && res.type === "basic") cache.put(req, res.clone());
       return res;
     }))),

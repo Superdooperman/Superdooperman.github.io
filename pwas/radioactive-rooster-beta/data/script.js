@@ -1,4 +1,4 @@
-// Radioactive Rooster and the Yolk of Midnight: story v2 data (beta slice 2).
+// Radioactive Rooster: The Yolk of Midnight: story v2 data (beta slice 2).
 // Scene coordinates are logical pixels in a 320x180 scene (see art/manifest.json).
 // Source of truth for story: github-pages-plans/rooster-story.md (v2.x).
 export const SCENE = { w: 320, h: 180 };
@@ -67,12 +67,9 @@ export const NAMES = {
 // Henny NEVER speaks out loud (Arlong, 2026-10-16). Every Henny line is a thought bubble.
 export const HENNY_THINKS = { speaker: SPEAKER.henny, thought: true };
 
-// Title-screen cutouts drawn over bg/title (top-left `at` in its 320x180 px). See js/main.js renderTitle.
-export const TITLE = {
-  overlays: [
-    { art: "sprite/titlehen-side-l-h16", at: [58, 58] }, // the white hen on the barn-roof peak (feet at 67,74), a sprite now, not plate paint
-  ],
-};
+// The ending card's teaser (Usopp's placeholder, 2026-10-26): commits to nothing until Arlong decides on Issue 2.
+// Shown on every ending under the cover, after a "NEXT ISSUE:" label (js/main.js).
+export const NEXT_ISSUE = "The yolk's cracked, the fair's dark, and somebody in Cluck County is still crowing...";
 
 export const ITEMS = {
   geiger: {
@@ -342,7 +339,7 @@ export const CROW = [
 // Without it (showboat, darkside, eggfried): the older code-drawn cover.
 export const ENDINGS = {
   hero: {
-    series: "RADIOACTIVE ROOSTER #1",
+    series: "RADIOACTIVE ROOSTER",
     title: "ROOSTER RETURNS!",
     // Arlong 2026-10-19: a Silver Age (1950s-60s) comic cover. Splash = the glide, red webbing out; the beats below
     // are inset panels with painted pixel art (bg/cover-hero-1..4), narration captions, bubbles and editor's notes.
@@ -390,7 +387,7 @@ export const ENDINGS = {
     tone: "smitten",
   },
   showboat: {
-    series: "RADIOACTIVE ROOSTER #1 · MISPRINT EDITION",
+    series: "RADIOACTIVE ROOSTER · MISPRINT EDITION",
     title: "ROOSTER SAVES EGG, NOT FACES!",
     // Oct 21 item 19: a Silver Age cover too. Splash = the kick off the vat rim, a wave of oil over the front row
     // (bg/cover-showboat, tools/sprites/cut_oct21.py); the beats are painted inset panels (bg/cover-showboat-1..4).
@@ -418,7 +415,7 @@ export const ENDINGS = {
     rewind: true,
   },
   eggfried: {
-    series: "RADIOACTIVE ROOSTER #1",
+    series: "RADIOACTIVE ROOSTER",
     title: "HARD-BOILED",
     stamp: "CANCELLED",
     blurb: "The oil got there first.",
@@ -1429,10 +1426,11 @@ export const ROOMS = {
     // slides back down and walks back to his mark.
     cutscenes: { shimmy: SHIMMY },
     overlays: [{ art: "fg/midway--cashbox", at: [63, 92], z: 148 }, // over the booth front cutout (z); Corny's cash box on the end of the counter (tools/sprites/cut_next.py)
-      // Hawkeye pass (2026-10-25): the plate's club sign is painted fully lit; these PLACEHOLDER dead-tube patches
-      // (tools/neon/club_sign_parts.py) cover whichever CLUB_SIGN parts are dark (js/main.js, signParts in js/logic.js)
+      // Club sign (Brook's midway-sign-v1, Arlong OK 2026-10-26): the plate is painted PRE-REVEAL (hawk + THE COCK lit,
+      // GOBBLER a dead ghost). A dead patch shows while its part is dark (THE COCK, variant A only); a whenLit patch shows
+      // once its part is lit (GOBBLER's seven letters, after the Pavilion reveal). js/main.js, signParts in js/logic.js
       { art: "fx/clubsign-dark-thecock", at: [216, 48], signPart: "thecock" },
-      ...[[215, 57], [220, 57], [226, 57], [232, 57], [238, 57], [244, 57], [250, 57]].map((at, i) => ({ art: `fx/clubsign-dark-g${i + 1}`, at, signPart: "gobbler" }))],
+      ...[[215, 57], [220, 57], [226, 57], [232, 57], [238, 57], [244, 57], [250, 57]].map((at, i) => ({ art: `fx/clubsign-lit-g${i + 1}`, at, signPart: "gobbler", whenLit: true }))],
     cast: [
       { spot: "kids", sprite: "dot-front", talk: "dot-talk", voice: ["dot", "kids"], at: [38, 140], height: 72 }, // behind the counter window
       { spot: "kids", sprite: "rocco-front", talk: "rocco-talk", voice: ["rocco", "kids"], at: [59, 141], height: 72 },
@@ -1533,7 +1531,7 @@ export const ROOMS = {
       spot({
         id: "hawk",
         name: "red neon hawk",
-        rect: [215, 27, 44, 42], // the painted-in club neon (tools/bg/next_signs.py club); its parts light per CLUB_SIGN
+        rect: [214, 18, 46, 53], // the painted-in club neon (Brook's midway-sign-v1; hawk from y20); its parts light per CLUB_SIGN
         look: { special: "look_club_sign" }, // SIGN_LOOK below, by variant and reveal
         talk: "The neon buzzes back. Not a yes. Not a no.",
         take: "It's her sign, over her club. You don't take a woman's neon.",
@@ -1863,8 +1861,8 @@ export const NIGHT = { hq: 0, fence: 0.15, henhouse: 0.2, barn: 0.25, store: 0.3
 // `on`: "start" = after the cold open; { room } = the first time he enters `room`.
 // `then`: beats that follow the card (the club cutaway after THREE HOURS).
 // The club's neon sign (Hawkeye pass, Arlong + Usopp 2026-10-25): three parts, each lit or dark. Before the Pavilion
-// reveal only some are lit (SIGN_VARIANT picks which); the stogie henchman's smack in the club cutaway sputters the dark
-// ones for half a second; right after Hattie's "Hawkeye Hattie is dead" speech every part lights (flag CLUB_SIGN.lit)
+// reveal only some are lit (SIGN_VARIANT picks which); the stogie henchman's smack in the club cutaway sputters THE COCK
+// for half a second and it stays on (Arlong 2026-10-26: GOBBLER stays dark through it, no giveaway); right after Hattie's "Hawkeye Hattie is dead" speech every part lights (flag CLUB_SIGN.lit)
 // and stays lit. Variant "B" (default): hawk + THE COCK lit, GOBBLER dead, so players read the club as "The Cock".
 // Variant "A": only the hawk lit (Usopp's first call). Not locked by Usopp yet: flip this one constant.
 export const SIGN_VARIANT = "B";
@@ -1876,7 +1874,7 @@ export const CLUB_SIGN = {
   clubArt: { A: "club/bg-signoff", B: "club/bg-thecock", lit: "club/bg" },
 };
 // Extra code-side dim over the dead GOBBLER tubes in the club cutaway (0 = off, 1 = black). Brook's updated
-// club-B3-thecock already ghosts them, so it's off; lifted during the smack sputter. Tune 0..0.6.
+// club-B3-thecock already ghosts them, so it's off; it stays on through the smack (GOBBLER never sputters). Tune 0..0.6.
 export const GOBBLER_DIM = 0;
 // Rooster's LOOK at the Midway sign (placeholder wording; the B line is Usopp's).
 export const SIGN_LOOK = {

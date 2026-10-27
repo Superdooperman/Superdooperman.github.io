@@ -1,7 +1,7 @@
-import { COLD_OPEN, ENDINGS, NAMES, ROOMS, SCENE, SPEAKER, TIME_CARDS, TITLE } from "../data/script.js";
+import { COLD_OPEN, ENDINGS, NAMES, NEXT_ISSUE, ROOMS, SCENE, SPEAKER, TIME_CARDS } from "../data/script.js";
 import { artMode, artUrl, assetInfo, fancyCount, initArt, onArtChange, setArtMode } from "./art.js";
 import { audioSettings, audioState, hasVoice, initAudio, MOMENT_THEMES, playBed, playCue, playVoice, playVoiceSeq, preloadTheme, resumeAudio, REVEAL_XFADE_S, setAudio, setTension, stopVoice } from "./audio.js";
-import { beatActive, onBeatsDone, playBeats, smokeVeil } from "./beats.js";
+import { beatActive, onBeatsDone, playBeats, preloadSignCut, smokeVeil } from "./beats.js";
 import { clampToArea, findPath, parseFlagOverride, roomView, stepToward, depthHeight, actorZ, occluderZ, occluderAsset, occluderBase, spriteFilter, castFrame, standFor, behindOccluder } from "./walk.js";
 import { act, choicesFor, HERO, ITEMS, itemOf, maxHeat, newGame, nightOf, nightTint, panelVoice, preview, signLetters, signLevel, signParts, spotsFor, startBeats, vatState, veilLifted, visible } from "./logic.js";
 
@@ -57,6 +57,16 @@ function writeSaves(slots) {
   localStorage.setItem(SAVE_KEY, JSON.stringify(slots));
 }
 
+// Continue / Load: the saved state, then the lines that were still to come when it was saved (a line with an unplayed
+// cut, such as the Pavilion's signCut, plays it first, as in showLine). Saves without lines resume on an empty queue.
+function resumeSlot(slot) {
+  ui.state = seedNight(slot.data);
+  ui.queue = Array.isArray(slot.lines) ? slot.lines : [];
+  ui.index = 0;
+  render();
+  if (ui.queue.length) showLine(ui.queue[0]);
+}
+
 // `fallback`: another asset to show if this one is unknown or fails to load, so a missing frame never leaves an
 // empty image (Rooster must never vanish). An id the manifest doesn't know yet (stale manifest) is tried directly as
 // art/pixel/<id>.png first.
@@ -102,7 +112,7 @@ function showLine(entry) {
     playCutscene(entry.cutscene, () => showLine(entry));
     return;
   }
-  // Usopp 2026-10-25: the cut to the club sign (GOBBLER lights letter by letter) plays first, then back here
+  // Usopp 2026-10-25: the cut to the club sign (GOBBLER sputters and lights as one tube, Arlong 2026-10-26) plays first, then back here
   if (entry.signCut && !entry.played) {
     entry.played = true;
     playBeats([{ kind: "sign" }]).then(() => showLine(entry));
@@ -187,6 +197,7 @@ function pavilionVeil(state, world) {
     ui.pavVeil = pv;
     // her portrait smoke steps on the stage smoke's own tick (syncSmokePlate)
     preloadTheme(MOMENT_THEMES.gobbler); // her reveal hits on the smoke clear: decoded ahead
+    preloadSignCut(); // the club sign cut after her speech: its layers decoded ahead
     const veil = smokeVeil("thick", { ids: PAV_VEIL.ids, onFrame: (phase, i) => {
       pv.phase = phase; pv.frame = i;
       if (phase === "done") pv.cleared = true;
@@ -405,6 +416,7 @@ function render() {
     renderTitle();
     return;
   }
+  titleIntro.played = false; // the fade plays again next time the title comes up
   const state = ui.state;
   const room = roomOf(state);
   const lineNow = currentLine();
@@ -540,7 +552,7 @@ function render() {
     for (const o of room.overlays) {
       // holdCues: a prop stays on screen while a cued line still plays it out (the bell until Ned has walked over)
       if (!visible(state, o) && !(o.holdCues && lineNow && o.holdCues.includes(lineNow.cue))) continue;
-      if (o.signPart && signParts(state)[o.signPart]) continue; // club sign: dead-tube patch only while that part is dark
+      if (o.signPart && !!signParts(state)[o.signPart] !== !!o.whenLit) continue; // club sign: a dead patch only while its part is dark, a whenLit patch only once it's lit
       const node = el("img", "overlay");
       node.alt = "";
       node.dataset.id = o.art;
@@ -749,6 +761,10 @@ function render() {
 
   if (ended) {
     const end = ENDINGS[state.ending] || {};
+    // Every ending closes on the same old-comics hook (Usopp's placeholder until Issue 2 is decided), under the cover.
+    const next = el("p", "next-issue");
+    next.append(el("span", "ni-label", "NEXT ISSUE:"), document.createTextNode(` ${NEXT_ISSUE}`));
+    cabinet.append(next);
     const row = el("div", "title-actions end-row");
     if ((end.rewind || end.retry) && state.checkpoint) {
       row.append(button(end.rewind ? "Rewind" : "Try the crow-down again", "end-btn rewind", () => dispatch({ t: "rewind" })));
@@ -1312,17 +1328,19 @@ function menuPanel() {
       const snap = structuredClone(ui.state);
       if (snap.mode === "choice") snap.mode = "play";
       snap.pending = null;
-      next[index] = { at: new Date().toISOString(), room: ROOMS[snap.room].name, data: snap };
+      // the lines still to come (Chopper 2026-10-26): act() commits a beat's flags at once (the Pavilion unmasking
+      // sets the sign lit at the hero choice) but its lines only live in ui.queue, so a save mid-speech kept GOBBLER lit
+      // and dropped the sign cut that lights it; the tail from the current line resumes on Continue / Load
+      const lines = structuredClone(ui.queue.slice(ui.index));
+      next[index] = { at: new Date().toISOString(), room: ROOMS[snap.room].name, data: snap, lines };
       writeSaves(next);
       ui.menu = false;
       render();
     }));
     row.append(button("Load", "", () => {
       if (!slot) return;
-      ui.state = seedNight(slot.data);
-      ui.queue = [];
       ui.menu = false;
-      render();
+      resumeSlot(slot);
     }));
     panel.append(row);
   });
@@ -1385,49 +1403,68 @@ function soundPanel() {
   return box;
 }
 
+// Title (Arlong 2026-10-26): Brook's cover art in three aligned 320x180 layers, the scene (bg/title), then the
+// "RADIOACTIVE ROOSTER" logo (bg/title-logo) and "THE YOLK OF MIDNIGHT" (bg/title-sub) fading in, then the menu
+// bottom-right over the water (clear of the logo and both faces). The h1 is visually hidden, so the title shows once.
+// Any key or tap shows it all at once; prefers-reduced-motion skips the fade (css). Plays once per visit to the title.
+const TITLE_INTRO_MS = 3000;
+let titleIntro = { played: false, timer: 0 };
+
+function finishTitleIntro() {
+  clearTimeout(titleIntro.timer);
+  titleIntro.played = true;
+  const screen = document.querySelector(".title-screen.intro");
+  if (screen) screen.classList.replace("intro", "shown");
+}
+
 function renderTitle() {
   app.replaceChildren();
-  const screen = el("div", "title-screen");
+  if (!titleIntro.played && matchMedia("(prefers-reduced-motion: reduce)").matches) titleIntro.played = true;
+  const intro = !titleIntro.played;
+  const screen = el("div", `title-screen ${intro ? "intro" : "shown"}`);
   const frame = el("div", "title-frame");
   const img = el("img");
-  img.alt = "Night over the coop and the fair";
+  img.alt = "Radioactive Rooster in his cowl on a night dock, the masked Hawk over the moon behind him";
   mount(img, "bg-title.jpg");
-  // Title cutouts (the hen on the barn roof): sprites on the title plate, top-left `at` in its 320x180 px.
   const titleArt = el("div", "title-art");
   titleArt.append(img);
-  if (!artUrl("bg-title.jpg").startsWith("art/placeholders/")) {
-    for (const o of TITLE.overlays || []) {
-      const node = el("img", "title-cast");
-      node.alt = "";
-      placeAt(node, o.art, o.at);
-      titleArt.append(node);
-    }
+  for (const [id, cls] of [["bg/title-logo", "title-logo"], ["bg/title-sub", "title-sub"]]) {
+    if (!assetInfo(id)) continue;
+    const layer = el("img", `title-layer ${cls}`);
+    layer.alt = "";
+    layer.setAttribute("aria-hidden", "true");
+    mount(layer, id);
+    titleArt.append(layer);
   }
   frame.append(titleArt);
   const copy = el("div", "title-copy");
-  copy.append(el("h1", "", "RADIOACTIVE ROOSTER"), el("span", "beta", "BETA"));
-  copy.append(el("p", "sub", "and the Yolk of Midnight"));
+  copy.append(el("h1", "vh", "Radioactive Rooster"), el("p", "vh", "The Yolk of Midnight"));
   frame.append(copy);
-  screen.append(frame);
-  screen.append(el("p", "logline", "A pure-hearted rooster, a stolen Yolk, and the femme fatale who used to be his partner. One night. One fryer. Midnight."));
+  const menu = el("div", "title-menu");
   const row = el("div", "title-actions");
   row.append(button("New game", "on", startGame));
   const slots = saves().filter(Boolean);
   if (slots.length) {
     row.append(button("Continue", "", () => {
       const latest = slots.slice().sort((a, b) => (a.at < b.at ? 1 : -1))[0];
-      ui.state = seedNight(latest.data);
       ui.screen = "play";
-      ui.queue = [];
-      render();
+      resumeSlot(latest);
     }));
   }
-  screen.append(row);
+  menu.append(row, el("span", "beta", "BETA"));
+  frame.append(menu);
+  screen.append(frame);
+  screen.append(el("p", "logline", "A pure-hearted rooster, a stolen Yolk, and the femme fatale who used to be his partner. One night. One fryer. Midnight."));
   screen.append(el("p", "how", "Look, Talk, Take, Use, Push. To use an item, click it, then click the thing it goes on. Number keys 1–5 pick verbs. Click the caption to continue."));
   const artRow = el("div", "title-actions");
   artRow.append(artToggle());
   screen.append(artRow);
   screen.append(el("p", "how", "Pixel art is the default. Fancy art drops into art/fancy/ with the same file names; anything missing falls back to pixel. Press G to switch."));
+  if (intro) {
+    screen.addEventListener("pointerdown", finishTitleIntro, { once: true });
+    clearTimeout(titleIntro.timer);
+    titleIntro.timer = setTimeout(finishTitleIntro, TITLE_INTRO_MS);
+  }
   app.append(screen);
 }
 
@@ -1487,6 +1524,7 @@ function button(text, className, onClick) {
 }
 
 document.addEventListener("keydown", (event) => {
+  if (ui.screen === "title" && !titleIntro.played) finishTitleIntro(); // any key shows the whole title at once
   if ((event.key === "g" || event.key === "G") && ui.screen === "title") {
     setArtMode(artMode() === "pixel" ? "fancy" : "pixel");
     return;

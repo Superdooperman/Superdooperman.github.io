@@ -84,7 +84,7 @@ export function signParts(s, variant = SIGN_VARIANT) {
 }
 
 // The club cutaway: before the reveal (always, in play) the smoke is thick and the stogie henchman smacks the sign,
-// which sputters its dark parts for half a second (js/beats.js).
+// trying to get it to work: THE COCK sputters for half a second and stays on, GOBBLER stays dark (js/beats.js).
 export function clubBeat(s, veil) {
   const v = veil || (veilLifted(s) ? "open" : "thick");
   const sign = signParts(s);
@@ -106,7 +106,7 @@ export const UNMASK_LINES = [
   { who: "her", text: "I'm the Cock Gobbler. And I've been hungry for a long, long time.", names: true }, // nameplate flips here (GOBBLER_PLATE)
   // Usopp 2026-10-25: cut to the club sign across the boardwalk; GOBBLER buzzes on letter by letter (neon-lightup),
   // the full name holds on the neon-hum-full loop under the sax, then back to the Pavilion (js/beats.js "sign")
-  { who: "narration", text: "Across the boardwalk, the old bar's sign stutters awake one letter at a time. G. O. B. B. L. E. R. THE COCK GOBBLER, every tube lit for the first time.", signCut: true },
+  { who: "narration", text: "Across the boardwalk, the old bar's sign buzzes, and GOBBLER kicks on all at once. THE COCK GOBBLER, every tube lit for the first time.", signCut: true },
 ];
 
 // Plays once per run (a rewind to the Pavilion checkpoint clears the flags, so it plays again).
