@@ -1,0 +1,226 @@
+{
+  "note": "Brook's sprites. Files live in art/in/ (paths below are relative to art/). Names are the strip names; the M4 renderer still draws placeholder rects (art is wired in M6). Strips are horizontal, frame 00 on the left; pivot bottom-centre unless given.",
+  "artScale": 1,
+  "sprites": [
+    {
+      "name": "lark-turnaround",
+      "file": "in/char_lark_turnaround.png",
+      "frameW": 32,
+      "frameH": 48,
+      "frames": 6,
+      "fps": 0,
+      "pivot": [
+        16,
+        47
+      ],
+      "frameNames": [
+        "front",
+        "three-quarter",
+        "side",
+        "back",
+        "three-quarter-back",
+        "hood-down-front"
+      ],
+      "reference": true,
+      "note": "Reference sheet, not an engine strip. Shows rope tail and hook because section 6 asks for them. Throat painted in key greens."
+    },
+    {
+      "name": "lark-idle",
+      "file": "in/lark-idle.png",
+      "frameW": 32,
+      "frameH": 48,
+      "frames": 2,
+      "fps": 8,
+      "pivot": [
+        16,
+        47
+      ],
+      "accentKey": true,
+      "note": "Faces right. Body only, no rope drawn. OPEN: the turnaround and cloak-open frames draw the rope coiled at the feet, and the engine also draws a trailing rope from tailAnchor (just under the back hem point). Vegapunk to decide which one shows. fps 8 is the guide's figure for the 6-frame polish idle; with only these 2 MVP frames, ~2 fps (or holds of ~4 ticks at 8 fps) is suggested.",
+      "tailAnchor": [
+        11,
+        40
+      ]
+    },
+    {
+      "name": "tiles-harbor",
+      "file": "in/tiles-harbor.png",
+      "frameW": 16,
+      "frameH": 16,
+      "frames": 41,
+      "pivot": [
+        0,
+        0
+      ],
+      "tileNames": [
+        "wall_a",
+        "wall_b",
+        "wall_cracked",
+        "wall_pillar",
+        "wall_checker",
+        "floor_top",
+        "floor_top_l",
+        "floor_top_r",
+        "floor_fill",
+        "floor_side_l",
+        "floor_side_r",
+        "floor_bottom",
+        "ledge_l",
+        "ledge_mid",
+        "ledge_r",
+        "beam_h",
+        "beam_post",
+        "window_tl",
+        "window_tr",
+        "window_bl",
+        "window_br",
+        "window_lit_tl",
+        "window_lit_tr",
+        "window_lit_bl",
+        "window_lit_br",
+        "door_tl",
+        "door_tr",
+        "door_ml",
+        "door_mr",
+        "door_bl",
+        "door_br",
+        "shadow_wall",
+        "shadow_floor_top",
+        "shadow_floor_top_l",
+        "shadow_floor_top_r",
+        "shadow_floor_fill",
+        "shadow_ledge_mid",
+        "alcove_tl",
+        "alcove_tr",
+        "alcove_bl",
+        "alcove_br"
+      ],
+      "note": "Tiles anchor top-left. Window panes in window_* (unlit) are transparent so the sky parallax shows through."
+    },
+    {
+      "name": "lamp",
+      "file": "in/lamp.png",
+      "frameW": 32,
+      "frameH": 32,
+      "frames": 2,
+      "fps": 0,
+      "pivot": [
+        3,
+        7
+      ],
+      "frameNames": [
+        "on",
+        "off"
+      ],
+      "note": "Hanging/wall prop: pivot is the wall-plate attach point. Flame centre at (15,20) for the light-pool origin."
+    },
+    {
+      "name": "guard-watchman",
+      "file": "in/guard-watchman.png",
+      "frameW": 32,
+      "frameH": 48,
+      "frames": 11,
+      "fps": 10,
+      "pivot": [
+        16,
+        47
+      ],
+      "anims": {
+        "walk": [
+          0,
+          5
+        ],
+        "turn": [
+          6,
+          6
+        ],
+        "alert": [
+          7,
+          7
+        ],
+        "search": [
+          8,
+          9
+        ],
+        "tied": [
+          10,
+          10
+        ]
+      },
+      "lightOrigin": [
+        28,
+        19
+      ],
+      "note": "Faces right. lightOrigin = flashlight lens, 28 px above the feet (cone origin). Search frames aim the lens 5 px up / 4 px down. '!' frame is the startled pose only; the '!' glyph is UI. Walk contact frames (00, 03) dip 1 px, so the lens sits at y 20 there."
+    },
+    {
+      "name": "lark-cloak-open",
+      "file": "in/lark-cloak-open.png",
+      "frameW": 32,
+      "frameH": 48,
+      "frames": 3,
+      "fps": 12,
+      "loop": false,
+      "pivot": [
+        16,
+        47
+      ],
+      "accentKey": true,
+      "tailAnchor": [
+        11,
+        40
+      ],
+      "muzzle": [
+        31,
+        21
+      ],
+      "frameNames": [
+        "hand-at-seam",
+        "cloak-lifting",
+        "arm-out-gun"
+      ],
+      "note": "Faces right. Start of the grapple-fire animation. Pass 3 = Arlong's draw-over: frames 00-01 have the rope coiled at the feet, and in frame 02 the rope runs from the gun down through the lifted cloak. Lining is WL1 with WL0 shade, against the black WK1 bodysuit. muzzle = front face of the gun body on frame 02; his hook prongs went 2 px past the frame and are clipped. OPEN: rope drawn on the body vs the engine's trailing rope. Play once and hold frame 02 until the shot. fps 12 is a suggestion."
+    },
+    {
+      "name": "lark-gun-out",
+      "file": "in/lark-gun-out.png",
+      "frameW": 48,
+      "frameH": 48,
+      "frames": 2,
+      "fps": 0,
+      "pivot": [
+        24,
+        47
+      ],
+      "accentKey": true,
+      "tailAnchor": [
+        19,
+        40
+      ],
+      "frameNames": [
+        "side-gun-out",
+        "cloak-open-arm-out-gun"
+      ],
+      "muzzle": [
+        [
+          41,
+          20
+        ],
+        [
+          41,
+          22
+        ]
+      ],
+      "note": "Faces right. The two gun-out poses at 48x48 with Arlong's full, unclipped grapple hook. Frame 00 = turnaround side view; frame 01 = cloak-open frame 02. Each is the pass-3 32x48 frame padded 8 px left and right, so its (16,47) pivot lands on (24,47), and with the 2 hook-prong columns restored at x40-41. Same palette, throat key greens and WL1/WL0 lining as pass 3. muzzle is per frame [x,y] in 48x48 coordinates: the hook tip column (x41) on the barrel's centre row, between the two prongs. tailAnchor = the 32-px [11,40] + 8 x. The 32-px turnaround and cloak-open strips are unchanged; Vegapunk decides how this strip replaces or overlays them."
+    }
+  ],
+  "palette": "in/nightlark-v1.hex",
+  "mock": {
+    "file": "in/mockroom-style-target.png",
+    "size": [
+      480,
+      270
+    ],
+    "note": "Style target, not a game asset. Composite with engine-style lighting, so off-palette pixels are expected."
+  }
+}

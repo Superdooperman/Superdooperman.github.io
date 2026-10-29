@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en" data-build="beta">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; worker-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#090C13">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Night Lark (beta)</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #090C13; overflow: hidden; touch-action: none;
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  #game { position: absolute; image-rendering: pixelated; image-rendering: crisp-edges; touch-action: none; }
+  #touch[hidden], #rotate[hidden] { display: none; }
+  #touch { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
+  #touch .b { position: absolute; pointer-events: auto; touch-action: none; box-sizing: border-box;
+    border: 2px solid rgba(238,241,245,0.55); background: rgba(11,17,34,0.45); color: #EEF1F5;
+    font: bold 18px/1 monospace; display: flex; align-items: center; justify-content: center; }
+  #touch .b.on, #touch .dpad[data-dirs]:not([data-dirs=""]) { background: rgba(143,220,255,0.35); }
+  #touch .dpad { width: 144px; height: 144px; border-radius: 50%;
+    left: calc(16px + env(safe-area-inset-left)); bottom: 20px; }
+  #touch .dpad::before { content: ''; position: absolute; left: 50%; top: 14%; bottom: 14%; width: 30%;
+    transform: translateX(-50%); background: rgba(238,241,245,0.18); }
+  #touch .dpad::after { content: ''; position: absolute; top: 50%; left: 14%; right: 14%; height: 30%;
+    transform: translateY(-50%); background: rgba(238,241,245,0.18); }
+  #touch .ab { width: 64px; height: 64px; border-radius: 50%; }
+  #touch .A { right: calc(16px + env(safe-area-inset-right)); bottom: 28px; }
+  #touch .B { right: calc(92px + env(safe-area-inset-right)); bottom: 72px; }
+  #touch .sys { width: 64px; height: 48px; border-radius: 12px; font-size: 11px; top: 10px; }
+  #touch .start { right: calc(16px + env(safe-area-inset-right)); }
+  #touch .select { left: calc(16px + env(safe-area-inset-left)); }
+  #rotate { position: fixed; inset: 0; z-index: 3; background: #090C13; color: #EEF1F5;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font: bold 20px/1.4 monospace; text-align: center; }
+  #rotate .icon { width: 44px; height: 72px; border: 3px solid #EEF1F5; border-radius: 8px; margin-bottom: 18px;
+    animation: turn 1.6s ease-in-out infinite; }
+  @keyframes turn { 0%, 30% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
+  @media (prefers-reduced-motion: reduce) { #rotate .icon { animation: none; transform: rotate(-90deg); } }
+</style>
+</head>
+<body>
+<canvas id="game" aria-label="Night Lark"></canvas>
+<div id="touch" hidden>
+  <div class="b dpad" aria-label="D-pad"></div>
+  <div class="b ab B" data-action="fire" aria-label="B">B</div>
+  <div class="b ab A" data-action="jump" aria-label="A">A</div>
+  <div class="b sys start" data-action="start" aria-label="Start">START</div>
+  <div class="b sys select" data-action="select" aria-label="Select">SELECT</div>
+</div>
+<div id="rotate" hidden role="alert"><div class="icon"></div>ROTATE YOUR PHONE<br><small>NIGHT LARK PLAYS IN LANDSCAPE</small></div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
