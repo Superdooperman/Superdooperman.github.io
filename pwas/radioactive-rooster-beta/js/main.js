@@ -1,11 +1,11 @@
-import { COLD_OPEN, ENDINGS, NAMES, NEXT_ISSUE, ROOMS, SCENE, SPEAKER, TIME_CARDS } from "../data/script.js";
+import { COLD_OPEN, ENDINGS, GOBBLER_PLATE, NAMES, NEXT_ISSUE, ROOMS, SCENE, SPEAKER, TIME_CARDS } from "../data/script.js";
 import { artMode, artUrl, assetInfo, fancyCount, initArt, onArtChange, setArtMode } from "./art.js";
 import { audioSettings, audioState, hasVoice, initAudio, MOMENT_THEMES, playBed, playCue, playVoice, playVoiceSeq, preloadTheme, resumeAudio, REVEAL_XFADE_S, setAudio, setTension, stopVoice } from "./audio.js";
 import { beatActive, onBeatsDone, playBeats, preloadSignCut, smokeVeil } from "./beats.js";
 import { clampToArea, findPath, parseFlagOverride, roomView, stepToward, depthHeight, actorZ, occluderZ, occluderAsset, occluderBase, spriteFilter, castFrame, standFor, behindOccluder } from "./walk.js";
-import { act, choicesFor, HERO, ITEMS, itemOf, maxHeat, newGame, nightOf, nightTint, panelVoice, preview, signLetters, signLevel, signParts, spotsFor, startBeats, vatState, veilLifted, visible } from "./logic.js";
+import { act, choicesFor, validSave, HERO, ITEMS, itemOf, maxHeat, newGame, nightOf, nightTint, panelVoice, preview, signLetters, signLevel, signParts, spotsFor, startBeats, vatState, veilLifted, visible } from "./logic.js";
 
-const SAVE_KEY = "rr-yolk-saves";
+const SAVE_KEY = "rr-beta-yolk-saves"; // beta-only keys: rr-beta-* (js/boot.js copies old rr-* values once)
 const VERBS = [
   ["look", "Look at"],
   ["talk", "Talk to"],
@@ -27,16 +27,16 @@ const ui = {
   lineAt: 0, // when the current caption line was shown (cast talk frames run for a beat after it)
   lastAct: null, // { spot, verb } of the last hotspot click (cast `talkOn`)
   // Hints / easy mode (Arlong 2026-10-19): hover highlighting is OFF by default; the menu turns it on (kept per device).
-  hints: (() => { try { return localStorage.getItem("rr-hints") === "1"; } catch { return false; } })(),
+  hints: (() => { try { return localStorage.getItem("rr-beta-hints") === "1"; } catch { return false; } })(),
   // Push C PLACEHOLDER beats (2026-10-24). Cold open: COLD_OPEN in data/script.js, overridden per device by the Menu
-  // toggle (localStorage rr-coldopen) or per visit by ?coldopen=0|1. Colour shift: Menu toggle (rr-nightshift).
+  // toggle (localStorage rr-beta-coldopen) or per visit by ?coldopen=0|1. Colour shift: Menu toggle (rr-beta-nightshift).
   coldOpen: (() => {
     const q = new URLSearchParams(location.search).get("coldopen");
     if (q === "0" || q === "1") return q === "1";
-    try { const v = localStorage.getItem("rr-coldopen"); if (v === "0" || v === "1") return v === "1"; } catch { /* */ }
+    try { const v = localStorage.getItem("rr-beta-coldopen"); if (v === "0" || v === "1") return v === "1"; } catch { /* */ }
     return COLD_OPEN;
   })(),
-  nightShift: (() => { try { return localStorage.getItem("rr-nightshift") !== "0"; } catch { return true; } })(),
+  nightShift: (() => { try { return localStorage.getItem("rr-beta-nightshift") !== "0"; } catch { return true; } })(),
   voiceAfterBeat: null,
 };
 
@@ -45,7 +45,7 @@ const app = document.querySelector("#app");
 function saves() {
   try {
     const raw = JSON.parse(localStorage.getItem(SAVE_KEY) || "[]");
-    const slots = Array.isArray(raw) ? raw : [];
+    const slots = (Array.isArray(raw) ? raw : []).slice(0, 3).map((slot) => (validSave(slot) ? slot : null));
     while (slots.length < 3) slots.push(null);
     return slots.slice(0, 3);
   } catch {
@@ -53,13 +53,21 @@ function saves() {
   }
 }
 
+// false when the browser refuses (quota full, storage blocked): the game carries on, the slot just isn't kept
 function writeSaves(slots) {
-  localStorage.setItem(SAVE_KEY, JSON.stringify(slots));
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(slots));
+    return true;
+  } catch (err) {
+    console.warn("save not kept:", err && err.name);
+    return false;
+  }
 }
 
 // Continue / Load: the saved state, then the lines that were still to come when it was saved (a line with an unplayed
 // cut, such as the Pavilion's signCut, plays it first, as in showLine). Saves without lines resume on an empty queue.
 function resumeSlot(slot) {
+  if (!validSave(slot)) return; // saves() already drops these; never hand a bad slot to seedNight
   ui.state = seedNight(slot.data);
   ui.queue = Array.isArray(slot.lines) ? slot.lines : [];
   ui.index = 0;
@@ -93,6 +101,67 @@ function mount(img, file, fallback = null) {
   img.src = url;
   // Nearest-neighbor for pixel files, smooth for fancy and legacy placeholders.
   img.classList.toggle("px", url.startsWith("art/pixel/"));
+}
+
+// Talk-row portraits (Arlong 2026-10-27: a blank portrait frame on each speaker change). render() rebuilds the talk row
+// every time, and each speaker change used to mount a brand-new <img>: until that file was fetched and decoded, the
+// frame showed only its cream background, for a whole fetch the first time a face came up, and again whenever no node
+// held a face any more (its image could leave the memory cache: a refetch through the service worker). Now each portrait
+// url is ONE kept Image, fetched and decoded once and moved into every new talk row (a moved node keeps its pixels);
+// every portrait is fetched ahead from the title screen on (preloadPortraits, ~15 small files); and a face that still isn't
+// ready keeps the previous face in the frame until it is, then swaps in place. The frame is never empty.
+const portraits = new Map(); // url -> { img, ready, waiters }
+function portraitEntry(file, fallback = null) {
+  const url = urlOf(file);
+  let e = portraits.get(url);
+  if (e) return e;
+  const img = new Image();
+  e = { img, ready: false, waiters: [] };
+  portraits.set(url, e);
+  const settle = () => {
+    if (e.ready) return;
+    e.ready = true;
+    for (const fn of e.waiters.splice(0)) fn();
+  };
+  const load = (f, next) => {
+    const u = urlOf(f);
+    img.dataset.file = f;
+    img.classList.toggle("px", u.startsWith("art/pixel/"));
+    img.onload = () => (img.decode ? img.decode().catch(() => {}).then(settle) : settle());
+    img.onerror = next && next !== f ? () => load(next, null) : settle; // mount()'s fallback chain; a dead file still settles
+    img.src = u;
+  };
+  load(file, fallback);
+  return e;
+}
+// -> the <img> for the talk row: the kept portrait when it's ready (or nothing is up to hold), else `prev` (the face
+// that was in the frame before this render) until it is.
+function portraitNode(file, fallback, alt, prev) {
+  const e = portraitEntry(file, fallback);
+  e.img.alt = alt;
+  if (e.ready || !prev || prev === e.img) {
+    delete e.img.dataset.wants; // it was held in the frame for another face: that face's swap must not replace it now
+    return e.img;
+  }
+  const want = e.img;
+  prev.dataset.wants = want.dataset.file;
+  e.waiters.push(() => {
+    if (prev.isConnected && prev.dataset.wants === want.dataset.file) prev.replaceWith(want);
+    delete prev.dataset.wants;
+  });
+  return prev;
+}
+// the face in the talk row right now, if it's a loaded picture (read before render() clears the page)
+function framedPortrait() {
+  const img = app.querySelector(".talkrow > .speaker > img, .talkrow > .bust > img:not(.talk-b)");
+  return img && img.complete && img.naturalWidth > 0 ? img : null;
+}
+let portraitsFor = null; // art mode the portraits were last preloaded for
+function preloadPortraits() {
+  if (!assetInfo(HERO.talk) || portraitsFor === artMode()) return; // after the manifest, once per art mode
+  portraitsFor = artMode();
+  const files = new Set([...Object.values(HERO), ...Object.values(SPEAKER).filter((f) => !f.startsWith("voice:")), GOBBLER_PLATE.before.portrait]);
+  for (const f of files) portraitEntry(f, f === GOBBLER_PLATE.before.portrait ? GOBBLER_PLATE.before.fallback : null);
 }
 
 function pct(value, axis) {
@@ -149,7 +218,7 @@ function showLine(entry) {
   if (entry.veil === "whisk" && ui.pavVeil && !ui.pavVeil.clearing) { // the Pavilion unmasking: the smoke whisks off her mask
     const v = ui.pavVeil;
     v.clearing = true;
-    v.veil.clear({ now: true }).then(() => { v.cleared = true; v.wrap.remove(); syncSmokePlate(); syncMusic(REVEAL_XFADE_S); });
+    v.veil.clear({ now: true }).then(() => { v.cleared = true; v.wrap.remove(); if (v.back) v.back.wrap.remove(); syncSmokePlate(); syncMusic(REVEAL_XFADE_S); });
   }
 }
 
@@ -171,15 +240,21 @@ function smokePlateArt() { // -> { id, frame } for the current stage phase
   }
   return still;
 }
+// Every strip she can show (drift, clear, the still) is a mounted layer from the first render, and the clear portrait
+// waits underneath as a hidden <img> (Chopper 2026-10-27): setting a new background-image or src on the clear's own
+// tick painted one blank cream frame whenever that file had dropped out of the memory cache, since the fetch is async.
+// paintSmokePlate only moves the frame and shows one layer; the cut reuses the already-loaded <img>.
+const SMOKE_PLATE_IDS = ["portrait/hattie-smoke-drift", "portrait/hattie-smoke-clear", "portrait/hattie-smoke"];
 function paintSmokePlate(node) {
   const { id, frame } = smokePlateArt();
-  const n = (assetInfo(id) || {}).frames || 1;
-  if (node.dataset.id !== id) {
-    node.dataset.id = id;
-    node.style.backgroundImage = `url("${artUrl(id)}")`;
-    node.style.setProperty("--frames", String(n));
+  for (const layer of node.querySelectorAll(".ps-layer")) {
+    const on = layer.dataset.id === id;
+    layer.classList.toggle("on", on);
+    if (!on) continue;
+    const n = (assetInfo(id) || {}).frames || 1;
+    layer.style.backgroundPosition = `${n > 1 ? (Math.min(frame, n - 1) / (n - 1)) * 100 : 0}% 0`;
   }
-  node.style.backgroundPosition = `${n > 1 ? (Math.min(frame, n - 1) / (n - 1)) * 100 : 0}% 0`;
+  node.dataset.id = id;
   node.dataset.frame = String(frame + 1);
 }
 function smokePlateNode(clearTo, fallback) {
@@ -187,15 +262,28 @@ function smokePlateNode(clearTo, fallback) {
   node.setAttribute("role", "img");
   node.dataset.clearTo = clearTo;
   if (fallback) node.dataset.fallback = fallback;
+  const under = el("img", "ps-clear"); // the clear portrait, loaded and waiting for the cut
+  mount(under, clearTo, fallback || null);
+  node.append(under);
+  for (const id of SMOKE_PLATE_IDS) {
+    if (!artUrl(id)) continue;
+    const layer = el("div", "ps-layer");
+    layer.dataset.id = id;
+    layer.style.backgroundImage = `url("${artUrl(id)}")`;
+    layer.style.setProperty("--frames", String((assetInfo(id) || {}).frames || 1));
+    node.append(layer);
+  }
   paintSmokePlate(node);
   return node;
 }
 function syncSmokePlate() {
   for (const node of document.querySelectorAll(".speaker .portrait-smoke")) {
     if (pavVeilUp()) { paintSmokePlate(node); continue; }
-    const img = el("img"); // the smoke is gone: cut to the clear portrait
+    // the smoke is gone: cut to the clear portrait, the same <img> that has been loaded underneath all along
+    const img = node.querySelector("img.ps-clear") || el("img");
+    img.classList.remove("ps-clear");
     img.alt = node.getAttribute("aria-label") || "Hattie";
-    mount(img, node.dataset.clearTo, node.dataset.fallback || null);
+    if (!img.dataset.file) mount(img, node.dataset.clearTo, node.dataset.fallback || null);
     node.replaceWith(img);
   }
 }
@@ -206,18 +294,63 @@ function syncSmokePlate() {
 // Brook's pavilion/smoke strips are full 320x180 frames aligned to bg/pavilion (her head at x 195-208, y 53-70), so the
 // wrap is the whole scene; without them, the procedural CSS blobs in the small box over her head (fallback only).
 const PAV_VEIL = { spot: "gobbler", ids: "pavilion/smoke", box: [0, 0, 320, 180], fallbackBox: [190, 44, 34, 34] }; // logical px: left, top, w, h
+// Smoke v5 (Brook 2026-10-27, assets/art-placeholder/hattie-smoke-v5/): a BACK layer that wraps round behind her.
+// pavilion/smoke-drift-back + -clear-back (same 320x180 frames and timing as the front strips) in a second wrap at
+// actorZ(110) - 1, under hattie-chain and over the plate, stepped by the front veil's own onFrame so both layers always
+// show the same frame index (drift i, clear i). Removed with the front wrap when the clear ends. No back strips: front only.
+function pavBackLayer() { // -> { wrap, paint(phase, i) } or null without the back strips
+  const drift = `${PAV_VEIL.ids}-drift-back`, clear = `${PAV_VEIL.ids}-clear-back`;
+  if (!artUrl(drift) || !artUrl(clear)) return null;
+  const wrap = el("div", "pav-veil pav-veil-art pav-veil-back");
+  // both strips mounted from the start, the clear one at opacity 0 until the clear (the same reason as smokeVeil's
+  // standby strip: a background-image set on the clear's own tick could paint one empty frame)
+  const strips = {};
+  for (const [phase, id] of [["clear", clear], ["drift", drift]]) {
+    const strip = el("div", "strip stepped");
+    strip.dataset.id = id;
+    strip.style.backgroundImage = `url("${artUrl(id)}")`;
+    strip.style.setProperty("--frames", String((assetInfo(id) || {}).frames || 1));
+    wrap.append(strip);
+    strips[phase] = strip;
+  }
+  const paint = (phase, i) => {
+    if (phase === "done") { wrap.remove(); return; }
+    const id = phase === "clear" ? clear : drift;
+    const n = (assetInfo(id) || {}).frames || 1;
+    const strip = strips[phase === "clear" ? "clear" : "drift"];
+    strips.clear.style.opacity = phase === "clear" ? "1" : "0";
+    strips.drift.style.opacity = phase === "clear" ? "0" : "1";
+    const f = Math.min(Math.max(i, 0), n - 1);
+    strip.style.backgroundPosition = `${n > 1 ? (f / (n - 1)) * 100 : 0}% 0`;
+    strip.dataset.frame = String(f + 1);
+  };
+  paint("drift", 0);
+  return { wrap, paint };
+}
 function pavilionVeil(state, world) {
   if (state.room !== "pavilion") return;
   if (!veilLifted(state) && (!ui.pavVeil || ui.pavVeil.cleared)) {
     const art = !!(artUrl(`${PAV_VEIL.ids}-drift`) && artUrl(`${PAV_VEIL.ids}-clear`));
     const wrap = el("div", `pav-veil${art ? " pav-veil-art" : ""}`);
-    const pv = { wrap, veil: null, clearing: false, cleared: false, phase: "drift", frame: 0 };
+    const pv = { wrap, veil: null, clearing: false, cleared: false, phase: "drift", frame: 0, back: art ? pavBackLayer() : null };
     ui.pavVeil = pv;
     // her portrait smoke steps on the stage smoke's own tick (syncSmokePlate)
     preloadTheme(MOMENT_THEMES.gobbler); // her reveal hits on the smoke clear: decoded ahead
     preloadSignCut(); // the club sign cut after her speech: its layers decoded ahead
+    // the clear strips (front, back, her portrait whisk-away) fetched and decoded while the drift runs, so the first
+    // clear frame is not an empty ~80 ms flash while the browser loads them (the same idea as preloadSignCut)
+    // (held on pv.keep: an unreferenced Image() is collected and its file can leave the memory cache before the clear)
+    pv.keep = [];
+    for (const id of [`${PAV_VEIL.ids}-clear`, `${PAV_VEIL.ids}-clear-back`, "portrait/hattie-smoke-clear"]) {
+      if (!artUrl(id)) continue;
+      const img = new Image();
+      img.src = artUrl(id);
+      if (img.decode) img.decode().catch(() => {});
+      pv.keep.push(img);
+    }
     const veil = smokeVeil("thick", { ids: PAV_VEIL.ids, onFrame: (phase, i) => {
       pv.phase = phase; pv.frame = i;
+      if (pv.back) pv.back.paint(phase, i); // the back layer on the same frame index
       if (phase === "done") pv.cleared = true;
       if (ui.pavVeil === pv) { syncSmokePlate(); if (phase === "done") syncMusic(REVEAL_XFADE_S); } // the acid theme on the clear
     } });
@@ -230,6 +363,11 @@ function pavilionVeil(state, world) {
   if (!v || v.cleared || !world.querySelector(`img.cast[data-spot="${PAV_VEIL.spot}"]`)) return;
   v.wrap.style.zIndex = String(actorZ(110) + 1);
   world.append(v.wrap);
+  if (v.back) { // smoke v5 back layer: the same full-scene box, just under her sprite
+    const [x, y, w, h] = PAV_VEIL.box;
+    Object.assign(v.back.wrap.style, { left: pct(x, "x"), top: pct(y, "y"), width: pct(w, "x"), height: pct(h, "y"), zIndex: String(actorZ(110) - 1) });
+    world.append(v.back.wrap);
+  }
 }
 
 // One-shot tweens on existing frames (push gags): entry.anim = { <cast spot id | "hero">: "wobble" | "puff" | "recoil" }.
@@ -555,12 +693,17 @@ function cutsceneFx(cs, world) {
   };
 }
 
+function controlsSide() {
+  return document.documentElement.dataset.controls === "right" ? "right" : "left";
+}
+
 function roomOf(state) {
   return ROOMS[state.room];
 }
 
 function render() {
   document.body.classList.toggle("hints", !!ui.hints);
+  preloadPortraits(); // from the title on (the manifest's arrival re-renders it), so the first face is ready too
   if (ui.screen === "title") {
     renderTitle();
     return;
@@ -573,6 +716,9 @@ function render() {
   const choosing = state.mode === "choice" && atEndOfQueue && ui.queue.length > 0;
   const ended = state.mode === "end" && atEndOfQueue;
 
+  const oldControls = app.querySelector(".controls");
+  if (oldControls) ui.controlsScroll = oldControls.scrollTop; // read now: a tap that scrolled the column renders before its scroll event
+  const prevFace = framedPortrait(); // held in the frame if the next face isn't decoded yet (portraitNode)
   app.replaceChildren();
   castNodes.clear();
   const cabinet = el("div", "cabinet");
@@ -584,6 +730,7 @@ function render() {
     artToggle(),
     button("Menu", "ghost", () => {
       ui.menu = !ui.menu;
+      ui.menuJump = ui.menu;
       render();
     }),
   );
@@ -850,18 +997,12 @@ function render() {
       node.setAttribute("aria-label", plateName || "Speaker");
       face.append(node);
     } else if (!voiceOnly) {
-      const img = el("img");
-      img.alt = plateName || "Speaker";
-      mount(img, plateFace, plateFallback || null);
-      face.append(img);
+      face.append(portraitNode(plateFace, plateFallback || null, plateName || "Speaker", prevFace));
     }
     face.append(el("div", "who", `${plateName}${lineNow.thought ? " (thinking)" : ""}`));
   } else {
     face = el("div", "bust");
-    const bustImg = el("img");
-    bustImg.alt = "Radioactive Rooster";
-    mount(bustImg, heroFile);
-    face.append(bustImg);
+    face.append(portraitNode(heroFile, null, "Radioactive Rooster", prevFace));
     talkFlap(face, lineNow);
   }
 
@@ -887,6 +1028,12 @@ function render() {
 
   cabinet.append(stage);
 
+  // Everything under the scene goes in one .controls box: display: contents (no box at all) on desktop and portrait
+  // phones, and on short landscape phones its own scrolling column beside the scene (Arlong 2026-10-27), so the page
+  // never scrolls there. Its scroll position survives the re-render every action does.
+  const controls = el("div", "controls");
+  cabinet.append(controls);
+
   const caption = el("button", "caption");
   caption.type = "button";
   caption.id = "caption";
@@ -902,7 +1049,7 @@ function render() {
   caption.addEventListener("click", advance);
   const talkRow = el("div", "talkrow");
   talkRow.append(face, caption);
-  cabinet.append(talkRow);
+  controls.append(talkRow);
 
   if (choosing) {
     const choices = el("div", "choices");
@@ -911,7 +1058,7 @@ function render() {
       b.dataset.id = option.id;
       choices.append(b);
     }
-    cabinet.append(choices);
+    controls.append(choices);
   }
 
   if (ended) {
@@ -919,7 +1066,7 @@ function render() {
     // Every ending closes on the same old-comics hook (Usopp's placeholder until Issue 2 is decided), under the cover.
     const next = el("p", "next-issue");
     next.append(el("span", "ni-label", "NEXT ISSUE:"), document.createTextNode(` ${NEXT_ISSUE}`));
-    cabinet.append(next);
+    controls.append(next);
     const row = el("div", "title-actions end-row");
     if ((end.rewind || end.retry) && state.checkpoint) {
       row.append(button(end.rewind ? "Rewind" : "Try the crow-down again", "end-btn rewind", () => dispatch({ t: "rewind" })));
@@ -929,7 +1076,7 @@ function render() {
       ui.queue = [];
       render();
     }));
-    cabinet.append(row);
+    controls.append(row);
   }
 
   // Sentence line: what a click would do ("Take the bucket."), between the caption and the verbs.
@@ -937,7 +1084,7 @@ function render() {
   sentence.id = "sentence";
   sentence.setAttribute("aria-live", "off");
   sentence.textContent = sentenceIdle(state);
-  cabinet.append(sentence);
+  controls.append(sentence);
 
   const verbs = el("div", "verbs");
   VERBS.forEach(([id, label], index) => {
@@ -948,7 +1095,7 @@ function render() {
     verb.setAttribute("aria-pressed", state.verb === id ? "true" : "false");
     verbs.append(verb);
   });
-  cabinet.append(verbs);
+  controls.append(verbs);
 
   const exits = el("nav", "exits");
   for (const exit of room.exits || []) {
@@ -957,11 +1104,11 @@ function render() {
       dispatch({ t: "go", id: exit.spot });
     }));
   }
-  cabinet.append(exits);
+  controls.append(exits);
 
   const pending = el("div", "pending");
   pending.textContent = state.pending ? `Use the ${itemOf(state, state.pending).name} on...` : "";
-  cabinet.append(pending);
+  controls.append(pending);
 
   const inv = el("div", "inv");
   if (!state.inv.length) inv.append(el("div", "empty", "Pockets empty."));
@@ -980,10 +1127,17 @@ function render() {
     });
     inv.append(chip);
   }
-  cabinet.append(inv);
+  controls.append(inv);
 
-  if (ui.menu) cabinet.append(menuPanel());
+  const panel = ui.menu ? menuPanel() : null;
+  if (panel) controls.append(panel);
   app.append(cabinet);
+  if (ui.controlsRoom !== state.room) { ui.controlsRoom = state.room; ui.controlsScroll = 0; } // a new room starts at its caption
+  controls.scrollTop = ui.controlsScroll || 0;
+  if (panel && ui.menuJump && controls.scrollHeight > controls.clientHeight) {
+    controls.scrollTop += panel.getBoundingClientRect().top - controls.getBoundingClientRect().top; // the column scrolls: show the menu just opened
+  }
+  ui.menuJump = false;
   setTension(nightOf(state.room, state.night));
   // Beta v17: decode the line-tagged themes a room ahead, so they start on their line, not a decode later
   if (state.room === "wkuk") preloadTheme(MOMENT_THEMES["hattie-call"]); // the geiger slot's phone call
@@ -1593,7 +1747,7 @@ function menuPanel() {
   });
   panel.append(button(ui.hints ? "Hints: on (hover highlights)" : "Hints: off", "", () => {
     ui.hints = !ui.hints;
-    try { localStorage.setItem("rr-hints", ui.hints ? "1" : "0"); } catch { /* private mode */ }
+    try { localStorage.setItem("rr-beta-hints", ui.hints ? "1" : "0"); } catch { /* private mode */ }
     if (ui.hints) playCue("crow");
     render();
   }));
@@ -1606,12 +1760,21 @@ function menuPanel() {
   panel.append(el("h2", "", "Placeholder beats"));
   panel.append(button(ui.coldOpen ? "Cold open: on" : "Cold open: off", "", () => {
     ui.coldOpen = !ui.coldOpen;
-    try { localStorage.setItem("rr-coldopen", ui.coldOpen ? "1" : "0"); } catch { /* private mode */ }
+    try { localStorage.setItem("rr-beta-coldopen", ui.coldOpen ? "1" : "0"); } catch { /* private mode */ }
     render();
   }));
   panel.append(button(ui.nightShift ? "Night colour shift: on" : "Night colour shift: off", "", () => {
     ui.nightShift = !ui.nightShift;
-    try { localStorage.setItem("rr-nightshift", ui.nightShift ? "1" : "0"); } catch { /* private mode */ }
+    try { localStorage.setItem("rr-beta-nightshift", ui.nightShift ? "1" : "0"); } catch { /* private mode */ }
+    render();
+  }));
+  // Short landscape phones: which side the controls column sits on (the scene takes the other). The default is the
+  // one constant CONTROLS_DEFAULT in js/boot.js, which also applies the saved choice before the first paint. Only shown
+  // where it does something (css/style.css: short landscape).
+  panel.append(button(`Controls on: ${controlsSide() === "left" ? "Left" : "Right"}`, "controls-side", () => {
+    const side = controlsSide() === "left" ? "right" : "left";
+    document.documentElement.dataset.controls = side;
+    try { localStorage.setItem("rr-beta-controls", side); } catch { /* private mode */ }
     render();
   }));
   panel.append(button("Title screen", "", () => {
@@ -1623,7 +1786,7 @@ function menuPanel() {
   return panel;
 }
 
-// Sound settings (Push C): music / effects / voice volume and mute, kept per device (localStorage rr-audio).
+// Sound settings (Push C): music / effects / voice volume and mute, kept per device (localStorage rr-beta-audio).
 function soundPanel() {
   const box = el("div", "sound");
   box.append(el("h2", "", "Sound"));

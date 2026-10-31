@@ -1496,6 +1496,7 @@ export const ROOMS = {
         id: "cashbox",
         name: "Corny's cash box",
         rect: [68, 92, 16, 14],
+        side: "r", // Arlong Oct 27: from the boardwalk at the counter's end (y141, Corny's depth), not out in front of the booth at y150
         look: { special: "look_cashbox" },
         take: { special: "take_cashbox" },
         use: { special: "take_cashbox" },
@@ -1507,7 +1508,12 @@ export const ROOMS = {
         id: "corny",
         name: "Slick Corny",
         rect: [103, 61, 42, 80],
-        stand: [126, 150], // talk from the boardwalk in front of the booth line (y147), never tucked behind its corner
+        // Arlong Oct 27: talk on Corny's own feet line (he's at y141, h80), at his right, so RR is his size and beside
+        // him; the old y150 put RR 9 px in front of him at h100 (25% bigger, standing in front of him). Right side only:
+        // his left is the booth's corner (behind the booth front, y<147).
+        // core: his body plus the pitch pose's reaching arm, shifted 5 px right of the click rect, so the ring-toss pose's
+        // hand doesn't land on RR's beak.
+        stand: [126, 142], side: "r", core: [108, 61, 42, 80],
         look: "Slick Corny, the barker, leans on the clock post in a straw boater and a corn-yellow vest, flipping a quarter. A man made entirely of fairground hustle. Something under the smile is counting.",
         talk: { special: "talk_corny" },
         useItem: { photo: { say: "Corny flips it over, fast as a quarter. \"Signed? I could move these at a buck apiece.\" He pockets it. \"Twenty percent to the talent. Ten. Five. Get outta here.\"" }, mirror: "He looks into the mirror and likes what he sees, but he never lets go of the cash box key. Professional.", map: "\"Follow the money,\" the map says. Corny sees it and stops smiling for exactly one second." },
@@ -1920,5 +1926,5 @@ export const TIME_CARDS = [
 
 // The cold open: Hattie's henhouse at night, seen only as a glove, an egg's glow and a cigar ember. Never a face.
 // No dialogue until Arlong approves it (BRIEF.md). On by default in dev; set to false here, or ?coldopen=0 /
-// the Menu toggle (localStorage rr-coldopen), to skip it.
+// the Menu toggle (localStorage rr-beta-coldopen), to skip it.
 export const COLD_OPEN = true;

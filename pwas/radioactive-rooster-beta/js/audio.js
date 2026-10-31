@@ -11,7 +11,7 @@
 // Tension 0..1 (time to midnight, the same driver as the colour shift: logic.js nightOf) crossfades calm -> tense and,
 // for the stand-in music, raises the tempo and opens the filter.
 
-const SETTINGS_KEY = "rr-audio";
+const SETTINGS_KEY = "rr-beta-audio";
 const DEFAULTS = { music: 0.6, sfx: 0.8, voice: 1, muted: false };
 
 // Room -> area for Brook's first batch of 4 area loops (BRIEF.md, 2026-10-24). A per-room bed overrides its area.
@@ -133,21 +133,87 @@ function context() {
       bus[k].connect(master);
     }
     applyVolumes();
+    // iOS Safari parks the context in "interrupted" (a call, Siri, another app's audio, the screen locking), not only
+    // "suspended", and does not always come back by itself. Try again whenever it changes state or the page shows
+    // again, and on the next touch, which is the gesture iOS wants before it lets audio start.
+    ctx.addEventListener("statechange", wakeAudio);
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") wakeAudio(); });
   }
-  if (ctx.state === "suspended") ctx.resume().catch(() => {});
+  if (asleep()) ctx.resume().catch(() => {});
   return ctx;
 }
 
+function asleep() {
+  return !!ctx && (ctx.state === "suspended" || ctx.state === "interrupted");
+}
+
+let wakeArmed = false;
+function wakeAudio() {
+  if (!asleep()) return;
+  ctx.resume().catch(() => {});
+  if (wakeArmed) return;
+  wakeArmed = true;
+  const onTouch = () => {
+    window.removeEventListener("pointerdown", onTouch, true);
+    window.removeEventListener("touchend", onTouch, true);
+    wakeArmed = false;
+    if (asleep()) resumeAudio();
+  };
+  window.addEventListener("pointerdown", onTouch, true);
+  window.addEventListener("touchend", onTouch, true);
+}
+
 function applyVolumes() {
-  if (!ctx) return;
-  const t = ctx.currentTime;
-  master.gain.setTargetAtTime(settings.muted ? 0 : 1, t, 0.02);
-  for (const k of ["music", "sfx", "voice"]) bus[k].gain.setTargetAtTime(settings[k], t, 0.02);
-  for (const el of document.querySelectorAll("audio[data-bus]")) el.volume = elVolume(el.dataset.bus, Number(el.dataset.mix || 1));
+  if (ctx) {
+    const t = ctx.currentTime;
+    master.gain.setTargetAtTime(settings.muted ? 0 : 1, t, 0.02);
+    for (const k of ["music", "sfx", "voice"]) bus[k].gain.setTargetAtTime(settings[k], t, 0.02);
+  }
+  // only the fallback elements (no Web Audio here) still mix on .volume; routed ones sit on the buses above
+  for (const el of document.querySelectorAll("audio[data-bus]")) if (!el._rr) el.volume = elVolume(el.dataset.bus, Number(el.dataset.mix || 1));
 }
 
 function elVolume(kind, mix) {
   return settings.muted ? 0 : Math.max(0, Math.min(1, settings[kind] * mix));
+}
+
+// Arlong Oct 27 (beta v17, on his phone): the sliders did nothing, and at the start the rooftop bed sounded mixed into
+// the farm's. Root cause: iOS Safari ignores HTMLMediaElement.volume (read-only, always 1), and every <audio> here (the
+// calm/tense beds, cues, voice) was mixed and faded only through .volume. So on iOS both bed layers played at full
+// all the time, an old room's bed played at full until it was removed, and the sliders and mute only reached the
+// Web Audio themes. Now each <audio> plays through Web Audio: element -> its own gain (the mix: layer weight, fade,
+// CUE_MIX) -> the music/sfx/voice bus (the slider) -> master (mute). .volume stays 1 and is never used to mix.
+// Falls back to .volume only where Web Audio can't take the element.
+function route(a, kind, mix) {
+  const c = context();
+  if (c && c.createMediaElementSource && bus[kind]) {
+    try {
+      const src = c.createMediaElementSource(a);
+      const gain = c.createGain();
+      gain.gain.value = mix;
+      src.connect(gain);
+      gain.connect(bus[kind]);
+      a._rr = { src, gain };
+      return;
+    } catch { /* fall back to .volume below */ }
+  }
+  a.volume = elVolume(kind, mix);
+}
+
+// Set an element's mix (0..1, before the bus): its own gain when routed, else .volume.
+function setMix(a, mix, tc = 0.015) {
+  if (!a) return;
+  a.dataset.mix = String(mix);
+  if (a._rr) a._rr.gain.gain.setTargetAtTime(mix, ctx.currentTime, tc);
+  else if (a.dataset.bus) a.volume = elVolume(a.dataset.bus, mix);
+}
+
+// Stop an element for good: pause it (a detached <audio> must not keep sounding), unhook it, drop it.
+function release(a) {
+  if (!a) return;
+  try { a.pause(); } catch { /* */ }
+  if (a._rr) { try { a._rr.src.disconnect(); a._rr.gain.disconnect(); } catch { /* */ } a._rr = null; }
+  a.remove();
 }
 
 /* ---------- stand-in synth (the old cue synth, routed through the sfx bus) ---------- */
@@ -239,10 +305,10 @@ function element(url, kind, mix = 1, loop = false) {
   a.dataset.bus = kind;
   a.dataset.mix = String(mix);
   a.loop = loop;
-  a.volume = elVolume(kind, mix);
+  route(a, kind, mix);
   a.style.display = "none";
   document.body.append(a); // so applyVolumes finds it
-  a.addEventListener("ended", () => { if (!a.loop) a.remove(); });
+  a.addEventListener("ended", () => { if (!a.loop) release(a); });
   return a;
 }
 
@@ -267,7 +333,7 @@ export async function loopCue(kind) {
   if (url) {
     const a = element(url, "sfx", 1, true);
     a.play().catch(() => {});
-    loops.set(kind, () => a.remove());
+    loops.set(kind, () => release(a));
   } else {
     const id = setInterval(() => { try { synth(kind); } catch { /* */ } }, 550);
     try { synth(kind); } catch { /* */ }
@@ -442,16 +508,24 @@ function stopTheme(t, fade, keepPlace) {
   setTimeout(() => { try { t.src.disconnect(); t.gain.disconnect(); } catch { /* */ } }, (fade + 0.3) * 1000);
 }
 
-// <audio> beds fading out on a room change: off the volume bus (applyVolumes would reset them), stepped to 0, removed.
+// <audio> beds fading out on a room change: a gain ramp to 0 on its own gain (routed), then paused and removed.
 function fadeOutEl(a, fade) {
   if (!a) return;
   delete a.dataset.bus;
+  if (a._rr) {
+    const g = a._rr.gain.gain, now = ctx.currentTime;
+    g.cancelScheduledValues(now);
+    g.setValueAtTime(g.value, now);
+    g.linearRampToValueAtTime(0, now + Math.max(0.02, fade));
+    setTimeout(() => release(a), Math.max(0.02, fade) * 1000 + 60);
+    return;
+  }
   const from = a.volume, t0 = performance.now(), ms = fade * 1000;
-  if (!ms || !from) { a.remove(); return; }
+  if (!ms || !from) { release(a); return; }
   const id = setInterval(() => {
     const k = Math.min(1, (performance.now() - t0) / ms);
     a.volume = Math.max(0, from * (1 - k));
-    if (k >= 1) { clearInterval(id); a.remove(); }
+    if (k >= 1) { clearInterval(id); release(a); }
   }, 40);
 }
 
@@ -553,11 +627,9 @@ function mixBed() {
   if (bedNow.tense) {
     // Brook's calm/tense pairs are sample-aligned: keep the tense layer on the calm one's clock
     if (!bedNow.calm.paused && Math.abs(bedNow.tense.currentTime - bedNow.calm.currentTime) > 0.08) bedNow.tense.currentTime = bedNow.calm.currentTime;
-    bedNow.calm.dataset.mix = String(base * w.calm);
-    bedNow.tense.dataset.mix = String(base * w.tense);
-    bedNow.tense.volume = elVolume("music", base * w.tense);
-  } else bedNow.calm.dataset.mix = String(base);
-  bedNow.calm.volume = elVolume("music", Number(bedNow.calm.dataset.mix));
+    setMix(bedNow.calm, base * w.calm);
+    setMix(bedNow.tense, base * w.tense);
+  } else setMix(bedNow.calm, base);
 }
 
 // The stand-in bed: a quiet two-bar bass + pluck figure per area. Tempo and filter rise with tension, and a tense
@@ -670,7 +742,7 @@ export async function playVoiceSeq(ids) {
 
 export function stopVoice() {
   voiceSeq = null;
-  if (voiceNow) { voiceNow.pause(); voiceNow.remove(); voiceNow = null; }
+  if (voiceNow) { release(voiceNow); voiceNow = null; }
 }
 
 // Debug/inspection hook for the playtest scripts.
@@ -685,5 +757,7 @@ export function audioState() {
     tension, ctx: ctx ? ctx.state : null, held: heldBy, want: wantBed && { room: wantBed.room, moment: wantBed.moment },
     bed: bedNow && { key: bedNow.key, file: bedNow.calmUrl, synth: !!bedNow.synth, theme },
     settings: { ...settings }, loops: [...loops.keys()],
+    busGain: master ? { master: master.gain.value, music: bus.music.gain.value, sfx: bus.sfx.gain.value, voice: bus.voice.gain.value } : null,
+    beds: bedNow && bedNow.calm ? [bedNow.calm, bedNow.tense].filter(Boolean).map((a) => ({ file: a.src.split("/").pop(), routed: !!a._rr, gain: a._rr ? a._rr.gain.gain.value : a.volume })) : [],
   };
 }

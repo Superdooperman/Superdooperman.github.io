@@ -729,6 +729,7 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 .beat-club.on-art .veil-drift { left: 2%; top: 26%; width: 19%; height: 38%; }
 .veil-drift.has-strip, .beat-club.on-art .veil-drift.has-strip { inset: 0; left: 0; top: 0; width: 100%; height: 100%; }
 .veil-strip { inset: 0; }
+.veil-strip.veil-standby { opacity: 0; } /* the clear strip, mounted and loaded under the drift until the clear (js/beats.js smokeVeil) */
 .veil-blob { position: absolute; width: 62%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(178,172,186,.92) 0%, rgba(140,134,150,.75) 45%, rgba(110,104,120,0) 72%); filter: blur(4px);
   animation: veil-curl calc(4s + var(--i) * .45s) ease-in-out calc(var(--i) * -.7s) infinite alternate; }
 @keyframes veil-curl { 0% { transform: translate(0, 0) rotate(0deg) scale(1); } 50% { transform: translate(8%, -10%) rotate(40deg) scale(1.12); } 100% { transform: translate(-6%, 6%) rotate(-25deg) scale(.95); } }
@@ -795,6 +796,9 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 
 /* Hattie's smoke portrait (js/main.js smokePlateNode): Brook's 64x64 strips, stepped in lockstep with the Pavilion smoke */
 .speaker .portrait-smoke { display: block; width: 100%; aspect-ratio: 1; background-color: var(--cream); background-repeat: no-repeat; background-size: calc(var(--frames, 1) * 100%) 100%; image-rendering: pixelated; }
+.speaker .portrait-smoke { position: relative; }
+.speaker .portrait-smoke > .ps-layer, .speaker .portrait-smoke > img { position: absolute; inset: 0; width: 100%; height: 100%; background-repeat: no-repeat; background-size: calc(var(--frames, 1) * 100%) 100%; image-rendering: pixelated; opacity: 0; }
+.speaker .portrait-smoke > .ps-layer.on { opacity: 1; } /* js/main.js paintSmokePlate: every strip mounted, only the current one shown */
 
 /* beta v17: full-screen insert (js/main.js showInsert): a note or clue board over everything, fades in and out */
 .insert {
@@ -807,3 +811,74 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 .insert .insert-art { width: min(94vw, calc(82vh * 16 / 9)); height: auto; max-height: 82vh; object-fit: contain; image-rendering: pixelated; box-shadow: 0 6px 30px rgba(0,0,0,.6); }
 .insert .insert-caption { max-width: 60em; color: #f3ead2; font: 600 clamp(14px, 2.2vmin, 22px)/1.4 Georgia, serif; text-align: center; }
 .insert .insert-hint { color: rgba(243, 234, 210, 0.5); font: 11px/1 ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; }
+
+/* Phone landscape (844x390 and the like): the scene in one column, sized to the screen height, and the caption,
+   verbs, exits, pockets and menu in the other, a column that scrolls on its own (.controls). The page itself never
+   scrolls (Arlong 2026-10-27). Which side the controls take is html[data-controls], set before the first paint by
+   CONTROLS_DEFAULT in js/boot.js or the saved Menu choice "Controls on: Left / Right". */
+.controls { display: contents; } /* no box of its own outside short landscape: desktop and portrait lay out as before */
+.menu .controls-side { display: none; } /* the side setting only means something in the two-column layout */
+@media (orientation: landscape) and (max-height: 500px) {
+  html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  .cabinet {
+    /* as tall as the screen allows, but always leaving the controls column at least 200px (667x375 and narrower) */
+    --stage-w: min(calc((100svh - 8px - 28px - 6px - 8px - 8px) * 16 / 9 + 8px), calc(100vw - 24px - 8px - 200px));
+    --stage-h: calc((var(--stage-w) - 8px) * 9 / 16 + 8px);
+    box-sizing: border-box; height: 100vh; height: 100svh; overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--stage-w);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: "top top" "controls stage";
+    column-gap: 8px;
+    max-width: none;
+    padding: 8px 12px;
+  }
+  .menu .controls-side { display: inline-block; }
+  html[data-controls="right"] .cabinet { grid-template-columns: var(--stage-w) minmax(0, 1fr); grid-template-areas: "top top" "stage controls"; }
+  .cabinet > .top { grid-area: top; min-width: 0; height: 28px; margin-bottom: 6px; align-items: center; }
+  .cabinet > .top .room { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .cabinet > .stage {
+    grid-area: stage; align-self: start;
+    width: var(--stage-w); height: var(--stage-h); aspect-ratio: auto; box-shadow: 0 8px 20px #000;
+  }
+  .cabinet > .controls {
+    grid-area: controls; display: block; min-width: 0; min-height: 0;
+    overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+    padding: 0 2px 8px; /* the gap under the last chip, so the bottom row never sits on the screen edge */
+  }
+  .cabinet > .talkrow { margin-top: 0; }
+  .cabinet .bust, .cabinet .speaker { width: 48px; border-width: 2px; box-shadow: 2px 2px 0 #000; }
+  .cabinet .speaker.voice { width: 52px; }
+  .cabinet .caption { font-size: 0.8rem; line-height: 1.3; padding: 6px 8px; min-height: 0; }
+  .cabinet .caption.thought { padding: 6px 12px; margin-top: 16px; }
+  .cabinet .caption.more { padding-bottom: 1.7em; }
+  .cabinet .sentence { font-size: 0.75rem; margin-top: 4px; }
+  .cabinet .verbs, .cabinet .exits, .cabinet .inv, .cabinet .title-actions, .cabinet .choices { gap: 4px; margin-top: 4px; }
+  .cabinet .verbs button, .cabinet .exits button, .cabinet .choice, .cabinet .end-btn, .cabinet .menu button { padding: 4px 7px; font-size: 0.78rem; }
+  .cabinet .pending { min-height: 0; margin-top: 2px; font-size: 0.78rem; }
+  .cabinet .inv { min-height: 0; padding: 4px; }
+  .cabinet .item { width: 60px; padding: 3px; gap: 2px; }
+  .cabinet .item img { width: 32px; height: 32px; }
+  .cabinet .item span { font-size: 10px; }
+  .cabinet .empty { font-size: 0.78rem; }
+  .cabinet .menu { margin-top: 6px; padding: 8px; font-size: 0.8rem; }
+  .cabinet .slot span { min-width: 0; }
+  .cabinet .next-issue { font-size: 0.8rem; }
+
+  /* the title: the cover fills the height on the left, the blurb beside it */
+  .title-screen {
+    display: grid; grid-template-rows: repeat(6, min-content) 1fr;
+    grid-template-columns: min(calc((100svh - 24px - 8px) * 16 / 9), calc(100vw - 24px - 10px - 180px)) minmax(0, 1fr);
+    column-gap: 10px; align-content: start; max-width: none; padding: 16px 12px 8px;
+  }
+  .title-screen > * { grid-column: 2; min-width: 0; }
+  .title-screen > .title-frame { grid-column: 1; grid-row: 1 / -1; align-self: start; margin: 0; width: 100%; }
+  /* the cover goes on the scene's side, the blurb and buttons on the controls' side */
+  html[data-controls="left"] .title-screen { grid-template-columns: minmax(0, 1fr) min(calc((100svh - 24px - 8px) * 16 / 9), calc(100vw - 24px - 10px - 180px)); }
+  html[data-controls="left"] .title-screen > * { grid-column: 1; }
+  html[data-controls="left"] .title-screen > .title-frame { grid-column: 2; }
+  .title-screen > .logline { font-size: 0.8rem; margin: 0 0 6px; }
+  .title-screen > .how { font-size: 0.7rem; margin: 0 0 6px; }
+  .title-screen > .title-actions { margin: 0 0 6px; }
+  .title-screen > .title-actions button { padding: 4px 8px; font-size: 0.75rem; }
+}

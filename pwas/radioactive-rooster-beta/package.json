@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check js/main.js && node --check js/logic.js && node --check js/art.js && node --check js/audio.js && node --check js/beats.js && node --check js/walk.js && node --check data/script.js && node --check sw.js && node -e \"JSON.parse(require('fs').readFileSync('art/manifest.json')); JSON.parse(require('fs').readFileSync('audio/in/manifest.json'))\"",
+    "check": "node --check js/boot.js && node --check js/main.js && node --check js/logic.js && node --check js/art.js && node --check js/audio.js && node --check js/beats.js && node --check js/walk.js && node --check data/script.js && node --check sw.js && node -e \"JSON.parse(require('fs').readFileSync('art/manifest.json')); JSON.parse(require('fs').readFileSync('audio/in/manifest.json'))\"",
     "test": "node --test test/"
   }
 }

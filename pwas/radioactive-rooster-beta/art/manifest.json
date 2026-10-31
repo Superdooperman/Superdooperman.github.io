@@ -7199,7 +7199,7 @@
     0,
     0
    ],
-   "source": "Hattie's one talk portrait while the Pavilion smoke is up: portrait/gobbler under pixel smoke, mask/eyes hidden. Brook 2026-10-25 (final), assets/art-placeholder/portrait/ (build_hattie_smoke.py there, from portrait/gobbler with the pav_smoke.py recipe); staged by tools/art_files.py."
+   "source": "Hattie's one talk portrait while the Pavilion smoke is up: portrait/gobbler under pixel smoke, mask/eyes hidden. Brook 2026-10-25 (final), assets/art-placeholder/portrait/ (build_hattie_smoke.py there, from portrait/gobbler with the pav_smoke.py recipe); staged by tools/art_files.py. Smoke v5 drop-in (Brook 2026-10-27, LOCAL TRY, assets/art-placeholder/hattie-smoke-v5/; dry-brush streaks, the back layer baked into the portrait)."
   },
   "portrait/hattie-smoke-drift": {
    "kind": "portrait",
@@ -7217,7 +7217,7 @@
     1
    ],
    "loop": true,
-   "source": "Gentle smoke loop on her portrait, 6 x 180 ms = half the pavilion/smoke-drift loop, frame = stage drift frame % 6 (js/main.js). Frame 1 == hattie-smoke. Brook 2026-10-25 (final), assets/art-placeholder/portrait/ (build_hattie_smoke.py there, from portrait/gobbler with the pav_smoke.py recipe); staged by tools/art_files.py.",
+   "source": "Gentle smoke loop on her portrait, 6 x 180 ms = half the pavilion/smoke-drift loop, frame = stage drift frame % 6 (js/main.js). Frame 1 == hattie-smoke. Brook 2026-10-25 (final), assets/art-placeholder/portrait/ (build_hattie_smoke.py there, from portrait/gobbler with the pav_smoke.py recipe); staged by tools/art_files.py. Smoke v5 drop-in (Brook 2026-10-27, LOCAL TRY, assets/art-placeholder/hattie-smoke-v5/; dry-brush streaks, the back layer baked into the portrait).",
    "frame_ms": 180
   },
   "portrait/hattie-smoke-clear": {
@@ -7236,7 +7236,7 @@
     1
    ],
    "loop": false,
-   "source": "Portrait whisk-away, played once on the same frames as pavilion/smoke-clear (js/main.js); frames 6-8 == portrait/gobbler, then cut to portrait/gobbler. Brook 2026-10-25 (final), assets/art-placeholder/portrait/ (build_hattie_smoke.py there, from portrait/gobbler with the pav_smoke.py recipe); staged by tools/art_files.py.",
+   "source": "Portrait whisk-away, played once on the same frames as pavilion/smoke-clear (js/main.js); frames 6-8 == portrait/gobbler, then cut to portrait/gobbler. Brook 2026-10-25 (final), assets/art-placeholder/portrait/ (build_hattie_smoke.py there, from portrait/gobbler with the pav_smoke.py recipe); staged by tools/art_files.py. Smoke v5 drop-in (Brook 2026-10-27, LOCAL TRY, assets/art-placeholder/hattie-smoke-v5/; dry-brush streaks, the back layer baked into the portrait).",
    "frame_ms": [
     150,
     120,
@@ -11161,7 +11161,26 @@
     1
    ],
    "loop": true,
-   "source": "PLACEHOLDER (Brook, 2026-10-25; may serve as final): stage-smoke loop over Hattie's mask at the Pavilion, a horizontal strip of 320x180 transparent frames aligned to bg/pavilion with hattie-chain-l-h52 at feet (205,110) (12 frames, 180 ms each, loop). Staged by tools/art_files.py from assets/art-placeholder/pavilion/smoke/smoke-drift-strip.png. js/main.js pavilionVeil -> js/beats.js smokeVeil({ ids: \"pavilion/smoke\" }); procedural CSS smoke if missing.",
+   "source": "PLACEHOLDER (Brook, 2026-10-25; may serve as final): stage-smoke loop over Hattie's mask at the Pavilion, a horizontal strip of 320x180 transparent frames aligned to bg/pavilion with hattie-chain-l-h52 at feet (205,110) (12 frames, 180 ms each, loop). Staged by tools/art_files.py from assets/art-placeholder/pavilion/smoke/smoke-drift-strip.png. js/main.js pavilionVeil -> js/beats.js smokeVeil({ ids: \"pavilion/smoke\" }); procedural CSS smoke if missing. Smoke v5 drop-in (Brook 2026-10-27, LOCAL TRY, assets/art-placeholder/hattie-smoke-v5/; dry-brush streaks, the back layer baked into the portrait).",
+   "frame_ms": 180
+  },
+  "pavilion/smoke-drift-back": {
+   "kind": "fx",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "frames": 12,
+   "grid": [
+    12,
+    1
+   ],
+   "loop": true,
+   "source": "Smoke v5 BACK layer (Brook 2026-10-27, LOCAL TRY, assets/art-placeholder/hattie-smoke-v5/): the far half of the smoke ring, drawn behind Hattie, same frames and timing as pavilion/smoke-drift (frame i of both always shown together). js/main.js pavBackLayer, wrap at actorZ(110)-1. Staged by tools/art_files.py; kept by tools/sprites/keep_dropins.py.",
    "frame_ms": 180
   },
   "pavilion/smoke-clear": {
@@ -11180,7 +11199,35 @@
     1
    ],
    "loop": false,
-   "source": "PLACEHOLDER (Brook, 2026-10-25; may serve as final): Pavilion smoke whisk-away, 8 frames of 320x180 transparent, played once with Brook's per-frame ms (1.0 s), frame 1 == drift frame 1, last frame fully clear; her face shows from frame 4. Staged by tools/art_files.py from assets/art-placeholder/pavilion/smoke/smoke-clear-strip.png.",
+   "source": "PLACEHOLDER (Brook, 2026-10-25; may serve as final): Pavilion smoke whisk-away, 8 frames of 320x180 transparent, played once with Brook's per-frame ms (1.0 s), frame 1 == drift frame 1, last frame fully clear; her face shows from frame 4. Staged by tools/art_files.py from assets/art-placeholder/pavilion/smoke/smoke-clear-strip.png. Smoke v5 drop-in (Brook 2026-10-27, LOCAL TRY, assets/art-placeholder/hattie-smoke-v5/; dry-brush streaks, the back layer baked into the portrait).",
+   "frame_ms": [
+    150,
+    120,
+    110,
+    110,
+    110,
+    120,
+    130,
+    150
+   ]
+  },
+  "pavilion/smoke-clear-back": {
+   "kind": "fx",
+   "size": [
+    320,
+    180
+   ],
+   "anchor": [
+    0,
+    0
+   ],
+   "frames": 8,
+   "grid": [
+    8,
+    1
+   ],
+   "loop": false,
+   "source": "Smoke v5 BACK layer (Brook 2026-10-27, LOCAL TRY, assets/art-placeholder/hattie-smoke-v5/): the far half of the smoke ring, drawn behind Hattie, same frames and timing as pavilion/smoke-clear (frame i of both always shown together). js/main.js pavBackLayer, wrap at actorZ(110)-1. Staged by tools/art_files.py; kept by tools/sprites/keep_dropins.py.",
    "frame_ms": [
     150,
     120,

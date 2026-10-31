@@ -188,6 +188,24 @@ export function onLine(fn) {
 
 // An item as it is right now: `alt` entries ({ when: flag, name?, icon?, look?, ... }) override it once their flag is set
 // (the geiger counter with the bulb snapped on).
+// A save slot from localStorage, before Continue / Load hands slot.data to seedNight (Zoro 2026-10-31). The key is
+// per device and was shared with live Rooster until the rr-beta-* split, so a slot may be foreign, older, damaged or
+// hand-edited: anything not shaped like one this game wrote is skipped (shown as an empty slot), never loaded.
+const isPlain = (v) => !!v && typeof v === "object" && !Array.isArray(v);
+const SAVE_MODES = ["play", "choice", "end"];
+export function validSave(slot) {
+  if (!isPlain(slot) || typeof slot.at !== "string" || typeof slot.room !== "string") return false;
+  const d = slot.data;
+  if (!isPlain(d) || typeof d.room !== "string" || !Object.hasOwn(ROOMS, d.room)) return false;
+  if (!Array.isArray(d.inv) || !d.inv.every((id) => typeof id === "string" && Object.hasOwn(ITEMS, id))) return false;
+  if (!isPlain(d.flags)) return false;
+  if (d.mode !== undefined && !SAVE_MODES.includes(d.mode)) return false;
+  if (d.night !== undefined && typeof d.night !== "number") return false;
+  if (d.cards !== undefined && !Array.isArray(d.cards)) return false;
+  if (slot.lines !== undefined && !(Array.isArray(slot.lines) && slot.lines.every(isPlain))) return false;
+  return true;
+}
+
 export function itemOf(state, id) {
   const base = ITEMS[id];
   if (!base) return base;

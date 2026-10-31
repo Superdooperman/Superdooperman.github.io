@@ -185,11 +185,16 @@ export function smokeVeil(state = "thick", opts = {}) {
   veil.append(drift, el("div", "veil-ember"), glove);
   const ids = opts.ids || "club/smoke"; // the strips' id prefix: "<ids>-drift" / "<ids>-clear" ("pavilion/smoke" at the Pavilion)
   const useArt = opts.art !== false && !!(artUrl(`${ids}-drift`) && artUrl(`${ids}-clear`));
-  let loop = null, atFrame1 = null;
+  let loop = null, standby = null, atFrame1 = null;
   if (useArt) {
     drift.classList.add("has-strip");
     loop = steppedStrip(`${ids}-drift`, "veil-strip");
-    drift.append(loop.node);
+    // the clear strip is mounted from the start, under the drift strip at opacity 0 (Chopper 2026-10-27): a node whose
+    // background-image is first set on the clear's own tick paints one empty frame whenever the strip has dropped out
+    // of the memory cache (a preload Image() gets collected), because the CSS fetch is async. Mounted here, the strip
+    // stays loaded and the swap is only a reveal of an already-painted node.
+    standby = steppedStrip(`${ids}-clear`, "veil-strip veil-standby");
+    drift.append(standby.node, loop.node);
     loop.run(true, (i) => {
       if (i === 0 && atFrame1) { const go = atFrame1; atFrame1 = null; go(); return; }
       if (opts.onFrame) opts.onFrame("drift", i);
@@ -222,8 +227,9 @@ export function smokeVeil(state = "thick", opts = {}) {
     const swap = () => {
       if (!veil.isConnected) { resolve(); return; }
       loop.stop();
-      once = steppedStrip(`${ids}-clear`, "veil-strip");
-      drift.replaceChildren(once.node);
+      once = standby;
+      loop.node.remove();
+      once.node.classList.remove("veil-standby");
       start();
       if (opts.onFrame) opts.onFrame("clear", 0);
       once.run(false, (i) => { if (opts.onFrame) opts.onFrame("clear", i); }).then(() => { if (endNow) hold = setTimeout(end, frameMs(assetInfo(`${ids}-clear`), once.n - 1)); });
