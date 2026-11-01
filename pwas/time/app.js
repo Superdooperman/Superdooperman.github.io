@@ -114,7 +114,7 @@
       const d = JSON.parse(await f.text());
       if (!Array.isArray(d.tasks) || !Array.isArray(d.sessions)) throw new Error('missing tasks/sessions');
       if (!confirm(`Import ${d.tasks.length} tasks and ${d.sessions.length} sessions? This replaces current data.`)) return;
-      tasks = d.tasks; sessions = d.sessions; current = null; if (d.pomoSettings) { Object.assign(set, d.pomoSettings); LS.set('pomoSettings', set); egg.setSkin(set.eggSkin); eggSkinUI(); }
+      tasks = d.tasks; sessions = d.sessions; current = null; if (d.pomoSettings) { Object.assign(set, d.pomoSettings); if (set.eggSkin !== 'painted') set.eggSkin = 'pixel'; LS.set('pomoSettings', set); egg.setSkin(set.eggSkin); eggSkinUI(); }
       save(); renderTasks(); renderHistory(); updateStats();
     } catch (err) { alert('Could not import: ' + err.message); }
     e.target.value = '';
@@ -123,6 +123,7 @@
   // ---------- POMODORO ----------
   const DEF = { focus: 25, short: 5, long: 15, every: 4, autoStart: false, notify: false, wake: false, volume: 0.6, muted: false, eggSkin: 'pixel' };
   const set = Object.assign({}, DEF, LS.get('pomoSettings', {}));
+  if (set.eggSkin !== 'painted') set.eggSkin = 'pixel';   // unknown stored values read as the default
   const pomo = Object.assign({ phase: 'focus', endsAt: null, pausedRemaining: null, cycle: 0, taskId: null, startedAt: null }, LS.get('pomoState', {}));
   const savePomo = () => LS.set('pomoState', pomo);
   const dur = (ph) => set[ph] * 60000;

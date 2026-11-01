@@ -120,12 +120,10 @@
     for (let y = -pry; y <= pry; y++) for (let x = -pr; x <= pr; x++) if ((x * x) / (pr * pr + .01) + (y * y) / (pry * pry) <= 1.1) P(cx + ox + x, cy + oy + y, 1, 1, C.k);
   }
   // ---------- painted skin (optional sprite sheet; the drawn egg above stays the default + fallback) ----------
-  // Sheet: 72x92 cells. Row 1 = 12 turn views 30 deg apart (0 front, 90 side, 180 back);
-  // row 2 = crack 0/25/50/75/100% then the done pose (mask popped). Pupils are drawn live from the JSON.
-  // ---------- painted skin (optional sprite sheet; the drawn egg above stays the default + fallback) ----------
   // Sheet (layout read from its JSON): row 0 = 12 turn views 30 deg apart (0 front, 90/270 profiles, 180 back;
   // the face turns toward the viewer's left as the index rises, the opposite sign of rot);
-  // row 1 = crack 0/25/50/75/100% then the done pose (mask popped). Pupils are painted out and drawn live.
+  // crack frames: one view per stage, or (rotating-crack sheet) 12 views per stage 25/50/75/100% in the same
+  // angle order, so the egg keeps turning while it cracks; then the done pose. Pupils are painted out and drawn live.
   // Nostril glints and the open-beak overlay belong to the drawn egg only.
   EggTimer.prototype.setSkin = function (skin, base) {
     this.skin = skin === 'painted' ? 'painted' : 'pixel';
@@ -151,10 +149,10 @@
     c.imageSmoothingEnabled = false;
     let f;
     if (o.popped && S.done) f = S.done;
-    else if ((o.crack || 0) > 0 && S.cracks.length) f = nearestCrack(S.cracks, Math.min(4, Math.ceil(o.crack * 4)) / 4);
     else {
       const n = ((S.dir * Math.round((o.rot || 0) / (Math.PI / 6))) % 12 + 12) % 12;   // dir -1: sheet turns opposite to rot
-      f = nearestTurn(S.turns, n * 30);
+      f = (o.crack || 0) > 0 && S.cracks.length ? nearestCrack(S.cracks, Math.min(4, Math.ceil(o.crack * 4)) / 4, n * 30)
+        : nearestTurn(S.turns, n * 30);
     }
     const dx = Math.round(S.ax - f.ax), dy = Math.round(S.ay - f.ay);   // anchor: egg centre x / base y
     c.drawImage(S.img, f.x, f.y, f.w, f.h, dx, dy, f.w, f.h);
@@ -171,10 +169,11 @@
     for (const t of turns) { const d = Math.abs(((deg - t.angle + 540) % 360) - 180); if (d < bd) { bd = d; best = t; } }
     return best;
   }
-  function nearestCrack(cracks, v) {
-    let best = cracks[0].frame, bd = 1e9;
-    for (const k of cracks) { const d = Math.abs(k.crack - v); if (d < bd) { bd = d; best = k.frame; } }
-    return best;
+  // nearest crack stage, then the view nearest the turn angle within that stage (single-view stages just match)
+  function nearestCrack(cracks, v, deg) {
+    let sv = cracks[0].crack, bd = 1e9;
+    for (const k of cracks) { const d = Math.abs(k.crack - v); if (d < bd) { bd = d; sv = k.crack; } }
+    return nearestTurn(cracks.filter((k) => k.crack === sv).map((k) => k.frame), deg);
   }
   function loadPainted(base) {
     const img = new Image();
@@ -189,6 +188,7 @@
     const num = (v, d) => (typeof v === 'number' && isFinite(v) ? v : d);
     const cell = j.cell || j.cellSize || {}, cw = num(Array.isArray(cell) ? cell[0] : cell.w, num(j.cellW, W)), ch = num(Array.isArray(cell) ? cell[1] : cell.h, num(j.cellH, H));
     const cols = num(j.cols, 12);
+    if (!(cw >= 1 && cw <= 256 && ch >= 1 && ch <= 256)) throw new Error('bad cell size');
     const org = j.anchor || j.origin || {}, ax = num(org.x, cw / 2), ay = num(org.bottom_y, num(org.y, ch - 4));
     let raw = j.frames;
     if (raw && !Array.isArray(raw)) raw = Object.keys(raw).map((k) => Object.assign({ name: k }, raw[k]));
@@ -209,12 +209,13 @@
       fr.eyes = (f.eyes || []).filter((e) => !e.sliver && e.pupil !== false)
         .map((e) => ({ id: e.id != null ? e.id : null, x: num(e.cx, num(e.x, NaN)), y: num(e.cy, num(e.y, NaN)), rx: num(e.rx, num(e.r, 4)), ry: num(e.ry, num(e.r, 4)) }))
         .filter((e) => isFinite(e.x) && isFinite(e.y));
+      if (!(fr.x >= 0 && fr.y >= 0 && fr.w > 0 && fr.h > 0)) throw new Error('bad frame rect');
       if (fr.x + fr.w > img.naturalWidth || fr.y + fr.h > img.naturalHeight) throw new Error('frame outside sheet');
       const name = String(f.name || ''), type = f.type || f.kind ||
         (/done|pop/i.test(name) ? 'done' : /crack/i.test(name) ? 'crack' : 'turn');
       const digits = parseFloat((name.match(/\d+/) || ['NaN'])[0]);
       if (type === 'done') S.done = fr;
-      else if (type === 'crack') { let v = num(f.crack, num(f.pct, digits)); if (!isFinite(v)) v = 0; if (v > 1) v /= 100; S.cracks.push({ crack: v, frame: fr }); }
+      else if (type === 'crack') { let v = num(f.crack, num(f.pct, digits)); if (!isFinite(v)) v = 0; if (v > 1) v /= 100; fr.angle = num(f.view_deg, num(f.angle, 0)); S.cracks.push({ crack: v, frame: fr }); }
       else { fr.angle = num(f.view_deg, num(f.angle, isFinite(digits) ? digits : S.turns.length * 30)); S.turns.push(fr); }
     });
     if (!S.turns.length) throw new Error('no turn frames');

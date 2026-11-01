@@ -2,14 +2,14 @@
  "image": "egg-timer-sprites.png",
  "size": [
   864,
-  184
+  552
  ],
  "cell": [
   72,
   92
  ],
  "cols": 12,
- "rows": 2,
+ "rows": 6,
  "anchor": {
   "x": 36,
   "bottom_y": 88,
@@ -21,39 +21,64 @@
  "eye_ids": "0 = the eye on the viewer's left in the front view (code eyes[0], longitude -1.15); 1 = the other eye",
  "turning": "row 0 frame f = f*30 deg; the face turns toward the VIEWER'S LEFT as f increases (code rot is the opposite sign): f = ((-Math.round(rot/(Math.PI/6)))%12+12)%12",
  "sides": "near = eye on the visible side, draw pupil; far = eye peeking around the head; sliver=true means too small for a pupil",
- "crack_picks": {
-  "crack_000": 1,
-  "crack_025": 3,
-  "crack_050": 4,
-  "crack_075": 6,
-  "crack_100": 8
- },
  "unused_cells": [
   [
-   1,
+   5,
+   1
+  ],
+  [
+   5,
+   2
+  ],
+  [
+   5,
+   3
+  ],
+  [
+   5,
+   4
+  ],
+  [
+   5,
+   5
+  ],
+  [
+   5,
    6
   ],
   [
-   1,
+   5,
    7
   ],
   [
-   1,
+   5,
    8
   ],
   [
-   1,
+   5,
    9
   ],
   [
-   1,
+   5,
    10
   ],
   [
-   1,
+   5,
    11
   ]
  ],
+ "layout": {
+  "row 0": "turn_000..turn_330 (v1, unchanged)",
+  "row 1": "crack25_000..crack25_330",
+  "row 2": "crack50_000..crack50_330",
+  "row 3": "crack75_000..crack75_330",
+  "row 4": "crack100_000..crack100_330",
+  "row 5": "col 0 = done (v1, unchanged); cols 1-11 empty",
+  "columns": "every row uses the same column = view order as row 0 (col f = f*30 deg)",
+  "pick": "row = crack<=0 ? 0 : min(4, ceil(crack*4)); col = ((-Math.round(rot/(Math.PI/6)))%12+12)%12"
+ },
+ "cracks": "1px, one colour rgb(22,18,16) alpha 255, painted on a wrapped body-of-revolution network: same pattern in all 12 views of a stage; each stage contains every crack of the stage before. Mask cracks (75/100) only on views within 60 deg of the front.",
+ "eye_note": "eyes copied from the matching turn frame; crack_px_within_rim counts crack pixels inside the eye ellipse grown by 2px (0 everywhere = cracks never touch an eye)",
  "frames": [
   {
    "name": "turn_000",
@@ -65,7 +90,7 @@
    "w": 72,
    "h": 92,
    "view_deg": 0,
-   "source": "concept row1 #1",
+   "source": "v1 turn_000 (unchanged)",
    "eyes": [
     {
      "id": 0,
@@ -101,7 +126,7 @@
    "w": 72,
    "h": 92,
    "view_deg": 30,
-   "source": "concept row1 #2",
+   "source": "v1 turn_030 (unchanged)",
    "eyes": [
     {
      "id": 0,
@@ -137,7 +162,7 @@
    "w": 72,
    "h": 92,
    "view_deg": 60,
-   "source": "concept row1 #3",
+   "source": "v1 turn_060 (unchanged)",
    "eyes": [
     {
      "id": 0,
@@ -173,7 +198,7 @@
    "w": 72,
    "h": 92,
    "view_deg": 90,
-   "source": "concept row1 #4",
+   "source": "v1 turn_090 (unchanged)",
    "eyes": [
     {
      "id": 1,
@@ -198,7 +223,7 @@
    "w": 72,
    "h": 92,
    "view_deg": 120,
-   "source": "concept row1 #5",
+   "source": "v1 turn_120 (unchanged)",
    "eyes": [
     {
      "id": 0,
@@ -234,7 +259,7 @@
    "w": 72,
    "h": 92,
    "view_deg": 150,
-   "source": "concept row1 #6",
+   "source": "v1 turn_150 (unchanged)",
    "eyes": [
     {
      "id": 0,
@@ -270,7 +295,7 @@
    "w": 72,
    "h": 92,
    "view_deg": 180,
-   "source": "concept row1 #7",
+   "source": "v1 turn_180 (unchanged)",
    "eyes": [
     {
      "id": 0,
@@ -306,7 +331,7 @@
    "w": 72,
    "h": 92,
    "view_deg": 210,
-   "source": "concept row1 #8",
+   "source": "v1 turn_210 (unchanged)",
    "eyes": [
     {
      "id": 0,
@@ -331,7 +356,7 @@
    "w": 72,
    "h": 92,
    "view_deg": 240,
-   "source": "concept row1 #9",
+   "source": "v1 turn_240 (unchanged)",
    "eyes": [
     {
      "id": 0,
@@ -356,7 +381,7 @@
    "w": 72,
    "h": 92,
    "view_deg": 270,
-   "source": "concept row1 #10",
+   "source": "v1 turn_270 (unchanged)",
    "eyes": [
     {
      "id": 0,
@@ -381,7 +406,7 @@
    "w": 72,
    "h": 92,
    "view_deg": 300,
-   "source": "concept row1 #11",
+   "source": "v1 turn_300 (unchanged)",
    "eyes": [
     {
      "id": 0,
@@ -417,7 +442,7 @@
    "w": 72,
    "h": 92,
    "view_deg": 330,
-   "source": "concept row1 #12",
+   "source": "v1 turn_330 (unchanged)",
    "eyes": [
     {
      "id": 0,
@@ -444,7 +469,7 @@
    ]
   },
   {
-   "name": "crack_000",
+   "name": "crack25_000",
    "index": 12,
    "row": 1,
    "col": 0,
@@ -452,35 +477,37 @@
    "y": 92,
    "w": 72,
    "h": 92,
-   "view_deg": null,
-   "source": "concept row2 #1",
+   "view_deg": 0,
+   "source": "turn_000 + wrapped crack network stage 25%",
    "eyes": [
     {
      "id": 0,
      "side": "near",
-     "cx": 21.0,
-     "cy": 46.9,
-     "rx": 4.1,
+     "cx": 20.9,
+     "cy": 49.1,
+     "rx": 4.0,
      "ry": 5.2,
      "sliver": false,
      "pupil": true,
-     "pupil_painted_out": true
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
     },
     {
      "id": 1,
      "side": "near",
-     "cx": 50.7,
-     "cy": 46.7,
-     "rx": 4.0,
-     "ry": 5.3,
+     "cx": 50.2,
+     "cy": 48.6,
+     "rx": 4.1,
+     "ry": 5.2,
      "sliver": false,
      "pupil": true,
-     "pupil_painted_out": true
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
     }
    ]
   },
   {
-   "name": "crack_025",
+   "name": "crack25_030",
    "index": 13,
    "row": 1,
    "col": 1,
@@ -488,35 +515,37 @@
    "y": 92,
    "w": 72,
    "h": 92,
-   "view_deg": null,
-   "source": "concept row2 #3",
+   "view_deg": 30,
+   "source": "turn_030 + wrapped crack network stage 25%",
    "eyes": [
     {
      "id": 0,
-     "side": "near",
-     "cx": 20.8,
-     "cy": 47.0,
-     "rx": 3.6,
-     "ry": 5.0,
+     "side": "far",
+     "cx": 19.8,
+     "cy": 48.3,
+     "rx": 2.1,
+     "ry": 3.9,
      "sliver": false,
      "pupil": true,
-     "pupil_painted_out": true
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
     },
     {
      "id": 1,
      "side": "near",
-     "cx": 50.5,
-     "cy": 46.5,
-     "rx": 4.2,
-     "ry": 5.6,
+     "cx": 46.8,
+     "cy": 48.8,
+     "rx": 4.9,
+     "ry": 5.4,
      "sliver": false,
      "pupil": true,
-     "pupil_painted_out": true
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
     }
    ]
   },
   {
-   "name": "crack_050",
+   "name": "crack25_060",
    "index": 14,
    "row": 1,
    "col": 2,
@@ -524,35 +553,37 @@
    "y": 92,
    "w": 72,
    "h": 92,
-   "view_deg": null,
-   "source": "concept row2 #4",
+   "view_deg": 60,
+   "source": "turn_060 + wrapped crack network stage 25%",
    "eyes": [
     {
      "id": 0,
-     "side": "near",
-     "cx": 20.0,
-     "cy": 46.7,
-     "rx": 3.7,
-     "ry": 5.1,
-     "sliver": false,
-     "pupil": true,
-     "pupil_painted_out": true
+     "side": "far",
+     "cx": 20.2,
+     "cy": 47.1,
+     "rx": 1.6,
+     "ry": 1.8,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
     },
     {
      "id": 1,
      "side": "near",
-     "cx": 50.9,
-     "cy": 46.4,
-     "rx": 4.1,
-     "ry": 5.2,
+     "cx": 36.4,
+     "cy": 50.6,
+     "rx": 4.8,
+     "ry": 5.0,
      "sliver": false,
      "pupil": true,
-     "pupil_painted_out": true
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
     }
    ]
   },
   {
-   "name": "crack_075",
+   "name": "crack25_090",
    "index": 15,
    "row": 1,
    "col": 3,
@@ -560,35 +591,25 @@
    "y": 92,
    "w": 72,
    "h": 92,
-   "view_deg": null,
-   "source": "concept row2 #6",
+   "view_deg": 90,
+   "source": "turn_090 + wrapped crack network stage 25%",
    "eyes": [
-    {
-     "id": 0,
-     "side": "near",
-     "cx": 20.5,
-     "cy": 44.6,
-     "rx": 4.1,
-     "ry": 5.2,
-     "sliver": false,
-     "pupil": true,
-     "pupil_painted_out": true
-    },
     {
      "id": 1,
      "side": "near",
-     "cx": 52.3,
-     "cy": 44.2,
-     "rx": 3.9,
+     "cx": 29.3,
+     "cy": 50.6,
+     "rx": 4.4,
      "ry": 5.0,
      "sliver": false,
      "pupil": true,
-     "pupil_painted_out": true
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
     }
    ]
   },
   {
-   "name": "crack_100",
+   "name": "crack25_120",
    "index": 16,
    "row": 1,
    "col": 4,
@@ -596,35 +617,37 @@
    "y": 92,
    "w": 72,
    "h": 92,
-   "view_deg": null,
-   "source": "concept row2 #8",
+   "view_deg": 120,
+   "source": "turn_120 + wrapped crack network stage 25%",
    "eyes": [
     {
      "id": 0,
      "side": "far",
-     "cx": 18.6,
-     "cy": 43.0,
-     "rx": 2.2,
+     "cx": 50.0,
+     "cy": 49.2,
+     "rx": 1.5,
      "ry": 2.9,
      "sliver": true,
      "pupil": false,
-     "pupil_painted_out": false
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
     },
     {
      "id": 1,
      "side": "near",
-     "cx": 47.9,
-     "cy": 44.6,
-     "rx": 5.1,
-     "ry": 5.8,
+     "cx": 23.0,
+     "cy": 50.5,
+     "rx": 4.4,
+     "ry": 4.6,
      "sliver": false,
      "pupil": true,
-     "pupil_painted_out": true
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
     }
    ]
   },
   {
-   "name": "done",
+   "name": "crack25_150",
    "index": 17,
    "row": 1,
    "col": 5,
@@ -632,8 +655,1462 @@
    "y": 92,
    "w": 72,
    "h": 92,
+   "view_deg": 150,
+   "source": "turn_150 + wrapped crack network stage 25%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 49.5,
+     "cy": 49.3,
+     "rx": 1.8,
+     "ry": 2.7,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 24.6,
+     "cy": 52.1,
+     "rx": 4.1,
+     "ry": 4.6,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack25_180",
+   "index": 18,
+   "row": 1,
+   "col": 6,
+   "x": 432,
+   "y": 92,
+   "w": 72,
+   "h": 92,
+   "view_deg": 180,
+   "source": "turn_180 + wrapped crack network stage 25%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 51.6,
+     "cy": 49.4,
+     "rx": 1.9,
+     "ry": 2.7,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "far",
+     "cx": 19.2,
+     "cy": 49.5,
+     "rx": 1.8,
+     "ry": 3.0,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack25_210",
+   "index": 19,
+   "row": 1,
+   "col": 7,
+   "x": 504,
+   "y": 92,
+   "w": 72,
+   "h": 92,
+   "view_deg": 210,
+   "source": "turn_210 + wrapped crack network stage 25%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 46.2,
+     "cy": 51.0,
+     "rx": 4.4,
+     "ry": 5.2,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack25_240",
+   "index": 20,
+   "row": 1,
+   "col": 8,
+   "x": 576,
+   "y": 92,
+   "w": 72,
+   "h": 92,
+   "view_deg": 240,
+   "source": "turn_240 + wrapped crack network stage 25%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 43.4,
+     "cy": 50.2,
+     "rx": 4.5,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack25_270",
+   "index": 21,
+   "row": 1,
+   "col": 9,
+   "x": 648,
+   "y": 92,
+   "w": 72,
+   "h": 92,
+   "view_deg": 270,
+   "source": "turn_270 + wrapped crack network stage 25%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 43.2,
+     "cy": 50.8,
+     "rx": 5.1,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack25_300",
+   "index": 22,
+   "row": 1,
+   "col": 10,
+   "x": 720,
+   "y": 92,
+   "w": 72,
+   "h": 92,
+   "view_deg": 300,
+   "source": "turn_300 + wrapped crack network stage 25%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 39.1,
+     "cy": 50.7,
+     "rx": 4.9,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "far",
+     "cx": 51.1,
+     "cy": 45.9,
+     "rx": 1.2,
+     "ry": 1.4,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack25_330",
+   "index": 23,
+   "row": 1,
+   "col": 11,
+   "x": 792,
+   "y": 92,
+   "w": 72,
+   "h": 92,
+   "view_deg": 330,
+   "source": "turn_330 + wrapped crack network stage 25%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 20.9,
+     "cy": 49.0,
+     "rx": 4.1,
+     "ry": 4.9,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 50.6,
+     "cy": 48.8,
+     "rx": 3.9,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack50_000",
+   "index": 24,
+   "row": 2,
+   "col": 0,
+   "x": 0,
+   "y": 184,
+   "w": 72,
+   "h": 92,
+   "view_deg": 0,
+   "source": "turn_000 + wrapped crack network stage 50%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 20.9,
+     "cy": 49.1,
+     "rx": 4.0,
+     "ry": 5.2,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 50.2,
+     "cy": 48.6,
+     "rx": 4.1,
+     "ry": 5.2,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack50_030",
+   "index": 25,
+   "row": 2,
+   "col": 1,
+   "x": 72,
+   "y": 184,
+   "w": 72,
+   "h": 92,
+   "view_deg": 30,
+   "source": "turn_030 + wrapped crack network stage 50%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 19.8,
+     "cy": 48.3,
+     "rx": 2.1,
+     "ry": 3.9,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 46.8,
+     "cy": 48.8,
+     "rx": 4.9,
+     "ry": 5.4,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack50_060",
+   "index": 26,
+   "row": 2,
+   "col": 2,
+   "x": 144,
+   "y": 184,
+   "w": 72,
+   "h": 92,
+   "view_deg": 60,
+   "source": "turn_060 + wrapped crack network stage 50%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 20.2,
+     "cy": 47.1,
+     "rx": 1.6,
+     "ry": 1.8,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 36.4,
+     "cy": 50.6,
+     "rx": 4.8,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack50_090",
+   "index": 27,
+   "row": 2,
+   "col": 3,
+   "x": 216,
+   "y": 184,
+   "w": 72,
+   "h": 92,
+   "view_deg": 90,
+   "source": "turn_090 + wrapped crack network stage 50%",
+   "eyes": [
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 29.3,
+     "cy": 50.6,
+     "rx": 4.4,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack50_120",
+   "index": 28,
+   "row": 2,
+   "col": 4,
+   "x": 288,
+   "y": 184,
+   "w": 72,
+   "h": 92,
+   "view_deg": 120,
+   "source": "turn_120 + wrapped crack network stage 50%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 50.0,
+     "cy": 49.2,
+     "rx": 1.5,
+     "ry": 2.9,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 23.0,
+     "cy": 50.5,
+     "rx": 4.4,
+     "ry": 4.6,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack50_150",
+   "index": 29,
+   "row": 2,
+   "col": 5,
+   "x": 360,
+   "y": 184,
+   "w": 72,
+   "h": 92,
+   "view_deg": 150,
+   "source": "turn_150 + wrapped crack network stage 50%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 49.5,
+     "cy": 49.3,
+     "rx": 1.8,
+     "ry": 2.7,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 24.6,
+     "cy": 52.1,
+     "rx": 4.1,
+     "ry": 4.6,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack50_180",
+   "index": 30,
+   "row": 2,
+   "col": 6,
+   "x": 432,
+   "y": 184,
+   "w": 72,
+   "h": 92,
+   "view_deg": 180,
+   "source": "turn_180 + wrapped crack network stage 50%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 51.6,
+     "cy": 49.4,
+     "rx": 1.9,
+     "ry": 2.7,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "far",
+     "cx": 19.2,
+     "cy": 49.5,
+     "rx": 1.8,
+     "ry": 3.0,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack50_210",
+   "index": 31,
+   "row": 2,
+   "col": 7,
+   "x": 504,
+   "y": 184,
+   "w": 72,
+   "h": 92,
+   "view_deg": 210,
+   "source": "turn_210 + wrapped crack network stage 50%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 46.2,
+     "cy": 51.0,
+     "rx": 4.4,
+     "ry": 5.2,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack50_240",
+   "index": 32,
+   "row": 2,
+   "col": 8,
+   "x": 576,
+   "y": 184,
+   "w": 72,
+   "h": 92,
+   "view_deg": 240,
+   "source": "turn_240 + wrapped crack network stage 50%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 43.4,
+     "cy": 50.2,
+     "rx": 4.5,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack50_270",
+   "index": 33,
+   "row": 2,
+   "col": 9,
+   "x": 648,
+   "y": 184,
+   "w": 72,
+   "h": 92,
+   "view_deg": 270,
+   "source": "turn_270 + wrapped crack network stage 50%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 43.2,
+     "cy": 50.8,
+     "rx": 5.1,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack50_300",
+   "index": 34,
+   "row": 2,
+   "col": 10,
+   "x": 720,
+   "y": 184,
+   "w": 72,
+   "h": 92,
+   "view_deg": 300,
+   "source": "turn_300 + wrapped crack network stage 50%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 39.1,
+     "cy": 50.7,
+     "rx": 4.9,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "far",
+     "cx": 51.1,
+     "cy": 45.9,
+     "rx": 1.2,
+     "ry": 1.4,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack50_330",
+   "index": 35,
+   "row": 2,
+   "col": 11,
+   "x": 792,
+   "y": 184,
+   "w": 72,
+   "h": 92,
+   "view_deg": 330,
+   "source": "turn_330 + wrapped crack network stage 50%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 20.9,
+     "cy": 49.0,
+     "rx": 4.1,
+     "ry": 4.9,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 50.6,
+     "cy": 48.8,
+     "rx": 3.9,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack75_000",
+   "index": 36,
+   "row": 3,
+   "col": 0,
+   "x": 0,
+   "y": 276,
+   "w": 72,
+   "h": 92,
+   "view_deg": 0,
+   "source": "turn_000 + wrapped crack network stage 75% + mask cracks (16px)",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 20.9,
+     "cy": 49.1,
+     "rx": 4.0,
+     "ry": 5.2,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 50.2,
+     "cy": 48.6,
+     "rx": 4.1,
+     "ry": 5.2,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack75_030",
+   "index": 37,
+   "row": 3,
+   "col": 1,
+   "x": 72,
+   "y": 276,
+   "w": 72,
+   "h": 92,
+   "view_deg": 30,
+   "source": "turn_030 + wrapped crack network stage 75% + mask cracks (13px)",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 19.8,
+     "cy": 48.3,
+     "rx": 2.1,
+     "ry": 3.9,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 46.8,
+     "cy": 48.8,
+     "rx": 4.9,
+     "ry": 5.4,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack75_060",
+   "index": 38,
+   "row": 3,
+   "col": 2,
+   "x": 144,
+   "y": 276,
+   "w": 72,
+   "h": 92,
+   "view_deg": 60,
+   "source": "turn_060 + wrapped crack network stage 75% + mask cracks (8px)",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 20.2,
+     "cy": 47.1,
+     "rx": 1.6,
+     "ry": 1.8,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 36.4,
+     "cy": 50.6,
+     "rx": 4.8,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack75_090",
+   "index": 39,
+   "row": 3,
+   "col": 3,
+   "x": 216,
+   "y": 276,
+   "w": 72,
+   "h": 92,
+   "view_deg": 90,
+   "source": "turn_090 + wrapped crack network stage 75%",
+   "eyes": [
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 29.3,
+     "cy": 50.6,
+     "rx": 4.4,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack75_120",
+   "index": 40,
+   "row": 3,
+   "col": 4,
+   "x": 288,
+   "y": 276,
+   "w": 72,
+   "h": 92,
+   "view_deg": 120,
+   "source": "turn_120 + wrapped crack network stage 75%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 50.0,
+     "cy": 49.2,
+     "rx": 1.5,
+     "ry": 2.9,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 23.0,
+     "cy": 50.5,
+     "rx": 4.4,
+     "ry": 4.6,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack75_150",
+   "index": 41,
+   "row": 3,
+   "col": 5,
+   "x": 360,
+   "y": 276,
+   "w": 72,
+   "h": 92,
+   "view_deg": 150,
+   "source": "turn_150 + wrapped crack network stage 75%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 49.5,
+     "cy": 49.3,
+     "rx": 1.8,
+     "ry": 2.7,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 24.6,
+     "cy": 52.1,
+     "rx": 4.1,
+     "ry": 4.6,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack75_180",
+   "index": 42,
+   "row": 3,
+   "col": 6,
+   "x": 432,
+   "y": 276,
+   "w": 72,
+   "h": 92,
+   "view_deg": 180,
+   "source": "turn_180 + wrapped crack network stage 75%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 51.6,
+     "cy": 49.4,
+     "rx": 1.9,
+     "ry": 2.7,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "far",
+     "cx": 19.2,
+     "cy": 49.5,
+     "rx": 1.8,
+     "ry": 3.0,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack75_210",
+   "index": 43,
+   "row": 3,
+   "col": 7,
+   "x": 504,
+   "y": 276,
+   "w": 72,
+   "h": 92,
+   "view_deg": 210,
+   "source": "turn_210 + wrapped crack network stage 75%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 46.2,
+     "cy": 51.0,
+     "rx": 4.4,
+     "ry": 5.2,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack75_240",
+   "index": 44,
+   "row": 3,
+   "col": 8,
+   "x": 576,
+   "y": 276,
+   "w": 72,
+   "h": 92,
+   "view_deg": 240,
+   "source": "turn_240 + wrapped crack network stage 75%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 43.4,
+     "cy": 50.2,
+     "rx": 4.5,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack75_270",
+   "index": 45,
+   "row": 3,
+   "col": 9,
+   "x": 648,
+   "y": 276,
+   "w": 72,
+   "h": 92,
+   "view_deg": 270,
+   "source": "turn_270 + wrapped crack network stage 75%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 43.2,
+     "cy": 50.8,
+     "rx": 5.1,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack75_300",
+   "index": 46,
+   "row": 3,
+   "col": 10,
+   "x": 720,
+   "y": 276,
+   "w": 72,
+   "h": 92,
+   "view_deg": 300,
+   "source": "turn_300 + wrapped crack network stage 75%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 39.1,
+     "cy": 50.7,
+     "rx": 4.9,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "far",
+     "cx": 51.1,
+     "cy": 45.9,
+     "rx": 1.2,
+     "ry": 1.4,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack75_330",
+   "index": 47,
+   "row": 3,
+   "col": 11,
+   "x": 792,
+   "y": 276,
+   "w": 72,
+   "h": 92,
+   "view_deg": 330,
+   "source": "turn_330 + wrapped crack network stage 75% + mask cracks (5px)",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 20.9,
+     "cy": 49.0,
+     "rx": 4.1,
+     "ry": 4.9,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 50.6,
+     "cy": 48.8,
+     "rx": 3.9,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack100_000",
+   "index": 48,
+   "row": 4,
+   "col": 0,
+   "x": 0,
+   "y": 368,
+   "w": 72,
+   "h": 92,
+   "view_deg": 0,
+   "source": "turn_000 + wrapped crack network stage 100% + mask cracks (31px)",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 20.9,
+     "cy": 49.1,
+     "rx": 4.0,
+     "ry": 5.2,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 50.2,
+     "cy": 48.6,
+     "rx": 4.1,
+     "ry": 5.2,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack100_030",
+   "index": 49,
+   "row": 4,
+   "col": 1,
+   "x": 72,
+   "y": 368,
+   "w": 72,
+   "h": 92,
+   "view_deg": 30,
+   "source": "turn_030 + wrapped crack network stage 100% + mask cracks (27px)",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 19.8,
+     "cy": 48.3,
+     "rx": 2.1,
+     "ry": 3.9,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 46.8,
+     "cy": 48.8,
+     "rx": 4.9,
+     "ry": 5.4,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack100_060",
+   "index": 50,
+   "row": 4,
+   "col": 2,
+   "x": 144,
+   "y": 368,
+   "w": 72,
+   "h": 92,
+   "view_deg": 60,
+   "source": "turn_060 + wrapped crack network stage 100% + mask cracks (8px)",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 20.2,
+     "cy": 47.1,
+     "rx": 1.6,
+     "ry": 1.8,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 36.4,
+     "cy": 50.6,
+     "rx": 4.8,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack100_090",
+   "index": 51,
+   "row": 4,
+   "col": 3,
+   "x": 216,
+   "y": 368,
+   "w": 72,
+   "h": 92,
+   "view_deg": 90,
+   "source": "turn_090 + wrapped crack network stage 100%",
+   "eyes": [
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 29.3,
+     "cy": 50.6,
+     "rx": 4.4,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack100_120",
+   "index": 52,
+   "row": 4,
+   "col": 4,
+   "x": 288,
+   "y": 368,
+   "w": 72,
+   "h": 92,
+   "view_deg": 120,
+   "source": "turn_120 + wrapped crack network stage 100%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 50.0,
+     "cy": 49.2,
+     "rx": 1.5,
+     "ry": 2.9,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 23.0,
+     "cy": 50.5,
+     "rx": 4.4,
+     "ry": 4.6,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack100_150",
+   "index": 53,
+   "row": 4,
+   "col": 5,
+   "x": 360,
+   "y": 368,
+   "w": 72,
+   "h": 92,
+   "view_deg": 150,
+   "source": "turn_150 + wrapped crack network stage 100%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 49.5,
+     "cy": 49.3,
+     "rx": 1.8,
+     "ry": 2.7,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 24.6,
+     "cy": 52.1,
+     "rx": 4.1,
+     "ry": 4.6,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack100_180",
+   "index": 54,
+   "row": 4,
+   "col": 6,
+   "x": 432,
+   "y": 368,
+   "w": 72,
+   "h": 92,
+   "view_deg": 180,
+   "source": "turn_180 + wrapped crack network stage 100%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 51.6,
+     "cy": 49.4,
+     "rx": 1.9,
+     "ry": 2.7,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "far",
+     "cx": 19.2,
+     "cy": 49.5,
+     "rx": 1.8,
+     "ry": 3.0,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack100_210",
+   "index": 55,
+   "row": 4,
+   "col": 7,
+   "x": 504,
+   "y": 368,
+   "w": 72,
+   "h": 92,
+   "view_deg": 210,
+   "source": "turn_210 + wrapped crack network stage 100%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 46.2,
+     "cy": 51.0,
+     "rx": 4.4,
+     "ry": 5.2,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack100_240",
+   "index": 56,
+   "row": 4,
+   "col": 8,
+   "x": 576,
+   "y": 368,
+   "w": 72,
+   "h": 92,
+   "view_deg": 240,
+   "source": "turn_240 + wrapped crack network stage 100%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 43.4,
+     "cy": 50.2,
+     "rx": 4.5,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack100_270",
+   "index": 57,
+   "row": 4,
+   "col": 9,
+   "x": 648,
+   "y": 368,
+   "w": 72,
+   "h": 92,
+   "view_deg": 270,
+   "source": "turn_270 + wrapped crack network stage 100%",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 43.2,
+     "cy": 50.8,
+     "rx": 5.1,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack100_300",
+   "index": 58,
+   "row": 4,
+   "col": 10,
+   "x": 720,
+   "y": 368,
+   "w": 72,
+   "h": 92,
+   "view_deg": 300,
+   "source": "turn_300 + wrapped crack network stage 100% + mask cracks (4px)",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 39.1,
+     "cy": 50.7,
+     "rx": 4.9,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "far",
+     "cx": 51.1,
+     "cy": 45.9,
+     "rx": 1.2,
+     "ry": 1.4,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "crack100_330",
+   "index": 59,
+   "row": 4,
+   "col": 11,
+   "x": 792,
+   "y": 368,
+   "w": 72,
+   "h": 92,
+   "view_deg": 330,
+   "source": "turn_330 + wrapped crack network stage 100% + mask cracks (9px)",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 20.9,
+     "cy": 49.0,
+     "rx": 4.1,
+     "ry": 4.9,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 50.6,
+     "cy": 48.8,
+     "rx": 3.9,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true,
+     "crack_px_within_rim": 0
+    }
+   ]
+  },
+  {
+   "name": "done",
+   "index": 60,
+   "row": 5,
+   "col": 0,
+   "x": 0,
+   "y": 460,
+   "w": 72,
+   "h": 92,
    "view_deg": null,
-   "source": "concept row2 #9",
+   "source": "v1 done (unchanged)",
    "eyes": [
     {
      "id": 0,
