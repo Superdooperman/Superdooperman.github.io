@@ -1,4 +1,4 @@
-import { CROW, ENDINGS, FEEDSEED, HENNY_THINKS, HERO, ITEM_ON_ITEM, ITEMS, KINDNESS, ROOMS, SPEAKER, TEMPT, VAT_STATES } from "../data/script.js";
+import { CLUB_SIGN, CROW, GOBBLER_PLATE, ENDINGS, FEEDSEED, SIGN_LOOK, SIGN_VARIANT, HENNY_THINKS, HERO, ITEM_ON_ITEM, ITEMS, KINDNESS, NIGHT, PIP_UNLOCK_OPEN_MS, ROOMS, SPEAKER, TEMPT, TIME_CARDS, VAT_STATES } from "../data/script.js";
 
 export const MAX_TEMPTATION = 4;
 
@@ -19,11 +19,193 @@ export function newGame() {
     jingle: 0,
     ending: null,
     checkpoint: null,
+    night: 0, // 0 dusk .. 1 midnight, ratchets up (nightOf): drives the colour shift and the music's tension
+    cards: [], // time cards already shown (TIME_CARDS ids)
   };
+}
+
+/* ---------- Push C: night / tension and placeholder beats (2026-10-24) ---------- */
+
+// Where the night stands in `room`, never going back down from `prev`.
+export function nightOf(room, prev = 0) {
+  return Math.max(prev || 0, NIGHT[room] ?? 0);
+}
+
+// PLACEHOLDER colour-shift wash for night t (BRIEF.md: dusk blue -> deep night -> hot-oil red at the Pavilion), as a
+// CSS rgba() multiplied over the scene. Darkens monotonically; the last stretch swings the hue to oil red.
+const TINT_STOPS = [
+  [0, [150, 170, 230, 0.1]],
+  [0.45, [70, 85, 170, 0.32]],
+  [0.8, [35, 40, 110, 0.5]],
+  [1, [150, 45, 25, 0.56]],
+];
+export function nightTint(t) {
+  const u = Math.max(0, Math.min(1, Number(t) || 0));
+  let i = 0;
+  while (i < TINT_STOPS.length - 2 && u > TINT_STOPS[i + 1][0]) i += 1;
+  const [t0, a] = TINT_STOPS[i];
+  const [t1, b] = TINT_STOPS[i + 1];
+  const k = (u - t0) / (t1 - t0);
+  const mix = a.map((v, j) => v + (b[j] - v) * k);
+  return `rgba(${Math.round(mix[0])}, ${Math.round(mix[1])}, ${Math.round(mix[2])}, ${mix[3].toFixed(3)})`;
+}
+
+// Beats owed after a move from `from` to the state's current room: time cards (once each) and what follows them.
+// Mutates s.night and s.cards. Returns [{ kind: "card", id, title, sub } | { kind: "club" }].
+export function roomBeats(s, from) {
+  if (!Array.isArray(s.cards)) s.cards = [];
+  s.night = nightOf(s.room, s.night);
+  if (from === s.room) return [];
+  const beats = [];
+  for (const card of TIME_CARDS) {
+    if (card.on === "start" || s.cards.includes(card.id)) continue;
+    if (card.on.room !== s.room) continue;
+    s.cards.push(card.id);
+    beats.push({ kind: "card", id: card.id, title: card.title, sub: card.sub });
+    for (const then of card.then || []) beats.push(then === "club" ? clubBeat(s) : { kind: then });
+  }
+  return beats;
+}
+
+// The club cutaway (PLACEHOLDER content) hides the figure behind a smoke veil until VEIL.flag is set. Canon (Azzato +
+// Usopp, 2026-10-25, "Hawkeye" pass): she stays Hawkeye Hattie all game and Rooster knows it's her (noir dread, not a
+// whodunit). The smoke only clears at the Pavilion, right after the hero choice (crow-down round 2 answered right, so
+// every hero path, the Smitten one too): her "Hawkeye Hattie is dead" speech plays, the smoke whisks off her mask
+// (a line with veil: "whisk", js/main.js) and she becomes the Cock Gobbler. The club cutaway always plays before that,
+// so it stays thick and silent. ONE place to move the reveal: the flag, and the payoff room + crow round.
+export const VEIL = { flag: "unmasked", payoff: { room: "pavilion", crowRound: 1 }, played: "pavilion_unveiled" };
+export const veilLifted = (s) => !!(s.flags && s.flags[VEIL.flag]);
+
+// The club sign's parts right now: { hawk, thecock, gobbler } -> lit? All lit once CLUB_SIGN.lit is set.
+export function signParts(s, variant = SIGN_VARIANT) {
+  const lit = !!(s && s.flags && s.flags[CLUB_SIGN.lit]);
+  const before = CLUB_SIGN.before[variant] || CLUB_SIGN.before.A;
+  return Object.fromEntries(CLUB_SIGN.parts.map((p) => [p, lit || !!before[p]]));
+}
+
+// The club cutaway: before the reveal (always, in play) the smoke is thick and the stogie henchman smacks the sign,
+// trying to get it to work: THE COCK sputters for half a second and stays on, GOBBLER stays dark (js/beats.js).
+export function clubBeat(s, veil) {
+  const v = veil || (veilLifted(s) ? "open" : "thick");
+  const sign = signParts(s);
+  // unmasked: the club plays Brook's acid club-theme from the unmasking on, the noir groove before it (js/beats.js)
+  return { kind: "club", veil: v, sign, smack: !Object.values(sign).every(Boolean), unmasked: veilLifted(s) };
+}
+
+function lookClubSign(s, out) {
+  out.lines.push(line(s.flags[CLUB_SIGN.lit] ? SIGN_LOOK.lit : SIGN_LOOK[SIGN_VARIANT] || SIGN_LOOK.A));
+}
+
+// The Pavilion unmasking (Brook's draft, locked by Usopp 2026-10-25). Stage directions are narration beats, not spoken.
+export const UNMASK_LINES = [
+  { who: "rooster", text: "\"I still see her, you know. Hawkeye Hattie. Best shot on the Midway, best partner I ever had. She's still in there, Hat. I'd bet the farm on it.\"" },
+  { who: "narration", text: "A soft laugh, somewhere behind the smoke." },
+  { who: "her", text: "You always did bet on the wrong bird, sugar. You buried that girl the night you tore our ticket in half. Tonight you just threw the last shovel of dirt." },
+  { who: "narration", text: "She lifts the mask's wings. The smoke clears, and the sax hits.", veil: "whisk" },
+  { who: "her", text: "Hawkeye Hattie is dead, Big Green. What's left doesn't miss, doesn't forgive, and doesn't share the bill." },
+  { who: "her", text: "I'm the Cock Gobbler. And I've been hungry for a long, long time.", names: true }, // nameplate flips here (GOBBLER_PLATE)
+  // Usopp 2026-10-25: cut to the club sign across the boardwalk; GOBBLER is one tube and buzzes on all at once
+  // (neon-lightup), the full name holds on the neon-hum-full loop under the sax, then back to the Pavilion (js/beats.js "sign").
+  // Azzato 2026-10-27: this line is read in the caption DURING that close-up (js/main.js showLine), worded as below.
+  { who: "narration", text: "Across the boardwalk, the old bar's sign buzzes, and kicks on all at once, every tube lit for the first time.", signCut: true },
+];
+
+// Plays once per run (a rewind to the Pavilion checkpoint clears the flags, so it plays again).
+function unmask(s, out) {
+  const at = VEIL.payoff;
+  if (s.room !== at.room || s.crowRound !== at.crowRound || s.flags[VEIL.played]) return;
+  s.flags[VEIL.flag] = true;
+  s.flags[VEIL.played] = true;
+  s.flags[CLUB_SIGN.lit] = true; // the whole name lights for the first time (the signCut line below)
+  for (const l of UNMASK_LINES) {
+    if (l.who === "rooster") out.lines.push(line(l.text, { speaker: HERO.talk, mood: "talk" }));
+    else if (l.who === "her") out.lines.push(line(l.text, { speaker: SPEAKER.gobbler, names: l.names }));
+    else out.lines.push(line(l.text, { ...(l.veil ? { veil: l.veil } : {}), ...(l.signCut ? { signCut: true } : {}) }));
+  }
+}
+
+// The opening beats for a new game (the cold open is main.js's, behind its flag).
+export function startBeats(s) {
+  if (!Array.isArray(s.cards)) s.cards = [];
+  const beats = [];
+  for (const card of TIME_CARDS) {
+    if (card.on !== "start" || s.cards.includes(card.id)) continue;
+    s.cards.push(card.id);
+    beats.push({ kind: "card", id: card.id, title: card.title, sub: card.sub });
+  }
+  return beats;
+}
+
+/* ---------- voice line ids (audio/in/VOICE-IDS.md) ---------- */
+
+const SPEAKER_KEY = new Map(Object.entries(SPEAKER).map(([k, v]) => [v, k]));
+for (const v of Object.values(HERO)) SPEAKER_KEY.set(v, "rr");
+
+// Who voices a line: the SPEAKER key, or "rr" (Radioactive Rooster) for his own lines and the narration.
+export function speakerKey(speaker) {
+  return speaker ? SPEAKER_KEY.get(speaker) || "x" : "rr";
+}
+
+export function normalizeLine(text) {
+  return String(text).replace(/\s+/g, " ").trim();
+}
+
+// FNV-1a 32-bit, as 8 hex digits.
+export function hash8(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i += 1) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, "0");
+}
+
+// Stable id per spoken line: "<speaker key>-<hash of the exact text>". Same words + same voice = same id (record
+// once). Henny's thought bubbles get none: Henny never speaks aloud.
+export function voiceId(text, extra = {}) {
+  if (extra.thought || !text) return null;
+  return `${speakerKey(extra.speaker)}-${hash8(normalizeLine(text))}`;
+}
+
+// Ending comic panels (ENDINGS[*].panels) are voiced with the same ids: a plain caption is narration ("rr"), a
+// { say: "Henny" } bubble is that character out loud, a { thought } bubble is never voiced.
+const SAY_KEY = { Henny: SPEAKER.henny, Hattie: SPEAKER.hattie };
+export function panelVoice(panel) {
+  if (typeof panel === "string") return { id: voiceId(panel), text: panel, speaker: null };
+  if (!panel || panel.thought) return { id: null, text: panel && panel.text, speaker: null };
+  const speaker = panel.say ? SAY_KEY[panel.say] || null : null;
+  // Azzato 2026-10-24: Henny's only real words are the panel marked `real: true` ("...About time."). Her other
+  // out-loud bubbles stay on the page as text but are heard as henny-cluck gibberish, never as a voice line.
+  if (speaker === SPEAKER.henny && !panel.real) return { id: null, text: panel.text, speaker, say: panel.say, cluck: true };
+  return { id: voiceId(panel.text, { speaker }), text: panel.text, speaker, say: panel.say || null };
+}
+
+// Optional recorder for tools that list every line (the voice script). null in the game.
+let lineHook = null;
+export function onLine(fn) {
+  lineHook = fn;
 }
 
 // An item as it is right now: `alt` entries ({ when: flag, name?, icon?, look?, ... }) override it once their flag is set
 // (the geiger counter with the bulb snapped on).
+// A save slot from localStorage, before Continue / Load hands slot.data to seedNight (Zoro 2026-10-31). The key is
+// per device and was shared with live Rooster until the rr-beta-* split, so a slot may be foreign, older, damaged or
+// hand-edited: anything not shaped like one this game wrote is skipped (shown as an empty slot), never loaded.
+const isPlain = (v) => !!v && typeof v === "object" && !Array.isArray(v);
+const SAVE_MODES = ["play", "choice", "end"];
+export function validSave(slot) {
+  if (!isPlain(slot) || typeof slot.at !== "string" || typeof slot.room !== "string") return false;
+  const d = slot.data;
+  if (!isPlain(d) || typeof d.room !== "string" || !Object.hasOwn(ROOMS, d.room)) return false;
+  if (!Array.isArray(d.inv) || !d.inv.every((id) => typeof id === "string" && Object.hasOwn(ITEMS, id))) return false;
+  if (!isPlain(d.flags)) return false;
+  if (d.mode !== undefined && !SAVE_MODES.includes(d.mode)) return false;
+  if (d.night !== undefined && typeof d.night !== "number") return false;
+  if (d.cards !== undefined && !Array.isArray(d.cards)) return false;
+  if (slot.lines !== undefined && !(Array.isArray(slot.lines) && slot.lines.every(isPlain))) return false;
+  return true;
+}
+
 export function itemOf(state, id) {
   const base = ITEMS[id];
   if (!base) return base;
@@ -32,7 +214,8 @@ export function itemOf(state, id) {
 }
 
 export function line(text, extra = {}) {
-  return {
+  const made = {
+    id: voiceId(text, extra), // voice file audio/in/voice/<id>.ogg|mp3 (js/audio.js playVoice)
     text,
     speaker: extra.speaker || null,
     mood: extra.mood || null,
@@ -46,7 +229,17 @@ export function line(text, extra = {}) {
     ...(extra.flashback ? { flashback: true } : {}), // shown in old-photo sepia (js/main.js, css .world.flashback)
     ...(extra.flashStep !== undefined ? { flashStep: extra.flashStep } : {}), // the past beat 1..5 (js/main.js flashbackLayer)
     ...(extra.closeup ? { closeup: extra.closeup } : {}), // an item art id held up in his gloves while the line shows
+    ...(extra.signCut ? { signCut: true } : {}), // plays the club-sign cut (js/beats.js "sign") before the line shows
+    ...(extra.names ? { names: true } : {}), // her own-name line: from here on the nameplate is "The Cock Gobbler" (GOBBLER_PLATE)
+    ...(extra.pose ? { pose: extra.pose } : {}), // a held pose (room.poseAt key) shown only while this line is up (js/main.js shownState)
+    ...(extra.holdFlags ? { holdFlags: extra.holdFlags } : {}), // flags drawn as still unset while this line plays (js/main.js shownState)
+    ...(extra.holdMs !== undefined ? { holdMs: extra.holdMs } : {}), // ...for this many ms of the line, then shown
+    ...(extra.insert ? { insert: extra.insert } : {}), // { art, caption }: a full-screen insert shown before the line (js/main.js showInsert)
+    ...(extra.music ? { music: extra.music } : {}), // a music moment (js/audio.js MOMENT_THEMES) while this line is up
+    ...(extra.veil ? { veil: extra.veil } : {}), // "whisk": the Pavilion smoke veil clears off her mask as the line shows (js/main.js)
   };
+  if (lineHook) lineHook(made);
+  return made;
 }
 
 const henny = (text) => line(text, HENNY_THINKS);
@@ -219,7 +412,7 @@ function readNote(s, out) {
   if (!s.flags.read_note) {
     s.flags.read_note = true;
     s.mood = "embarrassed";
-    out.lines.push(line("A note in the bucket, in lipstick: \"MIDNIGHT. FAIR. BRING NOTHING. —A friend.\""));
+    out.lines.push(line("A note in the bucket, in lipstick: \"MIDNIGHT. FAIR. BRING NOTHING. —A friend.\"", { insert: { art: "fx/insert-note-clarion" } })); // beta v17: Brook's full-frame close-up first (Azzato OK Oct 27)
     out.lines.push(line("Under it, tonight's Cluck County Clarion: YOLK OF MIDNIGHT STOLEN FROM HENHOUSE. FAIR'S FRY-OFF STILL ON FOR MIDNIGHT. Legend says whoever eats the Yolk gets the Crow: a voice the whole county obeys."));
     out.lines.push(line("A friend needs help. He's sure of it. He tries his crow, just to warm up. *pah.* It's been a wheeze since that night at the fair.", { sound: "wheeze", mood: "embarrassed" }));
     return;
@@ -233,7 +426,7 @@ function lookBoard(s, out) {
   out.lines.push(line("HENNY: has never once blinked in front of him. And a clipping, circled: LOCAL MAN BRAHM A. ORPINGTON BEHIND ON FEED BILL. Labeled, in a hurry: DEAD END. DO NOT PURSUE."));
   const bits = [];
   if (s.flags.got_stub) bits.push("Pinned: a torn ticket stub. \"R— & H—\". He pins it face down.");
-  if (s.flags.reveal) bits.push("The joined ticket goes in the middle. The string from THE COCK GOBBLER runs straight to HATTIE.");
+  if (s.flags.reveal) bits.push("The joined ticket goes in the middle. The string from the red neon hawk runs straight to HATTIE.");
   if (s.flags.saw_rig) bits.push("A new string: SLICK CORNY → FRYER WIRING → 12:00. It doesn't touch Hattie at all.");
   if (!bits.length) bits.push("Every single string still runs to a photo of the goat.");
   out.lines.push(line(bits.join(" ")));
@@ -255,12 +448,12 @@ function coopPhoto(s, out) {
 }
 
 function lookHawkFar(s, out) {
-  out.lines.push(line("Across town, a red neon hawk over a club that wasn't there last year. He knows that hawk. He looks away first."));
+  out.lines.push(line("Across town, a red neon hawk over the old bar that's been there forever. The hawk is new. He knows that hawk. He looks away first."));
 }
 
 /* ---------- Fence / Henny (Henny NEVER speaks: thought bubbles only) ---------- */
 // Seated on the rail is the one state the dismount line belongs to: the rail's squat pose, in the yard. Only
-// squat_rail sets it; every way into the yard clears it. (Arlong, beta v11: the dismount played while he looked
+// squat_rail sets it; every way into the yard clears it. (Azzato, beta v11: the dismount played while he looked
 // unseated. The cause was the invisible rail-sit frame, not this gate; it stays explicit so it can't drift.)
 export function seatedOnRail(s) {
   return s.room === "fence" && s.pose === "squat";
@@ -280,7 +473,7 @@ function blowCover(s, out) {
   out.lines.push(henny("A real rooster doesn't explain himself."));
 }
 
-// Push gags (Arlong 2026-10-18): `anim` on a line plays a one-shot tween on that cast member / the hero (main.js).
+// Push gags (Azzato 2026-10-18): `anim` on a line plays a one-shot tween on that cast member / the hero (main.js).
 function pushPeck(s, out) {
   out.lines.push(line("He gives Peck a friendly nudge. Peck wobbles like a weather vane in a gust. The brass horn pops off his ear, and he fumbles it twice before it's home.", { anim: { peck: "wobble" } }));
   out.lines.push(line("\"EH? PUSHY? No, son, it's not gonna be PUSHY tonight. Clear skies by Tuesday!\"", { speaker: SPEAKER.peck }));
@@ -365,7 +558,7 @@ function photoHenny(s, out) {
     out.lines.push(line("She already has one. It's tucked under her wing like a badge."));
     return;
   }
-  s.flags.kind_henny = true; // he keeps his stack of signed photos (Arlong 2026-10-19): a fresh one, signed on the spot
+  s.flags.kind_henny = true; // he keeps his stack of signed photos (Azzato 2026-10-19): a fresh one, signed on the spot
   out.lines.push(line("He peels a fresh photo off the stack, signs it \"To Henny, the real guard,\" and holds it out. She takes it without a word. Then she sniffs it. Then she sniffs him. Long pause."));
   out.lines.push(henny("Something smells familiar."));
   out.lines.push(henny("...Coincidence. Lots of birds buy economy deodorant."));
@@ -468,9 +661,11 @@ function geigerSlot(s, out) {
   out.lines.push(line("He holds the rigged counter to the slot. Click. Click. Click. DeeJay finds the beat, and the station ID goes out on a geiger counter.", { speaker: SPEAKER.deejay, sound: "click" }));
   out.lines.push(line("DeeJay tests the parking-lot horn before he hands it over. \"TESTING, WKUK!\" The glass hums, and a coffee mug shivers itself right off the shelf behind him. \"...She's got some kick.\"", { speaker: SPEAKER.deejay, sound: "wheeze" })); // Oct 21 item 22: loud shakes things loose
   out.lines.push(line("The parking-lot horn comes off its nail and through the slot, with a fair map. DeeJay's circled two things."));
-  out.lines.push(line("Then the phone lights up. DeeJay: \"Caller, you're on WKUK.\" A voice like warm syrup on a cold knife.", { speaker: SPEAKER.deejay }));
-  out.lines.push(hattie("\"Still signing pictures for folks who didn't ask, sugar? Skip the farm-fair sleuthing. Meet me at the club. I'll tell you everything.\""));
-  out.lines.push(line("Hattie. Of course it's Hattie.", { mood: "smitten" }));
+  // Beta v17 item 7: Hattie's radio call has its own music moment (js/audio.js MOMENT_THEMES "hattie-call"), held
+  // through her choice (js/main.js musicMoment) and her reply (onTempt "phone"). Until Brook's file lands the room's music plays on.
+  out.lines.push(line("Then the phone lights up. DeeJay: \"Caller, you're on WKUK.\" A voice like warm syrup on a cold knife.", { speaker: SPEAKER.deejay, music: "hattie-call" }));
+  out.lines.push(hattie("\"Still signing pictures for folks who didn't ask, sugar? Skip the farm-fair sleuthing. Meet me at the club. I'll tell you everything.\"", { music: "hattie-call" }));
+  out.lines.push(line("Hattie. Of course it's Hattie.", { mood: "smitten", music: "hattie-call" }));
   startChoice(s, { set: "tempt", id: "phone" });
 }
 
@@ -482,7 +677,7 @@ function toGate(s, out) {
     give(s, "vip");
     out.lines.push(line("Out to the fair gate. The guard holds up a gold card between two fingers without looking at him."));
     out.lines.push(line("\"Lady left this for somebody called Big Green. That you?\"", { speaker: SPEAKER.guard }));
-    out.lines.push(line("THE COCK GOBBLER — ADMIT ONE, NO QUESTIONS. On the back, in lipstick: \"Wear something nice.\" He pockets it. He doesn't use it. Yet."));
+    out.lines.push(line("A gold card with a red lipstick kiss on the front. ADMIT ONE, NO QUESTIONS. On the back, in lipstick: \"Wear something nice.\" He pockets it. He doesn't use it. Yet."));
     return;
   }
   out.lines.push(line("Out to the fair gate. The bulbs are already gossiping."));
@@ -502,10 +697,12 @@ function cutout(s, out) {
     out.lines.push(line("The guard is watching. A man in a rooster suit hiding behind cardboard is a very short story."));
     return;
   }
-  s.pose = "squat";
+  // Beta v17 item 1: the squat is the stamping beat only (the line's own pose), not a state he stays stuck in. It
+  // used to set s.pose = "squat", which only a room change cleared: the floor ignored his clicks and hotspot walks
+  // moved his hidden sprite (footsteps, no Rooster). He stands back up when the line ends.
   s.flags.got_pass = true;
   give(s, "pass");
-  out.lines.push(line("He drops into Henny's squat behind the cutout. Gut out. Cheeks full. Doesn't explain himself. The guard stamps the cardboard without looking up. Rooster peels the stamped corner free."));
+  out.lines.push(line("He drops into Henny's squat behind the cutout. Gut out. Cheeks full. Doesn't explain himself. The guard stamps the cardboard without looking up. Rooster peels the stamped corner free.", { pose: "squat" }));
 }
 
 function offerVip(s, out) {
@@ -532,7 +729,9 @@ function turnstile(s, out) {
     out.lines.push(line("The stamp is a conversation. The turnstile agrees. He's in, the honest way. Mostly honest. Cardboard was involved."));
     return;
   }
-  if (has(s, "vip")) {
+  // The gold-card temptation fires once at the turnstile (Usopp playtest, Oct 24): after "the honest way", walking up
+  // to the turnstile again gets the guard's ticket line, not the choice. Using the card on purpose still offers it.
+  if (has(s, "vip") && !s.flags.vip_declined) {
     offerVip(s, out);
     return;
   }
@@ -604,12 +803,13 @@ function joinTicket(s, out) {
   give(s, "ticket");
   s.flags.reveal = true;
   s.mood = "embarrassed";
-  out.lines.push(line("The edges fit. \"ROOSTER & HATTIE: ADMIT TWO,\" dated the stunt night. Her half was pawned to Corny. The lipstick on his half is the Gobbler's."));
-  // Oct 21 items 15/20: the stunt-night flashback plays here, at the joined ticket (agreed with Arlong Oct 21)
+  // Beta v17 item 7: the joined ticket and its flashback have their own music moment ("ticket": theme-ticket-memory, js/audio.js MOMENT_THEMES)
+  out.lines.push(line("The edges fit. \"ROOSTER & HATTIE: ADMIT TWO,\" dated the stunt night. Her half was pawned to Corny. The lipstick on his half is the same red.", { music: "ticket" }));
+  // Oct 21 items 15/20: the stunt-night flashback plays here, at the joined ticket (agreed with Azzato Oct 21)
   // Oct 23 item 41: the past beats (flashStep 1..5) play on the aged Pavilion, the crowd gathering line by line, the
   // rigger's silhouette (Mayor Bantam's muscle, unnamed) in it (js/main.js flashbackLayer)
-  FLASHBACK.forEach((text, i) => out.lines.push(line(text, { flashback: true, flashStep: i })));
-  out.lines.push(line("The Cock Gobbler is Hattie. And somebody else, initials S.C., wired the fryer to blow at midnight. She doesn't know.", { mood: "embarrassed" }));
+  FLASHBACK.forEach((text, i) => out.lines.push(line(text, { flashback: true, flashStep: i, music: "ticket" })));
+  out.lines.push(line("It's Hattie. It was always Hattie. And somebody else, initials S.C., wired the fryer to blow at midnight. She doesn't know.", { mood: "embarrassed", music: "ticket" }));
 }
 
 const FLASHBACK = [
@@ -755,12 +955,13 @@ function pavilionOut(s, out) {
 /* ---------- Pavilion: crow-down, vat, finish ---------- */
 function lookGobbler(s, out) {
   s.mood = "smitten";
-  out.lines.push(line(s.flags.reveal
-    ? "Hawk mask, red lips, a feathered wing-cape over a slim black gown, opera gloves. He knows the smile under the mask. Hattie. \"You pushed me out of your life, sugar. I just built a nicer one across the street.\""
-    : "Hawk mask, red lips, a feathered wing-cape over a slim black gown, opera gloves, a bubble-soap cigarette holder. Then she smiles, and he knows. Hattie. \"You pushed me out of your life, sugar. I just built a nicer one across the street.\"",
-  { speaker: SPEAKER.gobbler, mood: "smitten" }));
+  // Usopp 2026-10-25: through the smoke, no mask in the words; the mask is described only once the smoke clears
+  if (!s.flags.unmasked) out.lines.push(line(SMOKE_LOOK, { mood: "smitten" }));
+  else out.lines.push(line("Hawk mask, red lips, a feathered wing-cape over a slim black gown, opera gloves. He knows the smile under the mask. Hattie. \"You pushed me out of your life, sugar. I just built a nicer one across the street.\"",
+    { speaker: SPEAKER.gobbler, mood: "smitten" }));
   s.flags.reveal_seen = true;
 }
+export const SMOKE_LOOK = "Smoke, thick as a lie. One ember glows at the tip of a long cigarette holder. Something gold catches the light, then it's gone.";
 
 function lookVat(s, out) {
   const st = vatState(s);
@@ -844,7 +1045,7 @@ function basketFryer(s, out) {
   out.lines.push(line("The basket's too low. The cage is still up on the chain, hugging the Yolk."));
 }
 
-/* ---------- Pavilion rope puzzle (Arlong, 2026-10-18): Pip lifts Corny's key ring ---------- */
+/* ---------- Pavilion rope puzzle (Azzato, 2026-10-18): Pip lifts Corny's key ring ---------- */
 // The front rope is padlocked; the vat beats need it open. Pip helps once she trusts him (pip_trust:
 // refused the ring-toss rig, won it straight, or gave her tickets back). Never a soft-lock: the exit
 // stays open after the crow-down, and every trust source stays available back on the Midway.
@@ -863,12 +1064,16 @@ function pipRefuses(s, out) {
   out.lines.push(line("\"Lots of guys wear costumes to the fair. Corny wears one, kind of.\" She nods back toward the Midway. \"Corny's ring-toss. Beat the pegs without his trick, then we'll talk.\"", { speaker: SPEAKER.pip }));
 }
 
+// Beta v17 item 2 (Azzato Oct 27: the lock and rope were already open before Pip got to them). The flag is set now
+// (saves, the walk), but the scene keeps drawing the rope up and locked (holdFlags) until Pip's hand is on the padlock
+// in the pip_unlock line (PIP_UNLOCK_OPEN_MS into it), then the open plate and the padlock click.
+const ROPE_HELD = ["rope_open"];
 function pipUnlocks(s, out) {
   s.flags.rope_open = true;
   s.flags.pip_helped = true;
-  out.lines.push(line("Pip looks at the cage over the oil, then at him. \"Marge watches grown-ups. Corny watches money. Nobody watches me.\"", { speaker: SPEAKER.pip }));
-  out.lines.push(line("She drifts off through the crowd like a kid looking for her mom. A minute later the key ring is gone from the cart hook. Nobody notices. Nobody ever notices Pip.", { cue: "pip_lift" }));
-  out.lines.push(line("*click.* The padlock pops. Pip lets the rope down and coils it at the post like she's done it a hundred times.", { cue: "pip_unlock" }));
+  out.lines.push(line("Pip looks at the cage over the oil, then at him. \"Marge watches grown-ups. Corny watches money. Nobody watches me.\"", { speaker: SPEAKER.pip, holdFlags: ROPE_HELD }));
+  out.lines.push(line("She drifts off through the crowd like a kid looking for her mom. A minute later the key ring is gone from the cart hook. Nobody notices. Nobody ever notices Pip.", { cue: "pip_lift", holdFlags: ROPE_HELD }));
+  out.lines.push(line("*click.* The padlock pops. Pip lets the rope down and coils it at the post like she's done it a hundred times.", { cue: "pip_unlock", holdFlags: ROPE_HELD, holdMs: PIP_UNLOCK_OPEN_MS }));
   out.lines.push(line("\"You caught me last time,\" she whispers. \"My turn.\"", { speaker: SPEAKER.pip }));
 }
 
@@ -892,6 +1097,7 @@ function useKeyring(s, out) {
   if (s.flags.pip_trust) {
     out.lines.push(line("He reaches for the keys. Marge's head turns like a weather vane. \"Two bucks, hon.\" He un-reaches. Pip, beside him, sighs like he's hopeless.", { cue: "corny_turn" }));
     pipUnlocks(s, out);
+    out.lines[out.lines.length - 5].holdFlags = ROPE_HELD; // his reach: still locked
     return;
   }
   out.lines.push(line("He reaches for the keys. At the cart, Marge's head turns like a weather vane. \"Two bucks, hon.\" He un-reaches. A grown man in a rooster suit can't sneak. Somebody small could, if she trusted him.", { cue: "corny_turn" }));
@@ -994,6 +1200,7 @@ const specials = {
   rope_in: ropeIn,
   pavilion_out: pavilionOut,
   look_gobbler: lookGobbler,
+  look_club_sign: lookClubSign,
   look_vat: lookVat,
   talk_gobbler: talkGobbler,
   return_vip: returnVip,
@@ -1099,18 +1306,19 @@ function onTempt(s, opt, out) {
   const id = s.choice.id;
   s.mode = "play";
   s.choice = null;
-  out.lines.push(line(opt.say, { speaker: HERO.talk }));
+  // the call's music runs on under his answer to Hattie (beta v17: no dip back to the room music between her lines)
+  out.lines.push(line(opt.say, { speaker: HERO.talk, ...(id === "phone" ? { music: "hattie-call" } : {}) }));
   if (id === "phone") {
     if (opt.id === "follow") {
       tempt(s, 1);
       s.flags.tempt_phone = true;
       s.flags.clock_tip = true;
-      out.lines.push(hattie("\"Atta bird. Oh, and sugar? The midway clock's minute hand is taped on. You'll want every minute.\" Click."));
+      out.lines.push(hattie("\"Atta bird. Oh, and sugar? The midway clock's minute hand is taped on. You'll want every minute.\" Click.", { music: "hattie-call" }));
     } else {
-      out.lines.push(hattie("\"Folks first. Always folks first.\" A long breath down the line. \"I left a card at the gate for you anyway. Wear something nice.\" Click."));
+      out.lines.push(hattie("\"Folks first. Always folks first.\" A long breath down the line. \"I left a card at the gate for you anyway. Wear something nice.\" Click.", { music: "hattie-call" }));
     }
     s.mood = "talk";
-    out.lines.push(line("DeeJay, off-air, quietly: \"You never did tell anybody what happened that night.\"", { speaker: SPEAKER.deejay, mood: "talk" }));
+    out.lines.push(line("DeeJay, off-air, quietly: \"You never did tell anybody what happened that night.\"", { speaker: SPEAKER.deejay, mood: "talk", music: "hattie-call" }));
     return;
   }
   if (id === "vip") {
@@ -1122,6 +1330,7 @@ function onTempt(s, opt, out) {
       s.pose = null;
       out.lines.push(line("The guard sees the gold and waves him through. Behind him, very quietly: \"Corny's gonna have my job for this.\" He doesn't turn around. He wants to.", { speaker: SPEAKER.guard }));
     } else {
+      s.flags.vip_declined = true;
       out.lines.push(line("He tucks the card back in his belt. The honest way, then. The guard's tooth looks like it could use some attention, and that cutout has ideal proportions."));
     }
     return;
@@ -1187,6 +1396,7 @@ function onCrow(s, opt, out) {
       s.temptation = 2;
       out.lines.push(line("And right there, in front of everybody, the rolling boil settles. The red glow sinks. The crowd lets out a breath it didn't know it was holding."));
     }
+    unmask(s, out); // the hero choice: her speech, the smoke clears, the Cock Gobbler
   }
   if (opt.showboat) s.flags.showboat = true;
   if (s.crowRound === 2 && !opt.showboat) s.flags.crowd_warned = true;
@@ -1236,6 +1446,19 @@ function onRewind(s, out) {
   return back;
 }
 
+// Her nameplate before she names herself (GOBBLER_PLATE): gobbler lines get plate "before" (smoke-hidden portrait)
+// while the smoke is up, "cleared" (the clear portrait, js/main.js swaps it the moment the veil clears) from the Pavilion
+// whisk line on, and no plate (the gobbler's own) from the names line. The whisk line is narration (voice id unchanged)
+// but carries her plate, so her portrait is on screen as the smoke clears.
+function plates(s, lines) {
+  for (const l of lines) {
+    if (l.veil === "whisk") { s.flags[GOBBLER_PLATE.clearedFlag] = true; l.plate = GOBBLER_PLATE.cleared; continue; }
+    if (l.speaker !== SPEAKER.gobbler || s.flags[GOBBLER_PLATE.flag]) continue;
+    if (l.names) s.flags[GOBBLER_PLATE.flag] = true;
+    else l.plate = s.flags[GOBBLER_PLATE.clearedFlag] ? GOBBLER_PLATE.cleared : GOBBLER_PLATE.before;
+  }
+}
+
 export function act(state, action) {
   let s = structuredClone(state);
   const out = { lines: [] };
@@ -1244,12 +1467,26 @@ export function act(state, action) {
     return { state: s, lines: out.lines };
   }
   if (s.mode === "end") return { state: s, lines: [] };
+  const from = s.room;
+  const res = actInner(s, action, out);
+  plates(res.state, res.lines);
+  res.beats = res.state.mode === "end" ? [] : roomBeats(res.state, from);
+  return res;
+}
+
+function actInner(s, action, out) {
   if (s.mode === "choice" && action.t !== "choice") {
     return { state: s, lines: [line(s.choice && s.choice.set === "tempt" ? "Hattie's waiting on an answer." : "She's waiting on an answer.")] };
   }
   if (action.t === "verb") {
     s.verb = action.verb;
     s.pending = null;
+    return { state: s, lines: [] };
+  }
+  // Beta v17 item 1: a click away from a held crouch (the gate cutout squat) stands him up first, so he can walk off
+  // (js/main.js standUp). No line: the caption he was reading stays up.
+  if (action.t === "stand") {
+    s.pose = null;
     return { state: s, lines: [] };
   }
   if (action.t === "item") onItem(s, action.id, out);

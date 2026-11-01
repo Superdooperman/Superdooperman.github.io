@@ -1,21 +1,28 @@
-// Radioactive Rooster (live) service worker. Own prefix "radioactive-rooster-" (the old live SW used
-// radioactive-rooster-v2), so it never touches the beta's caches or other games.
-const VERSION = "6";
-const CORE_CACHE = `radioactive-rooster-core-v${VERSION}`;
-const PIXEL_CACHE = `radioactive-rooster-pixel-v${VERSION}`;
-const FANCY_CACHE = `radioactive-rooster-fancy-v${VERSION}`;
+// Radioactive Rooster service worker. CHANNEL is "beta" here; tools/ship/build.mjs writes "prod" into the main Rooster
+// copy. Each channel has its own cache prefix and only ever deletes its own old caches: the beta "rr-beta-", main
+// Rooster "radioactive-rooster-" (its name since live v2-v6), so neither touches the other or other games.
+const CHANNEL = "prod";
+const VERSION = CHANNEL === "prod" ? "7" : "18";
+const PREFIX = CHANNEL === "prod" ? "radioactive-rooster-" : "rr-beta-";
+const CORE_CACHE = `${PREFIX}core-v${VERSION}`;
+const PIXEL_CACHE = `${PREFIX}pixel-v${VERSION}`;
+const FANCY_CACHE = `${PREFIX}fancy-v${VERSION}`;
 const KEEP = [CORE_CACHE, PIXEL_CACHE, FANCY_CACHE];
 const CORE = [
   "./",
   "./index.html",
   "./css/style.css",
+  "./js/boot.js",
+  "./js/channel.js",
   "./js/main.js",
   "./js/logic.js",
   "./js/art.js",
   "./js/audio.js",
+  "./js/beats.js",
   "./js/walk.js",
   "./data/script.js",
   "./art/manifest.json",
+  "./audio/in/manifest.json",
 ];
 
 self.addEventListener("install", (event) => {
@@ -29,7 +36,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k.startsWith("radioactive-rooster-") && !KEEP.includes(k)).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith(PREFIX) && !KEEP.includes(k)).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
@@ -53,7 +60,7 @@ self.addEventListener("fetch", (event) => {
   if (name === CORE_CACHE) {
     event.respondWith(
       fetch(req, { cache: "no-cache" }).then((res) => {
-        if (res.ok && res.type === "basic") {
+        if (res.status === 200 && res.type === "basic") { // not 206: <audio> range requests can't be cached
           const copy = res.clone();
           caches.open(name).then((cache) => cache.put(req, copy));
         }
@@ -63,9 +70,10 @@ self.addEventListener("fetch", (event) => {
     return;
   }
   // Art: cache-first. Fetched once, the first time a room shows it (no bulk precache: 2026-10-21 rate limit); art
-  // files are versioned by the cache name, so a new SW version refetches them lazily. Only 200s are cached.
+  // files are versioned by the cache name, so a new SW version refetches them lazily. The miss fetch revalidates (no-cache) so an
+  // HTTP-cached copy of the old version's art can't get stored under the new cache (Chopper, v15). Only 200s are cached.
   event.respondWith(
-    caches.open(name).then((cache) => cache.match(req).then((hit) => hit || fetch(req).then((res) => {
+    caches.open(name).then((cache) => cache.match(req).then((hit) => hit || fetch(req, { cache: "no-cache" }).then((res) => {
       if (res.ok && res.type === "basic") cache.put(req, res.clone());
       return res;
     }))),

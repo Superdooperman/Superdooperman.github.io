@@ -247,7 +247,9 @@ function seqFrame(seq, since, at) {
 }
 
 export function castFrame(c, { line = null, since = Infinity, now = 0, lastAct = null, speakers = {} } = {}) {
-  const cue = line && line.cue && c.cues && c.cues[line.cue];
+  let cue = line && line.cue && c.cues && c.cues[line.cue];
+  // since < 0: the line is up but its cue hasn't started (a cutscene holds it for its hit): poses wait, walks sit at their start
+  if (cue && since < 0 && !cue.walk) cue = null;
   if (cue && typeof cue === "string") return { sprite: cue, at: c.at };
   if (cue && !cue.walk && cue.seq) return seqFrame(cue.seq, since, cue.at || c.at);
   if (cue && !cue.walk) return { sprite: cue.sprite, at: cue.at || c.at }; // a held pose somewhere else: { sprite, at }
@@ -280,7 +282,7 @@ export function castSprites(c) {
   return [...out];
 }
 
-/* ---------- Stand beside, not in front (Arlong, 2026-10-18) ----------
+/* ---------- Stand beside, not in front (Azzato, 2026-10-18) ----------
  * To use a hotspot he walks to its left or right side, never into it: his idle side frame, facing the object, must
  * not overlap the hotspot's core rect (spot.core, else its rect; HERO_ALLOW px of overlap is fine). He prefers the
  * side he is coming from, else the nearest open side, and turns to face the object when he arrives. Characters get
@@ -316,7 +318,7 @@ export function castRects(room, except) {
 }
 
 // The other characters' bodies (head, shoulders, chest: the part that reads), from their feet and height, for the
-// "neither blocks the other" rule (Arlong: Rooster hidden behind Corny at the clock). `when` cast only when shown.
+// "neither blocks the other" rule (Azzato: Rooster hidden behind Corny at the clock). `when` cast only when shown.
 export function castBodies(room, except, flags = {}) {
   const out = [];
   for (const c of room.cast || []) {

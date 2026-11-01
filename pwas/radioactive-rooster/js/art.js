@@ -1,6 +1,8 @@
 // Dual art mode: "pixel" (default) and "fancy". Same relative ids in art/pixel/ and art/fancy/.
 // Resolution per asset: art/<mode>/<id>.(png|webp) -> art/pixel/<id>.png -> art/placeholders/<legacy>, from the manifest.
-const MODE_KEY = "rr-art-mode";
+import { storeKey } from "./channel.js";
+
+const MODE_KEY = storeKey("art-mode");
 const MODES = ["pixel", "fancy"];
 
 const art = {

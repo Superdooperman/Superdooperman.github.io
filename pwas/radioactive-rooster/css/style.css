@@ -114,7 +114,7 @@ button:focus-visible {
 }
 
 /* hover highlight only with Hints on (menu); keyboard focus always shows */
-/* (no fill: a tinted box over the striped tent/booth read as the tent shifting as you moved across it, Arlong 10-19) */
+/* (no fill: a tinted box over the striped tent/booth read as the tent shifting as you moved across it, Azzato 10-19) */
 .hints .spot:hover,
 .spot:focus-visible {
   background: transparent;
@@ -311,6 +311,13 @@ button.on {
   background: #120a16;
 }
 
+.title-frame {
+  /* the whole 16:9 cover fits the viewport height too (phone landscape 844x390) */
+  width: min(100%, calc((100vh - 32px - 8px) * 16 / 9));
+  width: min(100%, calc((100svh - 32px - 8px) * 16 / 9));
+  margin: 0 auto;
+}
+
 .title-frame img {
   display: block;
   width: 100%;
@@ -320,30 +327,78 @@ button.on {
 
 .title-art { position: relative; }
 
-.title-frame .title-cast {
+/* Brook's text layers, 320x180 like the scene and aligned at 0,0 */
+.title-frame .title-layer {
   position: absolute;
-  aspect-ratio: auto;
-  height: auto;
+  inset: 0;
+  height: 100%;
   pointer-events: none;
 }
 
-.title-copy {
-  text-align: center;
-  padding: 12px 8px 0;
+/* Menu bottom-right over the water (Usopp): clear of the logo, Rooster (centre-left) and the Hawk (upper right). */
+.title-menu {
+  position: absolute;
+  right: 2.2%;
+  bottom: 4%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
 }
-
-.title-copy h1 {
+.title-menu .title-actions { margin: 0; flex-direction: column; align-items: stretch; gap: clamp(4px, 0.8vw, 8px); }
+.title-menu .title-actions button {
+  min-width: clamp(96px, 14vw, 170px);
+  padding: clamp(4px, 0.9vw, 9px) clamp(10px, 1.6vw, 18px);
+  font-size: clamp(13px, 1.5vw, 18px);
+  box-shadow: 3px 3px 0 #000;
+}
+.title-menu .beta {
   margin: 0;
-  font-family: "Arial Black", Impact, sans-serif;
-  font-size: clamp(28px, 5vw, 64px);
-  letter-spacing: 0.04em;
-  color: var(--yolk);
+  font-size: 9px;
+  padding: 0 4px;
+  background: rgba(0, 0, 0, 0.45);
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.14em;
 }
 
-.sub {
-  margin: 4px 0 0;
-  font-size: clamp(16px, 2vw, 24px);
-  text-shadow: 2px 2px 0 #000;
+/* Accessible title text, visually hidden: the logo art says it on screen, so the title never shows twice. */
+.vh {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The fade-in: scene, then the logo, then the subtitle, then the menu. Any key/tap swaps .intro for .shown. */
+@keyframes title-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes title-logo-in { from { opacity: 0; transform: scale(1.04); } to { opacity: 1; transform: none; } }
+.title-screen.intro .title-frame > .title-art > img:first-child { animation: title-in 0.6s ease-out both; }
+.title-screen.intro .title-logo { animation: title-logo-in 0.9s ease-out 0.5s both; transform-origin: 25% 25%; }
+.title-screen.intro .title-sub { animation: title-in 0.7s ease-out 1.4s both; }
+.title-screen.intro .title-menu { animation: title-in 0.5s ease-out 2.2s both; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) {
+  .title-screen.intro .title-frame img, .title-screen.intro .title-menu { animation: none; }
+}
+
+.next-issue {
+  margin: 8px auto 0;
+  max-width: 46rem;
+  padding: 6px 12px;
+  background: var(--yolk);
+  color: #141018;
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 #000;
+  font: italic 700 clamp(13px, 1.6vw, 17px)/1.3 Georgia, "Times New Roman", serif;
+  transform: rotate(-0.6deg);
+}
+.next-issue .ni-label {
+  font: normal 900 1.05em/1 "Arial Black", Impact, sans-serif;
+  color: var(--comb);
+  letter-spacing: 0.06em;
+  margin-right: 4px;
 }
 
 .logline, .how {
@@ -368,7 +423,6 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
   background: var(--comb); color: #fff; font: 700 12px/1.4 "Arial Black", Impact, sans-serif;
   letter-spacing: 0.08em; vertical-align: middle;
 }
-.title-copy .beta { font-size: 16px; }
 .art-toggle { margin-left: 0; }
 .plate { object-fit: fill; }
 
@@ -520,6 +574,9 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 
 /* cutscenes (js/main.js playCutscene): input locked, a short screen shake on impacts */
 .cs-block { position: fixed; inset: 0; z-index: 10000; cursor: wait; }
+/* cutscene fx slots (js/main.js cutsceneFx): Brook's strips, else code-drawn droplets */
+.world .cs-strip { position: absolute; pointer-events: none; background-repeat: no-repeat; background-size: calc(var(--frames) * 100%) 100%; image-rendering: pixelated; }
+.world .cs-drop { position: absolute; pointer-events: none; border-radius: 50%; }
 .world.shake { animation: world-shake 0.35s linear; }
 @keyframes world-shake { 0%, 100% { transform: none; } 20% { transform: translate(-1.2%, 0.6%); } 40% { transform: translate(1%, -0.8%); } 60% { transform: translate(-0.7%, 0.4%); } 80% { transform: translate(0.4%, -0.3%); } }
 
@@ -538,6 +595,17 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 .world.flashback { filter: sepia(0.85) contrast(1.08) brightness(0.92); }
 .world.flashback::after { content: ""; position: absolute; inset: 0; z-index: 990; pointer-events: none; box-shadow: inset 0 0 40px 12px rgba(40, 22, 6, 0.75); }
 
+/* beta v17 item 6: the flashback dissolves in and out (js/main.js flashFade; --flash-delay keeps a re-render in step) */
+.world.flash-in { animation: flash-sepia-in 0.9s ease-in-out both; animation-delay: var(--flash-delay, 0ms); }
+.world.flash-in::after { animation: flash-fade-in 0.9s ease-in-out both; animation-delay: var(--flash-delay, 0ms); }
+.world.flash-out { animation: flash-sepia-out 0.9s ease-in-out both; animation-delay: var(--flash-delay, 0ms); }
+@keyframes flash-sepia-in { from { filter: none; } to { filter: sepia(0.85) contrast(1.08) brightness(0.92); } }
+@keyframes flash-sepia-out { from { filter: sepia(0.85) contrast(1.08) brightness(0.92); } to { filter: none; } }
+@keyframes flash-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes flash-fade-out { from { opacity: 1; } to { opacity: 0; } }
+.world .flash-past.dissolve-in { animation: flash-fade-in 0.9s ease-in-out both; }
+.world .flash-past.dissolve-out { animation: flash-fade-out 0.9s ease-in-out both; }
+
 /* Push A (Oct 24) */
 /* item 31: a new room fades in from black instead of popping (its neighbours' plates are preloaded) */
 .stage.fadein .world { animation: room-fade 0.4s ease-out; }
@@ -549,3 +617,268 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 .world .flash-past .flash-sil { position: absolute; height: auto; image-rendering: pixelated; transition: opacity 0.8s; }
 /* item 30: Rooster himself, while an item is held */
 .spot.self { cursor: pointer; }
+
+/* ---------- Push C PLACEHOLDER beats (2026-10-24): js/beats.js, the colour shift and the talk flap ---------- */
+.beat-tag {
+  position: absolute; left: 8px; bottom: 8px; z-index: 5; padding: 2px 6px;
+  font: 700 11px/1.3 ui-monospace, monospace; letter-spacing: .04em; color: #ffde59;
+  background: rgba(0,0,0,.65); border: 1px dashed #ffde59; pointer-events: none;
+}
+.beat {
+  position: fixed; inset: 0; z-index: 5000; pointer-events: none; overflow: hidden;
+  display: flex; align-items: center; justify-content: center; background: #050508;
+  opacity: 0; transition: opacity .25s ease-out;
+}
+.beat.beat-in { opacity: 1; }
+.beat .beat-caption {
+  position: absolute; left: 50%; bottom: 3vh; transform: translateX(-50%); width: min(92vw, 60em); box-sizing: border-box;
+  background: var(--cream); color: var(--ink); border: 3px solid var(--ink); padding: 10px 12px; line-height: 1.35; text-align: left;
+}
+.beat.beat-out { opacity: 0; }
+.beat .beat-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+.beat-stage { position: relative; width: min(100vw, calc(100vh * 16 / 9)); aspect-ratio: 16 / 9; overflow: hidden; background: #111; }
+.beat .gb { position: absolute; }
+
+/* time card */
+.beat-card { background: #000; }
+.card-text { position: relative; text-align: center; color: #f3ead2; padding: 0 6vw; animation: card-in var(--beat-ms, 2600ms) ease-out both; }
+.card-title { font: 900 clamp(28px, 7vw, 76px)/1.05 Georgia, "Times New Roman", serif; letter-spacing: .06em; text-shadow: 0 0 18px rgba(255,180,90,.25); }
+.card-sub { margin-top: .6em; font: italic 400 clamp(14px, 2.4vw, 24px)/1.2 Georgia, serif; color: #b9ad95; }
+@keyframes card-in { 0% { opacity: 0; transform: scale(1.04); } 15% { opacity: 1; transform: scale(1); } 85% { opacity: 1; } 100% { opacity: 0; } }
+
+/* club cutaway: gray box with a red neon hawk */
+.beat-club .beat-stage { background: #2a2a2e; }
+.club-wall { inset: 0 0 34% 0; background: repeating-linear-gradient(90deg, #3a3a40 0 18%, #34343a 18% 19%); }
+.club-bar { left: 6%; right: 38%; bottom: 14%; height: 22%; background: #4a4a50; border-top: 6px solid #5a5a62; }
+.club-stool { bottom: 4%; width: 4%; height: 12%; background: #55555c; border-radius: 40% 40% 0 0; }
+.club-piano { right: 6%; bottom: 8%; width: 24%; height: 34%; background: #1d1d20; border-radius: 30% 8% 0 0; box-shadow: inset 0 -10px 0 #3c3c40; }
+.club-hawk, .club-hawk-art { position: absolute; left: 50%; top: 8%; width: 30%; transform: translateX(-50%); color: #ff2a2a; filter: drop-shadow(0 0 4px #ff3030) drop-shadow(0 0 14px #c00); animation: neon-flicker 2.2s steps(1) infinite; }
+.club-hawk svg { width: 100%; height: auto; display: block; }
+.beat-club .beat-stage::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 20%, rgba(255,40,40,.22), transparent 55%); pointer-events: none; }
+@keyframes neon-flicker { 0%, 100% { opacity: 1; } 47% { opacity: .35; } 49% { opacity: 1; } 71% { opacity: .55; } 72% { opacity: 1; } }
+
+/* cold open: dark henhouse, glove + egg glow + cigar ember only. Never a face. */
+.beat-coldopen .beat-stage { background: #07080d; }
+.hh-wall { inset: 0; background: linear-gradient(#0b0d16, #05060a); }
+.hh-plank { top: 0; bottom: 0; width: 1px; background: #151826; }
+.hh-roost { left: 8%; right: 8%; top: 38%; height: 2%; background: #14161f; }
+.hh-nest { left: 38%; width: 22%; bottom: 18%; height: 12%; background: #1b160f; border-radius: 50% 50% 10% 10%; }
+.co-egg, .co-egg-art { position: absolute; left: 45%; bottom: 24%; width: 8%; aspect-ratio: 3 / 4; border-radius: 50% 50% 48% 48% / 60% 60% 40% 40%; background: radial-gradient(circle at 45% 40%, #fffbd8, #f5d35a 55%, #b88a1c); box-shadow: 0 0 30px 12px rgba(255,214,90,.45), 0 0 90px 40px rgba(255,190,60,.18); animation: egg-pulse 1.8s ease-in-out infinite; }
+.co-egg-art { background: none; box-shadow: none; border-radius: 0; height: auto; }
+.co-glove, .co-glove-art { position: absolute; left: 18%; bottom: 25%; width: 20%; filter: brightness(.55) drop-shadow(0 0 10px rgba(255,214,90,.35)); animation: glove-reach var(--beat-ms, 5600ms) ease-in-out both; }
+.co-glove svg { width: 100%; height: auto; display: block; }
+.co-ember, .co-ember-art { position: absolute; left: 72%; top: 30%; width: 1.4%; aspect-ratio: 1; border-radius: 50%; background: #ff7a1a; box-shadow: 0 0 8px 3px rgba(255,110,20,.8), 0 0 26px 10px rgba(255,80,10,.25); animation: ember-glow 2.4s ease-in-out infinite; }
+.co-ember-art { background: none; box-shadow: none; }
+.co-smoke { position: absolute; left: 71.5%; top: 18%; width: 2.5%; height: 12%; background: linear-gradient(to top, rgba(160,160,170,.25), transparent); filter: blur(3px); animation: smoke-rise 3s ease-in-out infinite; }
+@keyframes egg-pulse { 50% { box-shadow: 0 0 40px 18px rgba(255,214,90,.55), 0 0 110px 50px rgba(255,190,60,.22); } }
+@keyframes glove-reach { 0% { transform: translateX(-60%); opacity: 0; } 25% { opacity: 1; } 70% { transform: translateX(55%); } 100% { transform: translateX(60%); } }
+@keyframes ember-glow { 0%, 100% { opacity: .7; transform: scale(1); } 40% { opacity: 1; transform: scale(1.4); } }
+@keyframes smoke-rise { 0% { transform: translateY(20%) scaleX(1); opacity: .2; } 50% { opacity: .5; } 100% { transform: translateY(-30%) scaleX(1.8); opacity: 0; } }
+
+/* colour shift toward midnight (main.js nightTint): a multiply wash over the scene */
+.world .night-tint { position: absolute; inset: 0; z-index: 950; pointer-events: none; mix-blend-mode: multiply; transition: background-color 1.2s ease; }
+.world .night-tag { position: absolute; right: 4px; top: 4px; z-index: 951; pointer-events: none; font: 700 9px/1.2 ui-monospace, monospace; color: #ffde59; background: rgba(0,0,0,.55); padding: 1px 4px; }
+
+/* Rooster talk: a 2-frame beak flap while his line is fresh. Frame B is portrait/rooster-talk-b when it lands, else a
+   dark mouth wedge over frame A. Animation clock is carried across renders by a negative delay (main.js). */
+.bust { position: relative; }
+.bust .talk-b { position: absolute; inset: 0; opacity: 0; }
+.bust.talking .talk-b { animation: beak-flap .26s steps(1) var(--flaps, 4); animation-delay: var(--flap-delay, 0ms); }
+.bust.talking.no-b::after {
+  content: ""; position: absolute; left: 44%; top: 63%; width: 17%; height: 9%; background: #1a0606; border-radius: 10% 10% 60% 60%;
+  opacity: 0; animation: beak-flap .26s steps(1) var(--flaps, 4); animation-delay: var(--flap-delay, 0ms);
+}
+@keyframes beak-flap { 0% { opacity: 0; } 50% { opacity: 1; } }
+.menu .sound { margin: 10px 0 6px; }
+.menu .slider { display: flex; align-items: center; gap: 10px; margin: 4px 0; }
+.menu .slider span { width: 64px; }
+.menu .slider input { flex: 1; max-width: 220px; accent-color: #c0392b; }
+.club-hattie, .club-hattie-art { position: absolute; right: 31%; bottom: 8%; width: 11%; filter: drop-shadow(0 0 6px rgba(255,40,40,.55)); }
+.club-hattie svg { width: 100%; height: auto; display: block; }
+.club-holder-ember { position: absolute; right: 31%; bottom: 33.5%; width: .7%; aspect-ratio: 1; border-radius: 50%; background: #ff7a1a; box-shadow: 0 0 6px 2px rgba(255,110,20,.8); animation: ember-glow 2.4s ease-in-out infinite; }
+
+/* Push B preview flipbooks (Brook's placeholder strips): logical px scaled to the 320-wide stage */
+.beat .strip { position: absolute; background-repeat: no-repeat; background-size: calc(var(--frames) * 100%) 100%; image-rendering: pixelated; animation: strip-play var(--strip-ms) steps(var(--frames), jump-none) infinite; }
+@keyframes strip-play { from { background-position: 0% 0; } to { background-position: 100% 0; } } /* % positions: 0..100% walks frame 1..N with steps(N, jump-none) */
+.potato-flyer { position: absolute; width: 10%; aspect-ratio: 2 / 1; }
+.potato-flame { right: 0; top: 0; width: 75%; aspect-ratio: 24 / 16; }
+.potato-trail { right: 45%; top: 18%; width: 100%; aspect-ratio: 32 / 10; }
+.beat-potato .potato-flyer { animation: potato-x var(--beat-ms) linear both, potato-y var(--beat-ms) both; }
+@keyframes potato-x { from { left: 5%; } 80% { left: 82%; } to { left: 82%; } }
+@keyframes potato-y { 0% { top: 70%; animation-timing-function: ease-out; } 40% { top: 12%; animation-timing-function: ease-in; } 80%, 100% { top: 66%; } }
+.carny { position: absolute; left: 55%; bottom: 10%; width: 12.5%; aspect-ratio: 40 / 64; animation: carny-run var(--beat-ms) linear both; }
+.carny .strip { inset: 0; opacity: 0; }
+.carny .carny-idle { animation: strip-play var(--strip-ms) steps(var(--frames), jump-none) infinite, carny-a var(--beat-ms) steps(1) both; }
+.carny .carny-talk { animation: strip-play var(--strip-ms) steps(var(--frames), jump-none) infinite, carny-b var(--beat-ms) steps(1) both; }
+.carny .carny-run { animation: strip-play var(--strip-ms) steps(var(--frames), jump-none) infinite, carny-c var(--beat-ms) steps(1) both; }
+@keyframes carny-a { 0% { opacity: 1; } 30%, 100% { opacity: 0; } }
+@keyframes carny-b { 0% { opacity: 0; } 30% { opacity: 1; } 57%, 100% { opacity: 0; } }
+@keyframes carny-c { 0% { opacity: 0; } 57%, 100% { opacity: 1; } }
+@keyframes carny-run { 0%, 57% { transform: translateX(0); } 100% { transform: translateX(380%); } }
+/* club cutaway: smoke wisp off Hattie's holder and a small gloved flick (no dialogue, ever) */
+.club-smoke { position: absolute; right: 30.6%; bottom: 35%; width: 1.6%; height: 14%; background: linear-gradient(to top, rgba(190,180,200,.35), transparent); filter: blur(2.5px); border-radius: 50%; animation: smoke-rise 3.2s ease-in-out infinite; transform-origin: bottom center; }
+.club-smoke.s2 { animation-delay: -1.6s; animation-duration: 3.8s; }
+.club-gesture { position: absolute; right: 33%; bottom: 31%; width: 3.2%; transform-origin: 85% 60%; animation: glove-flick 2.2s ease-in-out infinite; }
+.club-gesture svg { width: 100%; display: block; }
+@keyframes glove-flick { 0%, 55%, 100% { transform: rotate(0deg); } 65% { transform: rotate(-14deg) translateY(-6%); } 75% { transform: rotate(4deg); } }
+.beat-club.on-art .club-smoke { right: auto; left: 22.2%; bottom: auto; top: 41%; }
+.beat-club.on-art .club-gesture { right: auto; left: 17.2%; top: 54%; bottom: auto; width: 3%; opacity: .9; }
+/* smokeVeil (js/beats.js, 2026-10-25): smoke over Hattie's mask until the Midway reveal; only the ember glows through */
+.smoke-veil { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.veil-drift { position: absolute; left: 56%; top: 57%; width: 16%; height: 22%; }
+.beat-club.on-art .veil-drift { left: 2%; top: 26%; width: 19%; height: 38%; }
+.veil-drift.has-strip, .beat-club.on-art .veil-drift.has-strip { inset: 0; left: 0; top: 0; width: 100%; height: 100%; }
+.veil-strip { inset: 0; }
+.veil-strip.veil-standby { opacity: 0; } /* the clear strip, mounted and loaded under the drift until the clear (js/beats.js smokeVeil) */
+.veil-blob { position: absolute; width: 62%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(178,172,186,.92) 0%, rgba(140,134,150,.75) 45%, rgba(110,104,120,0) 72%); filter: blur(4px);
+  animation: veil-curl calc(4s + var(--i) * .45s) ease-in-out calc(var(--i) * -.7s) infinite alternate; }
+@keyframes veil-curl { 0% { transform: translate(0, 0) rotate(0deg) scale(1); } 50% { transform: translate(8%, -10%) rotate(40deg) scale(1.12); } 100% { transform: translate(-6%, 6%) rotate(-25deg) scale(.95); } }
+.veil-ember { position: absolute; left: 22.2%; top: 54.6%; width: .8%; aspect-ratio: 1; border-radius: 50%; background: #ff7a1a; box-shadow: 0 0 7px 3px rgba(255,110,20,.85), 0 0 20px 8px rgba(255,80,10,.3); animation: ember-glow 2.4s ease-in-out infinite; z-index: 3; }
+.beat-club:not(.on-art) .veil-ember { display: none; }
+.beat-club:not(.on-art) .club-holder-ember { z-index: 3; }
+.veil-glove { position: absolute; left: 13%; top: 52%; width: 4%; opacity: 0; transform-origin: 90% 60%; z-index: 3; }
+.beat-club:not(.on-art) .veil-glove { left: auto; right: 34%; top: auto; bottom: 30%; }
+.veil-glove svg { width: 100%; display: block; }
+.veil-flick .veil-glove { animation: veil-flick-glove .5s ease-out forwards; }
+.beat-club:has(.veil-flick) .club-gesture { opacity: 0; }
+@keyframes veil-flick-glove { 0% { opacity: 0; transform: rotate(20deg) translate(-10%, 10%); } 30% { opacity: 1; } 70% { opacity: 1; transform: rotate(-35deg) translate(30%, -20%); } 100% { opacity: 0; transform: rotate(-50deg) translate(60%, -25%); } }
+.veil-clearing .veil-blob { animation: veil-whisk 1s cubic-bezier(.5, 0, .9, .6) calc(var(--i) * 45ms) forwards; }
+@keyframes veil-whisk { 0% { transform: translateX(0) scaleX(1); opacity: 1; } 100% { transform: translateX(320%) scaleX(2.8) scaleY(.5); opacity: 0; } }
+.beat .strip.stepped { animation: none; } /* smokeVeil steps these frames itself (js/beats.js steppedStrip) */
+.veil-gone .veil-drift, .veil-gone .veil-ember { display: none; }
+/* Hawkeye pass: the Pavilion veil over her stage sprite's mask (js/main.js pavilionVeil): Brook's full-scene
+   pavilion/smoke strips (.pav-veil-art), or CSS blobs in a small box over her head when the strips are missing */
+.pav-veil { position: absolute; pointer-events: none; }
+.pav-veil .veil-drift { left: 0; top: 0; width: 100%; height: 100%; }
+.pav-veil .veil-ember { display: none; }
+.pav-veil .veil-glove { left: 30%; top: 55%; width: 22%; }
+.pav-veil .strip { position: absolute; inset: 0; background-repeat: no-repeat; background-size: calc(var(--frames) * 100%) 100%; image-rendering: pixelated; }
+.pav-veil-art .veil-glove { left: 62.5%; top: 34.8%; width: 2.4%; } /* the same spot over her head as the fallback box */
+.beat-club.on-art .club-smoke { display: none; } /* B3 paints its own wisp; Brook's smoke strips do the rest */
+
+/* Club sign (Hawkeye pass 2026-10-25, js/beats.js). The smack (Azzato 2026-10-26): THE COCK sputters ~0.5 s and
+   stays on (variant A: its dark letters flash and die again); GOBBLER never lights before the reveal. */
+.beat-club .club-sign-flash { opacity: 0; mix-blend-mode: screen; pointer-events: none; }
+.beat-club.smacked .club-sign-flash { animation: sign-sputter var(--sputter-ms, 500ms) steps(1, end) forwards; }
+@keyframes sign-sputter { 0% { opacity: 1; } 12% { opacity: .15; } 22% { opacity: .95; } 36% { opacity: 0; } 48% { opacity: .85; } 62% { opacity: .25; } 74% { opacity: 1; } 88% { opacity: .1; } 100% { opacity: 0; } }
+.beat-club .club-gob-dim { position: absolute; filter: blur(3px); pointer-events: none; }
+.beat-club .club-sign-dead { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
+.beat-club .club-sign-dead-mask { position: absolute; inset: 0; background: #060208; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.beat-club.smacked .club-sign-dead { animation: sign-recover var(--sputter-ms, 500ms) steps(1, end) forwards; }
+@keyframes sign-recover { 0% { opacity: .78; } 12% { opacity: .1; } 22% { opacity: .78; } 36% { opacity: .3; } 48% { opacity: .78; } 62% { opacity: 0; } 74% { opacity: .6; } 88% { opacity: 0; } 100% { opacity: 0; } }
+.club-hench { position: absolute; left: 54%; top: 27%; width: 12.5%; opacity: 0; animation: hench-in 700ms ease-out 500ms forwards; filter: drop-shadow(0 0 3px rgba(200,30,30,.35)); }
+.club-hench svg { width: 100%; height: auto; display: block; overflow: visible; }
+.club-hench .hench-arm { transform-box: fill-box; transform-origin: 100% 85%; transform: rotate(-35deg); animation: hench-smack 260ms ease-in calc(var(--smack-ms, 1800ms) - 160ms) forwards; }
+.club-hench .hench-ember { animation: ember-glow 1.6s ease-in-out infinite; }
+/* Brook's frames: 56x72 logical at stage (165,55), feet on (193,127); no outline, no drop-shadow, frames swapped by js */
+.club-hench.club-hench-art { left: 51.5625%; top: 30.556%; width: 17.5%; height: 40%; filter: none; image-rendering: pixelated; display: block; }
+@keyframes hench-in { from { opacity: 0; transform: translateX(40%); } to { opacity: 1; transform: none; } }
+@keyframes hench-smack { 0% { transform: rotate(-35deg); } 60% { transform: rotate(12deg); } 100% { transform: rotate(4deg); } }
+/* The cut to the sign after the Pavilion speech: Midway plate close on the club sign (fallback when sign-cut-v2 is
+   missing). THE COCK's dead patch blips off on tube-on (variant A); the plate's GOBBLER is dead, and its seven lit
+   patches sit in one .sign-tube that js/beats.js tubeFlicker steps on as one word (the inverse of tube-on).
+   Zoom origin (237,18): midway-sign-v1's hawk reaches y20, so the close-up keeps y~11-83 in frame. */
+.beat-sign .beat-stage { background: #05040a; }
+.beat-sign .sign-zoom { position: absolute; inset: 0; transform-origin: 74% 10%; transform: scale(2.6); animation: sign-push var(--beat-ms) ease-out forwards; }
+@keyframes sign-push { from { transform: scale(2.5); } to { transform: scale(2.75); } }
+.beat-sign .sign-patch { position: absolute; image-rendering: pixelated; animation: tube-on 90ms steps(1, end) var(--on-ms) forwards; }
+@keyframes tube-on { 0% { opacity: 0; } 40% { opacity: 1; } 70% { opacity: 0; } 100% { opacity: 0; } }
+.beat-sign .sign-tube { position: absolute; inset: 0; pointer-events: none; }
+.beat-sign .sign-patch.sign-patch-held { animation: none; }
+/* The redrawn sign cut (Brook's sign-cut-v2): full 320x180 layers, no close-up zoom, only a slow push toward the sign;
+   glows screen-blend over the base (their fade is baked into the alpha), lit tubes in normal blend (js/beats.js signNode) */
+.beat-sign.sign-redrawn .sign-zoom { transform-origin: 73% 40%; transform: none; animation-name: sign-push-art; }
+.beat-sign .sign-halo { mix-blend-mode: screen; }
+@keyframes sign-push-art { from { transform: scale(1); } to { transform: scale(1.04); } }
+.beat-sign .sign-glow { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at 50% 55%, rgba(255,40,40,.28), transparent 50%); animation: sign-snap 700ms ease-out var(--snap-ms, 950ms) forwards; }
+@keyframes sign-snap { 0% { opacity: 0; } 25% { opacity: 1; } 100% { opacity: .55; } }
+.beat-sign .gb.sign-gb { inset: 0; background: #1a1424; }
+
+/* Hattie's smoke portrait (js/main.js smokePlateNode): Brook's 64x64 strips, stepped in lockstep with the Pavilion smoke */
+.speaker .portrait-smoke { display: block; width: 100%; aspect-ratio: 1; background-color: var(--cream); background-repeat: no-repeat; background-size: calc(var(--frames, 1) * 100%) 100%; image-rendering: pixelated; }
+.speaker .portrait-smoke { position: relative; }
+.speaker .portrait-smoke > .ps-layer, .speaker .portrait-smoke > img { position: absolute; inset: 0; width: 100%; height: 100%; background-repeat: no-repeat; background-size: calc(var(--frames, 1) * 100%) 100%; image-rendering: pixelated; opacity: 0; }
+.speaker .portrait-smoke > .ps-layer.on { opacity: 1; } /* js/main.js paintSmokePlate: every strip mounted, only the current one shown */
+
+/* beta v17: full-screen insert (js/main.js showInsert): a note or clue board over everything, fades in and out */
+.insert {
+  position: fixed; inset: 0; z-index: 9000; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; padding: 4vmin; background: rgba(5, 5, 8, 0.88); opacity: 0; pointer-events: none; /* clicks: js/main.js showInsert */
+  transition: opacity var(--insert-fade, 400ms) ease-in-out;
+}
+.insert.on { opacity: 1; }
+/* fitted to the screen whatever its size: a 320x180 pixel insert scales up (pixelated), a big painting scales down */
+.insert .insert-art { width: min(94vw, calc(82vh * 16 / 9)); height: auto; max-height: 82vh; object-fit: contain; image-rendering: pixelated; box-shadow: 0 6px 30px rgba(0,0,0,.6); }
+.insert .insert-caption { max-width: 60em; color: #f3ead2; font: 600 clamp(14px, 2.2vmin, 22px)/1.4 Georgia, serif; text-align: center; }
+.insert .insert-hint { color: rgba(243, 234, 210, 0.5); font: 11px/1 ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; }
+
+/* Phone landscape (844x390 and the like): the scene in one column, sized to the screen height, and the caption,
+   verbs, exits, pockets and menu in the other, a column that scrolls on its own (.controls). The page itself never
+   scrolls (Azzato 2026-10-27). Which side the controls take is html[data-controls], set before the first paint by
+   CONTROLS_DEFAULT in js/boot.js or the saved Menu choice "Controls on: Left / Right". */
+.controls { display: contents; } /* no box of its own outside short landscape: desktop and portrait lay out as before */
+.menu .controls-side { display: none; } /* the side setting only means something in the two-column layout */
+@media (orientation: landscape) and (max-height: 500px) {
+  html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  .cabinet {
+    /* as tall as the screen allows, but always leaving the controls column at least 200px (667x375 and narrower) */
+    --stage-w: min(calc((100svh - 8px - 28px - 6px - 8px - 8px) * 16 / 9 + 8px), calc(100vw - 24px - 8px - 200px));
+    --stage-h: calc((var(--stage-w) - 8px) * 9 / 16 + 8px);
+    box-sizing: border-box; height: 100vh; height: 100svh; overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--stage-w);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: "top top" "controls stage";
+    column-gap: 8px;
+    max-width: none;
+    padding: 8px 12px;
+  }
+  .menu .controls-side { display: inline-block; }
+  html[data-controls="right"] .cabinet { grid-template-columns: var(--stage-w) minmax(0, 1fr); grid-template-areas: "top top" "stage controls"; }
+  .cabinet > .top { grid-area: top; min-width: 0; height: 28px; margin-bottom: 6px; align-items: center; }
+  .cabinet > .top .room { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .cabinet > .stage {
+    grid-area: stage; align-self: start;
+    width: var(--stage-w); height: var(--stage-h); aspect-ratio: auto; box-shadow: 0 8px 20px #000;
+  }
+  .cabinet > .controls {
+    grid-area: controls; display: block; min-width: 0; min-height: 0;
+    overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+    padding: 0 2px 8px; /* the gap under the last chip, so the bottom row never sits on the screen edge */
+  }
+  .cabinet > .talkrow { margin-top: 0; }
+  .cabinet .bust, .cabinet .speaker { width: 48px; border-width: 2px; box-shadow: 2px 2px 0 #000; }
+  .cabinet .speaker.voice { width: 52px; }
+  .cabinet .caption { font-size: 0.8rem; line-height: 1.3; padding: 6px 8px; min-height: 0; }
+  .cabinet .caption.thought { padding: 6px 12px; margin-top: 16px; }
+  .cabinet .caption.more { padding-bottom: 1.7em; }
+  .cabinet .sentence { font-size: 0.75rem; margin-top: 4px; }
+  .cabinet .verbs, .cabinet .exits, .cabinet .inv, .cabinet .title-actions, .cabinet .choices { gap: 4px; margin-top: 4px; }
+  .cabinet .verbs button, .cabinet .exits button, .cabinet .choice, .cabinet .end-btn, .cabinet .menu button { padding: 4px 7px; font-size: 0.78rem; }
+  .cabinet .pending { min-height: 0; margin-top: 2px; font-size: 0.78rem; }
+  .cabinet .inv { min-height: 0; padding: 4px; }
+  .cabinet .item { width: 60px; padding: 3px; gap: 2px; }
+  .cabinet .item img { width: 32px; height: 32px; }
+  .cabinet .item span { font-size: 10px; }
+  .cabinet .empty { font-size: 0.78rem; }
+  .cabinet .menu { margin-top: 6px; padding: 8px; font-size: 0.8rem; }
+  .cabinet .slot span { min-width: 0; }
+  .cabinet .next-issue { font-size: 0.8rem; }
+
+  /* the title: the cover fills the height on the left, the blurb beside it */
+  .title-screen {
+    display: grid; grid-template-rows: repeat(6, min-content) 1fr;
+    grid-template-columns: min(calc((100svh - 24px - 8px) * 16 / 9), calc(100vw - 24px - 10px - 180px)) minmax(0, 1fr);
+    column-gap: 10px; align-content: start; max-width: none; padding: 16px 12px 8px;
+  }
+  .title-screen > * { grid-column: 2; min-width: 0; }
+  .title-screen > .title-frame { grid-column: 1; grid-row: 1 / -1; align-self: start; margin: 0; width: 100%; }
+  /* the cover goes on the scene's side, the blurb and buttons on the controls' side */
+  html[data-controls="left"] .title-screen { grid-template-columns: minmax(0, 1fr) min(calc((100svh - 24px - 8px) * 16 / 9), calc(100vw - 24px - 10px - 180px)); }
+  html[data-controls="left"] .title-screen > * { grid-column: 1; }
+  html[data-controls="left"] .title-screen > .title-frame { grid-column: 2; }
+  .title-screen > .logline { font-size: 0.8rem; margin: 0 0 6px; }
+  .title-screen > .how { font-size: 0.7rem; margin: 0 0 6px; }
+  .title-screen > .title-actions { margin: 0 0 6px; }
+  .title-screen > .title-actions button { padding: 4px 8px; font-size: 0.75rem; }
+}
