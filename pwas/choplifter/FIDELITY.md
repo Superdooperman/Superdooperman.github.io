@@ -54,4 +54,5 @@ That script runs the simulation with no DOM. In Chrome, open `pwas/choplifter/` 
 - In play the three counters sit in black rounded boxes with white digits, on the violet stripe band. Each box has a one-pixel rim in the counter's colour (orange, blue, green), which is how those lemons read in the recomp flight frame.
 - Sprites are new and simpler than the original shapes: the chopper, tank, jet, barracks, post office, and hostages read in the same palette and at a similar size, but they are not tracings. The logo is a block alphabet with an orange/blue offset, not the original hi-res wordmark.
 - After a crash there are 18 frames in which the new chopper cannot be hit, so the explosion does not destroy it immediately.
-- Cache name is `choplifter-v25`.
+- Cache name is `choplifter-v26`.
+- Ground and cliffs are solid violet, not 1-pixel stripes, so scrolling does not moire. The cliff layer is the original half-speed hills, scrolled in whole pixels. Shots leave the cap when they hit, reach the ground, or leave the screen. The chopper hurtbox is the body, not the rotor. Jets and their missiles hit that body; a bullet that crosses a jet's sprite destroys the jet. A tank shell or a tank driving over a hostage squashes them. `?debug=1` draws the boxes.

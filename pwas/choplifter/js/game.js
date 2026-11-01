@@ -160,9 +160,50 @@
     buildStars();
     showTitle();
     if (typeof location !== 'undefined' && location.search) {
-      const shot = new URLSearchParams(location.search).get('shot');
+      const q = new URLSearchParams(location.search);
+      if (q.get('debug') === '1') S.debug = true;
+      const shot = q.get('shot');
       if (shot) debugSetup(shot);
     }
+  }
+
+  function integerScale(cssW, cssH) {
+    let scale = Math.floor(Math.min(cssW / W, cssH / H));
+    if (scale < 1) scale = 1;
+    return scale;
+  }
+
+  function paintFrame() {
+    const pix = new Uint32Array(W * H);
+    const ctx = {
+      fillStyle: '#000000',
+      _stack: [],
+      save() { this._stack.push(this.fillStyle); },
+      restore() { this.fillStyle = this._stack.pop() || '#000000'; },
+      font: '',
+      textAlign: '',
+      textBaseline: '',
+      measureText() { return { width: 200 }; },
+      fillText() {},
+      fillRect(x, y, w, h) {
+        const hex = String(this.fillStyle || '#000000');
+        const c = hex[0] === '#' ? parseInt(hex.slice(1), 16) : 0;
+        let x0 = Math.floor(x);
+        let y0 = Math.floor(y);
+        let x1 = Math.ceil(x + w);
+        let y1 = Math.ceil(y + h);
+        if (x0 < 0) x0 = 0;
+        if (y0 < 0) y0 = 0;
+        if (x1 > W) x1 = W;
+        if (y1 > H) y1 = H;
+        for (let yy = y0; yy < y1; yy++) {
+          const row = yy * W;
+          for (let xx = x0; xx < x1; xx++) pix[row + xx] = c;
+        }
+      },
+    };
+    draw(ctx);
+    return pix;
   }
 
   function buildStars() {
@@ -475,25 +516,55 @@
     return S.heli.alive && S.heli.landed && S.heli.tilt === 0;
   }
 
+  function heliBody() {
+    const h = S.heli;
+    const mag = Math.abs(h.pose);
+    const sprite = mag === 0 ? HELI_FRONT : HELI_SIDE;
+    const keep = mag === 0 ? 1 : [0, 0.42, 0.66, 0.86, 1][mag];
+    const w = Math.max(10, Math.round(sprite[0].length * keep));
+    const height = sprite.length;
+    const foot = GROUND - Math.round(h.alt);
+    return { x: h.x - w / 2, y: foot - height, w, h: height };
+  }
+
+  function muzzle(h) {
+    const body = heliBody();
+    if (Math.abs(h.pose) < 2) {
+      const dir = h.lastSide || 1;
+      return { x: h.x, y: body.y + body.h + 1, dir, front: true };
+    }
+    const dir = Math.sign(h.pose) || h.lastSide || 1;
+    return { x: h.x + dir * (body.w / 2 + 3), y: body.y + Math.round(body.h * 0.42), dir, front: false };
+  }
+
   function fireGun() {
     const h = S.heli;
-    if (!h.alive || h.landed || h.mercy > 12) return;
-    const flying = S.shots.filter((s) => !s.enemy && s.alive !== false).length;
+    if (!h.alive || h.mercy > 12) return;
+    reapShots();
+    const flying = S.shots.filter((s) => !s.enemy && s.alive).length;
     if (flying >= 5) return;
-    const y = GROUND - h.alt - 6;
-    const down = Math.abs(h.pose) < 3;
-    if (down) {
-      S.shots.push({
-        x: h.x, y: y + 4, vx: Math.sign(h.pose) * 1.2, vy: 4,
-        kind: 'bullet', enemy: false, down: true, alive: true,
-      });
-    } else {
-      const dir = Math.sign(h.pose) || h.lastSide || 1;
-      S.shots.push({
-        x: h.x + dir * 16, y, vx: dir * 8, vy: 0,
-        kind: 'bullet', enemy: false, down: false, alive: true,
-      });
+    const m = muzzle(h);
+    const low = h.landed || h.alt < 18;
+    let vx = m.dir * (low ? 8 : 6);
+    let vy = 0;
+    let x = m.x;
+    let y = m.y;
+    if (m.front && !low) {
+      vx = 0;
+      vy = 5;
+      x = h.x;
+      y = heliBody().y + heliBody().h + 1;
+    } else if (!low) {
+      vy = 3;
+    } else if (m.front) {
+      x = h.x + m.dir * (heliBody().w / 2 + 3);
+      y = heliBody().y + Math.round(heliBody().h * 0.42);
     }
+    S.shots.push({
+      x, y, vx, vy,
+      kind: 'bullet', enemy: false, down: vy > 2 && Math.abs(vx) < 1,
+      alive: true, age: 0,
+    });
     sfx('shot');
   }
 
@@ -564,11 +635,25 @@
   }
 
   function crush(man) {
-    if (man.dead) return;
+    if (man.dead || man.state === 'squash') return;
     man.dead = true;
     S.killed += 1;
     boom(man.x, GROUND - 4);
     sfx('killed');
+  }
+
+  function squashMan(man) {
+    if (man.dead || man.state === 'squash') return;
+    man.state = 'squash';
+    man.squashT = 8;
+  }
+
+  function tickSquash() {
+    S.hostages.forEach((man) => {
+      if (man.state !== 'squash') return;
+      man.squashT -= 1;
+      if (man.squashT <= 0) crush(man);
+    });
   }
 
   function stepWalkers() {
@@ -639,7 +724,7 @@
           if (S.heli.alive && S.heli.alt < 40) {
             S.shots.push({
               x: t.x, y: GROUND - 8, vx: Math.sign(dx || 1) * 1.7, vy: -3.4,
-              kind: 'shell', enemy: true, alive: true,
+              kind: 'shell', enemy: true, alive: true, age: 0,
             });
             sfx('noise');
           }
@@ -651,6 +736,10 @@
         t.dir = -1;
       }
       if (t.x < HELI_MIN) t.x = HELI_MIN;
+      S.hostages.forEach((man) => {
+        if (man.dead || man.state === 'squash') return;
+        if (overlap(tankBox(t), manBox(man))) squashMan(man);
+      });
     });
     S.tanks = S.tanks.filter((t) => t.alive);
   }
@@ -671,14 +760,15 @@
         if (j.timer === 10 && S.heli.alive) {
           const sy = GROUND - j.alt;
           if (S.heli.landed) {
-            S.shots.push({ x: j.x, y: sy, vx: 0, vy: 2.2, kind: 'bomb', enemy: true, alive: true });
+            S.shots.push({ x: j.x, y: sy, vx: 0, vy: 2.2, kind: 'bomb', enemy: true, alive: true, age: 0 });
           } else {
-            const dx = S.heli.x - j.x;
-            const dy = (GROUND - S.heli.alt - 6) - sy;
+            const body = heliBody();
+            const dx = (body.x + body.w / 2) - j.x;
+            const dy = (body.y + body.h / 2) - sy;
             const len = Math.hypot(dx, dy) || 1;
             S.shots.push({
               x: j.x, y: sy, vx: (dx / len) * 3.4, vy: (dy / len) * 3.4,
-              kind: 'missile', enemy: true, alive: true,
+              kind: 'missile', enemy: true, alive: true, age: 0,
             });
           }
           sfx('noise');
@@ -686,6 +776,7 @@
         if (j.timer > 36) j.alive = false;
       }
       if (j.x < 300 || j.x > 5300) j.alive = false;
+      if (j.alive && S.heli.alive && overlap(jetBox(j), heliBody())) destroyHeli();
     });
     S.jets = S.jets.filter((j) => j.alive);
   }
@@ -702,10 +793,10 @@
       if (S.level >= 3 && d.cool <= 0) {
         d.cool = 28;
         S.shots.push({
-          x: d.x, y: GROUND - d.alt, vx: 0, vy: 2.4, kind: 'shell', enemy: true, alive: true,
+          x: d.x, y: GROUND - d.alt, vx: 0, vy: 2.4, kind: 'shell', enemy: true, alive: true, age: 0,
         });
       }
-      if (S.heli.alive && S.heli.mercy <= 0 && Math.abs(d.x - S.heli.x) < 12 && Math.abs(d.alt - S.heli.alt) < 12) {
+      if (S.heli.alive && S.heli.mercy <= 0 && overlap(droneBox(d), heliBody())) {
         d.alive = false;
         destroyHeli();
       }
@@ -714,28 +805,86 @@
     S.drones = S.drones.filter((d) => d.alive);
   }
 
+  function overlap(a, b) {
+    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  }
+
+  function tankBox(t) {
+    return { x: t.x - 16, y: GROUND - TANK_SPRITE.length, w: TANK_SPRITE[0].length, h: TANK_SPRITE.length };
+  }
+
+  function jetBox(j) {
+    return { x: j.x - 11, y: GROUND - j.alt - 5, w: JET_SPRITE[0].length, h: JET_SPRITE.length };
+  }
+
+  function manBox(man) {
+    const sprite = man.state === 'wave' ? MAN_WAVE : MAN_RUN[(man.id || 0) & 1];
+    return { x: man.x - 2, y: GROUND - sprite.length, w: sprite[0].length, h: sprite.length };
+  }
+
+  function shotBox(s) {
+    return { x: s.x - 1, y: s.y - 1, w: 4, h: 3 };
+  }
+
+  function droneBox(d) {
+    return { x: d.x - 7, y: GROUND - d.alt - 7, w: 14, h: 14 };
+  }
+
+  function shotOffscreen(s) {
+    const left = S.view - 32;
+    const right = S.view + W + 32;
+    if (s.x < left || s.x > right) return true;
+    if (s.y >= GROUND + 2 || s.y < 4) return true;
+    if ((s.age || 0) > 40) return true;
+    return false;
+  }
+
+  function reapShots() {
+    S.shots.forEach((s) => {
+      if (s.alive && shotOffscreen(s)) s.alive = false;
+    });
+    S.shots = S.shots.filter((s) => s.alive);
+  }
+
+  function alongShot(prevX, prevY, s, box) {
+    const steps = Math.max(1, Math.ceil(Math.hypot(s.x - prevX, s.y - prevY)));
+    for (let i = 0; i <= steps; i++) {
+      const x = prevX + ((s.x - prevX) * i) / steps;
+      const y = prevY + ((s.y - prevY) * i) / steps;
+      if (overlap({ x: x - 1, y: y - 1, w: 4, h: 3 }, box)) return true;
+    }
+    return false;
+  }
+
   function stepShots() {
+    tickSquash();
     S.shots.forEach((s) => {
       if (!s.alive) return;
+      const prevX = s.x;
+      const prevY = s.y;
+      s.age = (s.age || 0) + 1;
       s.x += s.vx;
       s.y += s.vy;
       if (s.kind === 'shell' || s.kind === 'bomb') s.vy += 0.38;
-      if (s.y >= GROUND - 1) {
+      if (shotOffscreen(s) || s.y >= GROUND - 1) {
         s.alive = false;
-        if (s.enemy) groundBlast(s.x, true);
-        else if (s.down) groundBlast(s.x, false);
+        if (s.y >= GROUND - 1) {
+          if (s.enemy) groundBlast(s.x, true);
+          else groundBlast(s.x, false);
+        }
         return;
       }
       if (!s.enemy) {
-        if (!s.down && hitBarracks(s)) { s.alive = false; return; }
-        if (hitMan(s) || hitAir(s)) { s.alive = false; return; }
-      } else if (s.kind === 'missile' && hitHeliBox(s.x, s.y, 8)) {
+        if (hitBarracks(s)) { s.alive = false; return; }
+        if (hitManShot(prevX, prevY, s) || hitAir(prevX, prevY, s)) { s.alive = false; return; }
+      } else if (hitsHeliBody(prevX, prevY, s)) {
         s.alive = false;
         destroyHeli();
+      } else {
+        hitManShot(prevX, prevY, s);
       }
-      if (s.x < 200 || s.x > 5400 || s.y < 10) s.alive = false;
     });
-    S.shots = S.shots.filter((s) => s.alive);
+    reapShots();
     S.hostages = S.hostages.filter((man) => !man.dead);
     S.tanks = S.tanks.filter((t) => t.alive);
     S.jets = S.jets.filter((j) => j.alive);
@@ -758,22 +907,23 @@
     return false;
   }
 
-  function hitMan(s) {
-    if (Math.abs(s.y - (GROUND - 5)) > 8) return false;
+  function hitManShot(prevX, prevY, s) {
     for (let i = 0; i < S.hostages.length; i++) {
       const man = S.hostages[i];
-      if (!man.dead && Math.abs(man.x - s.x) <= 4) {
-        crush(man);
+      if (man.dead || man.state === 'squash') continue;
+      if (alongShot(prevX, prevY, s, manBox(man))) {
+        if (s.enemy) squashMan(man);
+        else crush(man);
         return true;
       }
     }
     return false;
   }
 
-  function hitAir(s) {
+  function hitAir(prevX, prevY, s) {
     for (let i = 0; i < S.jets.length; i++) {
       const j = S.jets[i];
-      if (j.alive && Math.hypot(j.x - s.x, (GROUND - j.alt) - s.y) < 9) {
+      if (j.alive && alongShot(prevX, prevY, s, jetBox(j))) {
         j.alive = false;
         boom(j.x, GROUND - j.alt);
         sfx('boom');
@@ -782,14 +932,28 @@
     }
     for (let i = 0; i < S.drones.length; i++) {
       const d = S.drones[i];
-      if (d.alive && Math.hypot(d.x - s.x, (GROUND - d.alt) - s.y) < 9) {
+      if (d.alive && alongShot(prevX, prevY, s, droneBox(d))) {
         d.alive = false;
         boom(d.x, GROUND - d.alt);
         sfx('boom');
         return true;
       }
     }
+    for (let i = 0; i < S.tanks.length; i++) {
+      const t = S.tanks[i];
+      if (t.alive && alongShot(prevX, prevY, s, tankBox(t))) {
+        t.alive = false;
+        boom(t.x, GROUND - 4);
+        sfx('boom');
+        return true;
+      }
+    }
     return false;
+  }
+
+  function hitsHeliBody(prevX, prevY, s) {
+    if (!S.heli.alive || S.heli.mercy > 0) return false;
+    return alongShot(prevX, prevY, s, heliBody());
   }
 
   function groundBlast(x, enemy) {
@@ -802,7 +966,7 @@
           killMenNear(b.x + 8, 10);
         }
       });
-      if (hitHeliBox(x, GROUND - 4, 12) && S.heli.alt < 18) destroyHeli();
+      if (S.heli.alt < 18 && overlap({ x: x - 4, y: GROUND - 8, w: 8, h: 8 }, heliBody())) destroyHeli();
     } else {
       S.tanks.forEach((t) => {
         if (t.alive && Math.abs(t.x - x) < 14) {
@@ -819,12 +983,6 @@
     S.hostages.forEach((man) => {
       if (!man.dead && Math.abs(man.x - x) <= r) crush(man);
     });
-  }
-
-  function hitHeliBox(x, y, r) {
-    if (!S.heli.alive || S.heli.mercy > 0) return false;
-    const hy = GROUND - S.heli.alt - 6;
-    return Math.abs(S.heli.x - x) < r + 8 && Math.abs(hy - y) < r + 4;
   }
 
   function destroyHeli() {
@@ -882,7 +1040,7 @@
     const step = Math.abs(spd) + 4;
     S.view += clamp(desired - S.view, -step, step);
     if (S.heli.landed && onPad()) S.view += clamp(VIEW_MAX - S.view, -4, 4);
-    S.view = clamp(S.view, VIEW_MIN, VIEW_MAX);
+    S.view = Math.round(clamp(S.view, VIEW_MIN, VIEW_MAX));
   }
 
   function scene() {
@@ -898,14 +1056,8 @@
     ctx.fillRect(0, 0, W, H);
     drawStars(ctx);
     drawPlanet(ctx);
-    // Hi-res ground bytes are the repeating pair that lights every even column.
-    // Unlit columns stay black, which is the stripe in the recomp screenshots.
-    for (let y = GROUND; y < H; y++) {
-      for (let x = 0; x < W; x += 2) {
-        ctx.fillStyle = INK.V;
-        ctx.fillRect(x, y, 1, 1);
-      }
-    }
+    ctx.fillStyle = INK.V;
+    ctx.fillRect(0, GROUND, W, H - GROUND);
     if (S.mode !== 'title') {
       drawTerrain(ctx);
       drawFence(ctx);
@@ -929,6 +1081,7 @@
     }
     drawHud(ctx);
     drawMessages(ctx);
+    if (S.debug) drawDebug(ctx);
   }
 
   function drawStars(ctx) {
@@ -978,13 +1131,31 @@
   }
 
   function drawTerrain(ctx) {
-    const origin = S.view * 0.5;
-    for (let x = 0; x < W; x += 2) {
+    const origin = Math.floor(S.view / 2);
+    ctx.fillStyle = INK.V;
+    for (let x = 0; x < W; x++) {
       const hgt = mesaHeight(origin + x);
       if (hgt <= 0) continue;
-      ctx.fillStyle = INK.V;
       ctx.fillRect(x, GROUND - hgt, 1, hgt);
     }
+  }
+
+  function drawDebug(ctx) {
+    const boxes = [heliBody()];
+    S.tanks.forEach((t) => { if (t.alive) boxes.push(tankBox(t)); });
+    S.jets.forEach((j) => { if (j.alive) boxes.push(jetBox(j)); });
+    S.drones.forEach((d) => { if (d.alive) boxes.push(droneBox(d)); });
+    S.hostages.forEach((man) => { if (!man.dead) boxes.push(manBox(man)); });
+    S.shots.forEach((s) => { if (s.alive) boxes.push(shotBox(s)); });
+    ctx.fillStyle = '#ff44fd';
+    boxes.forEach((b) => {
+      const x = Math.round(b.x - S.view);
+      const y = Math.round(b.y);
+      ctx.fillRect(x, y, Math.max(1, Math.round(b.w)), 1);
+      ctx.fillRect(x, y + Math.round(b.h) - 1, Math.max(1, Math.round(b.w)), 1);
+      ctx.fillRect(x, y, 1, Math.max(1, Math.round(b.h)));
+      ctx.fillRect(x + Math.round(b.w) - 1, y, 1, Math.max(1, Math.round(b.h)));
+    });
   }
 
   function drawHorizon(ctx) {
@@ -1195,20 +1366,11 @@
   }
 
   function drawVioletHud(ctx) {
-    for (let y = 2; y <= 24; y++) {
-      for (let x = 0; x < W; x += 2) {
-        ctx.fillStyle = INK.V;
-        ctx.fillRect(x, y, 1, 1);
-      }
-    }
-    for (let y = 2; y <= 7; y++) {
-      const n = 8 - y;
-      ctx.fillStyle = INK.B;
-      for (let i = 0; i < n; i++) {
-        ctx.fillRect(2 + i * 2, y, 1, 1);
-        ctx.fillRect(W - 4 - i * 2, y, 1, 1);
-      }
-    }
+    ctx.fillStyle = INK.V;
+    ctx.fillRect(0, 2, W, 23);
+    ctx.fillStyle = INK.B;
+    ctx.fillRect(0, 2, 10, 4);
+    ctx.fillRect(W - 10, 2, 10, 4);
   }
 
   const CREDIT = 'A tribute to Choplifter by Dan Gorlin, Broderbund 1982';
@@ -1281,9 +1443,6 @@
     const scale = 2;
     const width = str.length * 6 * scale - scale;
     const x = Math.round((W - width) / 2);
-    ctx.fillStyle = INK.O;
-    ctx.fillRect(x - 4, y - 3, width + 8, 3);
-    ctx.fillRect(x - 4, y + 7 * scale, width + 8, 3);
     text(ctx, str, x, y, INK.W, scale);
   }
 
@@ -1332,6 +1491,7 @@
   function selfTest() {
     const failures = [];
     function expect(cond, msg) { if (!cond) failures.push(msg); }
+    buildStars();
     S.quiet = true;
     S.soundOn = false;
     beginPlay();
@@ -1462,10 +1622,10 @@
     beginPlay();
     S.tanks = [{ x: BARRACKS_X[1], dir: 0, think: 40, alive: true }];
     S.shots = [{
-      x: BARRACKS_X[1], y: GROUND - 6, vx: 8, vy: 0, kind: 'bullet', enemy: false, down: false, alive: true,
+      x: BARRACKS_X[1], y: GROUND - 40, vx: 8, vy: 0, kind: 'bullet', enemy: false, down: false, alive: true, age: 0,
     }];
     stepShots();
-    expect(S.tanks.length === 1 && S.tanks[0].alive, 'a side-on shot does not destroy a tank');
+    expect(S.tanks.length === 1 && S.tanks[0].alive, 'a shot above a tank does not destroy it');
     S.shots = [{
       x: BARRACKS_X[1], y: GROUND - 2, vx: 0, vy: 3, kind: 'bullet', enemy: false, down: true, alive: true,
     }];
@@ -1479,6 +1639,146 @@
     update({ stickX: 0, stickY: 10, face: false });
     update({ stickX: 0, stickY: 10, face: false });
     expect(S.heli.pose === 0, 'a short press faces the viewer');
+
+    beginPlay();
+    S.quiet = true;
+    S.soundOn = false;
+    S.heli.alive = true;
+    S.heli.mercy = 0;
+    S.heli.alt = 40;
+    S.heli.landed = false;
+    S.heli.pose = 4;
+    S.view = Math.round(S.heli.x - 40);
+    S.shots = [];
+    fireGun();
+    const right = S.shots.find((s) => !s.enemy);
+    const rightBody = heliBody();
+    expect(right && right.x >= rightBody.x + rightBody.w - 1, 'right facing shot spawns at the nose');
+    expect(right && right.vx > 0 && right.vy > 0, 'flying shot goes diagonal down');
+
+    S.heli.pose = -4;
+    S.shots = [];
+    fireGun();
+    const left = S.shots.find((s) => !s.enemy);
+    const leftBody = heliBody();
+    expect(left && left.x <= leftBody.x + 1, 'left facing shot spawns at the nose');
+
+    S.heli.pose = 0;
+    S.heli.lastSide = 1;
+    S.shots = [];
+    fireGun();
+    const front = S.shots.find((s) => !s.enemy);
+    expect(front && Math.abs(front.x - S.heli.x) < 4 && front.vy > 0, 'front shot leaves the belly');
+
+    S.heli.landed = true;
+    S.heli.alt = 0;
+    S.heli.pose = 4;
+    S.shots = [];
+    fireGun();
+    const low = S.shots.find((s) => !s.enemy);
+    expect(low && low.vy === 0 && low.vx > 0 && low.x > S.heli.x, 'landed shot is horizontal from the nose');
+
+    beginPlay();
+    S.quiet = true;
+    S.heli.x = 2200;
+    S.heli.alt = 40;
+    S.heli.landed = false;
+    S.heli.pose = 4;
+    S.view = Math.round(S.heli.x - 40);
+    const jb = jetBox({ x: S.heli.x + 40, alt: 40 });
+    S.jets = [{ x: S.heli.x + 40, alt: 40, dir: -1, phase: 1, timer: 0, alive: true, bold: false }];
+    S.shots = [{
+      x: jb.x + 4, y: jb.y + 2, vx: 6, vy: 0, kind: 'bullet', enemy: false, down: false, alive: true, age: 0,
+    }];
+    stepShots();
+    expect(S.jets.length === 0, 'bullet hits a jet');
+
+    beginPlay();
+    S.quiet = true;
+    S.heli.landed = true;
+    S.heli.alt = 0;
+    S.heli.pose = 4;
+    S.heli.alive = true;
+    S.heli.mercy = 0;
+    S.pending = null;
+    S.lost = 0;
+    S.view = Math.round(S.heli.x - 40);
+    const hb = heliBody();
+    S.shots = [{
+      x: hb.x + hb.w + 8, y: hb.y - 3, vx: 0, vy: 0, kind: 'shell', enemy: true, alive: true, age: 0,
+    }];
+    stepShots();
+    expect(S.heli.alive, 'rotor tip does not count as a hit');
+
+    S.heli.x = BARRACKS_X[0] + 40;
+    S.heli.tilt = 0;
+    S.heli.landed = true;
+    S.heli.alt = 0;
+    S.view = Math.round(S.heli.x - 40);
+    S.hostages = [{ x: Math.round(S.heli.x), dir: 1, state: 'out', anchor: S.heli.x, id: 9 }];
+    const crushed = S.killed;
+    update({ stickX: 0, stickY: 10 });
+    expect(S.killed === crushed + 1, 'hostage-crush event');
+
+    const scale = integerScale(844, 390);
+    expect(Number.isInteger(scale) && scale >= 1, 'integer scale');
+    expect(W * scale <= 844 && H * scale <= 390, 'letterbox fits the viewport');
+    const dpr = 3;
+    expect((W * scale * dpr) % W === 0, 'device pixels are an integer multiple of the backbuffer');
+
+    beginPlay();
+    S.quiet = true;
+    S.mode = 'play';
+    S.banner = 0;
+    S.debug = false;
+    S.heli.alt = 30;
+    S.heli.landed = false;
+    S.view = 1400;
+    const frameA = paintFrame();
+    S.view = 1401;
+    const frameB = paintFrame();
+    const violet = 0xff44fd;
+    let flicker = 0;
+    for (let x = 0; x < W; x++) {
+      const ca = frameA[(GROUND + 8) * W + x];
+      const cb = frameB[(GROUND + 8) * W + x];
+      if (ca !== violet || cb !== violet) flicker += 1;
+    }
+    expect(flicker === 0, 'scroll does not flicker ground columns');
+
+    beginPlay();
+    S.quiet = true;
+    S.soundOn = false;
+    S.heli.alive = true;
+    S.heli.mercy = 0;
+    S.heli.pose = 4;
+    S.view = Math.round(S.heli.x - 40);
+    let stuck = 0;
+    for (let i = 0; i < 240; i++) {
+      if (i === 80) { S.heli.landed = true; S.heli.alt = 0; }
+      if (i === 140) { S.heli.landed = false; S.heli.alt = 28; S.heli.pose = -4; }
+      if (i === 190) {
+        S.lost = 0;
+        S.pending = null;
+        S.heli.alive = true;
+        S.heli.mercy = 0;
+        destroyHeli();
+        S.pendingT = 1;
+        update({ stickX: 0, stickY: 10 });
+        S.heli.mercy = 0;
+        S.heli.alive = true;
+        S.pending = null;
+        S.mode = 'play';
+        S.shots = [];
+      }
+      S.shots.forEach((s) => { if (!s.enemy) s.x = S.view + W + 100; });
+      reapShots();
+      const before = S.shots.filter((s) => !s.enemy && s.alive).length;
+      fireGun();
+      const after = S.shots.filter((s) => !s.enemy && s.alive).length;
+      if (before < 5 && after <= before) stuck += 1;
+    }
+    expect(stuck === 0, 'firing still works across landing, sortie and death');
 
     return { ok: failures.length === 0, failures, passed: failures.length === 0 };
   }
@@ -1533,7 +1833,7 @@
   }
 
   root.GameApp = {
-    boot, frame, update, draw, scene, selfTest, debugSetup, state: S,
+    boot, frame, update, draw, scene, selfTest, debugSetup, integerScale, paintFrame, state: S,
     GROUND, BASE, BARRACKS_X,
   };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
