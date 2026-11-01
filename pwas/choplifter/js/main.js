@@ -1,81 +1,46 @@
 const Game = (() => {
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
-  let scene = 'title';
+  ctx.imageSmoothingEnabled = false;
   let last = 0;
-  let pendingEnd = null;
+  let acc = 0;
 
   function resize() {
-    const scale = Math.min(window.innerWidth / World.WIDTH, window.innerHeight / World.HEIGHT);
-    canvas.style.width = `${World.WIDTH * scale}px`;
-    canvas.style.height = `${World.HEIGHT * scale}px`;
-  }
-
-  function setScene(name) {
-    scene = name;
-    document.body.dataset.scene = name;
-    const startBtn = document.getElementById('btn-start');
-    if (startBtn) startBtn.textContent = name === 'end' ? 'TAP TO CONTINUE' : 'TAP TO START';
-    if (name === 'title') TitleScene.enter();
-    if (name === 'play') PlayScene.enter();
-    if (name === 'end') {
-      EndScene.enter(pendingEnd.won, pendingEnd.score, pendingEnd.rescued, pendingEnd.killed);
-    }
-  }
-
-  function update(dt) {
-    if (scene === 'title') {
-      const next = TitleScene.update(dt);
-      if (next) setScene(next);
-    } else if (scene === 'play') {
-      const result = PlayScene.update(dt);
-      if (result && result.end) {
-        pendingEnd = {
-          won: result.won,
-          score: PlayScene.getScore(),
-          rescued: PlayScene.rescued,
-          killed: PlayScene.killed,
-        };
-        setScene('end');
-      } else if (PlayScene.lives <= 0 || PlayScene.gameOver) {
-        pendingEnd = {
-          won: false,
-          score: PlayScene.getScore(),
-          rescued: PlayScene.rescued,
-          killed: PlayScene.killed,
-        };
-        setScene('end');
-      }
-    } else if (scene === 'end') {
-      const next = EndScene.update(dt);
-      if (next) setScene(next);
-    }
-  }
-
-  function draw() {
-    if (scene === 'title') TitleScene.draw(ctx);
-    else if (scene === 'play') PlayScene.draw(ctx);
-    else if (scene === 'end') EndScene.draw(ctx);
+    const scale = Math.min(window.innerWidth / 280, window.innerHeight / 192);
+    canvas.style.width = `${Math.floor(280 * scale)}px`;
+    canvas.style.height = `${Math.floor(192 * scale)}px`;
   }
 
   function loop(ts) {
-    const dt = Math.min((ts - last) / 1000, 0.05);
-    last = ts;
-    update(dt);
-    draw();
+    const dt = Math.min(0.05, (ts - last) / 1000);
+    last = ts || 0;
+    acc += dt;
+    let steps = 0;
+    while (acc >= 1 / 12 && steps < 4) {
+      GameApp.frame();
+      acc -= 1 / 12;
+      steps += 1;
+    }
+    document.body.dataset.scene = GameApp.scene();
+    const startBtn = document.getElementById('btn-start');
+    if (startBtn) {
+      const scene = GameApp.scene();
+      startBtn.textContent = scene === 'end' ? 'TAP TO CONTINUE' : 'TAP TO START';
+    }
+    GameApp.draw(ctx);
     requestAnimationFrame(loop);
   }
 
-  async function init() {
+  function init() {
     Input.init();
     window.addEventListener('resize', resize);
     resize();
-    await Sprites.load();
-    document.body.addEventListener('click', () => AudioFX.init(), { once: true });
-    document.body.addEventListener('touchstart', () => AudioFX.init(), { once: true });
     document.body.dataset.scene = 'title';
-    TitleScene.enter();
-    requestAnimationFrame(loop);
+    const bootAudio = () => { try { AudioFX.init(); } catch (_) { /* ignore */ } };
+    document.body.addEventListener('pointerdown', bootAudio, { once: true });
+    document.body.addEventListener('keydown', bootAudio, { once: true });
+    GameApp.boot();
+    requestAnimationFrame((ts) => { last = ts; requestAnimationFrame(loop); });
   }
 
   return { init };

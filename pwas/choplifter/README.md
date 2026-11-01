@@ -7,11 +7,11 @@ A faithful HTML5 recreation of the 1982 Apple II classic. Rescue hostages from t
 Live: https://superdooperman.github.io/pwas/choplifter/
 
 ```bash
-cd /home/pibot/choplifter
+cd pwas/choplifter
 python3 -m http.server 8080
 ```
 
-Local: `http://localhost:8080` (or `http://<pi-ip>:8080` from another device).
+Local: `http://localhost:8080`. From the site root, the game is `/pwas/choplifter/`.
 
 ## Controls
 
@@ -25,4 +25,6 @@ On mobile, use "Add to Home Screen" after loading the page. Works offline after 
 
 ## Goal
 
-Shoot barrack doors to free hostages, land level to pick them up (max 16), return to the home base on the left to unload. Rescue 40 hostages to win.
+The post office base is on the right. Fly left, shoot a barracks from the side to open it, and land level so hostages can climb aboard (16 at a time). Set them down on the pad. Sixty-four hostages, three sorties. The counters are hostages lost, aboard, and safely home.
+
+Z (or the Face button) is the original turn button: a short press faces you, a held press carries the nose through to the other side. Space fires, and only a forward-facing shot reaches a tank. P or Esc pauses. Ctrl-S toggles sound. Ctrl-A and Ctrl-V reverse the stick. Ctrl-L, then a key, sets the level to that key's low two bits.

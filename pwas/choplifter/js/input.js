@@ -14,10 +14,37 @@ const Input = (() => {
     return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   }
 
+  let startEdge = false;
+  let pauseEdge = false;
+  let levelArm = false;
+  let levelSet = null;
+  let soundEdge = false;
+  let revXEdge = false;
+  let revYEdge = false;
+
   function init() {
     window.addEventListener('keydown', (e) => {
+      const first = !keys[e.code];
+      if (first && e.ctrlKey && e.code === 'KeyL') {
+        levelArm = true;
+        e.preventDefault();
+        return;
+      }
+      if (first && levelArm && !e.ctrlKey && !e.metaKey) {
+        levelSet = e.key;
+        levelArm = false;
+        e.preventDefault();
+        return;
+      }
+      if (first && e.ctrlKey && e.code === 'KeyS') { soundEdge = true; e.preventDefault(); return; }
+      if (first && e.ctrlKey && e.code === 'KeyA') { revXEdge = true; e.preventDefault(); return; }
+      if (first && e.ctrlKey && e.code === 'KeyV') { revYEdge = true; e.preventDefault(); return; }
+      if (first && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        startEdge = true;
+        if (e.code === 'KeyP' || e.code === 'Escape') pauseEdge = true;
+      }
       keys[e.code] = true;
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'Escape'].includes(e.code)) {
         e.preventDefault();
       }
     });
@@ -194,21 +221,54 @@ const Input = (() => {
   }
 
   function consumeStart() {
-    const v = startPressed || keys.Space || keys.Enter;
+    const v = startEdge || startPressed;
+    startEdge = false;
     startPressed = false;
     return v;
   }
 
   function consumePause() {
-    const v = pausePressed || keys.KeyP;
+    const v = pauseEdge || pausePressed;
+    pauseEdge = false;
     pausePressed = false;
     return v;
+  }
+
+  function consumeLevel() {
+    const v = levelSet;
+    levelSet = null;
+    return v;
+  }
+
+  function consumeSound() {
+    const v = soundEdge;
+    soundEdge = false;
+    return v;
+  }
+
+  function consumeRevX() {
+    const v = revXEdge;
+    revXEdge = false;
+    return v;
+  }
+
+  function consumeRevY() {
+    const v = revYEdge;
+    revYEdge = false;
+    return v;
+  }
+
+  function clearEdges() {
+    startEdge = false;
+    pauseEdge = false;
+    startPressed = false;
+    pausePressed = false;
   }
 
   function getMovement() {
     const kb = keyboardMovement();
     const kbActive = Math.abs(kb.x) > 0 || Math.abs(kb.y) > 0;
-    const aim = keys.KeyS || aimDown;
+    const aim = keys.KeyZ || aimDown;
 
     let x = 0;
     let y = 0;
@@ -234,6 +294,7 @@ const Input = (() => {
 
   return {
     init, getMovement, isShooting,
-    consumeStart, consumePause, isTouchDevice,
+    consumeStart, consumePause, consumeLevel, consumeSound, consumeRevX, consumeRevY,
+    clearEdges, isTouchDevice,
   };
 })();

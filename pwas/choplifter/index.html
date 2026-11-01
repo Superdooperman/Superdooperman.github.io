@@ -17,7 +17,7 @@
     <div id="touch-controls" class="hidden">
       <div id="joystick-zone"><div id="joystick-knob"></div></div>
       <div id="action-buttons">
-        <button id="btn-facing" type="button" aria-label="Aim down">AIM DN</button>
+        <button id="btn-facing" type="button" aria-label="Face">FACE</button>
         <button id="btn-fire" type="button" aria-label="Fire">FIRE</button>
         <button id="btn-motion" type="button" aria-label="Toggle motion controls">MOTION</button>
       </div>
@@ -32,24 +32,11 @@
     </div>
     <div id="rotate-hint" class="hidden">Rotate to landscape</div>
   </div>
+  <p id="tribute" class="sr">A faithful HTML5 recreation of the 1982 Apple II classic. Rescue hostages from the Bungeling Empire and fly them back to the USPS base. Independent tribute, not affiliated with Broderbund.</p>
   <script src="js/audio.js"></script>
-  <script src="js/sprite-atlas.js"></script>
-  <script src="js/sprites.js"></script>
-  <script src="js/collision.js"></script>
   <script src="js/motion.js"></script>
   <script src="js/input.js"></script>
-  <script src="js/world.js"></script>
-  <script src="js/entities/projectile.js"></script>
-  <script src="js/entities/hostage.js"></script>
-  <script src="js/entities/tank.js"></script>
-  <script src="js/entities/jet.js"></script>
-  <script src="js/entities/bomber.js"></script>
-  <script src="js/entities/alien.js"></script>
-  <script src="js/entities/helicopter.js"></script>
-  <script src="js/scenes/hud.js"></script>
-  <script src="js/scenes/title.js"></script>
-  <script src="js/scenes/end.js"></script>
-  <script src="js/scenes/play.js"></script>
+  <script src="js/game.js"></script>
   <script src="js/main.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
