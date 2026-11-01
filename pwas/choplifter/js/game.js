@@ -82,48 +82,63 @@
   glyph("'", ['00100', '00100', '01000', '00000', '00000', '00000', '00000']);
 
   const HELI_SIDE = [
-    '.............WWWWWWWWWW.............',
-    '.................WW.................',
-    '..........WWWWWWWWWWWWWWWW..........',
-    '.......WWWWWWWWWWWWWWWWWWWWW........',
-    '...WWWWWWWWWWWWWWWWWWWWWWWWWWW......',
-    '..WWWWW..............WWWWWWWWW......',
-    '..WWWWW..............WWW..WWWW......',
-    '..WWWWWWWWWWWWWWWWWWWWWWWWWWWW......',
-    '...WWWWWWWWWWWWWWWWWWWWWWW..........',
-    '.......WW..................WW.......',
-    '......WWWW................WWWW......',
+    '.................WWWWWWWWWWWWW..................',
+    '.......................WW.......................',
+    '................WWWWWWWWWWWWWWWW................',
+    '.............WWWWWWWWWWWWWWWWWWWWW..............',
+    '........WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW..........',
+    '......WWWWWWW..................WWWWWWWWW........',
+    '......WWWWWWW..................WWWW..WWWW.......',
+    '......WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW........',
+    '.......WWWWWWWWWWWWWWWWWWWWWWWWWWWWW............',
+    '..........WWWW......................WWWW........',
+    '.........WWWWWW....................WWWWWW.......',
+    '........WW....WW................WW....WW........',
   ];
   const HELI_FRONT = [
-    '......WWWWWW......',
-    '....WWWWWWWWWW....',
-    '...WWWWWWWWWWWW...',
-    '..WWW..WW..WWW....',
-    '..WWW..KK..WWW....',
-    '...WWWWWWWWWWWW...',
-    '....WWWWWWWWWW....',
-    '.....WW..WW.......',
-    '....WWW..WWW......',
-    '.....WW..WW.......',
+    '........WWWWWW........',
+    '......WWWWWWWWWW......',
+    '....WWWWWWWWWWWWWW....',
+    '...WWW...WWWW...WWW...',
+    '...WWW...WKKW...WWW...',
+    '....WWWWWWWWWWWWWW....',
+    '.....WWWWWWWWWWWW.....',
+    '.......WW....WW.......',
+    '......WWW....WWW......',
+    '.......WW....WW.......',
   ];
   const MAN_RUN = [
-    ['.WW.', 'WWWW', '.WW.', '.WW.', 'W..W', 'W..W'],
-    ['.WW.', 'WWWW', '.WW.', '.WW.', '.WW.', 'W..W'],
+    ['..WW..', '.WWWW.', '..WW..', '..WW..', '.W..W.', '.W..W.', 'W....W'],
+    ['..WW..', '.WWWW.', '..WW..', '..WW..', '..WW..', '.W..W.', 'W....W'],
   ];
-  const MAN_WAVE = ['W..W', '.WW.', 'WWWW', '.WW.', '.WW.', 'W..W'];
+  const MAN_WAVE = ['W....W', '.W..W.', '..WW..', '.WWWW.', '..WW..', '..WW..', 'W....W'];
   const TANK_SPRITE = [
-    '........GG..........',
-    '.......GGGG.........',
-    '..GGGGGGGGGGGGGG....',
-    '.GGGGGGGGGGGGGGGGG..',
-    'GG..GG..GG..GG..GG..',
+    '..........WWWW..............',
+    '.........WWWWWWW............',
+    '...WWWWWWWWWWWWWWWWWWW......',
+    '..WWWWWWWWWWWWWWWWWWWWWW....',
+    '.GG..GG..GG..GG..GG..GG..GG.',
+    'GG..GG..GG..GG..GG..GG..GG..',
   ];
   const JET_SPRITE = [
-    '..........WW..........',
-    '.....WWWWWWWWWWW......',
-    '...WWWWWWWWWWWWWWW....',
-    '.....WWWWWWWWWWW......',
-    '..........WW..........',
+    '.............WW.............',
+    '........WWWWWWWWWWWW........',
+    '.....WWWWWWWWWWWWWWWWW......',
+    '........WWWWWWWWWWWW........',
+    '.............WW.............',
+  ];
+  // Stepped violet masses in parallax space (half scroll). Each entry is
+  // start, width, height in pixels above the floor.
+  const MESAS = [
+    [360, 150, 100],
+    [640, 180, 118],
+    [760, 150, 112],
+    [1040, 160, 96],
+    [1320, 200, 124],
+    [1680, 140, 88],
+    [1960, 170, 116],
+    [2288, 170, 122],
+    [2520, 120, 48],
   ];
 
   const S = {};
@@ -293,7 +308,7 @@
       return;
     }
     if (inp.pause) S.paused = !S.paused;
-    if (S.paused) return;
+    if (S.paused || S.frozen) return;
 
     S.frame += 1;
     if (S.banner > 0) S.banner -= 1;
@@ -885,19 +900,18 @@
     drawPlanet(ctx);
     // Hi-res ground bytes are the repeating pair that lights every even column.
     // Unlit columns stay black, which is the stripe in the recomp screenshots.
-    for (let y = GROUND + 1; y < H; y++) {
+    for (let y = GROUND; y < H; y++) {
       for (let x = 0; x < W; x += 2) {
         ctx.fillStyle = INK.V;
         ctx.fillRect(x, y, 1, 1);
       }
     }
     if (S.mode !== 'title') {
-      drawHills(ctx);
-      drawHorizon(ctx);
+      drawTerrain(ctx);
       drawFence(ctx);
       drawBase(ctx);
       S.barracks.forEach((b) => drawBarracks(ctx, b));
-      S.tanks.forEach((t) => { if (t.alive) blit(ctx, TANK_SPRITE, sxOf(t.x) - 10, GROUND - 5, {}); });
+      S.tanks.forEach((t) => { if (t.alive) blit(ctx, TANK_SPRITE, sxOf(t.x) - 16, GROUND - TANK_SPRITE.length, {}); });
       S.hostages.forEach((man) => drawMan(ctx, man));
       S.walkers.forEach((w) => blit(ctx, MAN_RUN[(S.frame || 0) & 1], sxOf(w.x), GROUND - 6, {}));
       S.jets.forEach((j) => {
@@ -926,13 +940,14 @@
   }
 
   function drawPlanet(ctx) {
-    const cx = 250;
-    const cy = 74;
-    for (let y = -8; y <= 8; y++) {
-      for (let x = -8; x <= 8; x++) {
-        if (x * x + y * y > 62) continue;
+    const cx = 222;
+    const cy = 80;
+    const r = 11;
+    for (let y = -r; y <= r; y++) {
+      for (let x = -r; x <= r; x++) {
+        if (x * x + y * y > r * r - 2) continue;
+        const band = (y + 12) % 4;
         let color = INK.W;
-        const band = (y + S.frame) & 3;
         if (band === 0) color = INK.B;
         else if (band === 1) color = INK.O;
         ctx.fillStyle = color;
@@ -941,16 +956,33 @@
     }
   }
 
-  function drawHills(ctx) {
-    const par = S.view * 0.5;
-    for (let x = 0; x < W; x++) {
-      const wx = Math.floor(par + x);
-      const m = ((wx % 80) + 80) % 80;
-      const tri = m < 40 ? m : 80 - m;
-      const hh = Math.floor(tri / 12);
-      if (!hh) continue;
-      ctx.fillStyle = (wx & 1) ? INK.B : INK.O;
-      ctx.fillRect(x, GROUND - hh, 1, hh);
+  function mesaHeight(px) {
+    let best = 0;
+    for (let i = 0; i < MESAS.length; i++) {
+      const start = MESAS[i][0];
+      const width = MESAS[i][1];
+      const height = MESAS[i][2];
+      const end = start + width;
+      if (px >= start && px < end) {
+        if (height > best) best = height;
+        continue;
+      }
+      const dist = px < start ? start - px : px - end;
+      if (dist > 80) continue;
+      const steps = Math.ceil(dist / 8);
+      const h = height - steps * 12;
+      if (h > best) best = h;
+    }
+    return best;
+  }
+
+  function drawTerrain(ctx) {
+    const origin = S.view * 0.5;
+    for (let x = 0; x < W; x += 2) {
+      const hgt = mesaHeight(origin + x);
+      if (hgt <= 0) continue;
+      ctx.fillStyle = INK.V;
+      ctx.fillRect(x, GROUND - hgt, 1, hgt);
     }
   }
 
@@ -976,52 +1008,59 @@
   }
 
   function drawBase(ctx) {
-    const x = sxOf(BASE + 4);
-    if (x > W + 20 || x < -140) return;
+    const x = sxOf(BASE - 6);
+    if (x > W + 30 || x < -160) return;
     ctx.fillStyle = INK.G;
-    ctx.fillRect(x - 8, GROUND - 2, 78, 3);
-    ctx.fillStyle = INK.W;
-    ctx.fillRect(x - 8, GROUND - 3, 78, 1);
-    const bx = x + 62;
+    ctx.fillRect(x, GROUND - 4, 96, 4);
+    hiresRun(ctx, x, GROUND - 5, 96);
+    const bx = x + 70;
     ctx.fillStyle = INK.O;
-    ctx.fillRect(bx, GROUND - 12, 70, 12);
+    ctx.fillRect(bx, GROUND - 18, 88, 18);
+    hiresRun(ctx, bx, GROUND - 20, 88);
+    hiresRun(ctx, bx, GROUND - 19, 88);
     ctx.fillStyle = INK.W;
-    ctx.fillRect(bx, GROUND - 14, 70, 2);
-    for (let i = 0; i < 3; i++) ctx.fillRect(bx + 6 + i * 22, GROUND - 8, 12, 3);
+    for (let n = 0; n < 4; n++) ctx.fillRect(bx + 6 + n * 20, GROUND - 12, 12, 4);
     ctx.fillStyle = INK.K;
-    ctx.fillRect(bx + 40, GROUND - 8, 6, 8);
-    const pole = bx + 64;
-    ctx.fillStyle = INK.W;
-    ctx.fillRect(pole, GROUND - 26, 1, 14);
+    ctx.fillRect(bx + 40, GROUND - 12, 8, 12);
+    const pole = bx + 80;
+    for (let y = GROUND - 36; y < GROUND - 18; y++) {
+      ctx.fillStyle = INK.W;
+      ctx.fillRect(pole, y, 1, 1);
+    }
     const wave = (S.frame & 4) ? 0 : 1;
     ctx.fillStyle = INK.B;
-    ctx.fillRect(pole + 1, GROUND - 26 + wave, 3, 3);
+    ctx.fillRect(pole + 1, GROUND - 36 + wave, 4, 4);
     ctx.fillStyle = INK.O;
-    ctx.fillRect(pole + 1, GROUND - 23 + wave, 8, 2);
-    ctx.fillStyle = INK.W;
-    ctx.fillRect(pole + 1, GROUND - 21 + wave, 8, 2);
+    ctx.fillRect(pole + 1, GROUND - 32 + wave, 11, 3);
+    hiresRun(ctx, pole + 1, GROUND - 29 + wave, 11);
   }
 
   function drawBarracks(ctx, b) {
-    const x = sxOf(b.x) - 4;
-    if (x < -40 || x > W + 10) return;
-    const roof = GROUND - 16;
-    ctx.fillStyle = INK.W;
-    for (let i = 0; i < 6; i++) ctx.fillRect(x + 4 + i, roof + i, 28 - i * 2, 1);
+    const x = sxOf(b.x) - 20;
+    if (x < -50 || x > W + 10) return;
+    const baseW = 44;
+    const roofH = 10;
+    const bodyH = 12;
+    const top = GROUND - bodyH - roofH;
+    for (let i = 0; i < roofH; i++) {
+      const inset = roofH - 1 - i;
+      const w = baseW - inset * 2;
+      hiresRun(ctx, x + inset, top + i, w);
+    }
     ctx.fillStyle = INK.B;
-    ctx.fillRect(x + 2, GROUND - 10, 32, 10);
+    ctx.fillRect(x, GROUND - bodyH, baseW, bodyH);
     ctx.fillStyle = INK.W;
-    ctx.fillRect(x + 4, GROUND - 8, 28, 6);
+    ctx.fillRect(x + 3, GROUND - bodyH + 2, baseW - 6, bodyH - 4);
     if (b.open) {
       ctx.fillStyle = INK.K;
-      ctx.fillRect(x + 14, GROUND - 8, 6, 8);
+      ctx.fillRect(x + 18, GROUND - 10, 8, 10);
       ctx.fillStyle = (S.frame & 2) ? INK.O : INK.W;
-      ctx.fillRect(x + 6, GROUND - 18, 3, 3);
-      ctx.fillRect(x + 22, GROUND - 19, 2, 4);
+      ctx.fillRect(x + 8, top - 3, 4, 4);
+      ctx.fillRect(x + 30, top - 2, 3, 4);
     } else {
       ctx.fillStyle = INK.B;
-      ctx.fillRect(x + 8, GROUND - 7, 4, 3);
-      ctx.fillRect(x + 22, GROUND - 7, 4, 3);
+      ctx.fillRect(x + 8, GROUND - 8, 6, 4);
+      ctx.fillRect(x + 30, GROUND - 8, 6, 4);
     }
   }
 
@@ -1055,14 +1094,31 @@
       flip: h.pose < 0, tilt: visualTilt, keep, squish: h.squish,
     });
     if (!h.landed) {
-      const rw = mag === 0 ? 8 : 16;
+      const rw = mag === 0 ? 10 : 22;
       const ry = top - 2;
-      ctx.fillStyle = INK.W;
       for (let i = -rw; i <= rw; i++) {
         if (((i + S.frame) % 3) === 0) continue;
+        ctx.fillStyle = INK.W;
         ctx.fillRect(sxOf(h.x) + i, ry, 1, 1);
       }
     }
+  }
+
+  function plotWhite(ctx, x, y) {
+    ctx.fillStyle = INK.W;
+    ctx.fillRect(Math.round(x), Math.round(y), 1, 1);
+  }
+
+  function hiresRun(ctx, x, y, w) {
+    x = Math.round(x);
+    y = Math.round(y);
+    if (w <= 0) return;
+    ctx.fillStyle = (x & 1) ? INK.V : INK.G;
+    ctx.fillRect(x - 1, y, 1, 1);
+    ctx.fillStyle = ((x + w) & 1) ? INK.O : INK.B;
+    ctx.fillRect(x + w, y, 1, 1);
+    ctx.fillStyle = INK.W;
+    ctx.fillRect(x, y, w, 1);
   }
 
   function blit(ctx, sprite, x, y, opt) {
@@ -1079,10 +1135,26 @@
       const dy = y + row - (opt.squish && row > 4 ? 1 : 0);
       for (let col = 0; col < dw; col++) {
         const sample = clamp(Math.round(col / keep), 0, w - 1);
-        const ch = src[flip ? w - 1 - sample : sample];
+        const si = flip ? w - 1 - sample : sample;
+        const ch = src[si];
         if (!ch || ch === '.' || ch === ' ') continue;
-        ctx.fillStyle = INK[ch] || INK.W;
-        ctx.fillRect(Math.round(x + col + shear), dy, 1, 1);
+        const px = Math.round(x + col + shear);
+        if (ch === 'W') {
+          const left = si > 0 ? src[si - 1] : '.';
+          const right = si < w - 1 ? src[si + 1] : '.';
+          if (!left || left === '.' || left === ' ') {
+            ctx.fillStyle = (px & 1) ? INK.V : INK.G;
+            ctx.fillRect(px - 1, dy, 1, 1);
+          }
+          if (!right || right === '.' || right === ' ') {
+            ctx.fillStyle = (px & 1) ? INK.O : INK.B;
+            ctx.fillRect(px + 1, dy, 1, 1);
+          }
+          ctx.fillStyle = INK.W;
+        } else {
+          ctx.fillStyle = INK[ch] || INK.W;
+        }
+        ctx.fillRect(px, dy, 1, 1);
       }
     }
   }
@@ -1097,6 +1169,17 @@
   }
 
   function drawHud(ctx) {
+    const killed = S.mode === 'play' || S.mode === 'end' ? S.killed : 0;
+    const aboard = S.mode === 'play' || S.mode === 'end' ? S.aboard : 0;
+    const home = S.mode === 'play' || S.mode === 'end' ? S.rescued : 0;
+    if (S.mode === 'title') drawRainbowHud(ctx);
+    else drawVioletHud(ctx);
+    lemon(ctx, 70, INK.O, killed);
+    lemon(ctx, 140, INK.B, aboard);
+    lemon(ctx, 210, INK.G, home);
+  }
+
+  function drawRainbowHud(ctx) {
     for (let y = 0; y < 8; y++) {
       const inset = 7 - y;
       ctx.fillStyle = INK.B;
@@ -1108,33 +1191,41 @@
     ctx.fillRect(1, 11, W - 2, 11);
     ctx.fillStyle = INK.G;
     ctx.fillRect(1, 22, W - 2, 3);
-    lemon(ctx, 70, INK.O, S.mode === 'play' || S.mode === 'end' ? S.killed : 0);
-    lemon(ctx, 140, INK.B, S.mode === 'play' || S.mode === 'end' ? S.aboard : 0);
-    lemon(ctx, 210, INK.G, S.mode === 'play' || S.mode === 'end' ? S.rescued : 0);
+  }
+
+  function drawVioletHud(ctx) {
+    for (let y = 2; y <= 24; y++) {
+      for (let x = 0; x < W; x += 2) {
+        ctx.fillStyle = INK.V;
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+    for (let y = 2; y <= 7; y++) {
+      const n = 8 - y;
+      ctx.fillStyle = INK.B;
+      for (let i = 0; i < n; i++) {
+        ctx.fillRect(2 + i * 2, y, 1, 1);
+        ctx.fillRect(W - 4 - i * 2, y, 1, 1);
+      }
+    }
   }
 
   function lemon(ctx, cx, color, value) {
-    ctx.fillStyle = INK.K;
-    for (let y = -4; y <= 4; y++) {
-      const half = 14 - Math.abs(y);
-      ctx.fillRect(cx - half, 16 + y, half * 2, 1);
-    }
+    const rows = [2, 4, 6, 8, 8, 6, 4, 2];
     ctx.fillStyle = color;
-    for (let y = -2; y <= 2; y++) {
-      const half = 8 - Math.abs(y);
-      ctx.fillRect(cx - half, 16 + y, half * 2, 1);
+    for (let i = 0; i < rows.length; i++) {
+      ctx.fillRect(cx - rows[i], 12 + i, rows[i] * 2, 1);
     }
     const text = String(clamp(value, 0, 99)).padStart(2, '0');
-    drawDigits(ctx, text, cx - 7, 14);
+    drawDigits(ctx, text, cx - 7, 13);
   }
 
   function drawDigits(ctx, text, x, y) {
-    ctx.fillStyle = INK.W;
     for (let i = 0; i < text.length; i++) {
       const rows = DIGIT[text[i]] || DIGIT[0];
       rows.forEach((row, ry) => {
         for (let rx = 0; rx < row.length; rx++) {
-          if (row[rx] === '1') ctx.fillRect(x + i * 8 + rx, y + ry, 1, 1);
+          if (row[rx] === '1') plotWhite(ctx, x + i * 8 + rx, y + ry);
         }
       });
     }
@@ -1378,18 +1469,21 @@
 
   function debugSetup(name) {
     S.quiet = true;
+    S.frozen = true;
     if (name === 'title') { showTitle(); return; }
     beginPlay();
     S.quiet = true;
-    S.banner = name === 'fly' ? 40 : 0;
+    S.banner = 0;
     if (name === 'fly') {
       S.heli.landed = false;
       S.heli.alt = 48;
       S.heli.tilt = -4;
       S.heli.pose = -4;
       S.heli.vx256 = -10 * 256;
-      S.heli.x = START_X - 80;
-      S.view = clamp(S.heli.x - 80, VIEW_MIN, VIEW_MAX);
+      S.heli.x = START_X - 120;
+      S.heli.tilt = -3;
+      S.view = clamp(S.heli.x - 36, VIEW_MIN, VIEW_MAX);
+      S.tanks = [{ x: S.heli.x + 70, dir: -1, think: 40, alive: true }];
     }
     if (name === 'gameplay') {
       const bx = BARRACKS_X[3];
