@@ -1,0 +1,652 @@
+{
+ "image": "egg-timer-sprites.png",
+ "size": [
+  864,
+  184
+ ],
+ "cell": [
+  72,
+  92
+ ],
+ "cols": 12,
+ "rows": 2,
+ "anchor": {
+  "x": 36,
+  "bottom_y": 88,
+  "note": "egg shell centred on x=36, lowest opaque row is y=88 in every cell"
+ },
+ "scale_from_concept": 0.2736,
+ "coords": "cell pixel-index coords (pixel (x,y) == fillRect(x,y,1,1)); eye rx/ry are the white interior radii, rim not included",
+ "pupil_radius_px": 1.94,
+ "eye_ids": "0 = the eye on the viewer's left in the front view (code eyes[0], longitude -1.15); 1 = the other eye",
+ "turning": "row 0 frame f = f*30 deg; the face turns toward the VIEWER'S LEFT as f increases (code rot is the opposite sign): f = ((-Math.round(rot/(Math.PI/6)))%12+12)%12",
+ "sides": "near = eye on the visible side, draw pupil; far = eye peeking around the head; sliver=true means too small for a pupil",
+ "crack_picks": {
+  "crack_000": 1,
+  "crack_025": 3,
+  "crack_050": 4,
+  "crack_075": 6,
+  "crack_100": 8
+ },
+ "unused_cells": [
+  [
+   1,
+   6
+  ],
+  [
+   1,
+   7
+  ],
+  [
+   1,
+   8
+  ],
+  [
+   1,
+   9
+  ],
+  [
+   1,
+   10
+  ],
+  [
+   1,
+   11
+  ]
+ ],
+ "frames": [
+  {
+   "name": "turn_000",
+   "index": 0,
+   "row": 0,
+   "col": 0,
+   "x": 0,
+   "y": 0,
+   "w": 72,
+   "h": 92,
+   "view_deg": 0,
+   "source": "concept row1 #1",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 20.9,
+     "cy": 49.1,
+     "rx": 4.0,
+     "ry": 5.2,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 50.2,
+     "cy": 48.6,
+     "rx": 4.1,
+     "ry": 5.2,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    }
+   ]
+  },
+  {
+   "name": "turn_030",
+   "index": 1,
+   "row": 0,
+   "col": 1,
+   "x": 72,
+   "y": 0,
+   "w": 72,
+   "h": 92,
+   "view_deg": 30,
+   "source": "concept row1 #2",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 19.8,
+     "cy": 48.3,
+     "rx": 2.1,
+     "ry": 3.9,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 46.8,
+     "cy": 48.8,
+     "rx": 4.9,
+     "ry": 5.4,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    }
+   ]
+  },
+  {
+   "name": "turn_060",
+   "index": 2,
+   "row": 0,
+   "col": 2,
+   "x": 144,
+   "y": 0,
+   "w": 72,
+   "h": 92,
+   "view_deg": 60,
+   "source": "concept row1 #3",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 20.2,
+     "cy": 47.1,
+     "rx": 1.6,
+     "ry": 1.8,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 36.4,
+     "cy": 50.6,
+     "rx": 4.8,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    }
+   ]
+  },
+  {
+   "name": "turn_090",
+   "index": 3,
+   "row": 0,
+   "col": 3,
+   "x": 216,
+   "y": 0,
+   "w": 72,
+   "h": 92,
+   "view_deg": 90,
+   "source": "concept row1 #4",
+   "eyes": [
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 29.3,
+     "cy": 50.6,
+     "rx": 4.4,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    }
+   ]
+  },
+  {
+   "name": "turn_120",
+   "index": 4,
+   "row": 0,
+   "col": 4,
+   "x": 288,
+   "y": 0,
+   "w": 72,
+   "h": 92,
+   "view_deg": 120,
+   "source": "concept row1 #5",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 50.0,
+     "cy": 49.2,
+     "rx": 1.5,
+     "ry": 2.9,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 23.0,
+     "cy": 50.5,
+     "rx": 4.4,
+     "ry": 4.6,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    }
+   ]
+  },
+  {
+   "name": "turn_150",
+   "index": 5,
+   "row": 0,
+   "col": 5,
+   "x": 360,
+   "y": 0,
+   "w": 72,
+   "h": 92,
+   "view_deg": 150,
+   "source": "concept row1 #6",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 49.5,
+     "cy": 49.3,
+     "rx": 1.8,
+     "ry": 2.7,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 24.6,
+     "cy": 52.1,
+     "rx": 4.1,
+     "ry": 4.6,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    }
+   ]
+  },
+  {
+   "name": "turn_180",
+   "index": 6,
+   "row": 0,
+   "col": 6,
+   "x": 432,
+   "y": 0,
+   "w": 72,
+   "h": 92,
+   "view_deg": 180,
+   "source": "concept row1 #7",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 51.6,
+     "cy": 49.4,
+     "rx": 1.9,
+     "ry": 2.7,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false
+    },
+    {
+     "id": 1,
+     "side": "far",
+     "cx": 19.2,
+     "cy": 49.5,
+     "rx": 1.8,
+     "ry": 3.0,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false
+    }
+   ]
+  },
+  {
+   "name": "turn_210",
+   "index": 7,
+   "row": 0,
+   "col": 7,
+   "x": 504,
+   "y": 0,
+   "w": 72,
+   "h": 92,
+   "view_deg": 210,
+   "source": "concept row1 #8",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 46.2,
+     "cy": 51.0,
+     "rx": 4.4,
+     "ry": 5.2,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    }
+   ]
+  },
+  {
+   "name": "turn_240",
+   "index": 8,
+   "row": 0,
+   "col": 8,
+   "x": 576,
+   "y": 0,
+   "w": 72,
+   "h": 92,
+   "view_deg": 240,
+   "source": "concept row1 #9",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 43.4,
+     "cy": 50.2,
+     "rx": 4.5,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    }
+   ]
+  },
+  {
+   "name": "turn_270",
+   "index": 9,
+   "row": 0,
+   "col": 9,
+   "x": 648,
+   "y": 0,
+   "w": 72,
+   "h": 92,
+   "view_deg": 270,
+   "source": "concept row1 #10",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 43.2,
+     "cy": 50.8,
+     "rx": 5.1,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    }
+   ]
+  },
+  {
+   "name": "turn_300",
+   "index": 10,
+   "row": 0,
+   "col": 10,
+   "x": 720,
+   "y": 0,
+   "w": 72,
+   "h": 92,
+   "view_deg": 300,
+   "source": "concept row1 #11",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 39.1,
+     "cy": 50.7,
+     "rx": 4.9,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    },
+    {
+     "id": 1,
+     "side": "far",
+     "cx": 51.1,
+     "cy": 45.9,
+     "rx": 1.2,
+     "ry": 1.4,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false
+    }
+   ]
+  },
+  {
+   "name": "turn_330",
+   "index": 11,
+   "row": 0,
+   "col": 11,
+   "x": 792,
+   "y": 0,
+   "w": 72,
+   "h": 92,
+   "view_deg": 330,
+   "source": "concept row1 #12",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 20.9,
+     "cy": 49.0,
+     "rx": 4.1,
+     "ry": 4.9,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 50.6,
+     "cy": 48.8,
+     "rx": 3.9,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    }
+   ]
+  },
+  {
+   "name": "crack_000",
+   "index": 12,
+   "row": 1,
+   "col": 0,
+   "x": 0,
+   "y": 92,
+   "w": 72,
+   "h": 92,
+   "view_deg": null,
+   "source": "concept row2 #1",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 21.0,
+     "cy": 46.9,
+     "rx": 4.1,
+     "ry": 5.2,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 50.7,
+     "cy": 46.7,
+     "rx": 4.0,
+     "ry": 5.3,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    }
+   ]
+  },
+  {
+   "name": "crack_025",
+   "index": 13,
+   "row": 1,
+   "col": 1,
+   "x": 72,
+   "y": 92,
+   "w": 72,
+   "h": 92,
+   "view_deg": null,
+   "source": "concept row2 #3",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 20.8,
+     "cy": 47.0,
+     "rx": 3.6,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 50.5,
+     "cy": 46.5,
+     "rx": 4.2,
+     "ry": 5.6,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    }
+   ]
+  },
+  {
+   "name": "crack_050",
+   "index": 14,
+   "row": 1,
+   "col": 2,
+   "x": 144,
+   "y": 92,
+   "w": 72,
+   "h": 92,
+   "view_deg": null,
+   "source": "concept row2 #4",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 20.0,
+     "cy": 46.7,
+     "rx": 3.7,
+     "ry": 5.1,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 50.9,
+     "cy": 46.4,
+     "rx": 4.1,
+     "ry": 5.2,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    }
+   ]
+  },
+  {
+   "name": "crack_075",
+   "index": 15,
+   "row": 1,
+   "col": 3,
+   "x": 216,
+   "y": 92,
+   "w": 72,
+   "h": 92,
+   "view_deg": null,
+   "source": "concept row2 #6",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 20.5,
+     "cy": 44.6,
+     "rx": 4.1,
+     "ry": 5.2,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 52.3,
+     "cy": 44.2,
+     "rx": 3.9,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    }
+   ]
+  },
+  {
+   "name": "crack_100",
+   "index": 16,
+   "row": 1,
+   "col": 4,
+   "x": 288,
+   "y": 92,
+   "w": 72,
+   "h": 92,
+   "view_deg": null,
+   "source": "concept row2 #8",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "far",
+     "cx": 18.6,
+     "cy": 43.0,
+     "rx": 2.2,
+     "ry": 2.9,
+     "sliver": true,
+     "pupil": false,
+     "pupil_painted_out": false
+    },
+    {
+     "id": 1,
+     "side": "near",
+     "cx": 47.9,
+     "cy": 44.6,
+     "rx": 5.1,
+     "ry": 5.8,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    }
+   ]
+  },
+  {
+   "name": "done",
+   "index": 17,
+   "row": 1,
+   "col": 5,
+   "x": 360,
+   "y": 92,
+   "w": 72,
+   "h": 92,
+   "view_deg": null,
+   "source": "concept row2 #9",
+   "eyes": [
+    {
+     "id": 0,
+     "side": "near",
+     "cx": 20.0,
+     "cy": 33.2,
+     "rx": 4.3,
+     "ry": 5.0,
+     "sliver": false,
+     "pupil": true,
+     "pupil_painted_out": true
+    }
+   ]
+  }
+ ]
+}

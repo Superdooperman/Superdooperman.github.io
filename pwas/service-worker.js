@@ -2,7 +2,7 @@
 // Games with their own sw.js (moon-axis/, phish-desk/, ...) register a narrower
 // scope, so they are controlled by their own worker, not this one.
 // VERSION is set by scripts/bump-sw.sh (content hash of shared files); run it before every push.
-const VERSION = '20261027-878edc0cbf';
+const VERSION = '20261101-188bdf253a';
 const PREFIX = 'pwas-shared-';
 const CACHE = PREFIX + VERSION;
 const CORE_CACHE = 'pwas-ffmpeg-core-0.12.10';
@@ -11,7 +11,7 @@ const PRECACHE = [
   './fonts/LilitaOne-Regular.woff2', './boxart/moon-axis-cover.webp', './boxart/moon-axis-unleashed-cover.webp', './boxart/lamprey-cover.webp', './boxart/rooster-timer-cover.webp', './boxart/radioactive-rooster-cover.webp', './boxart/yolk-box-cover.webp', './fonts/OFL.txt',
   './games/shelf.css', './brand/superdoop-arcade.svg',
   './TimeTracker.html', './time-manifest.json', './time/app.js', './time/egg.js', './time/rooster.js', './time/time.css',
-  './time/icon-192.png', './time/icon-512.png', './time/rooster-sprites.png',
+  './time/icon-192.png', './time/icon-512.png', './time/rooster-sprites.png', './time/egg-painted/egg-timer-sprites.png', './time/egg-painted/egg-timer-sprites.json',
   './video-toolbox.html', './Video-downloader.html', './x-pulse.html', './games/video-downloader.html', './games/x-pulse.html', './video-toolbox-manifest.json', './video-toolbox/app.js', './video-toolbox/vt.css',
   './video-toolbox/icon-192.png', './video-toolbox/icon-512.png', './video-toolbox/LilitaOne-Regular.ttf',
   './video-toolbox/vendor/ffmpeg/index.js', './video-toolbox/vendor/ffmpeg/classes.js', './video-toolbox/vendor/ffmpeg/const.js',

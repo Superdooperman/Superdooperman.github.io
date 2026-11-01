@@ -114,14 +114,14 @@
       const d = JSON.parse(await f.text());
       if (!Array.isArray(d.tasks) || !Array.isArray(d.sessions)) throw new Error('missing tasks/sessions');
       if (!confirm(`Import ${d.tasks.length} tasks and ${d.sessions.length} sessions? This replaces current data.`)) return;
-      tasks = d.tasks; sessions = d.sessions; current = null; if (d.pomoSettings) { Object.assign(set, d.pomoSettings); LS.set('pomoSettings', set); }
+      tasks = d.tasks; sessions = d.sessions; current = null; if (d.pomoSettings) { Object.assign(set, d.pomoSettings); LS.set('pomoSettings', set); egg.setSkin(set.eggSkin); eggSkinUI(); }
       save(); renderTasks(); renderHistory(); updateStats();
     } catch (err) { alert('Could not import: ' + err.message); }
     e.target.value = '';
   };
 
   // ---------- POMODORO ----------
-  const DEF = { focus: 25, short: 5, long: 15, every: 4, autoStart: false, notify: false, wake: false, volume: 0.6, muted: false };
+  const DEF = { focus: 25, short: 5, long: 15, every: 4, autoStart: false, notify: false, wake: false, volume: 0.6, muted: false, eggSkin: 'pixel' };
   const set = Object.assign({}, DEF, LS.get('pomoSettings', {}));
   const pomo = Object.assign({ phase: 'focus', endsAt: null, pausedRemaining: null, cycle: 0, taskId: null, startedAt: null }, LS.get('pomoState', {}));
   const savePomo = () => LS.set('pomoState', pomo);
@@ -225,6 +225,9 @@
     LS.set('pomoSettings', set);
   };
   $('sSpin').value = set.spin || (reduced ? 'tick' : 'smooth'); $('sSpin').onchange = (e) => { set.spin = e.target.value; LS.set('pomoSettings', set); };
+  // egg look: 'pixel' (drawn, default) or 'painted' (sprite sheet; silently falls back to pixel if it can't load)
+  function eggSkinUI() { document.querySelectorAll('#sEggSkin button').forEach((b) => { const on = b.dataset.skin === (set.eggSkin || 'pixel'); b.classList.toggle('on', on); b.setAttribute('aria-checked', on); }); }
+  document.querySelectorAll('#sEggSkin button').forEach((b) => b.onclick = () => { set.eggSkin = b.dataset.skin; LS.set('pomoSettings', set); egg.setSkin(set.eggSkin); eggSkinUI(); });
   $('sVol').oninput = (e) => { set.volume = Number(e.target.value); LS.set('pomoSettings', set); };
   $('testSnd').onclick = () => { unlockAudio(); const m = set.muted; set.muted = false; crow(); set.muted = m; };
 
@@ -252,6 +255,7 @@
     document.title = r || pomo.pausedRemaining != null ? `${r ? (pomo.phase === 'focus' ? '🥚' : '🐓') : '❚❚'} ${fmtMS(rem)} ${LABEL[pomo.phase]} · Rooster Timer` : 'Rooster Timer · Superdooper Arcade';
   }
   const egg = new EggTimer($('egg')), bctx = $('buddy').getContext('2d');
+  egg.setSkin(set.eggSkin); eggSkinUI();
   let doneAt = 0, lastSec = -1;
   function loop(now) {
     if (running() && pomo.endsAt <= Date.now()) phaseEnd();

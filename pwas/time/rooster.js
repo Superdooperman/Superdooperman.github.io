@@ -1,7 +1,7 @@
 /* Radioactive Rooster pixel art (placeholder, procedural).
    Sprite sheet layout matches github-pages-plans/rooster-frames.md: 8 cols x 6 rows of 32x32.
    Rows: 0 focus(8) 1 short(6) 2 long(8) 3 done(6) 4 paused(2) 5 idle(4).
-   If time/rooster-sprites.png exists (Arlong's art), it replaces the placeholder automatically. */
+   If time/rooster-sprites.png exists (Azzato's art), it replaces the placeholder automatically. */
 (function (G) {
   'use strict';
   const C = { k:'#000', g:'#2fae3a', gd:'#1d7a26', r:'#e10600', rd:'#7a0a12', y:'#ffd23a', yd:'#c99312',

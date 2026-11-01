@@ -81,6 +81,7 @@ h3{font-family:var(--ink-display);font-weight:400;letter-spacing:.04em}
 .chk{display:flex;gap:8px;align-items:center;margin:10px 0;color:#ddd}
 input[type=range]{accent-color:var(--ink-red);width:100%}
 .small{font-size:.8rem;color:#888}
+.seg{display:flex;align-items:center;gap:0;margin:10px 0;color:#ddd}.seg button{margin-left:-1px;padding:4px 12px;background:#0b0b0b;color:#ccc;border:1px solid #444;font:inherit;cursor:pointer}.seg button:first-of-type{margin-left:10px;border-radius:6px 0 0 6px}.seg button:last-of-type{border-radius:0 6px 6px 0}.seg button.on{background:var(--ink-red,#e10600);border-color:var(--ink-red,#e10600);color:#fff}
 @media (prefers-reduced-motion:reduce){.bubble{animation:none}}
 
 .top .btn{white-space:nowrap;padding:8px 12px}

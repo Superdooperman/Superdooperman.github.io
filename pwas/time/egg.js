@@ -5,6 +5,7 @@
   function EggTimer(canvas) {
     this.c = canvas.getContext('2d'); canvas.width = W; canvas.height = H;
     this.eyes = [mkEye(), mkEye()]; this.cracks = mkCracks(); this.last = performance.now();
+    this.skin = 'pixel'; this.painted = null; this._paintedLoad = null;   // painted sheet loads lazily
   }
   function mkEye() { return { x: 0, y: 0, tx: 0, ty: 0, next: 0, spin: 0 }; }
   function mkCracks() { // random zigzag cracks on the lower shell
@@ -30,6 +31,9 @@
   };
   // progress: 0..1 elapsed of the current phase; low: remaining fraction
   EggTimer.prototype.draw = function (o) {
+    if (this.skin === 'painted' && this.painted) {
+      try { return this.drawPainted(o); } catch (err) { this.painted = null; }   // bad sheet: back to the drawn egg
+    }
     const c = this.c, P = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(Math.round(x), Math.round(y), w || 1, h || 1); };
     c.clearRect(0, 0, W, H);
     const pop = o.popped ? 10 : 0;
@@ -114,6 +118,107 @@
     const pr = Math.max(1, Math.round(rx / 2.4)), pry = Math.max(1, Math.round(ry / 2.4));
     const ox = Math.round(px * (rx - pr - 1)), oy = Math.round(py * (ry - pry - 1));
     for (let y = -pry; y <= pry; y++) for (let x = -pr; x <= pr; x++) if ((x * x) / (pr * pr + .01) + (y * y) / (pry * pry) <= 1.1) P(cx + ox + x, cy + oy + y, 1, 1, C.k);
+  }
+  // ---------- painted skin (optional sprite sheet; the drawn egg above stays the default + fallback) ----------
+  // Sheet: 72x92 cells. Row 1 = 12 turn views 30 deg apart (0 front, 90 side, 180 back);
+  // row 2 = crack 0/25/50/75/100% then the done pose (mask popped). Pupils are drawn live from the JSON.
+  // ---------- painted skin (optional sprite sheet; the drawn egg above stays the default + fallback) ----------
+  // Sheet (layout read from its JSON): row 0 = 12 turn views 30 deg apart (0 front, 90/270 profiles, 180 back;
+  // the face turns toward the viewer's left as the index rises, the opposite sign of rot);
+  // row 1 = crack 0/25/50/75/100% then the done pose (mask popped). Pupils are painted out and drawn live.
+  // Nostril glints and the open-beak overlay belong to the drawn egg only.
+  EggTimer.prototype.setSkin = function (skin, base) {
+    this.skin = skin === 'painted' ? 'painted' : 'pixel';
+    if (this.skin === 'painted' && !this._paintedLoad) {
+      this._paintedLoad = loadPainted(base || 'time/egg-painted/egg-timer-sprites')
+        .then((p) => { this.painted = p; this.fitCanvas(); return true; })
+        .catch(() => { this.painted = null; return false; });           // silent: the drawn egg keeps going
+    }
+    this.fitCanvas();
+    return this._paintedLoad || Promise.resolve(false);
+  };
+  // Canvas takes the sheet's cell size in Painted mode (cells may grow), the drawn egg's 72x92 otherwise.
+  EggTimer.prototype.fitCanvas = function () {
+    const cv = this.c.canvas, S = this.skin === 'painted' && this.painted, w = S ? S.cw : W, h = S ? S.ch : H;
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+    if (S && (w !== W || h !== H)) { cv.style.aspectRatio = w + '/' + h; cv.style.transformOrigin = '50% ' + (100 * S.ay / h).toFixed(2) + '%'; }
+    else { cv.style.aspectRatio = ''; cv.style.transformOrigin = ''; }
+  };
+  EggTimer.prototype.drawPainted = function (o) {
+    const c = this.c, S = this.painted;
+    if (c.canvas.width !== S.cw || c.canvas.height !== S.ch) this.fitCanvas();
+    c.clearRect(0, 0, c.canvas.width, c.canvas.height);
+    c.imageSmoothingEnabled = false;
+    let f;
+    if (o.popped && S.done) f = S.done;
+    else if ((o.crack || 0) > 0 && S.cracks.length) f = nearestCrack(S.cracks, Math.min(4, Math.ceil(o.crack * 4)) / 4);
+    else {
+      const n = ((S.dir * Math.round((o.rot || 0) / (Math.PI / 6))) % 12 + 12) % 12;   // dir -1: sheet turns opposite to rot
+      f = nearestTurn(S.turns, n * 30);
+    }
+    const dx = Math.round(S.ax - f.ax), dy = Math.round(S.ay - f.ay);   // anchor: egg centre x / base y
+    c.drawImage(S.img, f.x, f.y, f.w, f.h, dx, dy, f.w, f.h);
+    c.fillStyle = '#000';
+    f.eyes.forEach((ey, i) => {
+      const e = this.eyes[ey.id != null ? ey.id : i % 2] || this.eyes[0];
+      const pr = S.pr || Math.max(1, Math.min(ey.rx, ey.ry) * 0.5), R = Math.ceil(pr);
+      const px = Math.round(dx + ey.x + e.x * Math.max(0, ey.rx - pr - 0.5)), py = Math.round(dy + ey.y + e.y * Math.max(0, ey.ry - pr - 0.5));
+      for (let y = -R; y <= R; y++) for (let x = -R; x <= R; x++) if (x * x + y * y <= pr * pr) c.fillRect(px + x, py + y, 1, 1);
+    });
+  };
+  function nearestTurn(turns, deg) {
+    deg = ((deg % 360) + 360) % 360; let best = turns[0], bd = 1e9;
+    for (const t of turns) { const d = Math.abs(((deg - t.angle + 540) % 360) - 180); if (d < bd) { bd = d; best = t; } }
+    return best;
+  }
+  function nearestCrack(cracks, v) {
+    let best = cracks[0].frame, bd = 1e9;
+    for (const k of cracks) { const d = Math.abs(k.crack - v); if (d < bd) { bd = d; best = k.frame; } }
+    return best;
+  }
+  function loadPainted(base) {
+    const img = new Image();
+    const imgP = new Promise((res, rej) => { img.onload = () => res(img); img.onerror = rej; img.src = base + '.png'; });
+    const jsonP = fetch(base + '.json').then((r) => { if (!r.ok) throw new Error('sheet json ' + r.status); return r.json(); });
+    return Promise.all([imgP, jsonP]).then(([im, j]) => parseSheet(j, im));
+  }
+  // Reads cell size, anchor, frames and eyes from the JSON. Tolerates cell as [w,h] or {w,h}, frames as a list
+  // or a name->frame map, x/y/w/h or col/row, eye cx/cy or x/y. Without frames it uses the documented grid (no pupils).
+  function parseSheet(j, img) {
+    j = j || {};
+    const num = (v, d) => (typeof v === 'number' && isFinite(v) ? v : d);
+    const cell = j.cell || j.cellSize || {}, cw = num(Array.isArray(cell) ? cell[0] : cell.w, num(j.cellW, W)), ch = num(Array.isArray(cell) ? cell[1] : cell.h, num(j.cellH, H));
+    const cols = num(j.cols, 12);
+    const org = j.anchor || j.origin || {}, ax = num(org.x, cw / 2), ay = num(org.bottom_y, num(org.y, ch - 4));
+    let raw = j.frames;
+    if (raw && !Array.isArray(raw)) raw = Object.keys(raw).map((k) => Object.assign({ name: k }, raw[k]));
+    if (!raw || !raw.length) {
+      raw = [];
+      for (let i = 0; i < 12; i++) raw.push({ type: 'turn', angle: i * 30, col: i, row: 0 });
+      [0, .25, .5, .75, 1].forEach((v, i) => raw.push({ type: 'crack', crack: v, col: i, row: 1 }));
+      raw.push({ type: 'done', col: 5, row: 1 });
+    }
+    const S = { img, cw, ch, ax, ay, dir: j.direction === 1 || j.direction === 'cw' ? 1 : -1,
+      pr: num(j.pupil_radius_px, 0), turns: [], cracks: [], done: null };
+    raw.forEach((f, idx) => {
+      const r = f.frame || f.rect || f;
+      const col = num(f.col, idx % cols), row = num(f.row, Math.floor(idx / cols));
+      const fr = { x: num(r.x, col * cw), y: num(r.y, row * ch), w: num(r.w, cw), h: num(r.h, ch) };
+      const fa = f.anchor || {};
+      fr.ax = num(fa.x, ax); fr.ay = num(fa.bottom_y, num(fa.y, ay));
+      fr.eyes = (f.eyes || []).filter((e) => !e.sliver && e.pupil !== false)
+        .map((e) => ({ id: e.id != null ? e.id : null, x: num(e.cx, num(e.x, NaN)), y: num(e.cy, num(e.y, NaN)), rx: num(e.rx, num(e.r, 4)), ry: num(e.ry, num(e.r, 4)) }))
+        .filter((e) => isFinite(e.x) && isFinite(e.y));
+      if (fr.x + fr.w > img.naturalWidth || fr.y + fr.h > img.naturalHeight) throw new Error('frame outside sheet');
+      const name = String(f.name || ''), type = f.type || f.kind ||
+        (/done|pop/i.test(name) ? 'done' : /crack/i.test(name) ? 'crack' : 'turn');
+      const digits = parseFloat((name.match(/\d+/) || ['NaN'])[0]);
+      if (type === 'done') S.done = fr;
+      else if (type === 'crack') { let v = num(f.crack, num(f.pct, digits)); if (!isFinite(v)) v = 0; if (v > 1) v /= 100; S.cracks.push({ crack: v, frame: fr }); }
+      else { fr.angle = num(f.view_deg, num(f.angle, isFinite(digits) ? digits : S.turns.length * 30)); S.turns.push(fr); }
+    });
+    if (!S.turns.length) throw new Error('no turn frames');
+    return S;
   }
   function line(P, x0, y0, x1, y1, col) { const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) | 0; for (let i = 0; i <= n; i++) P(x0 + (x1 - x0) * i / n, y0 + (y1 - y0) * i / n, 1, 1, col); }
   G.EggTimer = EggTimer;
