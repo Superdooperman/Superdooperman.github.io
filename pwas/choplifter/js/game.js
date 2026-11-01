@@ -940,8 +940,9 @@
   }
 
   function drawPlanet(ctx) {
-    const cx = 222;
-    const cy = 80;
+    // Title logo ends near x=222. Keep the moon clear of that R.
+    const cx = S.mode === 'title' ? 252 : 222;
+    const cy = S.mode === 'title' ? 76 : 80;
     const r = 11;
     for (let y = -r; y <= r; y++) {
       for (let x = -r; x <= r; x++) {
