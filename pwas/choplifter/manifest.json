@@ -1,7 +1,7 @@
 {
   "name": "Choplifter!",
   "short_name": "Choplifter",
-  "description": "Rescue the hostages! A faithful Apple II Choplifter recreation.",
+  "description": "A tribute to Choplifter by Dan Gorlin, Broderbund 1982",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "landscape",

@@ -1,6 +1,6 @@
 # Choplifter!
 
-A faithful HTML5 recreation of the 1982 Apple II classic. Rescue hostages from the Bungeling Empire and fly them back to the USPS base.
+A tribute to Choplifter by Dan Gorlin, Broderbund 1982
 
 ## Play
 

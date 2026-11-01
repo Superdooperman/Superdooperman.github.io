@@ -1,4 +1,4 @@
-const CACHE = 'choplifter-v24';
+const CACHE = 'choplifter-v25';
 const ASSETS = [
   './',
   './index.html',

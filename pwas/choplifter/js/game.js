@@ -1210,14 +1210,20 @@
     }
   }
 
+  const CREDIT = 'A tribute to Choplifter by Dan Gorlin, Broderbund 1982';
+
+  function roundBox(ctx, x, y, w, h, fill) {
+    ctx.fillStyle = fill;
+    ctx.fillRect(x + 2, y, w - 4, h);
+    ctx.fillRect(x, y + 2, w, h - 4);
+    ctx.fillRect(x + 1, y + 1, w - 2, h - 2);
+  }
+
   function lemon(ctx, cx, color, value) {
-    const rows = [2, 4, 6, 8, 8, 6, 4, 2];
-    ctx.fillStyle = color;
-    for (let i = 0; i < rows.length; i++) {
-      ctx.fillRect(cx - rows[i], 12 + i, rows[i] * 2, 1);
-    }
+    roundBox(ctx, cx - 18, 11, 36, 12, color);
+    roundBox(ctx, cx - 16, 13, 32, 8, INK.K);
     const text = String(clamp(value, 0, 99)).padStart(2, '0');
-    drawDigits(ctx, text, cx - 7, 13);
+    drawDigits(ctx, text, cx - 4, 14);
   }
 
   function drawDigits(ctx, text, x, y) {
@@ -1225,25 +1231,34 @@
       const rows = DIGIT[text[i]] || DIGIT[0];
       rows.forEach((row, ry) => {
         for (let rx = 0; rx < row.length; rx++) {
-          if (row[rx] === '1') plotWhite(ctx, x + i * 8 + rx, y + ry);
+          if (row[rx] === '1') plotWhite(ctx, x + i * 5 + rx, y + ry);
         }
       });
     }
   }
 
+  function creditLine(ctx, y) {
+    ctx.save();
+    ctx.fillStyle = INK.W;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.font = '7px "Courier New", Courier, monospace';
+    if (ctx.measureText(CREDIT).width > 272) ctx.font = '6px "Courier New", Courier, monospace';
+    ctx.fillText(CREDIT, W / 2, y);
+    ctx.restore();
+  }
+
   function drawMessages(ctx) {
     if (S.mode === 'title') {
-      textCenter(ctx, 'BRODERBUND SOFTWARE PRESENTS...', 36, INK.W, 1);
-      logo(ctx, 58);
-      textCenter(ctx, 'DAN GORLIN', 112, INK.W, 1);
-      textCenter(ctx, 'COPYRIGHT 1982', 122, INK.W, 1);
-      textCenter(ctx, 'INDEPENDENT TRIBUTE', 136, INK.G, 1);
+      logo(ctx, 48);
+      creditLine(ctx, 96);
       textCenter(ctx, 'ARROWS  Z TURN  SPACE FIRE', 150, INK.O, 1);
       return;
     }
     if (S.mode === 'attract') {
+      creditLine(ctx, 34);
       textCenter(ctx, 'YOUR MISSION:', 58, INK.W, 1);
-      barText(ctx, 'RESCUE HOSTAGES', 70);
+      barText(ctx, 'RESCUE HOSTAGES', 78);
       return;
     }
     if (S.paused) {

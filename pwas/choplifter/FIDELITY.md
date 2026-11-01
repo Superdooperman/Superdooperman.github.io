@@ -20,7 +20,7 @@ That script runs the simulation with no DOM. In Chrome, open `pwas/choplifter/` 
 |---|---|---|
 | Screen is 280×192 hi-res, about 12 frames a second, no interrupt clock | Matched | Fixed 1/12 s step in `main.js`. Two-page flicker is not simulated; one canvas is drawn each step. |
 | Six artifact colours: black, white, violet `#ff44fd`, green `#14f53c`, orange `#ff6a3c`, blue `#14cffd` | Matched | Same hex values as a colour Apple II render. Ground and the in-game score band use the even-column violet stripe of the `$55 $2A` fill, which is what the recomp flight BMPs show. White sprite edges pick up a one-pixel violet/green or orange/blue neighbour, the hi-res colour leak. Shapes are still newly drawn. |
-| In play the score band is that violet stripe, with the three counters set into it. The title's loading picture keeps the cyan/green/orange bar | Matched on the flight screens | `drawVioletHud` for play, attract, and the end. The title bar stays the rainbow, which is what `screenshots/title.png` in the recomp shows. Compared in `compare_flying.png`. |
+| In play the score band is that violet stripe, with the three counters in black rounded boxes and white digits. The title's loading picture keeps the cyan/green/orange bar | Matched on the flight screens | `drawVioletHud` plus `lemon` for play, attract, and the end. Each box has a one-pixel orange, blue, or green rim. The title bar stays the rainbow, which is what `screenshots/title.png` in the recomp shows. Compared in `compare_flying.png`. |
 | Stars twinkle; a planet about 22 dots across sits in the upper right of the screen | Partial | New star field and a new banded moon (white, orange, blue), about the size of the one in the recomp flight shot. It is not the original 66-store picture. |
 | Big violet stepped masses rise off the floor and scroll at half the view speed. Barracks and the post office sit in front of them | Partial | `MESAS` is a new height map: plateaus up to about 120 dots tall, edges stepping 12 dots down every 8 across. Not the original four hill shapes. Barracks are a larger blue-and-white pyramid; the post office is a longer orange block with a flag and a green pad. Compared in `compare_flying.png` and `compare_rescue.png`. |
 | Chopper, tank, and moon read at roughly the flight-shot sizes (chopper about 40 by 14, tank a small ground vehicle, moon about 20 across) | Partial | Side chopper is about 48 dots wide. Tank hull is white with green treads so it shows on the stripes. Moon radius is 11. Still simpler than the original shapes. |
@@ -49,8 +49,9 @@ That script runs the simulation with no DOM. In Chrome, open `pwas/choplifter/` 
 
 ## For Arlong
 
-- The title draws "BRODERBUND SOFTWARE PRESENTS...", "DAN GORLIN", and "COPYRIGHT 1982", plus a line that says "INDEPENDENT TRIBUTE". The page also keeps the old sentence: "A faithful HTML5 recreation of the 1982 Apple II classic. Rescue hostages from the Bungeling Empire and fly them back to the USPS base." Please confirm the Broderbund and Gorlin lines are what you want on a public page.
-- `pwas/games/choplifter.html` was not edited. Its blurb is still that same tribute sentence.
+- The on-screen credit, the README, the manifest description, and the attract screen use Arlong's line exactly: "A tribute to Choplifter by Dan Gorlin, Broderbund 1982". The recreated "Broderbund Software presents…", "Dan Gorlin", "Copyright 1982", and "Independent tribute" lines are gone.
+- `pwas/games/choplifter.html` is outside this folder and was not edited. Its blurb is still the older sentence.
+- In play the three counters sit in black rounded boxes with white digits, on the violet stripe band. Each box has a one-pixel rim in the counter's colour (orange, blue, green), which is how those lemons read in the recomp flight frame.
 - Sprites are new and simpler than the original shapes: the chopper, tank, jet, barracks, post office, and hostages read in the same palette and at a similar size, but they are not tracings. The logo is a block alphabet with an orange/blue offset, not the original hi-res wordmark.
 - After a crash there are 18 frames in which the new chopper cannot be hit, so the explosion does not destroy it immediately.
-- Cache name is `choplifter-v24`.
+- Cache name is `choplifter-v25`.
