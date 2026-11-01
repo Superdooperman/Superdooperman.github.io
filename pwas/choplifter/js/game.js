@@ -2,6 +2,7 @@
 // in public notes (thrust, climb, map, boarding, spawns, sorties).
 // Every picture here is newly drawn. No original bytes, shapes, or samples.
 (function (root) {
+  const BUILD = 'v27';
   const W = 280;
   const H = 192;
   const GROUND = 168;
@@ -518,13 +519,11 @@
 
   function heliBody() {
     const h = S.heli;
-    const mag = Math.abs(h.pose);
-    const sprite = mag === 0 ? HELI_FRONT : HELI_SIDE;
-    const keep = mag === 0 ? 1 : [0, 0.42, 0.66, 0.86, 1][mag];
-    const w = Math.max(10, Math.round(sprite[0].length * keep));
+    const sprite = chopperSprite(h);
+    const w = sprite[0].length;
     const height = sprite.length;
     const foot = GROUND - Math.round(h.alt);
-    return { x: h.x - w / 2, y: foot - height, w, h: height };
+    return { x: h.x - Math.floor(w / 2), y: foot - height, w, h: height };
   }
 
   function muzzle(h) {
@@ -1056,10 +1055,10 @@
     ctx.fillRect(0, 0, W, H);
     drawStars(ctx);
     drawPlanet(ctx);
+    if (S.mode !== 'title') drawTerrain(ctx);
     ctx.fillStyle = INK.V;
     ctx.fillRect(0, GROUND, W, H - GROUND);
     if (S.mode !== 'title') {
-      drawTerrain(ctx);
       drawFence(ctx);
       drawBase(ctx);
       S.barracks.forEach((b) => drawBarracks(ctx, b));
@@ -1081,6 +1080,7 @@
     }
     drawHud(ctx);
     drawMessages(ctx);
+    text(ctx, BUILD, 2, H - 8, INK.W, 1);
     if (S.debug) drawDebug(ctx);
   }
 
@@ -1254,26 +1254,15 @@
     }
   }
 
+  function chopperSprite(h) {
+    return Math.abs(h.pose) === 0 ? HELI_FRONT : HELI_SIDE;
+  }
+
   function drawHeli(ctx, h) {
-    const mag = Math.abs(h.pose);
-    const sprite = mag === 0 ? HELI_FRONT : HELI_SIDE;
-    const keep = mag === 0 ? 1 : [0, 0.42, 0.66, 0.86, 1][mag];
+    const sprite = chopperSprite(h);
     const foot = GROUND - Math.round(h.alt);
-    const sh = h.squish ? sprite.length - 1 : sprite.length;
-    const top = foot - sh;
-    const visualTilt = h.pose < 0 ? -h.tilt : h.tilt;
-    blit(ctx, sprite, sxOf(h.x) - Math.round((sprite[0].length * keep) / 2), top, {
-      flip: h.pose < 0, tilt: visualTilt, keep, squish: h.squish,
-    });
-    if (!h.landed) {
-      const rw = mag === 0 ? 10 : 22;
-      const ry = top - 2;
-      for (let i = -rw; i <= rw; i++) {
-        if (((i + S.frame) % 3) === 0) continue;
-        ctx.fillStyle = INK.W;
-        ctx.fillRect(sxOf(h.x) + i, ry, 1, 1);
-      }
-    }
+    const top = foot - sprite.length;
+    blit(ctx, sprite, sxOf(h.x) - Math.floor(sprite[0].length / 2), top, { flip: h.pose < 0 });
   }
 
   function plotWhite(ctx, x, y) {
@@ -1285,48 +1274,23 @@
     x = Math.round(x);
     y = Math.round(y);
     if (w <= 0) return;
-    ctx.fillStyle = (x & 1) ? INK.V : INK.G;
-    ctx.fillRect(x - 1, y, 1, 1);
-    ctx.fillStyle = ((x + w) & 1) ? INK.O : INK.B;
-    ctx.fillRect(x + w, y, 1, 1);
     ctx.fillStyle = INK.W;
     ctx.fillRect(x, y, w, 1);
   }
 
   function blit(ctx, sprite, x, y, opt) {
-    const flip = !!opt.flip;
-    const tilt = opt.tilt || 0;
-    const keep = opt.keep == null ? 1 : opt.keep;
+    const flip = !!(opt && opt.flip);
     const h = sprite.length;
     const w = sprite[0].length;
-    const dw = Math.max(1, Math.round(w * keep));
+    const ox = Math.round(x);
+    const oy = Math.round(y);
     for (let row = 0; row < h; row++) {
-      if (opt.squish && row === 4) continue;
-      const shear = Math.round((h - 1 - row) * tilt * -0.42);
       const src = sprite[row];
-      const dy = y + row - (opt.squish && row > 4 ? 1 : 0);
-      for (let col = 0; col < dw; col++) {
-        const sample = clamp(Math.round(col / keep), 0, w - 1);
-        const si = flip ? w - 1 - sample : sample;
-        const ch = src[si];
+      for (let col = 0; col < w; col++) {
+        const ch = src[flip ? w - 1 - col : col];
         if (!ch || ch === '.' || ch === ' ') continue;
-        const px = Math.round(x + col + shear);
-        if (ch === 'W') {
-          const left = si > 0 ? src[si - 1] : '.';
-          const right = si < w - 1 ? src[si + 1] : '.';
-          if (!left || left === '.' || left === ' ') {
-            ctx.fillStyle = (px & 1) ? INK.V : INK.G;
-            ctx.fillRect(px - 1, dy, 1, 1);
-          }
-          if (!right || right === '.' || right === ' ') {
-            ctx.fillStyle = (px & 1) ? INK.O : INK.B;
-            ctx.fillRect(px + 1, dy, 1, 1);
-          }
-          ctx.fillStyle = INK.W;
-        } else {
-          ctx.fillStyle = INK[ch] || INK.W;
-        }
-        ctx.fillRect(px, dy, 1, 1);
+        ctx.fillStyle = INK[ch] || INK.W;
+        ctx.fillRect(ox + col, oy + row, 1, 1);
       }
     }
   }
@@ -1779,6 +1743,85 @@
       if (before < 5 && after <= before) stuck += 1;
     }
     expect(stuck === 0, 'firing still works across landing, sortie and death');
+
+    function inkBox(sprite) {
+      let minX = 99;
+      let minY = 99;
+      let maxX = -1;
+      let maxY = -1;
+      sprite.forEach((row, y) => {
+        for (let x = 0; x < row.length; x++) {
+          if (row[x] && row[x] !== '.' && row[x] !== ' ') {
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+          }
+        }
+      });
+      return { w: maxX - minX + 1, h: maxY - minY + 1 };
+    }
+
+    function drawnBox(sprite, flip) {
+      const gw = sprite[0].length + 4;
+      const gh = sprite.length + 4;
+      const pix = new Uint8Array(gw * gh);
+      const ctx = {
+        fillStyle: '#ffffff',
+        fillRect(x, y, w, h) {
+          if (this.fillStyle === INK.K || this.fillStyle === '#000000') return;
+          for (let yy = Math.floor(y); yy < y + h; yy++) {
+            for (let xx = Math.floor(x); xx < x + w; xx++) {
+              if (xx >= 0 && yy >= 0 && xx < gw && yy < gh) pix[yy * gw + xx] = 1;
+            }
+          }
+        },
+      };
+      blit(ctx, sprite, 2, 2, { flip });
+      let minX = gw;
+      let minY = gh;
+      let maxX = -1;
+      let maxY = -1;
+      for (let y = 0; y < gh; y++) {
+        for (let x = 0; x < gw; x++) {
+          if (!pix[y * gw + x]) continue;
+          if (x < minX) minX = x;
+          if (y < minY) minY = y;
+          if (x > maxX) maxX = x;
+          if (y > maxY) maxY = y;
+        }
+      }
+      return { w: maxX - minX + 1, h: maxY - minY + 1 };
+    }
+
+    [-4, -2, 0, 2, 4].forEach((pose) => {
+      [-5, 0, 5].forEach((tilt) => {
+        const sprite = chopperSprite({ pose, tilt });
+        const src = inkBox(sprite);
+        const drawn = drawnBox(sprite, pose < 0);
+        const srcRatio = src.w / src.h;
+        const drawnRatio = drawn.w / drawn.h;
+        expect(Math.abs(drawn.w - src.w) <= 1 && Math.abs(drawn.h - src.h) <= 1, 'chopper box matches sprite pose ' + pose + ' tilt ' + tilt);
+        expect(Math.abs(drawnRatio - srcRatio) < 0.08, 'chopper ratio matches sprite pose ' + pose + ' tilt ' + tilt);
+      });
+    });
+
+    beginPlay();
+    S.quiet = true;
+    S.mode = 'play';
+    S.banner = 0;
+    S.debug = false;
+    S.heli.alive = false;
+    S.view = 2320;
+    const covered = paintFrame();
+    const cliff = 0xff44fd;
+    let moonLeak = 0;
+    for (let y = 74; y <= 86; y++) {
+      for (let x = 216; x <= 228; x++) {
+        if (covered[y * W + x] !== cliff) moonLeak += 1;
+      }
+    }
+    expect(moonLeak === 0, 'moon is fully occluded where a cliff covers it');
 
     return { ok: failures.length === 0, failures, passed: failures.length === 0 };
   }

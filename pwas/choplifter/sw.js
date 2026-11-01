@@ -1,4 +1,4 @@
-const CACHE = 'choplifter-v26';
+const CACHE = 'choplifter-v27';
 const ASSETS = [
   './',
   './index.html',
@@ -6,29 +6,43 @@ const ASSETS = [
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './js/main.js',
-  './js/audio.js',
-  './js/motion.js',
-  './js/input.js',
-  './js/game.js',
+  './js/main.js?v=27',
+  './js/audio.js?v=27',
+  './js/motion.js?v=27',
+  './js/input.js?v=27',
+  './js/game.js?v=27',
 ];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
-  self.skipWaiting();
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k.startsWith('choplifter-') && k !== CACHE).map((k) => caches.delete(k)))
-    )
-  );
-  self.clients.claim();
+  e.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter((k) => k.startsWith('choplifter-') && k !== CACHE).map((k) => caches.delete(k)));
+    await self.clients.claim();
+  })());
 });
 
+function wantsNetwork(url) {
+  return url.pathname.endsWith('.html')
+    || url.pathname.endsWith('.js')
+    || url.pathname.endsWith('.css')
+    || url.pathname.endsWith('/');
+}
+
 self.addEventListener('fetch', (e) => {
-  e.respondWith(
-    caches.match(e.request).then((cached) => cached || fetch(e.request))
-  );
+  const url = new URL(e.request.url);
+  if (e.request.mode === 'navigate' || wantsNetwork(url)) {
+    e.respondWith(
+      fetch(e.request).then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+        return res;
+      }).catch(() => caches.match(e.request))
+    );
+    return;
+  }
+  e.respondWith(caches.match(e.request).then((cached) => cached || fetch(e.request)));
 });
