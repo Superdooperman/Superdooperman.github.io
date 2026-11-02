@@ -21,6 +21,7 @@ const Input = (() => {
   let soundEdge = false;
   let revXEdge = false;
   let revYEdge = false;
+  let monitorEdge = false;
 
   function init() {
     window.addEventListener('keydown', (e) => {
@@ -39,6 +40,7 @@ const Input = (() => {
       if (first && e.ctrlKey && e.code === 'KeyS') { soundEdge = true; e.preventDefault(); return; }
       if (first && e.ctrlKey && e.code === 'KeyA') { revXEdge = true; e.preventDefault(); return; }
       if (first && e.ctrlKey && e.code === 'KeyV') { revYEdge = true; e.preventDefault(); return; }
+      if (first && !e.ctrlKey && e.code === 'KeyM') { monitorEdge = true; e.preventDefault(); return; }
       if (first && !e.ctrlKey && !e.metaKey && !e.altKey) {
         startEdge = true;
         if (e.code === 'KeyP' || e.code === 'Escape') pauseEdge = true;
@@ -61,6 +63,7 @@ const Input = (() => {
     const btnMotion = document.getElementById('btn-motion');
     const btnStart = document.getElementById('btn-start');
     const btnPause = document.getElementById('btn-pause');
+    const btnMonitor = document.getElementById('btn-monitor');
     const canvas = document.getElementById('game');
     const motionPanel = document.getElementById('motion-panel');
     const btnCalibrate = document.getElementById('btn-calibrate');
@@ -70,6 +73,12 @@ const Input = (() => {
 
     touchControls.classList.remove('hidden');
     touchActive = true;
+    if (btnMonitor) {
+      btnMonitor.addEventListener('click', (e) => {
+        e.preventDefault();
+        monitorEdge = true;
+      });
+    }
 
     function updateKnob(dx, dy) {
       const max = 35;
@@ -258,6 +267,12 @@ const Input = (() => {
     return v;
   }
 
+  function consumeMonitor() {
+    const v = monitorEdge;
+    monitorEdge = false;
+    return v;
+  }
+
   function clearEdges() {
     startEdge = false;
     pauseEdge = false;
@@ -294,7 +309,7 @@ const Input = (() => {
 
   return {
     init, getMovement, isShooting,
-    consumeStart, consumePause, consumeLevel, consumeSound, consumeRevX, consumeRevY,
+    consumeStart, consumePause, consumeLevel, consumeSound, consumeRevX, consumeRevY, consumeMonitor,
     clearEdges, isTouchDevice,
   };
 })();

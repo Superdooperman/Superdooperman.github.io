@@ -2,7 +2,8 @@
 // in public notes (thrust, climb, map, boarding, spawns, sorties).
 // Every picture here is newly drawn. No original bytes, shapes, or samples.
 (function (root) {
-  const BUILD = 'v27';
+  const BUILD = 'v28';
+  const RUBBLE = '#8aa4c8';
   const W = 280;
   const H = 192;
   const GROUND = 168;
@@ -82,31 +83,42 @@
   glyph('!', ['00100', '00100', '00100', '00100', '00100', '00000', '00100']);
   glyph("'", ['00100', '00100', '01000', '00000', '00000', '00000', '00000']);
 
+  // Side view faces right. Rotor is 36 wide (~1/8 of 280) and the body is about twice as wide as it is tall.
   const HELI_SIDE = [
-    '.................WWWWWWWWWWWWW..................',
-    '.......................WW.......................',
-    '................WWWWWWWWWWWWWWWW................',
-    '.............WWWWWWWWWWWWWWWWWWWWW..............',
-    '........WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW..........',
-    '......WWWWWWW..................WWWWWWWWW........',
-    '......WWWWWWW..................WWWW..WWWW.......',
-    '......WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW........',
-    '.......WWWWWWWWWWWWWWWWWWWWWWWWWWWWW............',
-    '..........WWWW......................WWWW........',
-    '.........WWWWWW....................WWWWWW.......',
-    '........WW....WW................WW....WW........',
+    'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW',
+    '.................WW.................',
+    '...........WWWWWWWWWWWW.............',
+    '.........WWWWWWWWWWWWWWWW...........',
+    '.......WWWWWWWWWWWWWWWWWWWW.........',
+    '.....WW..WWWWWWW......WWWWWWW.......',
+    '....WWWWWWWWWWWWWWWWWWWWWWWWWWW.....',
+    '....WWWWWWWWWWWWWWWWWWWWWWWWWWW.....',
+    '.....WWWWWWWWWWWWWWWWWWWWWWWWW......',
+    '.......WWWWWWWWWWWWWWWWWWWWW........',
+    '.........WW..............WW.........',
+    '........WWWW............WWWW........',
+    '........W..W............W..W........',
+    '.......WW..WW..........WW..WW.......',
+    '.......WW..WW..........WW..WW.......',
+    '......WWW..WWW........WWW..WWW......',
   ];
   const HELI_FRONT = [
-    '........WWWWWW........',
-    '......WWWWWWWWWW......',
-    '....WWWWWWWWWWWWWW....',
-    '...WWW...WWWW...WWW...',
-    '...WWW...WKKW...WWW...',
-    '....WWWWWWWWWWWWWW....',
-    '.....WWWWWWWWWWWW.....',
-    '.......WW....WW.......',
-    '......WWW....WWW......',
-    '.......WW....WW.......',
+    '....WWWWWWWW....',
+    '..WWWWWWWWWWWW..',
+    '.WWWWWWWWWWWWWW.',
+    'WWW..WWWWWW..WWW',
+    'WWW..WWKKWW..WWW',
+    'WWW..WKKKKW..WWW',
+    '.WWWWWWWWWWWWWW.',
+    '..WWWWWWWWWWWW..',
+    '...WWW....WWW...',
+    '....WW....WW....',
+    '...WWW....WWW...',
+    '....WW....WW....',
+    '..WW.WWWWWW.WW..',
+    '.WW...WWWW...WW.',
+    'WW.....WW.....WW',
+    '.W............W.',
   ];
   const MAN_RUN = [
     ['..WW..', '.WWWW.', '..WW..', '..WW..', '.W..W.', '.W..W.', 'W....W'],
@@ -114,12 +126,14 @@
   ];
   const MAN_WAVE = ['W....W', '.W..W.', '..WW..', '.WWWW.', '..WW..', '..WW..', 'W....W'];
   const TANK_SPRITE = [
-    '..........WWWW..............',
-    '.........WWWWWWW............',
-    '...WWWWWWWWWWWWWWWWWWW......',
-    '..WWWWWWWWWWWWWWWWWWWWWW....',
-    '.GG..GG..GG..GG..GG..GG..GG.',
-    'GG..GG..GG..GG..GG..GG..GG..',
+    '.......GGGG.........',
+    '.....GGGGGGGG.......',
+    '...GGGGGGGGGGGGGG...',
+    '..GGGGGGGGGGGGGGGG..',
+    '.GG..GG..GG..GG..GG.',
+    'GG..GG..GG..GG..GGG.',
+    '.GG..GG..GG..GG..GG.',
+    '..G..G..G..G..G..G..',
   ];
   const JET_SPRITE = [
     '.............WW.............',
@@ -127,19 +141,6 @@
     '.....WWWWWWWWWWWWWWWWW......',
     '........WWWWWWWWWWWW........',
     '.............WW.............',
-  ];
-  // Stepped violet masses in parallax space (half scroll). Each entry is
-  // start, width, height in pixels above the floor.
-  const MESAS = [
-    [360, 150, 100],
-    [640, 180, 118],
-    [760, 150, 112],
-    [1040, 160, 96],
-    [1320, 200, 124],
-    [1680, 140, 88],
-    [1960, 170, 116],
-    [2288, 170, 122],
-    [2520, 120, 48],
   ];
 
   const S = {};
@@ -156,8 +157,30 @@
     try { AudioFX[name](); } catch (_) { /* ignore */ }
   }
 
+  function loadMonitor() {
+    S.monitor = 'colour';
+    try {
+      if (typeof localStorage !== 'undefined' && localStorage.getItem('choplifter-monitor') === 'green') {
+        S.monitor = 'green';
+      }
+    } catch (_) { /* private mode */ }
+    const button = typeof document !== 'undefined' ? document.getElementById('btn-monitor') : null;
+    if (button) button.textContent = S.monitor === 'green' ? 'GREEN' : 'COLOUR';
+  }
+
+  function toggleMonitor() {
+    S.monitor = S.monitor === 'green' ? 'colour' : 'green';
+    try {
+      if (typeof localStorage !== 'undefined') localStorage.setItem('choplifter-monitor', S.monitor);
+    } catch (_) { /* ignore */ }
+    const button = typeof document !== 'undefined' ? document.getElementById('btn-monitor') : null;
+    if (button) button.textContent = S.monitor === 'green' ? 'GREEN' : 'COLOUR';
+  }
+
   function boot() {
     S.rng = 0x31;
+    S.monitor = 'colour';
+    loadMonitor();
     buildStars();
     showTitle();
     if (typeof location !== 'undefined' && location.search) {
@@ -215,8 +238,8 @@
       const x = 4 + (n % 272);
       n = (Math.imul(n, 1103515245) + 12345) >>> 0;
       const y = 28 + (n % 130);
-      const colors = ['#14f53c', '#ff44fd', '#ff6a3c', '#14cffd', '#ffffff'];
-      S.stars.push({ x, y, c: colors[i % 5] });
+      const colors = ['#ffffff', '#ff6a3c', '#14cffd'];
+      S.stars.push({ x, y, c: colors[i % 3] });
     }
   }
 
@@ -314,6 +337,7 @@
     if (Input.consumeSound()) S.soundOn = !S.soundOn;
     if (Input.consumeRevX()) S.revX = !S.revX;
     if (Input.consumeRevY()) S.revY = !S.revY;
+    if (Input.consumeMonitor && Input.consumeMonitor()) toggleMonitor();
     return {
       x: m.x, y: m.y, face: !!m.aimDown, fire: !!Input.isShooting(),
       start: !!Input.consumeStart(), pause: !!Input.consumePause(),
@@ -809,7 +833,8 @@
   }
 
   function tankBox(t) {
-    return { x: t.x - 16, y: GROUND - TANK_SPRITE.length, w: TANK_SPRITE[0].length, h: TANK_SPRITE.length };
+    const w = TANK_SPRITE[0].length;
+    return { x: t.x - Math.floor(w / 2), y: GROUND - TANK_SPRITE.length, w, h: TANK_SPRITE.length };
   }
 
   function jetBox(j) {
@@ -1050,19 +1075,24 @@
 
   function sxOf(x) { return Math.round(x - S.view); }
 
-  function draw(ctx) {
+  function draw(raw) {
+    const ctx = greenWrap(raw);
     ctx.fillStyle = INK.K;
     ctx.fillRect(0, 0, W, H);
     drawStars(ctx);
     drawPlanet(ctx);
-    if (S.mode !== 'title') drawTerrain(ctx);
-    ctx.fillStyle = INK.V;
+    ctx.fillStyle = inkColor(INK.V);
     ctx.fillRect(0, GROUND, W, H - GROUND);
     if (S.mode !== 'title') {
+      drawRubble(ctx);
       drawFence(ctx);
       drawBase(ctx);
       S.barracks.forEach((b) => drawBarracks(ctx, b));
-      S.tanks.forEach((t) => { if (t.alive) blit(ctx, TANK_SPRITE, sxOf(t.x) - 16, GROUND - TANK_SPRITE.length, {}); });
+      S.tanks.forEach((t) => {
+        if (!t.alive) return;
+        const box = tankBox(t);
+        blit(ctx, TANK_SPRITE, sxOf(box.x), box.y, {});
+      });
       S.hostages.forEach((man) => drawMan(ctx, man));
       S.walkers.forEach((w) => blit(ctx, MAN_RUN[(S.frame || 0) & 1], sxOf(w.x), GROUND - 6, {}));
       S.jets.forEach((j) => {
@@ -1073,21 +1103,45 @@
       if (S.heli.alive || S.pending) drawHeli(ctx, S.heli);
       S.shots.forEach((s) => {
         if (!s.alive) return;
-        ctx.fillStyle = s.enemy ? INK.O : INK.W;
+        ctx.fillStyle = inkColor(PROJECTILE);
         ctx.fillRect(sxOf(s.x), Math.round(s.y), s.kind === 'missile' ? 3 : 2, 2);
       });
       S.booms.forEach((b) => drawBoom(ctx, b));
     }
     drawHud(ctx);
     drawMessages(ctx);
-    text(ctx, BUILD, 2, H - 8, INK.W, 1);
+    text(ctx, BUILD.toUpperCase(), 2, 28, INK.W, 1);
     if (S.debug) drawDebug(ctx);
+  }
+
+  const PROJECTILE = '#ffffff';
+
+  function inkColor(hex) { return hex; }
+
+  function greenWrap(ctx) {
+    if (S.monitor !== 'green') return ctx;
+    return new Proxy(ctx, {
+      get(target, prop) {
+        const value = target[prop];
+        return typeof value === 'function' ? value.bind(target) : value;
+      },
+      set(target, prop, value) {
+        if (prop === 'fillStyle' && typeof value === 'string') {
+          const n = value.toLowerCase();
+          if (n !== '#000000' && n !== '#000') {
+            value = (n === '#ffffff' || n === '#fff') ? '#d6ff8a' : '#3dcc3d';
+          }
+        }
+        target[prop] = value;
+        return true;
+      },
+    });
   }
 
   function drawStars(ctx) {
     S.stars.forEach((star) => {
       if (((star.x * 3 + star.y + (S.frame || S.timer)) & 3) === 0) return;
-      ctx.fillStyle = star.c;
+      ctx.fillStyle = inkColor(star.c);
       ctx.fillRect(star.x, star.y, 1, 1);
     });
   }
@@ -1100,43 +1154,29 @@
     for (let y = -r; y <= r; y++) {
       for (let x = -r; x <= r; x++) {
         if (x * x + y * y > r * r - 2) continue;
-        const band = (y + 12) % 4;
+        const n = (Math.imul(x + 9, 13) + Math.imul(y + 4, 7)) & 7;
         let color = INK.W;
-        if (band === 0) color = INK.B;
-        else if (band === 1) color = INK.O;
+        if (n < 2) color = INK.B;
+        else if (n < 4) color = INK.O;
         ctx.fillStyle = color;
         ctx.fillRect(cx + x, cy + y, 1, 1);
       }
     }
   }
 
-  function mesaHeight(px) {
-    let best = 0;
-    for (let i = 0; i < MESAS.length; i++) {
-      const start = MESAS[i][0];
-      const width = MESAS[i][1];
-      const height = MESAS[i][2];
-      const end = start + width;
-      if (px >= start && px < end) {
-        if (height > best) best = height;
-        continue;
-      }
-      const dist = px < start ? start - px : px - end;
-      if (dist > 80) continue;
-      const steps = Math.ceil(dist / 8);
-      const h = height - steps * 12;
-      if (h > best) best = h;
-    }
-    return best;
-  }
-
-  function drawTerrain(ctx) {
-    const origin = Math.floor(S.view / 2);
-    ctx.fillStyle = INK.V;
-    for (let x = 0; x < W; x++) {
-      const hgt = mesaHeight(origin + x);
-      if (hgt <= 0) continue;
-      ctx.fillRect(x, GROUND - hgt, 1, hgt);
+  function drawRubble(ctx) {
+    const step = 80;
+    const left = Math.floor((S.view - step) / step) * step;
+    for (let wx = left; wx < S.view + W + step; wx += step) {
+      const n = (Math.imul(wx | 0, 0x45d9f3b) >>> 0);
+      if ((n % 3) !== 0) continue;
+      const sx = Math.round(wx - S.view);
+      const h = 3 + (n % 3);
+      ctx.fillStyle = (n & 16) ? RUBBLE : INK.B;
+      ctx.fillRect(sx, GROUND - h, 3, h);
+      ctx.fillRect(sx + 3, GROUND - 2, 4, 2);
+      ctx.fillRect(sx - 4, GROUND - 2 - (n & 1), 3, 2 + (n & 1));
+      if (n & 4) ctx.fillRect(sx + 7, GROUND - 4, 2, 4);
     }
   }
 
@@ -1308,8 +1348,7 @@
     const killed = S.mode === 'play' || S.mode === 'end' ? S.killed : 0;
     const aboard = S.mode === 'play' || S.mode === 'end' ? S.aboard : 0;
     const home = S.mode === 'play' || S.mode === 'end' ? S.rescued : 0;
-    if (S.mode === 'title') drawRainbowHud(ctx);
-    else drawVioletHud(ctx);
+    drawRainbowHud(ctx);
     lemon(ctx, 70, INK.O, killed);
     lemon(ctx, 140, INK.B, aboard);
     lemon(ctx, 210, INK.G, home);
@@ -1329,14 +1368,6 @@
     ctx.fillRect(1, 22, W - 2, 3);
   }
 
-  function drawVioletHud(ctx) {
-    ctx.fillStyle = INK.V;
-    ctx.fillRect(0, 2, W, 23);
-    ctx.fillStyle = INK.B;
-    ctx.fillRect(0, 2, 10, 4);
-    ctx.fillRect(W - 10, 2, 10, 4);
-  }
-
   const CREDIT = 'A tribute to Choplifter by Dan Gorlin, Broderbund 1982';
 
   function roundBox(ctx, x, y, w, h, fill) {
@@ -1347,10 +1378,23 @@
   }
 
   function lemon(ctx, cx, color, value) {
-    roundBox(ctx, cx - 18, 11, 36, 12, color);
-    roundBox(ctx, cx - 16, 13, 32, 8, INK.K);
+    const x = cx - 18;
+    const y = 12;
+    const w = 36;
+    const h = 9;
+    ctx.fillStyle = INK.K;
+    for (let row = 0; row < h; row++) {
+      const taper = row < 2 ? 2 - row : row > h - 3 ? row - (h - 3) : 0;
+      ctx.fillRect(x + taper, y + row, w - taper * 2, 1);
+    }
+    ctx.fillStyle = inkColor(color);
+    const dx = x + 6;
+    const dy = y + 3;
+    ctx.fillRect(dx + 1, dy, 2, 1);
+    ctx.fillRect(dx, dy + 1, 4, 1);
+    ctx.fillRect(dx + 1, dy + 2, 2, 1);
     const text = String(clamp(value, 0, 99)).padStart(2, '0');
-    drawDigits(ctx, text, cx - 4, 14);
+    drawDigits(ctx, text, x + 14, y + 2);
   }
 
   function drawDigits(ctx, text, x, y) {
@@ -1379,7 +1423,7 @@
     if (S.mode === 'title') {
       logo(ctx, 48);
       creditLine(ctx, 96);
-      textCenter(ctx, 'ARROWS  Z TURN  SPACE FIRE', 150, INK.O, 1);
+      textCenter(ctx, 'ARROWS  Z TURN  SPACE FIRE  M MONITOR', 150, INK.O, 1);
       return;
     }
     if (S.mode === 'attract') {
@@ -1794,6 +1838,12 @@
       return { w: maxX - minX + 1, h: maxY - minY + 1 };
     }
 
+    const sideInk = inkBox(HELI_SIDE);
+    const frontInk = inkBox(HELI_FRONT);
+    expect(sideInk.w / W > 0.10 && sideInk.w / W < 0.16, 'side chopper is about 1/8 of the play width');
+    expect(sideInk.w / sideInk.h >= 1.7 && sideInk.w / sideInk.h <= 2.6, 'side chopper is about 2:1');
+    expect(Math.abs(frontInk.w / frontInk.h - 1) <= 0.25, 'front chopper is nearly square');
+
     [-4, -2, 0, 2, 4].forEach((pose) => {
       [-5, 0, 5].forEach((tilt) => {
         const sprite = chopperSprite({ pose, tilt });
@@ -1813,15 +1863,93 @@
     S.debug = false;
     S.heli.alive = false;
     S.view = 2320;
-    const covered = paintFrame();
-    const cliff = 0xff44fd;
-    let moonLeak = 0;
-    for (let y = 74; y <= 86; y++) {
-      for (let x = 216; x <= 228; x++) {
-        if (covered[y * W + x] !== cliff) moonLeak += 1;
+    const frame = paintFrame();
+    const magenta = 0xff44fd;
+    let pinkSky = 0;
+    for (let y = 30; y < GROUND; y++) {
+      for (let x = 0; x < W; x++) {
+        if (frame[y * W + x] === magenta) pinkSky += 1;
       }
     }
-    expect(moonLeak === 0, 'moon is fully occluded where a cliff covers it');
+    expect(pinkSky === 0, 'the sky has no magenta cliff');
+    expect(frame[(GROUND + 4) * W + 40] === magenta, 'the ground band is magenta');
+    expect(frame[80 * W + 222] !== magenta, 'the moon is not the ground colour');
+    const band = H - GROUND;
+    expect(band / H >= 0.10 && band / H <= 0.18, 'the ground is a thin band');
+
+    beginPlay();
+    S.quiet = true;
+    S.mode = 'play';
+    S.banner = 0;
+    S.debug = false;
+    S.monitor = 'colour';
+    S.heli.alive = false;
+    S.tanks = [];
+    S.jets = [];
+    S.drones = [];
+    S.hostages = [];
+    S.walkers = [];
+    S.booms = [];
+    S.shots = [];
+    const bare = paintFrame();
+    const spots = [
+      { x: S.view + 36, y: 64, kind: 'bullet' },
+      { x: S.view + 70, y: GROUND + 6, kind: 'shell' },
+      { x: S.view + 110, y: 96, kind: 'missile' },
+      { x: S.view + 150, y: GROUND + 8, kind: 'bomb' },
+    ];
+    S.shots = spots.map((s) => ({
+      x: s.x, y: s.y, vx: 0, vy: 0, kind: s.kind, enemy: true, alive: true, age: 0,
+    }));
+    const painted = paintFrame();
+    spots.forEach((s) => {
+      const sx = Math.round(s.x - S.view);
+      const sy = Math.round(s.y);
+      const sw = s.kind === 'missile' ? 3 : 2;
+      let changed = 0;
+      for (let dy = 0; dy < 2; dy++) {
+        for (let dx = 0; dx < sw; dx++) {
+          const i = (sy + dy) * W + (sx + dx);
+          if (painted[i] !== bare[i]) {
+            changed += 1;
+            expect(painted[i] !== bare[i], s.kind + ' colour differs from the layer behind it');
+          }
+        }
+      }
+      expect(changed > 0, s.kind + ' is visible against the layer behind it');
+    });
+    expect(PROJECTILE !== INK.K && PROJECTILE !== INK.V, 'projectile colour is neither sky nor ground');
+
+    const store = {};
+    const prevStore = globalThis.localStorage;
+    globalThis.localStorage = {
+      getItem(k) { return Object.prototype.hasOwnProperty.call(store, k) ? store[k] : null; },
+      setItem(k, v) { store[k] = String(v); },
+    };
+    S.monitor = 'colour';
+    toggleMonitor();
+    expect(store['choplifter-monitor'] === 'green' && S.monitor === 'green', 'green monitor is saved');
+    S.monitor = 'colour';
+    loadMonitor();
+    expect(S.monitor === 'green', 'green monitor is restored');
+    const greenFrame = paintFrame();
+    let skyIdx = -1;
+    let groundIdx = -1;
+    for (let i = 32 * W; i < GROUND * W; i++) {
+      if (skyIdx < 0 && bare[i] === 0) skyIdx = i;
+    }
+    for (let x = 0; x < W; x++) {
+      const i = (GROUND + 4) * W + x;
+      if (bare[i] === magenta) { groundIdx = i; break; }
+    }
+    expect(skyIdx >= 0 && greenFrame[skyIdx] === 0x000000, 'green monitor keeps the sky black');
+    expect(groundIdx >= 0 && greenFrame[groundIdx] !== magenta && greenFrame[groundIdx] !== 0, 'green monitor ground is phosphor, not pink');
+    const shellAt = (GROUND + 6) * W + 70;
+    expect(greenFrame[shellAt] !== 0 && greenFrame[shellAt] !== greenFrame[groundIdx], 'a shell still contrasts on the green monitor');
+    toggleMonitor();
+    expect(S.monitor === 'colour' && store['choplifter-monitor'] === 'colour', 'colour monitor is saved');
+    if (prevStore === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = prevStore;
 
     return { ok: failures.length === 0, failures, passed: failures.length === 0 };
   }
@@ -1833,16 +1961,31 @@
     beginPlay();
     S.quiet = true;
     S.banner = 0;
+    if (name === 'base') {
+      S.heli.x = BASE + 28;
+      S.heli.landed = true;
+      S.heli.alt = 0;
+      S.heli.pose = -4;
+      S.heli.tilt = 0;
+      S.heli.vx256 = 0;
+      S.view = clamp(BASE - 70, VIEW_MIN, VIEW_MAX);
+      S.tanks = [];
+      S.hostages = [];
+    }
     if (name === 'fly') {
       S.heli.landed = false;
       S.heli.alt = 48;
       S.heli.tilt = -4;
       S.heli.pose = -4;
       S.heli.vx256 = -10 * 256;
-      S.heli.x = START_X - 120;
+      S.heli.x = START_X - 180;
       S.heli.tilt = -3;
-      S.view = clamp(S.heli.x - 36, VIEW_MIN, VIEW_MAX);
-      S.tanks = [{ x: S.heli.x + 70, dir: -1, think: 40, alive: true }];
+      S.view = clamp(S.heli.x - 90, VIEW_MIN, VIEW_MAX);
+      S.tanks = [{ x: S.heli.x + 80, dir: -1, think: 40, alive: true }];
+      S.shots = [
+        { x: S.heli.x - 16, y: GROUND - 80, vx: -6, vy: 3, kind: 'bullet', enemy: false, alive: true, age: 0 },
+        { x: S.heli.x + 36, y: GROUND - 36, vx: -2, vy: -3, kind: 'shell', enemy: true, alive: true, age: 0 },
+      ];
     }
     if (name === 'gameplay') {
       const bx = BARRACKS_X[3];

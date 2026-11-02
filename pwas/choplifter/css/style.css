@@ -42,7 +42,8 @@ html, body {
 #joystick-zone,
 #action-buttons,
 #btn-start,
-#btn-pause {
+#btn-pause,
+#btn-monitor {
   pointer-events: auto;
   -webkit-tap-highlight-color: transparent;
   touch-action: none;
@@ -82,7 +83,8 @@ html, body {
 
 #action-buttons button,
 #btn-start,
-#btn-pause {
+#btn-pause,
+#btn-monitor {
   min-width: 72px;
   min-height: 48px;
   padding: 8px 12px;
@@ -117,6 +119,16 @@ html, body {
   font-size: 12px;
 }
 
+#btn-monitor {
+  position: absolute;
+  top: max(8px, env(safe-area-inset-top));
+  left: max(8px, env(safe-area-inset-left));
+  min-width: 72px;
+  min-height: 36px;
+  font-size: 12px;
+  z-index: 12;
+}
+
 body[data-scene="title"] #btn-start,
 body[data-scene="end"] #btn-start { display: block; }
 
@@ -131,7 +143,8 @@ body[data-scene="end"] #action-buttons {
 
 #action-buttons button:active,
 #btn-start:active,
-#btn-pause:active { background: #ffa533; }
+#btn-pause:active,
+#btn-monitor:active { background: #ffa533; }
 
 #btn-motion.active { background: #7cfc00; }
 

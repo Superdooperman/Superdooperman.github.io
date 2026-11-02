@@ -9,7 +9,7 @@
   <title>Choplifter!</title>
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="css/style.css?v=27">
+  <link rel="stylesheet" href="css/style.css?v=28">
 </head>
 <body>
   <div id="app">
@@ -23,6 +23,7 @@
       </div>
       <button id="btn-start" type="button">TAP TO START</button>
       <button id="btn-pause" type="button">PAUSE</button>
+      <button id="btn-monitor" type="button">COLOUR</button>
     </div>
     <div id="motion-panel" class="hidden">
       <p>Tilt device to fly. Hold level, then tap Calibrate.</p>
@@ -33,14 +34,14 @@
     <div id="rotate-hint" class="hidden">Rotate to landscape</div>
   </div>
   <p id="tribute" class="sr">A tribute to Choplifter by Dan Gorlin, Broderbund 1982</p>
-  <script src="js/audio.js?v=27"></script>
-  <script src="js/motion.js?v=27"></script>
-  <script src="js/input.js?v=27"></script>
-  <script src="js/game.js?v=27"></script>
-  <script src="js/main.js?v=27"></script>
+  <script src="js/audio.js?v=28"></script>
+  <script src="js/motion.js?v=28"></script>
+  <script src="js/input.js?v=28"></script>
+  <script src="js/game.js?v=28"></script>
+  <script src="js/main.js?v=28"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js?v=27').catch(() => {});
+      navigator.serviceWorker.register('sw.js?v=28').catch(() => {});
     }
   </script>
 </body>

@@ -15,7 +15,7 @@ Local: `http://localhost:8080`. From the site root, the game is `/pwas/choplifte
 
 ## Controls
 
-**Desktop:** Arrow keys / WASD to fly, Space to shoot, Z to change facing, P to pause.
+**Desktop:** Arrow keys / WASD to fly, Space to shoot, Z to change facing, P to pause. M, or the COLOUR button, switches between the colour picture and a green-phosphor monitor. The choice is remembered in this browser.
 
 **Mobile:** On-screen joystick + Fire/Face buttons. Optional motion controls (tap MOTION, calibrate, tilt to fly).
 
