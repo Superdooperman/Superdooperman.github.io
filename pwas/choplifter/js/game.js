@@ -2,7 +2,7 @@
 // in public notes (thrust, climb, map, boarding, spawns, sorties).
 // Every picture here is newly drawn. No original bytes, shapes, or samples.
 (function (root) {
-  const BUILD = 'v31';
+  const BUILD = 'v32';
   const RUBBLE = '#8aa4c8';
   const W = 280;
   const H = 192;
@@ -83,85 +83,7 @@
   glyph('!', ['00100', '00100', '00100', '00100', '00100', '00000', '00100']);
   glyph("'", ['00100', '00100', '01000', '00000', '00000', '00000', '00000']);
 
-  // Side view faces right: long rotor, tapering tail to the left, rounded nose to the right.
-  const HELI_SIDE = [
-    '....WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW....',
-    'WW......................WW......................',
-    'WW......................WW......................',
-    'WWWW............................................',
-    'WWWWWWWWWWWWWWWWWWWWWWWWWW......................',
-    'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW..................',
-    'WW..WWWWWWWWWWW...........WWWWWWWW..............',
-    'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW..............',
-    '.WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW..............',
-    '..WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW................',
-    '...WW......................WW...................',
-    '..WWWW....................WWWW..................',
-    '..W..W....................W..W..................',
-    '.WW..WW..................WW..WW.................',
-    '.WW..WW..................WW..WW.................',
-    'WWW..WWW................WWW..WWW................',
-  ];
-  function noseDown(sprite) {
-    const h = sprite.length;
-    const w = sprite[0].length;
-    const dest = Array.from({ length: h }, () => Array(w).fill('.'));
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        const ch = sprite[y][x];
-        if (!ch || ch === '.') continue;
-        const ny = y + (x > w * 0.42 ? 1 : 0);
-        if (ny >= 0 && ny < h) dest[ny][x] = ch;
-      }
-    }
-    return dest.map((row) => row.join(''));
-  }
-  const HELI_NOSE = noseDown(HELI_SIDE);
-  const HELI_FRONT = [
-    'WWWWWWWWWWWWWWWWWWWWWW',
-    '..........WW..........',
-    '........WWWWWW........',
-    '......WWWWWWWWWW......',
-    '.....WW...WW...WW.....',
-    '......WWWWWWWWWW......',
-    '.......WW.KK.WW.......',
-    '........WWWWWW........',
-    '.......WW....WW.......',
-    '......WW......WW......',
-    '......W........W......',
-    '.....WW........WW.....',
-  ];
-  const MAN_IDLE = [
-    ['..W..', '..W..', '..W..', '.W.W.', '..W..', '.WWW.', '..W..', '.W.W.', 'W...W', '.W.W.'],
-    ['..W..', '..W..', '.W.W.', 'W.W.W', '..W..', '.WWW.', '..W..', '.W.W.', '.W.W.', 'W...W'],
-  ];
-  const MAN_RUN = [
-    ['..W..', '..W..', '.W.W.', '..W..', '..W..', '.WWW.', '..W..', 'W..W.', '.W...', '..W..'],
-    ['..W..', '..W..', '..W..', '.W.W.', '..W..', '.WWW.', '..W..', '.W.W.', '...W.', '.W...'],
-  ];
-  const MAN_WAVE = [
-    ['W.W.W', '.W.W.', '..W..', '..W..', '.WWW.', '..W..', '..W..', '.W.W.', 'W...W', '.W.W.'],
-    ['.W.W.', 'W.W.W', '..W..', '..W..', '.WWW.', '..W..', '..W..', '.W.W.', '.W.W.', 'W...W'],
-  ];
-  const TANK_SPRITE = [
-    '..........WWG.................',
-    '.........WWGGG................',
-    '........GGGGGG................',
-    '......WWGGGGGGGGGGGGWW........',
-    '....WGGGGGGGGGGGGGGGGGGW......',
-    '...WWG.GG.GG.GG.GG.GG.GWW.....',
-    '....WGGGGGGGGGGGGGGGGGGW......',
-    '.....WW.WW.WW.WW.WW.WW.WW.....',
-  ];
-  const JET_SPRITE = [
-    '......B...............',
-    '.....BBB..............',
-    '....BBBBBBBBBBBBBBBB..',
-    '..BBBBBBBBWWWWWWBBBBB.',
-    '....BBBBBBBBBBBBBBBB..',
-    '.....BBB..............',
-    '......B...............',
-  ];
+  // Sprites live in sprites.js, extracted pixel-exact from art/*.png.
 
   const S = {};
 
@@ -583,23 +505,46 @@
     return S.heli.alive && S.heli.landed && S.heli.tilt === 0;
   }
 
+  function frameOrigin(worldX, worldY, frame, flip) {
+    const ax = flip ? frame.w - 1 - frame.anchor_px[0] : frame.anchor_px[0];
+    return { x: worldX - ax, y: worldY - frame.anchor_px[1] };
+  }
+
+  function chopperTilt(h) {
+    if (Math.abs(h.pose) === 0) return 'front';
+    if (h.landed) return 'level';
+    const facing = Math.sign(h.pose) || 1;
+    const vx = (h.vx256 || 0) / 256;
+    if (vx * facing > 1.5) return 'nosedown';
+    if (vx * facing < -1.5) return 'noseup';
+    return 'level';
+  }
+
+  function chopperFrame(h) {
+    const phase = (S.frame || 0) % 3;
+    const tilt = chopperTilt(h);
+    const key = tilt === 'front' ? 'chopper_front_' + phase : 'chopper_side_' + tilt + '_' + phase;
+    return Sprites.frames[key];
+  }
+
+  function heliCenterY(h) {
+    return GROUND - h.alt - 7;
+  }
+
   function heliBody() {
     const h = S.heli;
-    const sprite = chopperSprite(h);
-    const w = sprite[0].length;
-    const height = sprite.length;
-    const foot = GROUND - Math.round(h.alt);
-    return { x: h.x - Math.floor(w / 2), y: foot - height, w, h: height };
+    const frame = chopperFrame(h);
+    const o = frameOrigin(h.x, heliCenterY(h), frame, h.pose < 0);
+    return { x: o.x, y: o.y, w: frame.w, h: frame.h };
   }
 
   function muzzle(h) {
-    const body = heliBody();
-    if (Math.abs(h.pose) < 2) {
-      const dir = h.lastSide || 1;
-      return { x: h.x, y: body.y + body.h + 1, dir, front: true };
-    }
+    const frame = chopperFrame(h);
+    const flip = h.pose < 0;
+    const o = frameOrigin(h.x, heliCenterY(h), frame, flip);
+    const mx = flip ? frame.w - 1 - frame.muzzle[0] : frame.muzzle[0];
     const dir = Math.sign(h.pose) || h.lastSide || 1;
-    return { x: h.x + dir * (body.w / 2 + 3), y: body.y + Math.round(body.h * 0.42), dir, front: false };
+    return { x: o.x + mx, y: o.y + frame.muzzle[1], dir, tilt: chopperTilt(h) };
   }
 
   function fireGun() {
@@ -609,28 +554,20 @@
     const flying = S.shots.filter((s) => !s.enemy && s.alive).length;
     if (flying >= 5) return;
     const m = muzzle(h);
-    const low = h.landed || h.alt < 18;
     const hvx = h.vx256 / 256;
-    const hvy = h.landed ? 0 : h.vy;
-    const muzzleSpeed = 24;
-    let vx = hvx + m.dir * muzzleSpeed;
+    const hvy = h.landed ? 0 : (h.vy || 0);
+    const speed = 24;
+    let vx = hvx;
     let vy = hvy;
-    let x = m.x;
-    let y = m.y;
-    if (m.front && !low) {
-      vx = hvx;
-      vy = hvy + muzzleSpeed;
-      x = h.x;
-      y = heliBody().y + heliBody().h + 1;
-    } else if (!low) {
-      vy = hvy + 10;
-    } else if (m.front) {
-      x = h.x + m.dir * (heliBody().w / 2 + 3);
-      y = heliBody().y + Math.round(heliBody().h * 0.42);
+    if (m.tilt === 'front') vy = hvy + speed;
+    else {
+      vx = hvx + m.dir * speed;
+      if (m.tilt === 'nosedown') vy = hvy + 6;
+      else if (m.tilt === 'noseup') vy = hvy - 6;
     }
     S.shots.push({
-      x, y, vx, vy,
-      kind: 'bullet', enemy: false, down: vy > 2 && Math.abs(vx - hvx) < 1,
+      x: m.x, y: m.y, vx, vy,
+      kind: 'bullet', enemy: false, down: m.tilt === 'front' || m.tilt === 'nosedown',
       alive: true, age: 0,
     });
     sfx('shot');
@@ -815,6 +752,7 @@
   function stepTanks() {
     S.tanks.forEach((t) => {
       if (!t.alive) return;
+      if (t.dir) t.face = t.dir;
       const dx = S.heli.x - t.x;
       if (Math.abs(dx) > 128) {
         t.dir = dx >= 0 ? 1 : -1;
@@ -915,35 +853,56 @@
     return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
   }
 
+  function tankFrame(t) {
+    const phase = (S.frame >> 1) & 1;
+    const aiming = Math.abs((S.heli && S.heli.x) - t.x) <= 128;
+    return Sprites.frames[(aiming ? 'tank_up_' : 'tank_') + phase];
+  }
+
   function tankBox(t) {
-    const w = TANK_SPRITE[0].length;
-    return { x: t.x - Math.floor(w / 2), y: GROUND - TANK_SPRITE.length, w, h: TANK_SPRITE.length };
+    const frame = tankFrame(t);
+    const o = frameOrigin(t.x, GROUND, frame, (t.dir || t.face || 1) < 0);
+    return { x: o.x, y: o.y, w: frame.w, h: frame.h };
+  }
+
+  function jetFrame() {
+    return Sprites.frames['jet_' + ((S.frame >> 1) & 1)];
   }
 
   function jetBox(j) {
-    const w = JET_SPRITE[0].length;
-    const h = JET_SPRITE.length;
-    return { x: j.x - Math.floor(w / 2), y: GROUND - j.alt - h, w, h };
+    const frame = jetFrame();
+    const o = frameOrigin(j.x, GROUND - j.alt, frame, j.dir < 0);
+    return { x: o.x, y: o.y, w: frame.w, h: frame.h };
   }
 
-  function manSprite(man) {
-    const tick = (S.frame >> 3) & 1;
-    if (man.state === 'wave') return MAN_WAVE[tick];
-    if (man.state === 'run') return MAN_RUN[(S.frame + (man.id || 0)) & 1];
-    return MAN_IDLE[tick];
+  function manFrame(man) {
+    if (man.state === 'run') {
+      if (Math.abs(man.x - (S.heli ? S.heli.x : man.x)) < 16) {
+        return Sprites.frames['hostage_board' + ((S.frame >> 1) & 1)];
+      }
+      return Sprites.frames['hostage_run' + (S.frame & 3)];
+    }
+    return Sprites.frames['hostage_wave' + ((S.frame >> 2) & 1)];
   }
 
   function manBox(man) {
-    const sprite = manSprite(man);
-    return { x: man.x - 2, y: GROUND - sprite.length, w: sprite[0].length, h: sprite.length };
+    const frame = Sprites.frames.hostage_run0;
+    const o = frameOrigin(man.x, GROUND, frame, false);
+    return { x: o.x, y: o.y, w: frame.w, h: frame.h };
   }
 
   function shotBox(s) {
     return { x: s.x - 1, y: s.y - 1, w: 4, h: 3 };
   }
 
+  function droneFrame() {
+    return Sprites.frames['saucer_' + ((S.frame >> 2) & 1)];
+  }
+
   function droneBox(d) {
-    return { x: d.x - 5, y: GROUND - d.alt - 4, w: SAUCER[0].length, h: SAUCER.length };
+    const frame = droneFrame();
+    const o = frameOrigin(d.x, GROUND - d.alt, frame, false);
+    return { x: o.x, y: o.y, w: frame.w, h: frame.h };
   }
 
   function shotOffscreen(s) {
@@ -1008,8 +967,14 @@
     S.drones = S.drones.filter((d) => d.alive);
   }
 
+  function barracksFrame(b) {
+    return Sprites.frames[b.open ? 'barracks_destroyed' : 'barracks_intact'];
+  }
+
   function barracksBox(b) {
-    return { x: b.x - 20, y: GROUND - 24, w: 44, h: 24 };
+    const frame = barracksFrame(b);
+    const o = frameOrigin(b.x, GROUND, frame, false);
+    return { x: o.x, y: o.y, w: frame.w, h: frame.h };
   }
 
   function hitBarracks(prevX, prevY, s) {
@@ -1184,18 +1149,16 @@
       S.barracks.forEach((b) => drawBarracks(ctx, b));
       S.tanks.forEach((t) => {
         if (!t.alive) return;
-        const box = tankBox(t);
-        blit(ctx, TANK_SPRITE, sxOf(box.x), box.y, { flip: t.dir < 0 });
+        const frame = tankFrame(t);
+        drawAnchored(ctx, frame, t.x, GROUND, (t.dir || t.face || 1) < 0);
       });
       S.hostages.forEach((man) => drawMan(ctx, man));
       S.walkers.forEach((w) => {
-        const sprite = MAN_RUN[(S.frame || 0) & 1];
-        blit(ctx, sprite, sxOf(w.x), GROUND - sprite.length, {});
+        drawAnchored(ctx, Sprites.frames['hostage_run' + (S.frame & 3)], w.x, GROUND, false);
       });
       S.jets.forEach((j) => {
         if (!j.alive) return;
-        const box = jetBox(j);
-        blit(ctx, JET_SPRITE, sxOf(box.x), box.y, { flip: j.dir < 0 });
+        drawAnchored(ctx, jetFrame(), j.x, GROUND - j.alt, j.dir < 0);
       });
       S.drones.forEach((d) => { if (d.alive) drawDrone(ctx, d); });
       if (S.heli.alive || S.pending) drawHeli(ctx, S.heli);
@@ -1391,64 +1354,31 @@
     ctx.fillRect(pole + 1, by - 8 + wave, 8, 2);
   }
 
+  function drawAnchored(ctx, frame, worldX, worldY, flip) {
+    const ax = flip ? frame.w - 1 - frame.anchor_px[0] : frame.anchor_px[0];
+    blit(ctx, frame.rows, sxOf(worldX) - ax, Math.round(worldY) - frame.anchor_px[1], { flip });
+  }
+
   function drawBarracks(ctx, b) {
-    const x = sxOf(b.x) - 14;
-    if (x < -40 || x > W + 8) return;
-    const bodyW = 28;
-    const bodyH = 9;
-    const baseY = GROUND - bodyH;
-    const dome = [6, 10, 16, 22, 26, 28];
-    dome.forEach((w, i) => {
-      let color = i < 2 ? INK.W : INK.B;
-      if (b.open && i < 2) color = INK.O;
-      else if (b.open && i === 3) color = INK.K;
-      ctx.fillStyle = color;
-      ctx.fillRect(x + Math.round((bodyW - w) / 2), baseY - dome.length + i, w, 1);
-    });
-    ctx.fillStyle = b.open ? INK.O : INK.B;
-    ctx.fillRect(x, baseY, bodyW, bodyH);
-    ctx.fillStyle = INK.W;
-    ctx.fillRect(x + 3, baseY + 2, 6, 3);
-    ctx.fillRect(x + bodyW - 9, baseY + 2, 6, 3);
-    if (b.open) {
-      ctx.fillStyle = INK.K;
-      ctx.fillRect(x + 10, baseY - 4, 8, bodyH + 2);
-      ctx.fillStyle = INK.O;
-      ctx.fillRect(x + 2, baseY - 6, 3, 3);
-      ctx.fillRect(x + 20, baseY - 5, 4, 3);
-    }
+    if (sxOf(b.x) < -40 || sxOf(b.x) > W + 40) return;
+    drawAnchored(ctx, barracksFrame(b), b.x, GROUND, false);
   }
 
   function drawMan(ctx, man) {
-    const sprite = manSprite(man);
-    blit(ctx, sprite, sxOf(man.x) - 2, GROUND - sprite.length, {});
+    const frame = manFrame(man);
+    drawAnchored(ctx, frame, man.x, GROUND, man.dir < 0);
   }
 
-  const SAUCER = [
-    '..G....G..',
-    '...OOOO...',
-    '..OOOOOO..',
-    '.OOOGGGOOO',
-    '..OOOOOO..',
-    '...OOOO...',
-    '....GG....',
-  ];
-
   function drawDrone(ctx, d) {
-    blit(ctx, SAUCER, sxOf(d.x) - 5, Math.round(GROUND - d.alt) - 4, {});
+    drawAnchored(ctx, droneFrame(), d.x, GROUND - d.alt, false);
   }
 
   function chopperSprite(h) {
-    if (Math.abs(h.pose) === 0) return HELI_FRONT;
-    if (h.landed === false && (h.alt || 0) > 2) return HELI_NOSE;
-    return HELI_SIDE;
+    return chopperFrame(h).rows;
   }
 
   function drawHeli(ctx, h) {
-    const sprite = chopperSprite(h);
-    const foot = GROUND - Math.round(h.alt);
-    const top = foot - sprite.length;
-    blit(ctx, sprite, sxOf(h.x) - Math.floor(sprite[0].length / 2), top, { flip: h.pose < 0 });
+    drawAnchored(ctx, chopperFrame(h), h.x, heliCenterY(h), h.pose < 0);
   }
 
   function plotWhite(ctx, x, y) {
@@ -1812,16 +1742,16 @@
     S.shots = [];
     fireGun();
     const right = S.shots.find((s) => !s.enemy);
-    const rightBody = heliBody();
-    expect(right && right.x >= rightBody.x + rightBody.w - 1, 'right facing shot spawns at the nose');
-    expect(right && right.vx > 0 && right.vy > 0, 'flying shot goes diagonal down');
+    const rightMuzzle = muzzle(S.heli);
+    expect(right && Math.abs(right.x - rightMuzzle.x) < 0.01 && Math.abs(right.y - rightMuzzle.y) < 0.01, 'right facing shot spawns at the muzzle');
+    expect(chopperTilt(S.heli) === 'level' && right && right.vy === 0 && right.vx > 0, 'a level shot fires flat');
 
     S.heli.pose = -4;
     S.shots = [];
     fireGun();
     const left = S.shots.find((s) => !s.enemy);
-    const leftBody = heliBody();
-    expect(left && left.x <= leftBody.x + 1, 'left facing shot spawns at the nose');
+    const leftMuzzle = muzzle(S.heli);
+    expect(left && Math.abs(left.x - leftMuzzle.x) < 0.01 && left.x < S.heli.x, 'left facing shot spawns at the mirrored muzzle');
 
     S.heli.pose = 0;
     S.heli.lastSide = 1;
@@ -1856,6 +1786,19 @@
     fireGun();
     const lead = S.shots.find((s) => !s.enemy);
     expect(lead && lead.vx > 0, 'muzzle speed still carries a shot ahead of a reversing chopper');
+    expect(chopperTilt(S.heli) === 'noseup' && lead.vy < 0, 'pulling backwards aims the shot upward');
+    S.heli.vx256 = 21 * 256;
+    S.heli.pose = 4;
+    S.heli.vy = 0;
+    expect(chopperTilt(S.heli) === 'nosedown', 'moving forward selects nose-down');
+    S.shots = [];
+    fireGun();
+    const dive = S.shots.find((s) => !s.enemy);
+    expect(dive && dive.vy > 0, 'nose-down aims the shot slightly down');
+    S.heli.vx256 = 0;
+    expect(chopperTilt(S.heli) === 'level', 'holding selects the level frame');
+    S.heli.pose = 0;
+    expect(chopperTilt(S.heli) === 'front', 'facing the camera selects the head-on frame');
 
     beginPlay();
     S.quiet = true;
@@ -2059,10 +2002,16 @@
       return { w: maxX - minX + 1, h: maxY - minY + 1 };
     }
 
-    const sideInk = inkBox(HELI_SIDE);
-    const frontInk = inkBox(HELI_FRONT);
-    expect(sideInk.w / sideInk.h >= 2.4 && sideInk.w / sideInk.h <= 3.15, 'side chopper is a long 2.5 to 3 to 1 profile');
-    expect(frontInk.w / frontInk.h >= 0.8 && frontInk.w / frontInk.h <= 2.3, 'front chopper is a compact head-on shape');
+    const levelFrame = Sprites.frames.chopper_side_level_0;
+    const downFrame = Sprites.frames.chopper_side_nosedown_0;
+    const upFrame = Sprites.frames.chopper_side_noseup_0;
+    const frontFrame = Sprites.frames.chopper_front_0;
+    expect(levelFrame.w === 49 && levelFrame.h === 14, 'level chinook is 49 by 14');
+    expect(downFrame.w === 49 && downFrame.h === 22, 'nose-down chinook is 49 by 22');
+    expect(upFrame.w === 49 && upFrame.h === 22, 'nose-up chinook is 49 by 22');
+    expect(frontFrame.w === 35 && frontFrame.h === 13, 'head-on chinook is 35 by 13');
+    expect(levelFrame.muzzle[0] === 43 && levelFrame.muzzle[1] === 9, 'level muzzle');
+    expect(downFrame.muzzle[1] === 15 && upFrame.muzzle[1] === 11, 'tilted muzzles');
 
     [-4, -2, 0, 2, 4].forEach((pose) => {
       [-5, 0, 5].forEach((tilt) => {

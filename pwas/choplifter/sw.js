@@ -1,4 +1,4 @@
-const CACHE = 'choplifter-v31';
+const CACHE = 'choplifter-v32';
 const ASSETS = [
   './',
   './index.html',
@@ -6,11 +6,16 @@ const ASSETS = [
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './js/main.js?v=31',
-  './js/audio.js?v=31',
-  './js/motion.js?v=31',
-  './js/input.js?v=31',
-  './js/game.js?v=31',
+  './js/main.js?v=32',
+  './js/audio.js?v=32',
+  './js/motion.js?v=32',
+  './js/input.js?v=32',
+  './js/sprites.js?v=32',
+  './js/game.js?v=32',
+  './art/chopper.png',
+  './art/people.png',
+  './art/enemies.png',
+  './art/barracks.png',
 ];
 
 self.addEventListener('install', (e) => {
