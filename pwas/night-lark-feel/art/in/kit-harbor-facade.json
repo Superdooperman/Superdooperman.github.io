@@ -1,0 +1,234 @@
+{
+ "atlas": "kit-harbor-facade.png",
+ "area": "harbor",
+ "layer": "a",
+ "cell": [
+  64,
+  96
+ ],
+ "gutter": 2,
+ "extrude": 1,
+ "units": "px, module-local, origin top-left of the art box",
+ "cells": [
+  {
+   "id": "plain-wall",
+   "x": 2,
+   "y": 2,
+   "w": 64,
+   "h": 96,
+   "footprint": {
+    "c": 4,
+    "r": 6
+   },
+   "weight": 6
+  },
+  {
+   "id": "plain-wall-v2",
+   "x": 68,
+   "y": 2,
+   "w": 64,
+   "h": 96,
+   "footprint": {
+    "c": 4,
+    "r": 6
+   },
+   "codeId": "plain-wall"
+  },
+  {
+   "id": "plain-wall-v3",
+   "x": 134,
+   "y": 2,
+   "w": 64,
+   "h": 96,
+   "footprint": {
+    "c": 4,
+    "r": 6
+   },
+   "codeId": "plain-wall"
+  },
+  {
+   "id": "window-narrow",
+   "x": 200,
+   "y": 2,
+   "w": 64,
+   "h": 96,
+   "footprint": {
+    "c": 4,
+    "r": 6
+   },
+   "weight": 2
+  },
+  {
+   "id": "window-narrow-lit",
+   "x": 266,
+   "y": 2,
+   "w": 64,
+   "h": 96,
+   "footprint": {
+    "c": 4,
+    "r": 6
+   },
+   "codeId": "window-narrow",
+   "note": "lit variant (LG glass): engine picks 1-2 per screen, needs an LG lamp pool"
+  },
+  {
+   "id": "window-large",
+   "x": 332,
+   "y": 2,
+   "w": 64,
+   "h": 96,
+   "footprint": {
+    "c": 4,
+    "r": 6
+   },
+   "weight": 1
+  },
+  {
+   "id": "window-large-lit",
+   "x": 398,
+   "y": 2,
+   "w": 64,
+   "h": 96,
+   "footprint": {
+    "c": 4,
+    "r": 6
+   },
+   "codeId": "window-large",
+   "note": "lit variant (LG glass): engine picks 1-2 per screen"
+  },
+  {
+   "id": "archway",
+   "x": 464,
+   "y": 2,
+   "w": 64,
+   "h": 96,
+   "footprint": {
+    "c": 4,
+    "r": 6
+   },
+   "weight": 1,
+   "note": "dark doorway with a moon pool on the floor (lit-inside left to the engine pool)"
+  },
+  {
+   "id": "broken-wall",
+   "x": 2,
+   "y": 100,
+   "w": 64,
+   "h": 96,
+   "footprint": {
+    "c": 4,
+    "r": 6
+   },
+   "weight": 1
+  },
+  {
+   "id": "banner-wall",
+   "x": 68,
+   "y": 100,
+   "w": 64,
+   "h": 96,
+   "footprint": {
+    "c": 4,
+    "r": 6
+   },
+   "weight": 1
+  },
+  {
+   "id": "recessed-wall",
+   "x": 134,
+   "y": 100,
+   "w": 64,
+   "h": 96,
+   "footprint": {
+    "c": 4,
+    "r": 6
+   },
+   "weight": 1
+  },
+  {
+   "id": "vertical-beam",
+   "x": 200,
+   "y": 100,
+   "w": 64,
+   "h": 96,
+   "footprint": {
+    "c": 4,
+    "r": 6
+   },
+   "weight": 1
+  },
+  {
+   "id": "drainpipe",
+   "x": 266,
+   "y": 100,
+   "w": 64,
+   "h": 96,
+   "footprint": {
+    "c": 4,
+    "r": 6
+   },
+   "weight": 1
+  },
+  {
+   "id": "corner",
+   "x": 332,
+   "y": 100,
+   "w": 64,
+   "h": 96,
+   "footprint": {
+    "c": 4,
+    "r": 6
+   },
+   "weight": 0,
+   "note": "outer columns 0/27; mirror for the right column"
+  },
+  {
+   "id": "edge-left",
+   "x": 398,
+   "y": 100,
+   "w": 16,
+   "h": 96,
+   "footprint": {
+    "c": 1,
+    "r": 6
+   },
+   "note": "outer corner stones just outside column 0 (ATLAS-SPEC recommendation)"
+  },
+  {
+   "id": "edge-right",
+   "x": 464,
+   "y": 100,
+   "w": 16,
+   "h": 96,
+   "footprint": {
+    "c": 1,
+    "r": 6
+   },
+   "note": "mirror of edge-left, just outside column 27"
+  },
+  {
+   "id": "plain-wall-v4",
+   "x": 2,
+   "y": 198,
+   "w": 64,
+   "h": 96,
+   "footprint": {
+    "c": 4,
+    "r": 6
+   },
+   "codeId": "plain-wall"
+  },
+  {
+   "id": "plain-wall-v5",
+   "x": 68,
+   "y": 198,
+   "w": 64,
+   "h": 96,
+   "footprint": {
+    "c": 4,
+    "r": 6
+   },
+   "codeId": "plain-wall"
+  }
+ ]
+}
