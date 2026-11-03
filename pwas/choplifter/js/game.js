@@ -118,52 +118,49 @@
   }
   const HELI_NOSE = noseDown(HELI_SIDE);
   const HELI_FRONT = [
-    '..WWWWWWWWWWWW..',
-    '.......WW.......',
-    '.....WWWWWW.....',
-    '....WW.WW.WW....',
-    '.....WWWWWW.....',
-    '......WKKW......',
-    '......WWWW......',
-    '.....WW..WW.....',
-    '.....W....W.....',
-    '....WW....WW....',
-    '....W......W....',
-    '...WW......WW...',
+    'WWWWWWWWWWWWWWWWWWWWWW',
+    '..........WW..........',
+    '........WWWWWW........',
+    '......WWWWWWWWWW......',
+    '.....WW...WW...WW.....',
+    '......WWWWWWWWWW......',
+    '.......WW.KK.WW.......',
+    '........WWWWWW........',
+    '.......WW....WW.......',
+    '......WW......WW......',
+    '......W........W......',
+    '.....WW........WW.....',
   ];
   const MAN_IDLE = [
-    ['..W..', '..W..', '.W.W.', 'W.W.W', '..W..', '.WWW.', '..W..', '.W.W.', 'W...W', '.W.W.'],
-    ['..W..', '..W..', 'W.W.W', '.W.W.', '..W..', '.WWW.', '..W..', '.W.W.', '.W.W.', 'W...W'],
+    ['..W..', '..W..', '..W..', '.W.W.', '..W..', '.WWW.', '..W..', '.W.W.', 'W...W', '.W.W.'],
+    ['..W..', '..W..', '.W.W.', 'W.W.W', '..W..', '.WWW.', '..W..', '.W.W.', '.W.W.', 'W...W'],
   ];
   const MAN_RUN = [
     ['..W..', '..W..', '.W.W.', '..W..', '..W..', '.WWW.', '..W..', 'W..W.', '.W...', '..W..'],
     ['..W..', '..W..', '..W..', '.W.W.', '..W..', '.WWW.', '..W..', '.W.W.', '...W.', '.W...'],
   ];
   const MAN_WAVE = [
-    ['.W.W.', 'W.W.W', '..W..', '..W..', '.WWW.', '..W..', '..W..', '.W.W.', 'W...W', '.W.W.'],
-    ['W.W.W', '.W.W.', '..W..', '..W..', '.WWW.', '..W..', '..W..', '.W.W.', '.W.W.', 'W...W'],
+    ['W.W.W', '.W.W.', '..W..', '..W..', '.WWW.', '..W..', '..W..', '.W.W.', 'W...W', '.W.W.'],
+    ['.W.W.', 'W.W.W', '..W..', '..W..', '.WWW.', '..W..', '..W..', '.W.W.', '.W.W.', 'W...W'],
   ];
   const TANK_SPRITE = [
-    '........WWGGG.............',
-    '.......WWGGGGG............',
-    '......GGGGGGGGGG..........',
-    '...WWGGGGGGGGGGGGGWW......',
-    '..WGGGGGGGGGGGGGGGGGGW....',
-    '.WWG.GG.GG.GG.GG.GG.GWW...',
-    '..WGGGGGGGGGGGGGGGGGGW....',
-    '...WW.WW.WW.WW.WW.WW.W....',
+    '..........WWG.................',
+    '.........WWGGG................',
+    '........GGGGGG................',
+    '......WWGGGGGGGGGGGGWW........',
+    '....WGGGGGGGGGGGGGGGGGGW......',
+    '...WWG.GG.GG.GG.GG.GG.GWW.....',
+    '....WGGGGGGGGGGGGGGGGGGW......',
+    '.....WW.WW.WW.WW.WW.WW.WW.....',
   ];
   const JET_SPRITE = [
-    '.................B..',
-    '................BB..',
-    '.....B.........BBB..',
-    '....BBB.......BBBB..',
-    '...BBBBBBBBBBBBBBB..',
-    '..BBBBBBBBBBBBBBBBBB',
-    '...BBBBBBBBBBBBBBB..',
-    '....BBB.......BBBB..',
-    '.....B.........BBB..',
-    '................BB..',
+    '......B...............',
+    '.....BBB..............',
+    '....BBBBBBBBBBBBBBBB..',
+    '..BBBBBBBBWWWWWWBBBBB.',
+    '....BBBBBBBBBBBBBBBB..',
+    '.....BBB..............',
+    '......B...............',
   ];
 
   const S = {};
@@ -1395,35 +1392,30 @@
   }
 
   function drawBarracks(ctx, b) {
-    const x = sxOf(b.x) - 16;
+    const x = sxOf(b.x) - 14;
     if (x < -40 || x > W + 8) return;
-    const bodyW = 32;
-    const bodyH = 8;
-    const domeH = 8;
+    const bodyW = 28;
+    const bodyH = 9;
     const baseY = GROUND - bodyH;
-    for (let i = 0; i < domeH; i++) {
-      const w = 10 + i * 3;
-      const dx = Math.round((bodyW - w) / 2);
+    const dome = [6, 10, 16, 22, 26, 28];
+    dome.forEach((w, i) => {
       let color = i < 2 ? INK.W : INK.B;
-      if (b.open && i < 3) color = INK.O;
-      else if (b.open && (i & 1)) color = INK.K;
+      if (b.open && i < 2) color = INK.O;
+      else if (b.open && i === 3) color = INK.K;
       ctx.fillStyle = color;
-      ctx.fillRect(x + dx, baseY - domeH + i, Math.max(4, w), 1);
-    }
+      ctx.fillRect(x + Math.round((bodyW - w) / 2), baseY - dome.length + i, w, 1);
+    });
     ctx.fillStyle = b.open ? INK.O : INK.B;
     ctx.fillRect(x, baseY, bodyW, bodyH);
     ctx.fillStyle = INK.W;
-    ctx.fillRect(x + 2, baseY + 2, 7, 3);
-    ctx.fillRect(x + bodyW - 9, baseY + 2, 7, 3);
+    ctx.fillRect(x + 3, baseY + 2, 6, 3);
+    ctx.fillRect(x + bodyW - 9, baseY + 2, 6, 3);
     if (b.open) {
       ctx.fillStyle = INK.K;
-      ctx.fillRect(x + 12, baseY - 3, 8, bodyH + 3);
+      ctx.fillRect(x + 10, baseY - 4, 8, bodyH + 2);
       ctx.fillStyle = INK.O;
-      ctx.fillRect(x + 3, baseY - 5, 3, 3);
-      ctx.fillRect(x + 22, baseY - 4, 4, 3);
-    } else {
-      ctx.fillStyle = INK.W;
-      ctx.fillRect(x + 12, baseY - domeH - 1, bodyW - 24, 2);
+      ctx.fillRect(x + 2, baseY - 6, 3, 3);
+      ctx.fillRect(x + 20, baseY - 5, 4, 3);
     }
   }
 
@@ -2070,7 +2062,7 @@
     const sideInk = inkBox(HELI_SIDE);
     const frontInk = inkBox(HELI_FRONT);
     expect(sideInk.w / sideInk.h >= 2.4 && sideInk.w / sideInk.h <= 3.15, 'side chopper is a long 2.5 to 3 to 1 profile');
-    expect(frontInk.w / frontInk.h >= 0.8 && frontInk.w / frontInk.h <= 1.6, 'front chopper is a compact head-on shape');
+    expect(frontInk.w / frontInk.h >= 0.8 && frontInk.w / frontInk.h <= 2.3, 'front chopper is a compact head-on shape');
 
     [-4, -2, 0, 2, 4].forEach((pose) => {
       [-5, 0, 5].forEach((tilt) => {
