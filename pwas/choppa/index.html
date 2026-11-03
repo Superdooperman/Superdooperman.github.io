@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#000000">
+  <title>Git to da Choppa!</title>
+  <meta name="description" content="A love letter to the Apple II classic Choplifter. Not affiliated with or endorsed by its owners.">
+  <meta property="og:title" content="Git to da Choppa!">
+  <meta property="og:description" content="A love letter to the Apple II classic Choplifter. Not affiliated with or endorsed by its owners.">
+  <meta property="og:url" content="https://superdooperman.github.io/pwas/choppa/">
+  <meta property="og:image" content="https://superdooperman.github.io/pwas/choppa/assets/boxart.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Git to da Choppa!">
+  <meta name="twitter:description" content="A love letter to the Apple II classic Choplifter. Not affiliated with or endorsed by its owners.">
+  <meta name="twitter:image" content="https://superdooperman.github.io/pwas/choppa/assets/boxart.jpg">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-box-192.png">
+  <link rel="stylesheet" href="css/style.css?v=35">
+</head>
+<body>
+  <div id="splash">
+    <picture>
+      <source srcset="assets/boxart.webp" type="image/webp">
+      <img src="assets/boxart.jpg" alt="Git to da Choppa! box art">
+    </picture>
+    <p>TAP / PRESS START</p>
+  </div>
+  <div id="app">
+    <div id="safe-probe"></div>
+    <canvas id="game" width="280" height="192"></canvas>
+    <div id="touch-controls" class="hidden">
+      <div id="joystick-zone"><div id="joystick-knob"></div></div>
+      <div id="action-buttons">
+        <button id="btn-facing" type="button" aria-label="Face">FACE</button>
+        <button id="btn-fire" type="button" aria-label="Fire">FIRE</button>
+        <button id="btn-motion" type="button" aria-label="Toggle motion controls">MOTION</button>
+      </div>
+      <button id="btn-start" type="button">TAP TO START</button>
+      <button id="btn-pause" type="button">PAUSE</button>
+      <button id="btn-monitor" type="button">COLOUR</button>
+    </div>
+    <div id="motion-panel" class="hidden">
+      <p>Tilt device to fly. Hold level, then tap Calibrate.</p>
+      <button id="btn-calibrate" type="button">Calibrate</button>
+      <label>Sensitivity <input id="motion-sensitivity" type="range" min="0.5" max="2" step="0.1" value="1"></label>
+      <button id="btn-motion-close" type="button">Close</button>
+    </div>
+    <div id="rotate-hint" class="hidden">Rotate to landscape</div>
+  </div>
+  <p id="tribute" class="sr">A love letter to the Apple II classic Choplifter. Not affiliated with or endorsed by its owners.</p>
+  <script src="js/audio.js?v=35"></script>
+  <script src="js/motion.js?v=35"></script>
+  <script src="js/input.js?v=35"></script>
+  <script src="js/sprites.js?v=35"></script>
+  <script src="js/game.js?v=35"></script>
+  <script src="js/main.js?v=35"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js?v=35', { scope: './' }).catch(() => {});
+    }
+  </script>
+</body>
+</html>
