@@ -1,0 +1,646 @@
+{
+ "atlas": "kit-harbor-props.png",
+ "area": "harbor",
+ "layer": "c",
+ "cell": [
+  48,
+  64
+ ],
+ "gutter": 2,
+ "extrude": 0,
+ "units": "px, module-local, origin top-left of the art box",
+ "cells": [
+  {
+   "id": "flagpole-tall",
+   "x": 2,
+   "y": 2,
+   "w": 16,
+   "h": 64,
+   "footprint": {
+    "c": 1,
+    "r": 4
+   },
+   "mount": "wall",
+   "mountPoint": [
+    0,
+    32
+   ],
+   "grapple": [
+    {
+     "x": 8,
+     "y": 2,
+     "kind": "finial",
+     "protrudes": true
+    }
+   ],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "note": "upright pole, small torn PX1 pennant (<=16 px wide)"
+  },
+  {
+   "id": "flagpole-short",
+   "x": 52,
+   "y": 2,
+   "w": 48,
+   "h": 32,
+   "footprint": {
+    "c": 3,
+    "r": 2
+   },
+   "mount": "wall",
+   "mountPoint": [
+    0,
+    16
+   ],
+   "grapple": [
+    {
+     "x": 45,
+     "y": 3,
+     "kind": "tip",
+     "protrudes": true
+    }
+   ],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "note": "ATLAS-SPEC 48x32 / (45,3); props.js still says 2x2 / (29,3)"
+  },
+  {
+   "id": "hanging-lantern",
+   "x": 102,
+   "y": 2,
+   "w": 16,
+   "h": 32,
+   "footprint": {
+    "c": 1,
+    "r": 2
+   },
+   "aliases": [
+    "lantern"
+   ],
+   "mount": "under",
+   "mountPoint": [
+    8,
+    0
+   ],
+   "grapple": [
+    {
+     "x": 8,
+     "y": 2,
+     "kind": "ring",
+     "protrudes": true
+    }
+   ],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "note": "ATLAS-SPEC 16x32; flame LG = danger light, engine adds the pool"
+  },
+  {
+   "id": "cage",
+   "x": 152,
+   "y": 2,
+   "w": 16,
+   "h": 32,
+   "footprint": {
+    "c": 1,
+    "r": 2
+   },
+   "mount": "under",
+   "mountPoint": [
+    8,
+    0
+   ],
+   "grapple": [
+    {
+     "x": 8,
+     "y": 2,
+     "kind": "ring",
+     "protrudes": true
+    }
+   ],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "note": "ATLAS-SPEC 16x32"
+  },
+  {
+   "id": "beam-rope",
+   "x": 202,
+   "y": 2,
+   "w": 48,
+   "h": 48,
+   "footprint": {
+    "c": 3,
+    "r": 3
+   },
+   "mount": "wall",
+   "mountPoint": [
+    0,
+    24
+   ],
+   "grapple": [
+    {
+     "x": 40,
+     "y": 6,
+     "kind": "tip",
+     "protrudes": true
+    }
+   ],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right"
+  },
+  {
+   "id": "chain-ring",
+   "x": 252,
+   "y": 2,
+   "w": 16,
+   "h": 48,
+   "footprint": {
+    "c": 1,
+    "r": 3
+   },
+   "mount": "under",
+   "mountPoint": [
+    8,
+    0
+   ],
+   "grapple": [
+    {
+     "x": 8,
+     "y": 42,
+     "kind": "ring",
+     "protrudes": true
+    }
+   ],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "note": "ATLAS-SPEC 16x48 / (8,42); props.js still says 1x4 / (8,58)"
+  },
+  {
+   "id": "grapple-hook",
+   "x": 302,
+   "y": 2,
+   "w": 16,
+   "h": 32,
+   "footprint": {
+    "c": 1,
+    "r": 2
+   },
+   "mount": "under",
+   "mountPoint": [
+    8,
+    0
+   ],
+   "grapple": [
+    {
+     "x": 8,
+     "y": 2,
+     "kind": "ring",
+     "protrudes": true
+    }
+   ],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "note": "not in ATLAS-SPEC; painted at props.js size"
+  },
+  {
+   "id": "banner-bracket",
+   "x": 352,
+   "y": 2,
+   "w": 32,
+   "h": 32,
+   "footprint": {
+    "c": 2,
+    "r": 2
+   },
+   "mount": "wall",
+   "mountPoint": [
+    0,
+    16
+   ],
+   "grapple": [
+    {
+     "x": 29,
+     "y": 4,
+     "kind": "tip",
+     "protrudes": true
+    }
+   ],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right"
+  },
+  {
+   "id": "small-hook",
+   "x": 2,
+   "y": 68,
+   "w": 16,
+   "h": 16,
+   "footprint": {
+    "c": 1,
+    "r": 1
+   },
+   "aliases": [
+    "hook"
+   ],
+   "mount": "wall",
+   "mountPoint": [
+    0,
+    8
+   ],
+   "grapple": [
+    {
+     "x": 8,
+     "y": 8,
+     "kind": "hook",
+     "protrudes": true
+    }
+   ],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right"
+  },
+  {
+   "id": "gargoyle",
+   "x": 52,
+   "y": 68,
+   "w": 32,
+   "h": 16,
+   "footprint": {
+    "c": 2,
+    "r": 1
+   },
+   "mount": "wall",
+   "mountPoint": [
+    0,
+    8
+   ],
+   "grapple": [
+    {
+     "x": 27,
+     "y": 7,
+     "kind": "brow",
+     "protrudes": true
+    }
+   ],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right"
+  },
+  {
+   "id": "statue",
+   "x": 102,
+   "y": 68,
+   "w": 16,
+   "h": 32,
+   "footprint": {
+    "c": 1,
+    "r": 2
+   },
+   "mount": "top",
+   "mountPoint": [
+    8,
+    31
+   ],
+   "grapple": [
+    {
+     "x": 12,
+     "y": 2,
+     "kind": "hand",
+     "protrudes": true
+    }
+   ],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "note": "flush: grip is buried if a piece stacks on it"
+  },
+  {
+   "id": "railing-a",
+   "x": 152,
+   "y": 68,
+   "w": 16,
+   "h": 16,
+   "footprint": {
+    "c": 1,
+    "r": 1
+   },
+   "mount": "top",
+   "mountPoint": [
+    8,
+    15
+   ],
+   "grapple": [
+    {
+     "x": 8,
+     "y": 3,
+     "kind": "post",
+     "protrudes": true
+    }
+   ],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "note": "end post cell"
+  },
+  {
+   "id": "railing-a-span",
+   "x": 202,
+   "y": 68,
+   "w": 16,
+   "h": 16,
+   "footprint": {
+    "c": 1,
+    "r": 1
+   },
+   "codeId": "railing-a",
+   "mount": "top",
+   "mountPoint": [
+    8,
+    15
+   ],
+   "grapple": [],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "deco": true,
+   "note": "middle span (deco:true)"
+  },
+  {
+   "id": "railing-b",
+   "x": 252,
+   "y": 68,
+   "w": 16,
+   "h": 16,
+   "footprint": {
+    "c": 1,
+    "r": 1
+   },
+   "mount": "top",
+   "mountPoint": [
+    8,
+    15
+   ],
+   "grapple": [
+    {
+     "x": 8,
+     "y": 3,
+     "kind": "post",
+     "protrudes": true
+    }
+   ],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "note": "end post cell, ornate"
+  },
+  {
+   "id": "railing-b-span",
+   "x": 302,
+   "y": 68,
+   "w": 16,
+   "h": 16,
+   "footprint": {
+    "c": 1,
+    "r": 1
+   },
+   "codeId": "railing-b",
+   "mount": "top",
+   "mountPoint": [
+    8,
+    15
+   ],
+   "grapple": [],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "deco": true,
+   "note": "middle span (deco:true), ornate"
+  },
+  {
+   "id": "bracket",
+   "x": 352,
+   "y": 68,
+   "w": 16,
+   "h": 16,
+   "footprint": {
+    "c": 1,
+    "r": 1
+   },
+   "mount": "under",
+   "mountPoint": [
+    8,
+    0
+   ],
+   "grapple": [],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "deco": true,
+   "note": "corbel under a slab end"
+  },
+  {
+   "id": "support",
+   "x": 2,
+   "y": 134,
+   "w": 16,
+   "h": 32,
+   "footprint": {
+    "c": 1,
+    "r": 2
+   },
+   "mount": "under",
+   "mountPoint": [
+    8,
+    0
+   ],
+   "grapple": [],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "deco": true,
+   "note": "timber strut under a slab"
+  },
+  {
+   "id": "banner-deco",
+   "x": 52,
+   "y": 134,
+   "w": 16,
+   "h": 48,
+   "footprint": {
+    "c": 1,
+    "r": 3
+   },
+   "mount": "wall",
+   "mountPoint": [
+    0,
+    24
+   ],
+   "grapple": [],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "deco": true,
+   "note": "Company banner: GD2 field, GD1 folds, GD0 outline, PX3 crest"
+  },
+  {
+   "id": "banner-deco-v2",
+   "x": 102,
+   "y": 134,
+   "w": 16,
+   "h": 48,
+   "footprint": {
+    "c": 1,
+    "r": 3
+   },
+   "codeId": "banner-deco",
+   "mount": "wall",
+   "mountPoint": [
+    0,
+    24
+   ],
+   "grapple": [],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "deco": true,
+   "note": "small torn PX1 banner (10 px wide)"
+  },
+  {
+   "id": "cloth-drape",
+   "x": 152,
+   "y": 134,
+   "w": 48,
+   "h": 32,
+   "footprint": {
+    "c": 3,
+    "r": 2
+   },
+   "mount": "wall",
+   "mountPoint": [
+    0,
+    16
+   ],
+   "grapple": [],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "deco": true
+  },
+  {
+   "id": "vines",
+   "x": 202,
+   "y": 134,
+   "w": 32,
+   "h": 32,
+   "footprint": {
+    "c": 2,
+    "r": 2
+   },
+   "mount": "wall",
+   "mountPoint": [
+    0,
+    16
+   ],
+   "grapple": [],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "deco": true
+  },
+  {
+   "id": "pots-crates",
+   "x": 252,
+   "y": 134,
+   "w": 32,
+   "h": 16,
+   "footprint": {
+    "c": 2,
+    "r": 1
+   },
+   "mount": "top",
+   "mountPoint": [
+    16,
+    15
+   ],
+   "grapple": [],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "deco": true
+  },
+  {
+   "id": "bird-perch",
+   "x": 302,
+   "y": 134,
+   "w": 16,
+   "h": 16,
+   "footprint": {
+    "c": 1,
+    "r": 1
+   },
+   "mount": "top",
+   "mountPoint": [
+    8,
+    15
+   ],
+   "grapple": [],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "deco": true,
+   "note": "gull in HA3/HA0, never white"
+  },
+  {
+   "id": "misc-details",
+   "x": 352,
+   "y": 134,
+   "w": 32,
+   "h": 16,
+   "footprint": {
+    "c": 2,
+    "r": 1
+   },
+   "mount": "top",
+   "mountPoint": [
+    16,
+    15
+   ],
+   "grapple": [],
+   "ledgeGrab": [],
+   "solid": [],
+   "oneWay": [],
+   "faces": "right",
+   "deco": true,
+   "note": "barrel and sacks"
+  }
+ ]
+}

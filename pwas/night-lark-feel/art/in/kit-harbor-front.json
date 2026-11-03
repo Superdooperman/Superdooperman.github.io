@@ -1,0 +1,62 @@
+{
+ "atlas": "kit-harbor-front.png",
+ "area": "harbor",
+ "layer": "front",
+ "cell": [
+  64,
+  64
+ ],
+ "gutter": 2,
+ "extrude": 0,
+ "units": "px, module-local, origin top-left of the art box",
+ "cells": [
+  {
+   "id": "front-chain",
+   "x": 2,
+   "y": 2,
+   "w": 64,
+   "h": 64,
+   "footprint": {
+    "c": 4,
+    "r": 4
+   },
+   "note": "hanging chain with a cargo hook"
+  },
+  {
+   "id": "front-rafter",
+   "x": 68,
+   "y": 2,
+   "w": 64,
+   "h": 64,
+   "footprint": {
+    "c": 4,
+    "r": 4
+   },
+   "note": "rafter beam with knee brace"
+  },
+  {
+   "id": "front-cargo",
+   "x": 134,
+   "y": 2,
+   "w": 64,
+   "h": 64,
+   "footprint": {
+    "c": 4,
+    "r": 4
+   },
+   "note": "net of hanging cargo on a rope"
+  },
+  {
+   "id": "front-pulley",
+   "x": 200,
+   "y": 2,
+   "w": 64,
+   "h": 64,
+   "footprint": {
+    "c": 4,
+    "r": 4
+   },
+   "note": "pulley block, rope and counterweight"
+  }
+ ]
+}
