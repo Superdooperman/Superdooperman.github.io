@@ -7,11 +7,24 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#000000">
   <title>Choplifter!</title>
+  <meta property="og:title" content="Choplifter!">
+  <meta property="og:image" content="assets/boxart.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Choplifter!">
+  <meta name="twitter:image" content="assets/boxart.jpg">
+  <!-- GitHub Pages absolute preview, for when this is on the live site: https://superdooperman.github.io/pwas/choplifter/assets/boxart.jpg -->
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="css/style.css?v=32">
+  <link rel="apple-touch-icon" href="icons/icon-box-192.png">
+  <link rel="stylesheet" href="css/style.css?v=33">
 </head>
 <body>
+  <div id="splash">
+    <picture>
+      <source srcset="assets/boxart.webp" type="image/webp">
+      <img src="assets/boxart.jpg" alt="Choplifter box art">
+    </picture>
+    <p>TAP / PRESS START</p>
+  </div>
   <div id="app">
     <div id="safe-probe"></div>
     <canvas id="game" width="280" height="192"></canvas>
@@ -35,15 +48,15 @@
     <div id="rotate-hint" class="hidden">Rotate to landscape</div>
   </div>
   <p id="tribute" class="sr">A tribute to Choplifter by Dan Gorlin, Broderbund 1982</p>
-  <script src="js/audio.js?v=32"></script>
-  <script src="js/motion.js?v=32"></script>
-  <script src="js/input.js?v=32"></script>
-  <script src="js/sprites.js?v=32"></script>
-  <script src="js/game.js?v=32"></script>
-  <script src="js/main.js?v=32"></script>
+  <script src="js/audio.js?v=33"></script>
+  <script src="js/motion.js?v=33"></script>
+  <script src="js/input.js?v=33"></script>
+  <script src="js/sprites.js?v=33"></script>
+  <script src="js/game.js?v=33"></script>
+  <script src="js/main.js?v=33"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js?v=32').catch(() => {});
+      navigator.serviceWorker.register('sw.js?v=33').catch(() => {});
     }
   </script>
 </body>

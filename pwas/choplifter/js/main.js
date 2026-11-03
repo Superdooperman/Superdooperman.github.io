@@ -104,6 +104,21 @@ const Game = (() => {
     resize();
     document.body.dataset.scene = 'title';
     const bootAudio = () => { try { AudioFX.init(); } catch (_) { /* ignore */ } };
+    const splash = document.getElementById('splash');
+    const skipSplash = typeof location !== 'undefined' && location.search.indexOf('shot=') !== -1;
+    if (splash && skipSplash) splash.classList.add('hidden');
+    function dismissSplash(e) {
+      if (!splash || splash.classList.contains('hidden')) return;
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      splash.classList.add('hidden');
+      bootAudio();
+      if (typeof Input !== 'undefined' && Input.clearEdges) Input.clearEdges();
+    }
+    window.addEventListener('pointerdown', dismissSplash, true);
+    window.addEventListener('keydown', dismissSplash, true);
     document.body.addEventListener('pointerdown', bootAudio, { once: true });
     document.body.addEventListener('keydown', bootAudio, { once: true });
     GameApp.boot();

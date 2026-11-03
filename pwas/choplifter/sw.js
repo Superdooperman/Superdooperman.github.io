@@ -1,4 +1,4 @@
-const CACHE = 'choplifter-v32';
+const CACHE = 'choplifter-v33';
 const ASSETS = [
   './',
   './index.html',
@@ -6,12 +6,16 @@ const ASSETS = [
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './js/main.js?v=32',
-  './js/audio.js?v=32',
-  './js/motion.js?v=32',
-  './js/input.js?v=32',
-  './js/sprites.js?v=32',
-  './js/game.js?v=32',
+  './icons/icon-box-192.png',
+  './icons/icon-box-512.png',
+  './assets/boxart.jpg',
+  './assets/boxart.webp',
+  './js/main.js?v=33',
+  './js/audio.js?v=33',
+  './js/motion.js?v=33',
+  './js/input.js?v=33',
+  './js/sprites.js?v=33',
+  './js/game.js?v=33',
   './art/chopper.png',
   './art/people.png',
   './art/enemies.png',
