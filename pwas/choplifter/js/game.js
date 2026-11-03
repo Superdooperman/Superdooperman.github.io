@@ -2,7 +2,7 @@
 // in public notes (thrust, climb, map, boarding, spawns, sorties).
 // Every picture here is newly drawn. No original bytes, shapes, or samples.
 (function (root) {
-  const BUILD = 'v29';
+  const BUILD = 'v30';
   const RUBBLE = '#8aa4c8';
   const W = 280;
   const H = 192;
@@ -83,24 +83,24 @@
   glyph('!', ['00100', '00100', '00100', '00100', '00100', '00000', '00100']);
   glyph("'", ['00100', '00100', '01000', '00000', '00000', '00000', '00000']);
 
-  // Side view faces right. Rotor is 36 wide (~1/8 of 280) and the body is about twice as wide as it is tall.
+  // Side view faces right. Tail boom and tail rotor are on the left. 36×16, about 2:1.
   const HELI_SIDE = [
     'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW',
-    '.................WW.................',
-    '...........WWWWWWWWWWWW.............',
-    '.........WWWWWWWWWWWWWWWW...........',
-    '.......WWWWWWWWWWWWWWWWWWWW.........',
-    '.....WW..WWWWWWW......WWWWWWW.......',
-    '....WWWWWWWWWWWWWWWWWWWWWWWWWWW.....',
-    '....WWWWWWWWWWWWWWWWWWWWWWWWWWW.....',
-    '.....WWWWWWWWWWWWWWWWWWWWWWWWW......',
-    '.......WWWWWWWWWWWWWWWWWWWWW........',
-    '.........WW..............WW.........',
-    '........WWWW............WWWW........',
-    '........W..W............W..W........',
-    '.......WW..WW..........WW..WW.......',
-    '.......WW..WW..........WW..WW.......',
-    '......WWW..WWW........WWW..WWW......',
+    'WW...............WW.................',
+    'W.W..............WW.................',
+    'WW...............WW.................',
+    '.WWWWWWWWWWWWWWWWWWWWWWWW...........',
+    '...WW..WWWWWWW......WWWWWWW.........',
+    '..WWWWWWWWWWWWWWWWWWWWWWWWWWW.......',
+    '..WWWWWWWWWWWWWWWWWWWWWWWWWWW.......',
+    '...WWWWWWWWWWWWWWWWWWWWWWWWW........',
+    '.....WWWWWWWWWWWWWWWWWWWWW..........',
+    '.......WW..............WW...........',
+    '......WWWW............WWWW..........',
+    '......W..W............W..W..........',
+    '.....WW..WW..........WW..WW.........',
+    '.....WW..WW..........WW..WW.........',
+    '....WWW..WWW........WWW..WWW........',
   ];
   const HELI_FRONT = [
     '....WWWWWWWW....',
@@ -120,11 +120,18 @@
     'WW.....WW.....WW',
     '.W............W.',
   ];
-  const MAN_RUN = [
-    ['..WW..', '.WWWW.', '..WW..', '..WW..', '.W..W.', '.W..W.', 'W....W'],
-    ['..WW..', '.WWWW.', '..WW..', '..WW..', '..WW..', '.W..W.', 'W....W'],
+  const MAN_IDLE = [
+    ['..WW..', '..WW..', '.WWWW.', '..WW..', '..WW..', '.W..W.', '..WW..', '.W..W.', 'W....W'],
+    ['..WW..', '..WW..', '.WWWW.', '..WW..', '..WW..', 'W....W', '..WW..', '.W..W.', '.W..W.'],
   ];
-  const MAN_WAVE = ['W....W', '.W..W.', '..WW..', '.WWWW.', '..WW..', '..WW..', 'W....W'];
+  const MAN_RUN = [
+    ['..WW..', '..WW..', '.WWWW.', '..WW..', '..WW..', '.W..W.', '..WW..', 'W...W.', '.W...W'],
+    ['..WW..', '..WW..', '.WWWW.', '..WW..', '..WW..', '.W..W.', '..WW..', '.W.W..', 'W...W.'],
+  ];
+  const MAN_WAVE = [
+    ['W....W', '.W..W.', '..WW..', '..WW..', '.WWWW.', '..WW..', '..WW..', '.W..W.', 'W....W'],
+    ['.W..W.', 'W....W', '..WW..', '..WW..', '.WWWW.', '..WW..', '..WW..', '.W..W.', '.W..W.'],
+  ];
   const TANK_SPRITE = [
     '.......GGGG.........',
     '.....GGGGGGGG.......',
@@ -296,7 +303,7 @@
       S.sortie = 1;
       S.frame = 0;
       S.banner = 0;
-      S.barracks = BARRACKS_X.map((x, i) => ({ x, open: i === 3, inside: 16 }));
+      S.barracks = BARRACKS_X.map((x, i) => ({ x, open: i === 3, poured: i === 3, inside: 16 }));
       S.hostages = [];
       S.walkers = [];
       S.tanks = [];
@@ -590,24 +597,27 @@
     if (flying >= 5) return;
     const m = muzzle(h);
     const low = h.landed || h.alt < 18;
-    let vx = m.dir * (low ? 8 : 6);
-    let vy = 0;
+    const hvx = h.vx256 / 256;
+    const hvy = h.landed ? 0 : h.vy;
+    const muzzleSpeed = 24;
+    let vx = hvx + m.dir * muzzleSpeed;
+    let vy = hvy;
     let x = m.x;
     let y = m.y;
     if (m.front && !low) {
-      vx = 0;
-      vy = 5;
+      vx = hvx;
+      vy = hvy + muzzleSpeed;
       x = h.x;
       y = heliBody().y + heliBody().h + 1;
     } else if (!low) {
-      vy = 3;
+      vy = hvy + 10;
     } else if (m.front) {
       x = h.x + m.dir * (heliBody().w / 2 + 3);
       y = heliBody().y + Math.round(heliBody().h * 0.42);
     }
     S.shots.push({
       x, y, vx, vy,
-      kind: 'bullet', enemy: false, down: vy > 2 && Math.abs(vx) < 1,
+      kind: 'bullet', enemy: false, down: vy > 2 && Math.abs(vx - hvx) < 1,
       alive: true, age: 0,
     });
     sfx('shot');
@@ -619,15 +629,15 @@
     if ((S.frame % 4) === 0) releaseOne();
     S.hostages.forEach((man) => {
       const dx = man.x - hx;
-      const near = Math.abs(dx) < 120 && h.alt < 55;
-      if (doorOpen() && !onPad() && S.aboard < 16 && Math.abs(dx) < 150) {
+      const near = Math.abs(dx) < 200 && h.alt < 70;
+      if (S.aboard >= 16 && h.landed && Math.abs(dx) < 64) {
+        man.state = 'wave';
+        man.x += dx >= 0 ? 1 : -1;
+      } else if (h.alive && h.landed && !onPad() && S.aboard < 16 && Math.abs(dx) < 200) {
         man.state = 'run';
         const target = dx >= 0 ? hx + 8 : hx - 11;
         if (man.x < target) man.x += 1;
         else if (man.x > target) man.x -= 1;
-      } else if (S.aboard >= 16 && h.landed && Math.abs(dx) < 48) {
-        man.state = 'wave';
-        man.x += dx >= 0 ? 1 : -1;
       } else if (!h.landed && near && h.alive) {
         man.state = 'wave';
       } else {
@@ -651,9 +661,31 @@
     }
   }
 
+  function spawnMan(b, n) {
+    S.hostages.push({
+      x: b.x - 6 + (n % 5) * 6,
+      dir: n & 1 ? 1 : -1,
+      state: 'run',
+      anchor: b.x,
+      id: (S.frame + n + b.x) & 1023,
+    });
+  }
+
+  function pourOut(b) {
+    if (!b) return;
+    b.open = true;
+    if (b.poured) return;
+    b.poured = true;
+    const burst = Math.min(8, b.inside);
+    for (let n = 0; n < burst; n++) {
+      b.inside -= 1;
+      spawnMan(b, n);
+    }
+    boom(b.x + 8, GROUND - 8);
+    sfx('boom');
+  }
+
   function releaseOne() {
-    const out = S.hostages.length;
-    if (out >= 5 || out + S.walkers.length >= 16) return;
     const hx = S.heli.x >> 8;
     let pick = -1;
     for (let i = 0; i < 4; i++) {
@@ -666,10 +698,10 @@
       pick = open[rnd() % open.length];
     }
     const b = S.barracks[pick];
+    const near = S.hostages.filter((man) => !man.dead && man.anchor === b.x).length;
+    if (near >= 8 || b.inside <= 0) return;
     b.inside -= 1;
-    S.hostages.push({
-      x: b.x + 6, dir: 1, state: 'out', anchor: b.x, id: S.frame + pick,
-    });
+    spawnMan(b, near);
   }
 
   function board(man) {
@@ -701,9 +733,23 @@
     });
   }
 
+  function hqGeom() {
+    const botW = 108;
+    const topW = 62;
+    const botLeft = BASE - 6;
+    const farLeft = botLeft + (botW - topW) / 2;
+    const bw = 40;
+    const bx = Math.round(farLeft + topW - bw - 1);
+    return { bx, bw, bh: 8, doorX: bx + 18 };
+  }
+
   function stepWalkers() {
-    S.walkers.forEach((w) => { w.x += 1; });
-    S.walkers = S.walkers.filter((w) => w.x < DOOR);
+    const door = hqGeom().doorX;
+    S.walkers.forEach((w) => {
+      if (w.x < door) w.x += 1;
+      else if (w.x > door) w.x -= 1;
+    });
+    S.walkers = S.walkers.filter((w) => Math.abs(w.x - door) > 0.5);
   }
 
   function unload() {
@@ -767,8 +813,9 @@
           const roll = rnd() % 3;
           t.dir = roll === 0 ? 0 : roll === 1 ? Math.sign(dx || 1) : -Math.sign(dx || 1);
           if (S.heli.alive && S.heli.alt < 40) {
+            const tvx = t.dir * 1.5;
             S.shots.push({
-              x: t.x, y: GROUND - 8, vx: Math.sign(dx || 1) * 1.7, vy: -3.4,
+              x: t.x, y: GROUND - 8, vx: Math.sign(dx || 1) * 6 + tvx, vy: -4,
               kind: 'shell', enemy: true, alive: true, age: 0,
             });
             sfx('noise');
@@ -804,15 +851,16 @@
         j.alt += clamp(want - j.alt, -2, 2);
         if (j.timer === 10 && S.heli.alive) {
           const sy = GROUND - j.alt;
+          const jvx = j.dir * (j.phase === 0 ? 3.2 : 4.6);
           if (S.heli.landed) {
-            S.shots.push({ x: j.x, y: sy, vx: 0, vy: 2.2, kind: 'bomb', enemy: true, alive: true, age: 0 });
+            S.shots.push({ x: j.x, y: sy, vx: jvx, vy: 4, kind: 'bomb', enemy: true, alive: true, age: 0 });
           } else {
             const body = heliBody();
             const dx = (body.x + body.w / 2) - j.x;
             const dy = (body.y + body.h / 2) - sy;
             const len = Math.hypot(dx, dy) || 1;
             S.shots.push({
-              x: j.x, y: sy, vx: (dx / len) * 3.4, vy: (dy / len) * 3.4,
+              x: j.x, y: sy, vx: (dx / len) * 8 + jvx, vy: (dy / len) * 8,
               kind: 'missile', enemy: true, alive: true, age: 0,
             });
           }
@@ -863,8 +911,15 @@
     return { x: j.x - 11, y: GROUND - j.alt - 5, w: JET_SPRITE[0].length, h: JET_SPRITE.length };
   }
 
+  function manSprite(man) {
+    const tick = (S.frame >> 3) & 1;
+    if (man.state === 'wave') return MAN_WAVE[tick];
+    if (man.state === 'run') return MAN_RUN[(S.frame + (man.id || 0)) & 1];
+    return MAN_IDLE[tick];
+  }
+
   function manBox(man) {
-    const sprite = man.state === 'wave' ? MAN_WAVE : MAN_RUN[(man.id || 0) & 1];
+    const sprite = manSprite(man);
     return { x: man.x - 2, y: GROUND - sprite.length, w: sprite[0].length, h: sprite.length };
   }
 
@@ -912,6 +967,7 @@
       s.x += s.vx;
       s.y += s.vy;
       if (s.kind === 'shell' || s.kind === 'bomb') s.vy += 0.38;
+      const opened = !s.enemy && hitBarracks(prevX, prevY, s);
       if (shotOffscreen(s) || s.y >= GROUND - 1) {
         s.alive = false;
         if (s.y >= GROUND - 1) {
@@ -921,8 +977,8 @@
         return;
       }
       if (!s.enemy) {
-        if (hitBarracks(s)) { s.alive = false; return; }
         if (hitManShot(prevX, prevY, s) || hitAir(prevX, prevY, s)) { s.alive = false; return; }
+        if (opened) { s.alive = false; return; }
       } else if (hitsHeliBody(prevX, prevY, s)) {
         s.alive = false;
         destroyHeli();
@@ -937,16 +993,17 @@
     S.drones = S.drones.filter((d) => d.alive);
   }
 
-  function hitBarracks(s) {
-    if (s.y < GROUND - 22) return false;
+  function barracksBox(b) {
+    return { x: b.x - 20, y: GROUND - 24, w: 44, h: 24 };
+  }
+
+  function hitBarracks(prevX, prevY, s) {
     for (let i = 0; i < S.barracks.length; i++) {
       const b = S.barracks[i];
       if (b.open) continue;
-      if (Math.abs(s.x - (b.x + 8)) < 18) {
-        b.open = true;
+      if (alongShot(prevX, prevY, s, barracksBox(b))) {
         killMenNear(b.x + 8, 10);
-        boom(b.x + 8, GROUND - 8);
-        sfx('boom');
+        pourOut(b);
         return true;
       }
     }
@@ -1008,8 +1065,8 @@
       killMenNear(x, 12);
       S.barracks.forEach((b) => {
         if (!b.open && Math.abs((b.x + 8) - x) < 22) {
-          b.open = true;
           killMenNear(b.x + 8, 10);
+          pourOut(b);
         }
       });
       if (S.heli.alt < 18 && overlap({ x: x - 4, y: GROUND - 8, w: 8, h: 8 }, heliBody())) destroyHeli();
@@ -1116,7 +1173,10 @@
         blit(ctx, TANK_SPRITE, sxOf(box.x), box.y, {});
       });
       S.hostages.forEach((man) => drawMan(ctx, man));
-      S.walkers.forEach((w) => blit(ctx, MAN_RUN[(S.frame || 0) & 1], sxOf(w.x), GROUND - 6, {}));
+      S.walkers.forEach((w) => {
+        const sprite = MAN_RUN[(S.frame || 0) & 1];
+        blit(ctx, sprite, sxOf(w.x), GROUND - sprite.length, {});
+      });
       S.jets.forEach((j) => {
         if (!j.alive) return;
         blit(ctx, JET_SPRITE, sxOf(j.x) - 11, GROUND - j.alt - 5, { flip: j.dir < 0 });
@@ -1271,10 +1331,10 @@
     const botLeft = anchor - 6;
     ctx.fillStyle = INK.G;
     fillTrapezoid(ctx, GROUND, 10, botLeft, topW, botW);
-    const farLeft = botLeft + (botW - topW) / 2;
-    const bw = 40;
-    const bh = 8;
-    const bx = Math.round(farLeft + topW - bw - 1);
+    const hq = hqGeom();
+    const bw = hq.bw;
+    const bh = hq.bh;
+    const bx = sxOf(hq.bx);
     const by = GROUND - bh;
     ctx.fillStyle = INK.O;
     ctx.fillRect(bx, by, bw, bh);
@@ -1284,7 +1344,7 @@
     ctx.fillRect(bx + 14, by + 2, 7, 3);
     ctx.fillRect(bx + 28, by + 2, 7, 3);
     ctx.fillStyle = INK.K;
-    ctx.fillRect(bx + 16, by + 3, 5, 5);
+    ctx.fillRect(bx + (hq.doorX - hq.bx), by + 3, 6, 5);
     const pole = bx + bw - 3;
     for (let y = by - 11; y < by; y++) {
       ctx.fillStyle = INK.W;
@@ -1327,7 +1387,7 @@
   }
 
   function drawMan(ctx, man) {
-    const sprite = man.state === 'wave' ? MAN_WAVE : MAN_RUN[(S.frame + man.id) & 1];
+    const sprite = manSprite(man);
     blit(ctx, sprite, sxOf(man.x) - 2, GROUND - sprite.length, {});
   }
 
@@ -1741,6 +1801,66 @@
     fireGun();
     const low = S.shots.find((s) => !s.enemy);
     expect(low && low.vy === 0 && low.vx > 0 && low.x > S.heli.x, 'landed shot is horizontal from the nose');
+
+    beginPlay();
+    S.quiet = true;
+    S.heli.alive = true;
+    S.heli.mercy = 0;
+    S.heli.landed = false;
+    S.heli.alt = 40;
+    S.heli.pose = 4;
+    S.heli.vy = 0;
+    S.heli.vx256 = 21 * 256;
+    S.shots = [];
+    fireGun();
+    const fast = S.shots.find((s) => !s.enemy);
+    expect(fast && fast.vx > 21 && fast.vx >= 21 + 16, 'a shot adds muzzle speed on top of the chopper');
+    S.heli.vx256 = -21 * 256;
+    S.shots = [];
+    fireGun();
+    const lead = S.shots.find((s) => !s.enemy);
+    expect(lead && lead.vx > 0, 'muzzle speed still carries a shot ahead of a reversing chopper');
+
+    beginPlay();
+    S.quiet = true;
+    S.heli.x = BARRACKS_X[0] + 30;
+    const closed = S.barracks[0];
+    const popBefore = S.hostages.length;
+    const insideBefore = closed.inside;
+    const bb = barracksBox(closed);
+    S.shots = [{
+      x: bb.x + 8, y: bb.y + 8, vx: 6, vy: 0, kind: 'bullet', enemy: false, down: false, alive: true, age: 0,
+    }];
+    stepShots();
+    expect(closed.open && closed.inside < insideBefore, 'a shot opens a barracks');
+    expect(S.hostages.length > popBefore, 'hostages pour out when a barracks is shot');
+    beginPlay();
+    S.quiet = true;
+    const untouched = S.barracks[0];
+    S.shots = [{
+      x: untouched.x, y: 30, vx: 8, vy: 0, kind: 'bullet', enemy: false, down: false, alive: true, age: 0,
+    }];
+    stepShots();
+    expect(!untouched.open, 'a bullet that misses the barracks does not open it');
+
+    beginPlay();
+    S.quiet = true;
+    S.heli.x = BARRACKS_X[0] + 40;
+    S.heli.landed = true;
+    S.heli.tilt = 0;
+    S.heli.alt = 0;
+    S.heli.vx256 = 0;
+    S.heli.alive = true;
+    S.aboard = 0;
+    S.hostages = [{ x: S.heli.x + 36, dir: 1, state: 'out', anchor: BARRACKS_X[0], id: 11 }];
+    for (let i = 0; i < 40; i++) update({ stickX: 0, stickY: 10 });
+    expect(S.aboard === 1, 'landing near a hostage boards them');
+
+    const door = hqGeom().doorX;
+    S.walkers = [{ x: door - 4 }];
+    for (let i = 0; i < 6; i++) stepWalkers();
+    expect(S.walkers.length === 0, 'rescued hostages disappear into the HQ door');
+    expect(Math.abs(door - hqGeom().bx) < 30, 'the despawn point is the drawn door');
 
     beginPlay();
     S.quiet = true;
