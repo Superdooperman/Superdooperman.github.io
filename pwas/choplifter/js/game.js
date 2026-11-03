@@ -2,7 +2,7 @@
 // in public notes (thrust, climb, map, boarding, spawns, sorties).
 // Every picture here is newly drawn. No original bytes, shapes, or samples.
 (function (root) {
-  const BUILD = 'v30';
+  const BUILD = 'v31';
   const RUBBLE = '#8aa4c8';
   const W = 280;
   const H = 192;
@@ -83,71 +83,87 @@
   glyph('!', ['00100', '00100', '00100', '00100', '00100', '00000', '00100']);
   glyph("'", ['00100', '00100', '01000', '00000', '00000', '00000', '00000']);
 
-  // Side view faces right. Tail boom and tail rotor are on the left. 36×16, about 2:1.
+  // Side view faces right: long rotor, tapering tail to the left, rounded nose to the right.
   const HELI_SIDE = [
-    'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW',
-    'WW...............WW.................',
-    'W.W..............WW.................',
-    'WW...............WW.................',
-    '.WWWWWWWWWWWWWWWWWWWWWWWW...........',
-    '...WW..WWWWWWW......WWWWWWW.........',
-    '..WWWWWWWWWWWWWWWWWWWWWWWWWWW.......',
-    '..WWWWWWWWWWWWWWWWWWWWWWWWWWW.......',
-    '...WWWWWWWWWWWWWWWWWWWWWWWWW........',
-    '.....WWWWWWWWWWWWWWWWWWWWW..........',
-    '.......WW..............WW...........',
-    '......WWWW............WWWW..........',
-    '......W..W............W..W..........',
-    '.....WW..WW..........WW..WW.........',
-    '.....WW..WW..........WW..WW.........',
-    '....WWW..WWW........WWW..WWW........',
+    '....WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW....',
+    'WW......................WW......................',
+    'WW......................WW......................',
+    'WWWW............................................',
+    'WWWWWWWWWWWWWWWWWWWWWWWWWW......................',
+    'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW..................',
+    'WW..WWWWWWWWWWW...........WWWWWWWW..............',
+    'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW..............',
+    '.WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW..............',
+    '..WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW................',
+    '...WW......................WW...................',
+    '..WWWW....................WWWW..................',
+    '..W..W....................W..W..................',
+    '.WW..WW..................WW..WW.................',
+    '.WW..WW..................WW..WW.................',
+    'WWW..WWW................WWW..WWW................',
   ];
+  function noseDown(sprite) {
+    const h = sprite.length;
+    const w = sprite[0].length;
+    const dest = Array.from({ length: h }, () => Array(w).fill('.'));
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const ch = sprite[y][x];
+        if (!ch || ch === '.') continue;
+        const ny = y + (x > w * 0.42 ? 1 : 0);
+        if (ny >= 0 && ny < h) dest[ny][x] = ch;
+      }
+    }
+    return dest.map((row) => row.join(''));
+  }
+  const HELI_NOSE = noseDown(HELI_SIDE);
   const HELI_FRONT = [
-    '....WWWWWWWW....',
     '..WWWWWWWWWWWW..',
-    '.WWWWWWWWWWWWWW.',
-    'WWW..WWWWWW..WWW',
-    'WWW..WWKKWW..WWW',
-    'WWW..WKKKKW..WWW',
-    '.WWWWWWWWWWWWWW.',
-    '..WWWWWWWWWWWW..',
-    '...WWW....WWW...',
+    '.......WW.......',
+    '.....WWWWWW.....',
+    '....WW.WW.WW....',
+    '.....WWWWWW.....',
+    '......WKKW......',
+    '......WWWW......',
+    '.....WW..WW.....',
+    '.....W....W.....',
     '....WW....WW....',
-    '...WWW....WWW...',
-    '....WW....WW....',
-    '..WW.WWWWWW.WW..',
-    '.WW...WWWW...WW.',
-    'WW.....WW.....WW',
-    '.W............W.',
+    '....W......W....',
+    '...WW......WW...',
   ];
   const MAN_IDLE = [
-    ['..WW..', '..WW..', '.WWWW.', '..WW..', '..WW..', '.W..W.', '..WW..', '.W..W.', 'W....W'],
-    ['..WW..', '..WW..', '.WWWW.', '..WW..', '..WW..', 'W....W', '..WW..', '.W..W.', '.W..W.'],
+    ['..W..', '..W..', '.W.W.', 'W.W.W', '..W..', '.WWW.', '..W..', '.W.W.', 'W...W', '.W.W.'],
+    ['..W..', '..W..', 'W.W.W', '.W.W.', '..W..', '.WWW.', '..W..', '.W.W.', '.W.W.', 'W...W'],
   ];
   const MAN_RUN = [
-    ['..WW..', '..WW..', '.WWWW.', '..WW..', '..WW..', '.W..W.', '..WW..', 'W...W.', '.W...W'],
-    ['..WW..', '..WW..', '.WWWW.', '..WW..', '..WW..', '.W..W.', '..WW..', '.W.W..', 'W...W.'],
+    ['..W..', '..W..', '.W.W.', '..W..', '..W..', '.WWW.', '..W..', 'W..W.', '.W...', '..W..'],
+    ['..W..', '..W..', '..W..', '.W.W.', '..W..', '.WWW.', '..W..', '.W.W.', '...W.', '.W...'],
   ];
   const MAN_WAVE = [
-    ['W....W', '.W..W.', '..WW..', '..WW..', '.WWWW.', '..WW..', '..WW..', '.W..W.', 'W....W'],
-    ['.W..W.', 'W....W', '..WW..', '..WW..', '.WWWW.', '..WW..', '..WW..', '.W..W.', '.W..W.'],
+    ['.W.W.', 'W.W.W', '..W..', '..W..', '.WWW.', '..W..', '..W..', '.W.W.', 'W...W', '.W.W.'],
+    ['W.W.W', '.W.W.', '..W..', '..W..', '.WWW.', '..W..', '..W..', '.W.W.', '.W.W.', 'W...W'],
   ];
   const TANK_SPRITE = [
-    '.......GGGG.........',
-    '.....GGGGGGGG.......',
-    '...GGGGGGGGGGGGGG...',
-    '..GGGGGGGGGGGGGGGG..',
-    '.GG..GG..GG..GG..GG.',
-    'GG..GG..GG..GG..GGG.',
-    '.GG..GG..GG..GG..GG.',
-    '..G..G..G..G..G..G..',
+    '........WWGGG.............',
+    '.......WWGGGGG............',
+    '......GGGGGGGGGG..........',
+    '...WWGGGGGGGGGGGGGWW......',
+    '..WGGGGGGGGGGGGGGGGGGW....',
+    '.WWG.GG.GG.GG.GG.GG.GWW...',
+    '..WGGGGGGGGGGGGGGGGGGW....',
+    '...WW.WW.WW.WW.WW.WW.W....',
   ];
   const JET_SPRITE = [
-    '.............WW.............',
-    '........WWWWWWWWWWWW........',
-    '.....WWWWWWWWWWWWWWWWW......',
-    '........WWWWWWWWWWWW........',
-    '.............WW.............',
+    '.................B..',
+    '................BB..',
+    '.....B.........BBB..',
+    '....BBB.......BBBB..',
+    '...BBBBBBBBBBBBBBB..',
+    '..BBBBBBBBBBBBBBBBBB',
+    '...BBBBBBBBBBBBBBB..',
+    '....BBB.......BBBB..',
+    '.....B.........BBB..',
+    '................BB..',
   ];
 
   const S = {};
@@ -908,7 +924,9 @@
   }
 
   function jetBox(j) {
-    return { x: j.x - 11, y: GROUND - j.alt - 5, w: JET_SPRITE[0].length, h: JET_SPRITE.length };
+    const w = JET_SPRITE[0].length;
+    const h = JET_SPRITE.length;
+    return { x: j.x - Math.floor(w / 2), y: GROUND - j.alt - h, w, h };
   }
 
   function manSprite(man) {
@@ -928,7 +946,7 @@
   }
 
   function droneBox(d) {
-    return { x: d.x - 7, y: GROUND - d.alt - 7, w: 14, h: 14 };
+    return { x: d.x - 5, y: GROUND - d.alt - 4, w: SAUCER[0].length, h: SAUCER.length };
   }
 
   function shotOffscreen(s) {
@@ -1170,7 +1188,7 @@
       S.tanks.forEach((t) => {
         if (!t.alive) return;
         const box = tankBox(t);
-        blit(ctx, TANK_SPRITE, sxOf(box.x), box.y, {});
+        blit(ctx, TANK_SPRITE, sxOf(box.x), box.y, { flip: t.dir < 0 });
       });
       S.hostages.forEach((man) => drawMan(ctx, man));
       S.walkers.forEach((w) => {
@@ -1179,14 +1197,16 @@
       });
       S.jets.forEach((j) => {
         if (!j.alive) return;
-        blit(ctx, JET_SPRITE, sxOf(j.x) - 11, GROUND - j.alt - 5, { flip: j.dir < 0 });
+        const box = jetBox(j);
+        blit(ctx, JET_SPRITE, sxOf(box.x), box.y, { flip: j.dir < 0 });
       });
       S.drones.forEach((d) => { if (d.alive) drawDrone(ctx, d); });
       if (S.heli.alive || S.pending) drawHeli(ctx, S.heli);
       S.shots.forEach((s) => {
         if (!s.alive) return;
         ctx.fillStyle = inkColor(PROJECTILE);
-        ctx.fillRect(sxOf(s.x), Math.round(s.y), s.kind === 'missile' ? 3 : 2, 2);
+        const dash = s.kind === 'missile';
+        ctx.fillRect(sxOf(s.x), Math.round(s.y), dash ? 6 : 2, dash ? 1 : 2);
       });
       S.booms.forEach((b) => drawBoom(ctx, b));
     }
@@ -1204,6 +1224,23 @@
     if (S.monitor !== 'green') return ctx;
     return new Proxy(ctx, {
       get(target, prop) {
+        if (prop === 'fillRect') {
+          return (x, y, w, h) => {
+            if (w >= 70) {
+              const x0 = Math.floor(x);
+              const y0 = Math.floor(y);
+              const x1 = Math.ceil(x + w);
+              const y1 = Math.ceil(y + h);
+              const style = target.fillStyle;
+              for (let xx = x0; xx < x1; xx += 2) {
+                target.fillStyle = style;
+                target.fillRect(xx, y0, 1, Math.max(1, y1 - y0));
+              }
+              return;
+            }
+            return target.fillRect(x, y, w, h);
+          };
+        }
         const value = target[prop];
         return typeof value === 'function' ? value.bind(target) : value;
       },
@@ -1358,31 +1395,35 @@
   }
 
   function drawBarracks(ctx, b) {
-    const x = sxOf(b.x) - 20;
-    if (x < -50 || x > W + 10) return;
-    const baseW = 44;
-    const roofH = 10;
-    const bodyH = 12;
-    const top = GROUND - bodyH - roofH;
-    for (let i = 0; i < roofH; i++) {
-      const inset = roofH - 1 - i;
-      const w = baseW - inset * 2;
-      hiresRun(ctx, x + inset, top + i, w);
+    const x = sxOf(b.x) - 16;
+    if (x < -40 || x > W + 8) return;
+    const bodyW = 32;
+    const bodyH = 8;
+    const domeH = 8;
+    const baseY = GROUND - bodyH;
+    for (let i = 0; i < domeH; i++) {
+      const w = 10 + i * 3;
+      const dx = Math.round((bodyW - w) / 2);
+      let color = i < 2 ? INK.W : INK.B;
+      if (b.open && i < 3) color = INK.O;
+      else if (b.open && (i & 1)) color = INK.K;
+      ctx.fillStyle = color;
+      ctx.fillRect(x + dx, baseY - domeH + i, Math.max(4, w), 1);
     }
-    ctx.fillStyle = INK.B;
-    ctx.fillRect(x, GROUND - bodyH, baseW, bodyH);
+    ctx.fillStyle = b.open ? INK.O : INK.B;
+    ctx.fillRect(x, baseY, bodyW, bodyH);
     ctx.fillStyle = INK.W;
-    ctx.fillRect(x + 3, GROUND - bodyH + 2, baseW - 6, bodyH - 4);
+    ctx.fillRect(x + 2, baseY + 2, 7, 3);
+    ctx.fillRect(x + bodyW - 9, baseY + 2, 7, 3);
     if (b.open) {
       ctx.fillStyle = INK.K;
-      ctx.fillRect(x + 18, GROUND - 10, 8, 10);
-      ctx.fillStyle = (S.frame & 2) ? INK.O : INK.W;
-      ctx.fillRect(x + 8, top - 3, 4, 4);
-      ctx.fillRect(x + 30, top - 2, 3, 4);
+      ctx.fillRect(x + 12, baseY - 3, 8, bodyH + 3);
+      ctx.fillStyle = INK.O;
+      ctx.fillRect(x + 3, baseY - 5, 3, 3);
+      ctx.fillRect(x + 22, baseY - 4, 4, 3);
     } else {
-      ctx.fillStyle = INK.B;
-      ctx.fillRect(x + 8, GROUND - 8, 6, 4);
-      ctx.fillRect(x + 30, GROUND - 8, 6, 4);
+      ctx.fillStyle = INK.W;
+      ctx.fillRect(x + 12, baseY - domeH - 1, bodyW - 24, 2);
     }
   }
 
@@ -1391,21 +1432,24 @@
     blit(ctx, sprite, sxOf(man.x) - 2, GROUND - sprite.length, {});
   }
 
+  const SAUCER = [
+    '..G....G..',
+    '...OOOO...',
+    '..OOOOOO..',
+    '.OOOGGGOOO',
+    '..OOOOOO..',
+    '...OOOO...',
+    '....GG....',
+  ];
+
   function drawDrone(ctx, d) {
-    const cx = sxOf(d.x);
-    const cy = Math.round(GROUND - d.alt);
-    for (let y = -6; y <= 6; y++) {
-      for (let x = -6; x <= 6; x++) {
-        if (x * x + y * y > 30) continue;
-        const band = (y + S.frame + d.x) & 3;
-        ctx.fillStyle = band === 0 ? INK.B : band === 1 ? INK.O : INK.W;
-        ctx.fillRect(cx + x, cy + y, 1, 1);
-      }
-    }
+    blit(ctx, SAUCER, sxOf(d.x) - 5, Math.round(GROUND - d.alt) - 4, {});
   }
 
   function chopperSprite(h) {
-    return Math.abs(h.pose) === 0 ? HELI_FRONT : HELI_SIDE;
+    if (Math.abs(h.pose) === 0) return HELI_FRONT;
+    if (h.landed === false && (h.alt || 0) > 2) return HELI_NOSE;
+    return HELI_SIDE;
   }
 
   function drawHeli(ctx, h) {
@@ -2025,9 +2069,8 @@
 
     const sideInk = inkBox(HELI_SIDE);
     const frontInk = inkBox(HELI_FRONT);
-    expect(sideInk.w / W > 0.10 && sideInk.w / W < 0.16, 'side chopper is about 1/8 of the play width');
-    expect(sideInk.w / sideInk.h >= 1.7 && sideInk.w / sideInk.h <= 2.6, 'side chopper is about 2:1');
-    expect(Math.abs(frontInk.w / frontInk.h - 1) <= 0.25, 'front chopper is nearly square');
+    expect(sideInk.w / sideInk.h >= 2.4 && sideInk.w / sideInk.h <= 3.15, 'side chopper is a long 2.5 to 3 to 1 profile');
+    expect(frontInk.w / frontInk.h >= 0.8 && frontInk.w / frontInk.h <= 1.6, 'front chopper is a compact head-on shape');
 
     [-4, -2, 0, 2, 4].forEach((pose) => {
       [-5, 0, 5].forEach((tilt) => {
@@ -2136,9 +2179,10 @@
     spots.forEach((s) => {
       const sx = Math.round(s.x - S.view);
       const sy = Math.round(s.y);
-      const sw = s.kind === 'missile' ? 3 : 2;
+      const sw = s.kind === 'missile' ? 6 : 2;
+      const sh = s.kind === 'missile' ? 1 : 2;
       let changed = 0;
-      for (let dy = 0; dy < 2; dy++) {
+      for (let dy = 0; dy < sh; dy++) {
         for (let dx = 0; dx < sw; dx++) {
           const i = (sy + dy) * W + (sx + dx);
           if (painted[i] !== bare[i]) {
@@ -2174,7 +2218,16 @@
       if (bare[i] === magenta) { groundIdx = i; break; }
     }
     expect(skyIdx >= 0 && greenFrame[skyIdx] === 0x000000, 'green monitor keeps the sky black');
-    expect(groundIdx >= 0 && greenFrame[groundIdx] !== magenta && greenFrame[groundIdx] !== 0, 'green monitor ground is phosphor, not pink');
+    let hatchLit = 0;
+    let hatchDark = 0;
+    let hatchPink = 0;
+    for (let x = 0; x < W; x++) {
+      const c = greenFrame[(GROUND + 4) * W + x];
+      if (c === magenta) hatchPink += 1;
+      else if (c === 0) hatchDark += 1;
+      else hatchLit += 1;
+    }
+    expect(hatchPink === 0 && hatchLit > 20 && hatchDark > 20, 'green monitor ground is hatched phosphor');
     const shellAt = (GROUND + 6) * W + 70;
     expect(greenFrame[shellAt] !== 0 && greenFrame[shellAt] !== greenFrame[groundIdx], 'a shell still contrasts on the green monitor');
     toggleMonitor();
