@@ -2,7 +2,7 @@
 // in public notes (thrust, climb, map, boarding, spawns, sorties).
 // Every picture here is newly drawn. No original bytes, shapes, or samples.
 (function (root) {
-  const BUILD = 'v34';
+  const BUILD = 'v35';
   const RUBBLE = '#8aa4c8';
   const W = 280;
   const H = 192;

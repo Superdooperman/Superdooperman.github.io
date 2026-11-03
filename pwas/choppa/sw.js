@@ -1,4 +1,4 @@
-const CACHE = 'choppa-v34';
+const CACHE = 'choppa-v35';
 const ASSETS = [
   './',
   './index.html',
@@ -10,12 +10,12 @@ const ASSETS = [
   './icons/icon-box-512.png',
   './assets/boxart.jpg',
   './assets/boxart.webp',
-  './js/main.js?v=34',
-  './js/audio.js?v=34',
-  './js/motion.js?v=34',
-  './js/input.js?v=34',
-  './js/sprites.js?v=34',
-  './js/game.js?v=34',
+  './js/main.js?v=35',
+  './js/audio.js?v=35',
+  './js/motion.js?v=35',
+  './js/input.js?v=35',
+  './js/sprites.js?v=35',
+  './js/game.js?v=35',
   './art/chopper.png',
   './art/people.png',
   './art/enemies.png',

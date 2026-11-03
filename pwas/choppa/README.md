@@ -4,14 +4,14 @@ A love letter to the Apple II classic Choplifter. Not affiliated with or endorse
 
 ## Play
 
-Live: https://superdooperman.github.io/pwas/choplifter/
+Live: https://superdooperman.github.io/pwas/choppa/
 
 ```bash
-cd pwas/choplifter
+cd pwas/choppa
 python3 -m http.server 8080
 ```
 
-Local: `http://localhost:8080`. From the site root, the game is `/pwas/choplifter/`.
+Local: `http://localhost:8080`. From the site root, the game is `/pwas/choppa/`.
 
 ## Controls
 
