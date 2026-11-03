@@ -196,8 +196,7 @@ const Input = (() => {
     sensitivity.addEventListener('input', () => Motion.setSensitivity(parseFloat(sensitivity.value)));
 
     function checkOrientation() {
-      const portrait = window.innerHeight > window.innerWidth;
-      rotateHint.classList.toggle('hidden', !portrait || !isTouchDevice());
+      rotateHint.classList.add('hidden');
     }
     window.addEventListener('resize', checkOrientation);
     window.addEventListener('orientationchange', checkOrientation);

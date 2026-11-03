@@ -2072,6 +2072,16 @@
     beginPlay();
     S.quiet = true;
     S.banner = 0;
+    if (name === 'fence') {
+      S.heli.x = FENCE + 50;
+      S.heli.landed = false;
+      S.heli.alt = 36;
+      S.heli.pose = -4;
+      S.heli.tilt = -2;
+      S.view = FENCE - 36;
+      S.tanks = [];
+      S.hostages = [];
+    }
     if (name === 'base') {
       S.heli.x = BASE + 28;
       S.heli.landed = true;

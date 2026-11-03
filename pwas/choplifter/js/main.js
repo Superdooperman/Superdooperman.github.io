@@ -6,29 +6,70 @@ const Game = (() => {
   buffer.height = 192;
   const bctx = buffer.getContext('2d', { alpha: false });
   bctx.imageSmoothingEnabled = false;
+  const sharp = document.createElement('canvas');
+  const sctx = sharp.getContext('2d');
 
   let last = 0;
   let acc = 0;
-  let scale = 1;
+  let fit = null;
   let dpr = 1;
 
+  function readSafe() {
+    const probe = document.getElementById('safe-probe');
+    if (!probe) return { top: 0, right: 0, bottom: 0, left: 0 };
+    const style = getComputedStyle(probe);
+    return {
+      top: parseFloat(style.paddingTop) || 0,
+      right: parseFloat(style.paddingRight) || 0,
+      bottom: parseFloat(style.paddingBottom) || 0,
+      left: parseFloat(style.paddingLeft) || 0,
+    };
+  }
+
   function resize() {
-    dpr = Math.max(1, Math.round(window.devicePixelRatio || 1));
-    scale = GameApp.integerScale(window.innerWidth, window.innerHeight);
-    const cssW = 280 * scale;
-    const cssH = 192 * scale;
-    canvas.width = cssW * dpr;
-    canvas.height = cssH * dpr;
-    canvas.style.width = `${cssW}px`;
-    canvas.style.height = `${cssH}px`;
-    screen.imageSmoothingEnabled = false;
+    dpr = Math.max(1, window.devicePixelRatio || 1);
+    const vv = window.visualViewport;
+    const viewW = vv ? vv.width : window.innerWidth;
+    const viewH = vv ? vv.height : window.innerHeight;
+    const ox = vv ? vv.offsetLeft : 0;
+    const oy = vv ? vv.offsetTop : 0;
+    fit = GameApp.fitFrame(viewW, viewH, readSafe());
+    const px = fit.scale * dpr;
+    const dw = Math.max(1, Math.round(280 * px));
+    const dh = Math.max(1, Math.round(192 * px));
+    canvas.width = dw;
+    canvas.height = dh;
+    const cssW = dw / dpr;
+    const cssH = dh / dpr;
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    canvas.style.left = (ox + fit.left) + 'px';
+    canvas.style.top = (oy + fit.top) + 'px';
+    const root = document.documentElement.style;
+    root.setProperty('--game-top', (oy + fit.top) + 'px');
+    root.setProperty('--game-left', (ox + fit.left) + 'px');
+    root.setProperty('--game-w', cssW + 'px');
+    root.setProperty('--game-h', cssH + 'px');
+    document.body.dataset.orient = fit.portrait ? 'portrait' : 'landscape';
   }
 
   function paint() {
     GameApp.draw(bctx);
-    screen.imageSmoothingEnabled = false;
-    screen.setTransform(scale * dpr, 0, 0, scale * dpr, 0, 0);
-    screen.drawImage(buffer, 0, 0);
+    const step = fit ? fit.sharp : 1;
+    const iw = 280 * step;
+    const ih = 192 * step;
+    if (sharp.width !== iw || sharp.height !== ih) {
+      sharp.width = iw;
+      sharp.height = ih;
+    }
+    sctx.imageSmoothingEnabled = false;
+    sctx.setTransform(step, 0, 0, step, 0, 0);
+    sctx.drawImage(buffer, 0, 0);
+    screen.setTransform(1, 0, 0, 1, 0, 0);
+    const integer = fit && Math.abs(fit.scale - step) < 0.02;
+    screen.imageSmoothingEnabled = !integer;
+    if (!integer) screen.imageSmoothingQuality = 'high';
+    screen.drawImage(sharp, 0, 0, iw, ih, 0, 0, canvas.width, canvas.height);
   }
 
   function loop(ts) {
@@ -55,6 +96,11 @@ const Game = (() => {
   function init() {
     Input.init();
     window.addEventListener('resize', resize);
+    window.addEventListener('orientationchange', resize);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', resize);
+      window.visualViewport.addEventListener('scroll', resize);
+    }
     resize();
     document.body.dataset.scene = 'title';
     const bootAudio = () => { try { AudioFX.init(); } catch (_) { /* ignore */ } };
