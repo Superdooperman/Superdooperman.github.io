@@ -40,8 +40,19 @@ export function zoomTarget(speed, chain, cfg = ZOOM) {
   return 1 - (1 - cfg.min) * k;
 }
 
-/** One drawn frame (dt = real seconds since the last one). Returns the zoom. */
-export function stepZoom(w, dt, cfg = ZOOM) {
+/** Feel fix 2 (Chopper's zoom check): the target zoom moved to the nearest one whose scale on
+ *  this screen is a whole number (ties go wider, never below 1x). base: the presenter's
+ *  whole-number rest scale. A 1280x720 or 1366x768 window at DPR 1 (base 2) then rests at 2x
+ *  and goes out to 1x, never sitting at 1.5x; base 4 still goes 4x -> 3x. */
+export function wholeTarget(want, base) {
+  if (!base || want >= 1) return want;
+  const k = Math.max(1, Math.ceil(base * want - 0.5));
+  return Math.min(1, k / base);
+}
+
+/** One drawn frame (dt = real seconds since the last one). Returns the zoom.
+ *  view: { base } from the presenter (whole-scale targets); omitted = free targets. */
+export function stepZoom(w, dt, cfg = ZOOM, view = null) {
   if (!w) return 1;
   let s = state.get(w);
   if (!s) { // a new room carries the zoom over from the last one (no snap at a doorway)
@@ -50,12 +61,16 @@ export function stepZoom(w, dt, cfg = ZOOM) {
   }
   last = s;
   dt = Math.max(0, Math.min(0.1, dt));
-  const v = Math.hypot(w.vx || 0, w.anchor ? (w.vy || 0) : Math.min(Math.abs(w.vy || 0), cfg.speedFull));
+  // On a line her whole speed counts. Off it only the run (|vx|) does, plus a fall faster than
+  // fallFrom: a plain jump's rise and landing never zoom the view out (feel fix 2, Chopper).
+  const fall = (w.vy || 0) > cfg.fallFrom ? Math.min(w.vy, cfg.speedFull) : 0;
+  const v = w.anchor ? Math.hypot(w.vx || 0, w.vy || 0) : Math.max(Math.abs(w.vx || 0), fall);
   s.speed += (v - s.speed) * (1 - Math.exp(-dt / (v > s.speed ? (cfg.speedRise ?? cfg.speedSmooth) : cfg.speedSmooth)));
   const guard = guardPull(w, cfg);
   s.guard = guard;
   let want = cfg.enabled ? zoomTarget(s.speed, w.chain, cfg) : 1;
   if (guard) want = 1;
+  if (cfg.wholeScale && view && view.base) want = wholeTarget(want, view.base);
   // hysteresis: a wider target is taken at once and held holdOut s after the trigger drops
   if (want <= s.target || guard) { if (want < s.target) s.hold = cfg.holdOut; s.target = want; if (guard) s.hold = 0; }
   else if (s.hold > 0) s.hold = Math.max(0, s.hold - dt);
@@ -81,9 +96,11 @@ export function resetZoom(w) { if (w) state.delete(w); }
 export function zoomView(devW, devH, base, zoom) {
   let s = base * zoom;
   const near = Math.round(s);
-  if (Math.abs(s - near) < 0.02) s = near; // rest values (4 -> 3 at 0.75) stay pixel-exact
+  // a whole scale stays exact (rest, 4 -> 3 at 0.75); no snap band around it (feel fix 2: the
+  // old 0.02 band made a ~1% jump in one frame leaving and reaching rest). Any other scale is
+  // set by a whole number of logical rows, so it moves one row (~0.3%) at a time.
   const vh = Math.max(1, Math.round(devH / s));
-  if (s !== near) s = devH / vh;
+  if (Math.abs(s - near) > 1e-9) s = devH / vh; else s = near;
   const vw = Math.ceil(devW / s);
   return { s, vw, vh };
 }

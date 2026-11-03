@@ -41,7 +41,7 @@ export function createGame(opts = {}) {
     cardRendered: !opts.needsRender, genMs: 0,
     steps: 0, events: [], sfx: [],
     menu() {
-      return ['NEW NIGHT', 'RETURNED SHELF', ...(g.save.revealSeen ? ['UNMASKED'] : []), `SOUND: ${g.save.settings.mute ? 'OFF' : 'ON'}`,
+      return ['NEW NIGHT', 'RETURNED SHELF', 'TRAINING', ...(g.save.revealSeen ? ['UNMASKED'] : []), `SOUND: ${g.save.settings.mute ? 'OFF' : 'ON'}`,
         `MOTION: ${g.reducedMotion() ? 'REDUCED' : 'FULL'}`];
     },
     stashOptions() { return g.run ? [...stashChoices(g.run), null] : [null]; },
@@ -138,6 +138,7 @@ export function createGame(opts = {}) {
           g.sfx.push('select');
           if (it === 'NEW NIGHT') startCard(g.seed);
           else if (it === 'RETURNED SHELF') go('shelf');
+          else if (it === 'TRAINING') g.events.push({ type: 'training' }); // feel fix 2: the page opens ?room=training
           else if (it === 'UNMASKED') { g.reveal = 0; g.revealFromMenu = true; go('reveal'); }
           else if (it.startsWith('MOTION')) { g.save.settings.motion = g.reducedMotion() ? 'full' : 'reduced'; persist(); }
           else setMute(!g.save.settings.mute);

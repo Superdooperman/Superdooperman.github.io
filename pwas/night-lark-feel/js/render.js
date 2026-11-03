@@ -3,7 +3,7 @@
 // M2: lamp pools (edge at the hide radius), cones (SW0 fill, edge lerps SW1 -> AR3 with the
 // meter), searchlight beams, the meter over the watcher who sees her, the grace "!", the search
 // "?", the catch bark, the hidden look, the feathers HUD and the NIGHT OVER card.
-import { VIEW_W, VIEW_H, HUD_H, TILE_PX, TUNING, HEALTH, FEELFIX } from './config.js';
+import { VIEW_W, VIEW_H, HUD_H, TILE_PX, TUNING, HEALTH, FEELFIX, FEELFIX2 } from './config.js';
 import { tileAt, isStandable, isWood } from './level.js';
 import { promptText } from './prompts.js';
 import { PLACEHOLDER as C, PALETTE, drawSprite, drawFrame, drawFrameBox, hexToRgb, ART_SCALE } from './art.js';
@@ -153,6 +153,7 @@ export function render(ctx, world, sheets = null, opts = {}) {
       ctx.strokeStyle = C.ringTarget; ctx.lineWidth = 1; ctx.strokeRect(rx - 6.5, ry - 6.5, 13, 13);
     }
   }
+  if (world.aiming && world.aimDir) drawAimLine(ctx, world, cam, T); // feel fix 2: the aim line
   if (world.aiming && world.reticle) { // manual aim: snapping reticle (corner brackets)
     const rx = Math.round(world.reticle.x * T - cam.x); const ry = Math.round(world.reticle.y * T - cam.y);
     ctx.fillStyle = C.reticle;
@@ -269,6 +270,7 @@ function drawOverlays(ctx, world, opts) {
     centerText(ctx, `CAUGHT ${world.catches} TIMES`, VIEW_H / 2 + 2, C.hudDim, 1);
     if (world.overT >= TUNING.nightOverDelay) centerText(ctx, `${promptText('{A}', opts.device || 'key')} OR START: A NEW NIGHT`, VIEW_H / 2 + 16, C.hud, 1);
   }
+  if (world.abilities?.pullGrapple) drawText(ctx, world.grappleMode === 'pull' ? 'G PULL' : 'G SWING', VIEW_W - 34, HUD_H + 3, C.hudDim || C.hud, 1);
   if (opts.debug) drawText(ctx, `X ${world.x.toFixed(2)} Y ${world.y.toFixed(2)}`, 8, HUD_H + 4, C.hud, 1);
   if (opts.feel) feelLines(world).forEach((line, i) => drawText(ctx, line, 4, HUD_H + 4 + i * 7, C.hud, 1));
   if (opts.tune) {
@@ -366,4 +368,21 @@ function drawHud(ctx, world) {
     const x = 8 + i * 9; // a small quill: shaft and vane
     ctx.fillRect(x + 3, 4, 1, 9); ctx.fillRect(x + 1, 5, 2, 5); ctx.fillRect(x + 4, 6, 2, 4);
   }
+}
+
+/** Feel fix 2 aim line: a dotted line from her centre to the reticle (or along the aim when
+ *  nothing is picked). Whole pixels, the reticle colour. */
+function drawAimLine(ctx, world, cam, T) {
+  const x0 = world.x * T - cam.x; const y0 = world.center() * T - cam.y;
+  let x1, y1;
+  if (world.reticle) { x1 = world.reticle.x * T - cam.x; y1 = world.reticle.y * T - cam.y; }
+  else { const r = 6 * T; x1 = x0 + world.aimDir.x * r; y1 = y0 + world.aimDir.y * r; }
+  const len = Math.hypot(x1 - x0, y1 - y0); if (len < 1) return;
+  const dash = FEELFIX2.aimLineDash; const n = Math.floor(len / dash);
+  ctx.fillStyle = C.reticle;
+  for (let i = 2; i < n - 2; i++) { // a dot every dash px, clear of her and of the brackets
+    const t = (i * dash) / len;
+    ctx.fillRect(Math.round(x0 + (x1 - x0) * t), Math.round(y0 + (y1 - y0) * t), 1, 1);
+  }
+  if (world.grappleMode === 'pull') drawText(ctx, 'PULL', Math.round(x0) - 7, Math.round(y0) - 22, C.reticle, 1);
 }

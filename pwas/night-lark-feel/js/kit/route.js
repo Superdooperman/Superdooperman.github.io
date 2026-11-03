@@ -20,16 +20,35 @@ export const ROUTE = Object.freeze({
   leftInner: [6, 10], rightInner: [17, 21], // where a platform's lane-side end may sit
   cornerReach: 9.5, // corner-to-corner beyond this gets a hook in the gap
   hookChance: 0.35, stackChance: 0.3, lanternChance: 0.4, bannerChance: 0.5,
+  // feel fix 2 (denser rooms): a taller tower (ROUTE.towerRows block rows instead of TOWER.rows)
+  // and a dressing pass (DENSE) that adds side ledges, wall grips, railings, statues and decor
+  // in the free space around the route. dense: false gives back the sparse tower.
+  dense: true, towerRows: 10,
   pieces: ['platform-short', 'platform-medium', 'platform-long', 'balcony-small', 'balcony-medium', 'balcony-large', 'open-ledge', 'corner'],
+});
+
+/** The dressing pass's knobs (feel fix 2). It runs after the route on its own seeded stream and
+ *  only fills space that is open with room around it, so it never moves a route piece, never
+ *  puts a slab in the lane, and the stacked-edge cancel rule still applies (anchors come from
+ *  the finished map). */
+export const DENSE = Object.freeze({
+  branchChance: 0.7, // a side ledge on the outer wall between two route steps (a second line up)
+  branchPieces: ['open-ledge', 'balcony-small', 'platform-short', 'balcony-medium'],
+  wallGripPer6: 1.4, // extra wall grips (hooks, gargoyles, flagpoles) per 6 rows of tower
+  wallGrips: ['small-hook', 'gargoyle', 'flagpole-short', 'banner-bracket', 'flagpole-tall'],
+  railingChance: 0.6, // railing end posts on a bare platform (grips at both ends)
+  statueChance: 0.5, decorChance: 0.8,
+  clear: 3, // rows of open air kept above any added piece (she is 3 tiles tall)
 });
 
 /** attempt: the generator's reroll counter (js/levels/tall-shaft.js rejects a route the solver
  *  can't finish and asks for attempt + 1). Attempt 0 is the seed's own stream. */
 export function towerRoute(seed = 1, attempt = 0) {
   const rng = createRng(attempt ? hashSeed('tower', seed, attempt) : seed);
-  const cols = TOWER.cols * TOWER.blockW; const rows = TOWER.rows * TOWER.blockH;
+  const towerRows = ROUTE.dense ? ROUTE.towerRows : TOWER.rows;
+  const cols = TOWER.cols * TOWER.blockW; const rows = towerRows * TOWER.blockH;
   const A = createAssembly(cols, rows);
-  const facade = dressFacade(facadeColumn(rng), hashSeed('facade-art', seed, attempt));
+  const facade = dressFacade(facadeColumn(rng, { rows: towerRows }), hashSeed('facade-art', seed, attempt));
   const floorTop = rows - ROUTE.floorRows;
   A.place('floor', wallSegment(cols, ROUTE.floorRows), [0, floorTop]);
   const steps = [];
@@ -86,5 +105,71 @@ export function towerRoute(seed = 1, attempt = 0) {
     prevInner = step.inner; top = slabRow; side = side === 'L' ? 'R' : 'L';
     if (last) break;
   }
-  return { assembly: A, facade, steps, cols, rows, floorTop, seed, attempt };
+  const extra = ROUTE.dense ? densify(A, steps, { cols, rows, floorTop, seed, attempt }) : null;
+  return { assembly: A, facade, steps, cols, rows, floorTop, seed, attempt, extra };
+}
+
+/** The dressing pass (feel fix 2). Returns what it added (for tests and the seed record). */
+function densify(A, steps, { cols, rows, floorTop, seed, attempt }) {
+  const rng = createRng(hashSeed('dense', seed, attempt));
+  const added = { branches: [], grips: [], railings: 0, statues: 0, decor: 0 };
+  const box = (p) => { const t = PROP_TYPES[p.type]; return { c0: p.c, r0: p.r, c1: p.c + (p.w ?? t.w) - 1, r1: p.r + t.h - 1 }; };
+  const propHit = (c0, r0, c1, r1) => A.props.some((p) => { const b = box(p); return !(b.c1 < c0 || b.c0 > c1 || b.r1 < r0 || b.r0 > r1); });
+  const open = (c0, r0, c1, r1) => {
+    if (c0 < 0 || c1 >= cols || r0 < 0 || r1 >= floorTop) return false;
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) if (A.grid[r][c] !== '.') return false;
+    return !propHit(c0, r0, c1, r1);
+  };
+  const inLane = (c0, c1) => !(c1 < ROUTE.lane[0] || c0 > ROUTE.lane[1]);
+  // 1. side ledges: between steps i-1 and i+1 (both on the side opposite step i), on that side's
+  //    outer wall, with open air (DENSE.clear + 1 rows) above and below it and a tile either side
+  for (let i = 1; i < steps.length - 1; i++) {
+    if (!rng.chance(DENSE.branchChance)) continue;
+    const lo = steps[i - 1]; const hi = steps[i + 1];
+    const kind = rng.pick(DENSE.branchPieces);
+    const piece = PIECES[kind]();
+    const r = Math.round((lo.top + hi.top) / 2) + rng.int(-1, 1); // slab row
+    const outerLeft = lo.side === 'L';
+    const c0 = outerLeft ? 0 : cols - piece.w;
+    const pr = r - (piece.h - 1);
+    if (inLane(c0, c0 + piece.w - 1)) continue;
+    if (!open(Math.max(0, c0 - 1), pr - DENSE.clear - 1, Math.min(cols - 1, c0 + piece.w), r + DENSE.clear)) continue;
+    const id = `b${i}`;
+    A.place(id, piece, [c0, pr]);
+    added.branches.push({ id, kind, c0, c1: c0 + piece.w - 1, top: r, side: lo.side });
+    if (piece.h === 1 && piece.w >= 2 && rng.chance(DENSE.statueChance)) {
+      const sc = outerLeft ? c0 + 1 : c0 + piece.w - 2;
+      if (open(sc, r - 2, sc, r - 1)) { A.attach('statue', sc, r - 2, { piece: `${id}-statue` }); added.statues++; }
+    }
+  }
+  // 2. railings on bare route platforms (slabs with no props on top): end posts grip, the
+  //    middle cells are art. A stacked balcony already covers its end.
+  for (const s of steps) {
+    if (!s.kind.startsWith('platform') || s.stacked || !rng.chance(DENSE.railingChance)) continue;
+    if (!open(s.c0, s.top - 1, s.c1, s.top - 1)) continue;
+    const kind = rng.chance(0.5) ? 'railing-a' : 'railing-b';
+    for (let c = s.c0; c <= s.c1; c++) A.attach(kind, c, s.top - 1, c === s.c0 || c === s.c1 ? { piece: `${s.id}-rail` } : { deco: true, piece: `${s.id}-rail` });
+    added.railings++;
+  }
+  // 3. wall grips up both outer thirds, in open wall with room around them
+  const n = Math.round((floorTop / 6) * DENSE.wallGripPer6);
+  for (let k = 0, tries = 0; k < n && tries < n * 8; tries++) {
+    const type = rng.pick(DENSE.wallGrips); const t = PROP_TYPES[type];
+    const left = rng.chance(0.5);
+    const c = left ? rng.int(1, ROUTE.leftInner[1] - t.w) : rng.int(ROUTE.rightInner[0], cols - 1 - t.w);
+    const r = rng.int(ROUTE.topRow, floorTop - 5);
+    if (!open(c - 1, r - 2, c + t.w, r + t.h + 1)) continue;
+    A.attach(type, c, r, { flip: !left, piece: `w${k}` });
+    added.grips.push({ type, c, r }); k++;
+  }
+  // 4. decor on the wall ends of route and side pieces that have room
+  for (const s of [...steps, ...added.branches]) {
+    if (!rng.chance(DENSE.decorChance)) continue;
+    const d = rng.pick(DECOR); const t = PROP_TYPES[d];
+    const dc = s.side === 'L' ? s.c0 : s.c1 - t.w + 1;
+    const dr = t.mount === 'top' ? s.top - t.h : s.top - t.h - rng.int(1, 2);
+    if (!open(dc, dr, dc + t.w - 1, dr + t.h - 1)) continue;
+    A.attach(d, dc, dr, { deco: true, piece: `${s.id}-decor2` }); added.decor++;
+  }
+  return added;
 }

@@ -6,9 +6,11 @@
 // perches, the vault, the escape, the end card and the Stash. ?seed=N picks the first night.
 // ?room=first / ?room=watch / ?room=gen stay on the old room shell (walkthroughs 1-3).
 // ?room=tall[&fall=feather] plays the tall-shaft prototype (swing-feel branch).
+// ?room=training plays the feel fix 2 training room (also TRAINING on the title menu).
 import { firstRing } from './levels/first-ring.js';
 import { watchRoom } from './levels/watch-room.js';
 import { tallShaft, tallShaftRings } from './levels/tall-shaft.js';
+import { trainingRoom } from './levels/training.js';
 import { createInput, bindKeyboard, bindGamepads } from './input.js';
 import { createLoop, prefersReducedMotion } from './loop.js';
 import { setupCanvas } from './canvas.js';
@@ -31,9 +33,17 @@ import { drawText } from './font.js';
 import { PLACEHOLDER } from './art.js';
 
 const params = new URLSearchParams(location.search);
-// Feel fix 1 (Azzato, Nov 1 2026): the new movement feel is the default in the browser;
-// ?physics=legacy plays the old one. The generator plans with the same feel (gen/moves.js).
-SETTINGS.feel = params.get('physics') === 'legacy' ? 'legacy' : 'fix1';
+// Feel fix 2 (Azzato, Nov 3 2026) is the default in the browser; ?physics=fix1 plays fix 1,
+// ?physics=legacy the old one. The generator plans with the same feel (gen/moves.js).
+{ const ph = params.get('physics'); SETTINGS.feel = ph === 'legacy' || ph === 'fix1' ? ph : 'fix2'; }
+// Warp-pull grapple (the abilities.pullGrapple ability, no pickup yet): ?grapple=pull grants it and
+// starts in pull mode; G (or pad Select) switches classic / pull in game.
+if (params.get('grapple') === 'pull') { SETTINGS.abilities.pullGrapple = true; SETTINGS.grapple = 'pull'; }
+/** G: switch the grapple mode (classic / pull) when Wren has the pull ability; the choice carries to the next room. */
+function grappleToggleKey(e, w) {
+  if (e.code !== 'KeyG' || e.repeat || !w || !w.abilities?.pullGrapple) return;
+  SETTINGS.grapple = w.setGrappleMode();
+}
 // The test build (tools/build-beta.mjs --test) sets <html data-storage="...">: every
 // 'nightlark.v2.' key then lives under that prefix instead, so it never shares a save or a
 // setting with the dev page, the beta or v1 on the same origin.
@@ -57,7 +67,7 @@ const canvas = document.getElementById('game');
 // Feel fix 1: the dynamic zoom draws through zoom.js (device-pixel canvas + backbuffer);
 // ?zoom=0 turns it off (the old whole-number fill), ?zoomrender=backbuffer|nearest|direct
 // picks how a zoomed view reaches the screen.
-const zoomOn = SETTINGS.feel === 'fix1' && ZOOM.enabled && !params.has('letterbox') && params.get('zoom') !== '0';
+const zoomOn = SETTINGS.feel !== 'legacy' && ZOOM.enabled && !params.has('letterbox') && params.get('zoom') !== '0';
 const presenter = zoomOn ? createPresenter(canvas, window, { mode: params.get('zoomrender') || ZOOM.render }) : null;
 const { ctx } = presenter || setupCanvas(canvas, window, { letterbox: params.has('letterbox') });
 const tune = params.has('tune'); // feel fix 1: chain / speed / cap / zoom overlay
@@ -71,7 +81,7 @@ function stamp(c) { drawText(c, COMMIT, VIEW_W - COMMIT.length * 4 - 2, VIEW_H -
 function present(world, alpha, draw) {
   const dt = frameDt();
   if (!presenter) { withLerp(world, alpha, () => draw(ctx)); stamp(ctx); return; }
-  const z = world ? stepZoom(world, dt) : 1;
+  const z = world ? stepZoom(world, dt, ZOOM, presenter.state) : 1;
   presenter.frame(z, (c) => { withLerp(world, alpha, () => draw(c)); stamp(c); });
 }
 // Feel fix 1: full screen in landscape. The first touch in landscape asks the browser for full
@@ -112,7 +122,7 @@ loadArt().then((s) => {
 if (params.has('room')) bootShell(); else bootGame();
 
 function bootShell() {
-const ROOMS = { first: firstRing, watch: watchRoom };
+const ROOMS = { first: firstRing, watch: watchRoom, training: trainingRoom };
 const genTower = params.get('room') === 'gen' ? generateTower(Number(params.get('seed')) || 1) : null;
 // ?room=tall: the swing-feel tall-shaft prototype on its own; &fall=feather makes a big fall cost a feather
 // &seed=N picks the seeded kit route (default TALL_SEED); &anchors=rings plays the old ring shaft;
@@ -123,7 +133,7 @@ const tall = params.get('anchors') === 'rings' ? () => tallShaftRings({ fallCost
   : () => tallShaft({ fallCost, seed: params.has('seed') && params.get('room') === 'tall' ? Number(params.get('seed')) : undefined });
 ROOMS.tall = tall;
 const order = genTower ? genTower.floors.flatMap((f) => f.rooms).map((def) => () => structuredClone(def))
-  : params.get('room') === 'tall' ? [tall] : [firstRing, watchRoom];
+  : params.get('room') === 'tall' ? [tall] : params.get('room') === 'training' ? [trainingRoom] : [firstRing, watchRoom];
 const shell = createShell(order, { startRoom: Math.max(0, order.indexOf(ROOMS[params.get('room')])) });
 const rotate = document.getElementById('rotate');
 function onViewport() {
@@ -152,6 +162,7 @@ canvas.addEventListener('pointermove', (e) => { if (e.pointerType === 'touch') i
 canvas.addEventListener('pointerup', (e) => { if (e.pointerType === 'touch') input.endTouch(); });
 canvas.addEventListener('pointercancel', () => input.cancelTouch());
 
+addEventListener('keydown', (e) => grappleToggleKey(e, shell.world));
 const loop = createLoop({
   step(dt) {
     if (shell.world) shell.world.reducedMotion = fx.reduced;
@@ -210,6 +221,7 @@ function bootGame() {
   const wake = () => audio.start();
   addEventListener('keydown', (e) => {
     wake();
+    if (game.screen === 'play') grappleToggleKey(e, game.world);
     if (e.code === 'KeyM') { game.setMute(!game.save.settings.mute); audio.setMute(game.save.settings.mute); }
   });
   canvas.addEventListener('pointerdown', (e) => {
@@ -244,6 +256,7 @@ function bootGame() {
       for (const s of game.sfx) audio.sfx(s);
       game.sfx.length = 0;
       for (const e of game.events) {
+        if (e.type === 'training') { const q = new URLSearchParams(location.search); q.set('room', 'training'); location.search = q.toString(); }
         if (e.type === 'attach' && input.device === 'touch' && navigator.vibrate) navigator.vibrate(12);
         if (e.type === 'screen' && e.screen === 'title') audio.setMute(game.save.settings.mute);
       }

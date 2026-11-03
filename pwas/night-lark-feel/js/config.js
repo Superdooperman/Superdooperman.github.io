@@ -185,7 +185,7 @@ export const ARCH = Object.freeze({
  *  pad R1, touch ZIP; B is unchanged) or 'hold' (hold B on the line to zip, release B to launch).
  *  main.js sets it from ?yank= or localStorage. Default is 'button' because 'hold' defers B's
  *  let-go to the release, which breaks the browser walkthrough (FEEL-PLAN.md, "B-hold clash"). */
-export const SETTINGS = { yankInput: 'button', anchors: null, feel: 'fix1' }; // feel: 'fix1' (default) or 'legacy' (?physics=legacy; tests of the old feel set it) // anchors: null (room decides) or 'mixed' (?anchors=arch)
+export const SETTINGS = { yankInput: 'button', anchors: null, feel: 'fix2', grapple: 'classic', abilities: { pullGrapple: false } }; // feel: 'fix2' (default), 'fix1' (?physics=fix1) or 'legacy'; grapple: 'classic' or 'pull' (needs abilities.pullGrapple; ?grapple=pull grants it, no pickup yet) // anchors: null (room decides) or 'mixed' (?anchors=arch)
 
 export const SWING = Object.freeze({
   // pumping (Worms rope style): holding the way the swing is already going adds more than
@@ -316,6 +316,48 @@ export const FEELFIX = Object.freeze({
   trailPerChain: 4, // points per chain level
 });
 
+/** Feel fix 2 (Nov 3 2026, Azzato's playtest notes). On top of FEELFIX, only with feel 'fix2'
+ *  (the default; ?physics=fix1 keeps the fix-1 feel, ?physics=legacy the old one). */
+export const FEELFIX2 = Object.freeze({
+  // hold to aim: Wren holds perfectly still (no drift at all) until B is let go or the aim is cancelled
+  aimFreeze: true,
+  // aim: the reticle is the reachable point nearest the aim direction (held D-pad, else facing,
+  // tilted up), inside aimConeHalf if any is; ledges and props win over rings
+  aimConeHalf: 40 * Math.PI / 180,
+  aimFacingUp: 0.6, // facing aim tilt: (face, -aimFacingUp)
+  aimLineDash: 3, // px (render)
+  // pumping: the push along the swing is this much stronger than fix 1 (1.6 tried: the planner's
+  // predicted landings drifted on 5/40 night seeds; 1.5 keeps all 40 on plan)
+  pumpMul: 1.5,
+  // snap reel: the normal reel (hold UP) is unchanged; a double-tap of UP on a line adds a short
+  // fast burst reel-in. Angular momentum is kept, so a snap at the bottom of the arc slingshots
+  // her. snapReel: false removes it (the warp-pull mode may cover this).
+  snapReel: true,
+  snapReelTap: 0.28, // s between the two UP taps
+  snapReelLen: 3, // tiles reeled in by one snap (never below the line's minimum)
+  snapReelMul: 4, // x the normal reel speed during the burst (3 tiles in ~0.11 s)
+  // mash damping: a hook within mashWindow s of a jump-off that was not a GOOD release catches
+  // with only mashKeep of her speed along the arc, and none of a rising jump's upward speed
+  mashWindow: 0.45,
+  mashKeep: 0.45,
+});
+
+/** Warp-pull grapple (Metroid-style ability, abilities.pullGrapple; ?grapple=pull or the in-game
+ *  toggle). The hook point is an invisible anchor; a spring pulls her straight at it. Let go
+ *  mid-pull and she keeps the pull's speed (flies on past); hold on and once she is close (or
+ *  the pull stalls) the line becomes a normal swing at that length. */
+export const PULL = Object.freeze({
+  spring: 120, // t/s^2 per tile of stretch toward the anchor (pull toward it)
+  maxAccel: 260, // t/s^2 cap on the spring
+  damping: 1.5, // 1/s of sideways damping during the pull (keeps it a pull, not an orbit)
+  maxSpeed: 28, // t/s cap along the pull
+  gravityMul: 0.15, // gravity share while pulling
+  swingKeep: 0.85, // held on: this share of her speed turns along the swing (the way she was going)
+  swingAt: 2.2, // tiles from the anchor: hold on and the line turns into a normal swing
+  maxTime: 0.9, // s: hold on past this and it becomes a swing wherever she is
+  minLen: 1.75,
+});
+
 /** Ground run cycle (render only). Brook's 'lark-run' strip (Nov 1 2026): 8 frames of 32x48,
  *  16 fps at full run speed (walkSpeed 6.25 t/s = 100 px/s, so 50 px per 0.5 s cycle); the rate
  *  scales with |vx| / walkSpeed. Shown while grounded and moving. Without the strip loaded, the
@@ -341,6 +383,8 @@ export const ZOOM = Object.freeze({
   lookAhead: 36, // logical px max look-ahead in the direction of travel
   lookFull: 12, // t/s where the look-ahead is full
   lookTime: 0.45, // s ease of the look-ahead
+  fallFrom: 20, // t/s: off a line, a fall faster than this counts toward the zoom (a jump's landing, ~13, does not)
+  wholeScale: true, // feel fix 2: targets moved to whole-number screen scales (no resting at 1.5x)
   // Render method (compared Nov 3): 'direct' (scene drawn into the device canvas with a scale
   // transform) and a plain nearest blit both let a 16 px tile come out 54 or 55 device px at
   // scale 3.43 as the camera steps 1 px, so edges crawl while she runs (shimmer). 'backbuffer'

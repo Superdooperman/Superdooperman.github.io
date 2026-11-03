@@ -48,7 +48,7 @@ export function solveRope(body, anchor, ropeLen, iterations = TUNING.ropeIterati
 
 /** Swing pump: input along the swing adds tangential acceleration. dir is -1/0/+1.
  *  feel (v2, SWING): input with the swing pumps at pumpWithMul, against it at pumpAgainstMul. */
-export function pumpSwing(body, anchor, dir, dt, feel = false) {
+export function pumpSwing(body, anchor, dir, dt, feel = false, mul = 1) { // mul: feel fix 2's stronger pump
   const cy = body.y - body.h * 0.5;
   const dx = body.x - anchor.x;
   const dy = cy - anchor.y;
@@ -57,7 +57,7 @@ export function pumpSwing(body, anchor, dir, dt, feel = false) {
   const ty = dx / d;
   if (dir !== 0 && Math.abs(tx) > TUNING.pumpMinTangent) {
     const s = dir * Math.sign(tx);
-    let a = TUNING.pumpAccel;
+    let a = TUNING.pumpAccel * mul;
     if (feel) {
       const along = body.vx * tx + body.vy * ty; // current speed along the tangent
       a *= Math.abs(along) < v1px(4) || Math.sign(along) === s ? SWING.pumpWithMul : SWING.pumpAgainstMul;

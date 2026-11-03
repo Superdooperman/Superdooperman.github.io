@@ -1,7 +1,7 @@
 {
   "name": "Night Lark (test)",
   "short_name": "NL test",
-  "description": "A stealth grapple roguelike. Beta build.",
+  "description": "A stealth grapple roguelike. Test build.",
   "id": "./",
   "start_url": "./",
   "scope": "./",

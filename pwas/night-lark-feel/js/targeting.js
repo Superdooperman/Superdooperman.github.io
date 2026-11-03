@@ -103,3 +103,22 @@ export function pickAt(cands, px, py) {
   }
   return best;
 }
+
+/** Feel fix 2 aim pick: the reachable point nearest the aim direction (unit vector from her
+ *  centre). Inside the cone (half-angle coneHalf) the smallest angle wins, ties to the nearer
+ *  point; a real ledge or prop (any kind but 'ring') beats a ring in the cone, so in a room with
+ *  ledges the aim lands on stone, and a ring-only room still aims at its rings. An empty cone
+ *  gives the point nearest the aim at any angle. Null with no candidates. */
+export function aimPick(cands, x, cy, dir, coneHalf) {
+  if (!cands.length) return null;
+  const ang = (r) => {
+    const dx = r.x - x, dy = r.y - cy; const d = Math.hypot(dx, dy) || 1e-6;
+    return Math.acos(Math.max(-1, Math.min(1, (dx * dir.x + dy * dir.y) / d)));
+  };
+  const scored = cands.map((r) => ({ r, a: ang(r), d: Math.hypot(r.x - x, r.y - cy), solid: !!r.kind && r.kind !== 'ring' }));
+  const better = (p, q) => (Math.abs(p.a - q.a) > 0.035 ? p.a < q.a : p.d < q.d); // ~2 degrees counts as a tie
+  const best = (list) => list.reduce((b, c) => (!b || better(c, b) ? c : b), null);
+  const cone = scored.filter((c) => c.a <= coneHalf);
+  const pick = best(cone.filter((c) => c.solid)) || best(cone) || best(scored);
+  return pick.r;
+}

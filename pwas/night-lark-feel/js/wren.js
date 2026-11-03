@@ -82,9 +82,16 @@ export function wrenPose(a, w, sheets) {
     if (run) return { sheet: WALK.sheet, frame: Math.floor(a.walk) % (run.frames || WALK.frames), coil: true, muzzle: false };
     if (w.feelFix) return { sheet: 'lark-idle', frame: Math.floor(a.walk / 4) % 2, coil: true, muzzle: false, bob: walkBob(a, w, sheets) };
   }
+  const bell = sheets && sheets[IDLE_BELL];
+  if (bell) { // feel fix 2: Brook's bell idle (4 frames, its own fps; cloak and rope painted in)
+    const n = bell.frames || 4;
+    return { sheet: IDLE_BELL, frame: a ? Math.floor(a.idle * (bell.fps || 6)) % n : 0, coil: true, muzzle: false };
+  }
   const f = a ? Math.floor(a.idle * WREN_IDLE_FPS) % 2 : 0;
   return { sheet: 'lark-idle', frame: f, coil: true, muzzle: false };
 }
+/** Feel fix 2 (Brook, Nov 3 2026): the standing idle, cloak and rope loop painted in. */
+export const IDLE_BELL = 'lark-idle-bell';
 
 // ---- Frames that paint their own cloak (Azzato via Vegapunk, Oct 28 2026) -----------------------
 // Brook's motion strips (swing, air, freefall, yank) leave the cloak tail to the engine, except
@@ -118,7 +125,8 @@ export function ownsCloak(sheet, frame) {
 export function engineCloak(pose, sheets) {
   if (pose.swing) return !(!pose.swing.placeholder && ownsCloak(pose.swing.sheet, pose.swing.frame)); // the placeholder swing always trails it
   const sheet = sheets && sheets[pose.sheet];
-  if (!sheet || !(MOTION_SHEETS.includes(pose.sheet) || pose.sheet === WALK.sheet)) return false; // the run strip leaves the cloak to the engine (Brook)
+  if (!sheet || !(MOTION_SHEETS.includes(pose.sheet) || pose.sheet === WALK.sheet)) return false; // the old 32 px run strip left the cloak to the engine (Brook)
+  if (sheet.engineCloak === false) return false; // feel fix 2: the 48 px run and the bell idle paint cloak and rope tail themselves
   return !ownsCloak(sheet, pose.frame);
 }
 

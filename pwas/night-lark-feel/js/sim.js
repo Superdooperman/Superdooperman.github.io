@@ -18,13 +18,13 @@
 // M2 stealth (stealth.js): a catch costs a feather, plays the bark for catchHold, then resets
 // the whole room (level, items, doors, guards, the Lark at the spawn). At 0 feathers the phase
 // becomes 'night-over' and the sim stops.
-import { TUNING, SWING, SETTINGS, SIM_DT_CLAMP, HEALTH, TALL, ARCH, FEEL, FEELFIX } from './config.js';
+import { TUNING, SWING, SETTINGS, SIM_DT_CLAMP, HEALTH, TALL, ARCH, FEEL, FEELFIX, FEELFIX2, PULL } from './config.js';
 import { parseLevel, tileAt } from './level.js';
 import { bodyBlocked, findLanding, pushOut, woodUnderFeet, findLedge } from './physics.js';
 import { solveRope, pumpSwing, reel, conserveSwing } from './rope.js';
 import { lineOfSight } from './los.js';
 import { stepStealth, noiseRadius, tieCheck } from './stealth.js';
-import { chooseTarget, reachable, stepReticle, pickAt } from './targeting.js';
+import { chooseTarget, reachable, stepReticle, pickAt, aimPick } from './targeting.js';
 import { canCancelAttack, attackLimit, guardBump, attackReaches } from './feel.js';
 
 const NO_INPUT = Object.freeze({ held: {}, pressed: {}, released: {} });
@@ -37,8 +37,12 @@ export function createWorld(levelDef, opts = {}) {
   const parkour = opts.parkour ?? true;
   const yankInput = () => opts.yankInput ?? SETTINGS.yankInput; // 'hold' (B held on the line) or 'button'
   // Feel fix 1 (config.js FEELFIX): v2 worlds asked for with feel 'fix1' only. Off = the old feel, bit for bit.
-  const fix = v2 && (opts.feel ?? levelDef.feel ?? SETTINGS.feel) === 'fix1'; // a def may pin its feel (the tall-shaft prototype)
+  const feelName = opts.feel ?? levelDef.feel ?? SETTINGS.feel; // a def may pin its feel (the tall-shaft prototype)
+  const fix = v2 && (feelName === 'fix1' || feelName === 'fix2');
+  // Feel fix 2 (config.js FEELFIX2): aim freeze and cone, faster pump and reel, mash damping. A superset of fix 1.
+  const fix2 = v2 && feelName === 'fix2';
   const F = FEELFIX;
+  const F2 = FEELFIX2;
   const w = {
     level,
     controls: v2 ? 'v2' : 'v1',
@@ -85,6 +89,11 @@ export function createWorld(levelDef, opts = {}) {
     // feel fix 1 (all inert unless feelFix)
     feelFix: fix, chain: 0, chainGround: 0, tautT: 0, arc: 0, swingAng: null, relStat: null,
     landT: 1, hopCap: false, airCap: 0, lastGrade: null, cleanCatches: 0,
+    // feel fix 2: aim direction (render draws the aim line), the last jump-off (mash damping), catch keep
+    feelFix2: fix2, aimDir: null, relAt: -1, relGood: true, catchKeep: SWING.attachKeep, mashCatches: 0, upTapAt: -1, snapReelT: 0,
+    // abilities (Metroid-style; no pickups yet). pullGrapple: the warp-pull grapple mode.
+    abilities: { pullGrapple: !!(opts.abilities?.pullGrapple ?? SETTINGS.abilities?.pullGrapple) },
+    grappleMode: (opts.grapple ?? SETTINGS.grapple) === 'pull' ? 'pull' : 'classic', pull: null,
   };
 
   const roomStart = { hasSpark: !!opts.hasSpark, motes: [] };
@@ -126,7 +135,7 @@ export function createWorld(levelDef, opts = {}) {
     if (fix) w.relStat = swingStat();
     w.anchor = null;
     w.taut = false;
-    w.yank = null; w.bLine = null; w.snapCatch = false;
+    w.yank = null; w.bLine = null; w.snapCatch = false; w.pull = null; // a pull let go keeps its speed: she flies on past
     if (!w.grounded && why !== 'respawn' && why !== 'caught') w.lineFall = true; // a fall from here is a missed swing
     emit('release', { why });
   }
@@ -164,6 +173,18 @@ export function createWorld(levelDef, opts = {}) {
     // v2 freefall catch: the first time the line snaps taut she keeps her speed along the arc
     // (rope.js solveRope keep). A slack hook mid-fall snaps a few frames later, not here.
     w.snapCatch = v2 && inAir && (opts.attachProject ?? SWING.attachProject);
+    w.catchKeep = SWING.attachKeep;
+    w.pull = v2 && pullMode() ? { t: 0 } : null;
+    if (w.pull) { w.snapCatch = false; w.ropeLen = Math.max(PULL.minLen, d); }
+    else if (fix2 && inAir && !w.relGood && w.relAt >= 0 && w.time - w.relAt <= F2.mashWindow) {
+      // mash damping: a re-hook straight after a jump-off that was not a GOOD release (Space+J
+      // mashing) catches with only part of her speed and none of the jump's rise
+      if (w.vy < 0) w.vy = 0;
+      w.catchKeep = F2.mashKeep;
+      w.mashCatches += 1;
+      emit('mash-catch');
+    }
+    w.snapReelT = 0; w.upTapAt = -1;
     w.yanks = 0; w.yank = null; w.bLine = null; w.lineFall = false; w.ledgeAssist = 0; // assist is for arriving off a line, not on one
     w.everHooked = true;
     w.taut = inAir;
@@ -196,6 +217,38 @@ export function createWorld(levelDef, opts = {}) {
     const ang = Math.atan2(w.x - a.x, center() - a.y); // 0 straight below the anchor, + to its right
     const dir = Math.abs(w.vx) > 0.25 ? Math.sign(w.vx) : w.face;
     return { real: w.tautT >= F.realSwingTaut && w.arc >= F.realSwingArc, phi: ang * dir, tautT: w.tautT, arc: w.arc };
+  }
+  /** Warp-pull grapple: the ability is had and the mode is on. */
+  const pullMode = () => w.abilities.pullGrapple && w.grappleMode === 'pull';
+  /** Switch classic / pull (the in-game toggle). Only with the ability. */
+  function setGrappleMode(mode) {
+    if (!w.abilities.pullGrapple) return w.grappleMode;
+    w.grappleMode = mode ?? (w.grappleMode === 'pull' ? 'classic' : 'pull');
+    emit('grapple-mode', { mode: w.grappleMode });
+    return w.grappleMode;
+  }
+  /** One pull step: a spring toward the invisible anchor (velocity only; the move is the normal one). */
+  function stepPull(dt) {
+    const p = w.pull; p.t += dt;
+    const dx = w.anchor.x - w.x; const dy = w.anchor.y - center(); const d = Math.hypot(dx, dy) || 1e-6;
+    if (d <= PULL.swingAt || p.t >= PULL.maxTime) { // held on: a normal swing at this length
+      w.pull = null; w.ropeLen = Math.max(T.lineMin, Math.min(lineRange(), d)); w.taut = true;
+      w.tautT = 0; w.arc = 0; w.swingAng = null;
+      // her speed turns along the swing, the way she was going across
+      const tx = -dy / d, ty = dx / d; const sp = Math.hypot(w.vx, w.vy) * PULL.swingKeep;
+      const sgn = Math.sign(w.vx * tx + w.vy * ty) || Math.sign(w.vx * tx) || w.face * Math.sign(tx) || 1;
+      w.vx = tx * sp * sgn; w.vy = ty * sp * sgn;
+      emit('pull-swing', { len: w.ropeLen });
+      return;
+    }
+    const nx = dx / d; const ny = dy / d;
+    const a = Math.min(PULL.maxAccel, PULL.spring * d);
+    w.vx += nx * a * dt; w.vy += ny * a * dt;
+    // damp the sideways part so it is a pull, not an orbit
+    const along = w.vx * nx + w.vy * ny; const k = Math.exp(-PULL.damping * dt);
+    let sx = (w.vx - along * nx) * k; let sy = (w.vy - along * ny) * k;
+    const al = Math.min(PULL.maxSpeed, along);
+    w.vx = al * nx + sx; w.vy = al * ny + sy;
   }
   const chainCap = () => (w.chain > 0 ? F.chainCaps[Math.min(w.chain, F.chainCaps.length - 1)] : 0);
 
@@ -272,6 +325,13 @@ export function createWorld(levelDef, opts = {}) {
 
   function heldDir(H) {
     return { x: (H.right ? 1 : 0) - (H.left ? 1 : 0), y: (H.down ? 1 : 0) - (H.up ? 1 : 0) };
+  }
+  /** Feel fix 2 aim: the held D-pad (8-way), else her facing tilted up. Unit vector. */
+  function aimDirection(H) {
+    let d = heldDir(H);
+    if (!d.x && !d.y) d = { x: w.face, y: -F2.aimFacingUp };
+    const l = Math.hypot(d.x, d.y);
+    return { x: d.x / l, y: d.y / l };
   }
 
   /** v2 B button and pointer taps (BRIEF "Grapple controls"). Runs before the physics. */
@@ -356,7 +416,7 @@ export function createWorld(levelDef, opts = {}) {
         const cands = reachable(level, w.x, center(), range, w.doorsOpen);
         if (!(fix && F.aimNeedsTarget && !cands.length)) { // fix: nothing in reach = no aim, no slow-mo (the release still taps)
           w.aiming = true;
-          w.reticle = w.target || cands[0] || null;
+          w.reticle = fix2 ? aimPick(cands, w.x, center(), aimDirection(H), F2.aimConeHalf) : (w.target || cands[0] || null);
           emit('aim-start');
         }
       }
@@ -364,8 +424,11 @@ export function createWorld(levelDef, opts = {}) {
     if (w.aiming) {
       const cands = reachable(level, w.x, center(), range, w.doorsOpen);
       if (w.reticle && !cands.includes(w.reticle)) w.reticle = null;
-      if (!w.reticle && cands.length) w.reticle = w.target || cands[0];
-      if (w.reticle) {
+      if (fix2) { // the reticle follows the aim: nearest reachable point to the held direction
+        w.aimDir = aimDirection(H);
+        w.reticle = aimPick(cands, w.x, center(), w.aimDir, F2.aimConeHalf);
+      } else if (!w.reticle && cands.length) w.reticle = w.target || cands[0];
+      if (w.reticle && !fix2) {
         for (const [a, d] of [['left', { x: -1, y: 0 }], ['right', { x: 1, y: 0 }], ['up', { x: 0, y: -1 }], ['down', { x: 0, y: 1 }]])
           if (P[a]) w.reticle = stepReticle(cands, w.reticle, d);
       }
@@ -399,7 +462,7 @@ export function createWorld(levelDef, opts = {}) {
 
   /** Yank / zip: the line snaps taut and pulls her hard at the anchor (once per hook, cooldown). */
   function startYank() {
-    if (!w.anchor || w.yank || w.yanks >= SWING.yankPerAttach || w.yankCd > 0) return false;
+    if (!w.anchor || w.yank || w.pull || w.yanks >= SWING.yankPerAttach || w.yankCd > 0) return false;
     w.yanks += 1; w.yank = { t: 0, sp: Math.max(SWING.yankSpeed, Math.hypot(w.vx, w.vy)) }; w.yankCd = SWING.yankCooldown; // a zip never slows her
     w.stats.yanks = (w.stats.yanks || 0) + 1;
     emit('yank', { ring: w.anchor });
@@ -614,6 +677,13 @@ export function createWorld(levelDef, opts = {}) {
     w.stepStartGrounded = w.grounded;
     let jumpPressed = !!P.jump;
     if (v2) { const g = grappleControls(input, realDt); if (g.ateJump) jumpPressed = false; }
+    if (!w.aiming) w.aimDir = null;
+    // feel fix 2: holding to aim, she does not move at all (speed kept for when the aim ends).
+    // On the ground this starts on the first frame B is down: until aimHoldTime tells a tap from a
+    // hold she stays put, and a tap (B let go sooner) or a jump moves her again with her speed kept.
+    // If nothing is in reach once the hold time is up (no aim starts), she moves again.
+    const preAim = w.bArmed && !w.anchor && w.grounded && !!H.fire && !jumpPressed && w.bTime < F.aimHoldTime;
+    if (fix2 && F2.aimFreeze && (w.aiming || preAim)) { w.jumpBuf = 0; return; }
     if (v2 && stepFeel(input, dt, left, right)) { jumpPressed = false; w.jumpBuf = 0; }
     if (w.climb) { stepClimb(dt); afterMove(); return; }
 
@@ -633,7 +703,21 @@ export function createWorld(levelDef, opts = {}) {
     }
     if (w.anchor) {
       const oldLen = w.ropeLen;
-      w.ropeLen = reel(w.ropeLen, up, down, lineRange(), dt, w.reelMul);
+      if (!w.pull) w.ropeLen = reel(w.ropeLen, up, down, lineRange(), dt, w.reelMul);
+      // feel fix 2 snap reel: double-tap UP on a line = a short fast burst reel-in, on top of the
+      // normal (slow, unchanged) reel. Angular momentum is kept, so at the bottom of the arc it slingshots.
+      if (fix2 && F2.snapReel && !w.pull && !w.yank) {
+        if (P.up) {
+          if (w.time - w.upTapAt <= F2.snapReelTap) { w.snapReelT = F2.snapReelLen; w.upTapAt = -1; emit('snap-reel'); }
+          else w.upTapAt = w.time;
+        }
+        if (w.snapReelT > 0) {
+          const step = Math.min(w.snapReelT, T.reelSpeed * F2.snapReelMul * dt); // snapReelT: tiles left to reel
+          w.snapReelT -= step;
+          w.ropeLen = Math.max(T.lineMin, w.ropeLen - step);
+          if (w.ropeLen <= T.lineMin) w.snapReelT = 0;
+        }
+      }
       if (v2 && w.taut && !w.grounded) conserveSwing(w, w.anchor, oldLen, w.ropeLen);
     }
     if (v2) w.ledgeAssist = Math.max(0, (w.ledgeAssist || 0) - realDt);
@@ -647,18 +731,21 @@ export function createWorld(levelDef, opts = {}) {
       // jump off the line (v1 rope jump); v2 adds a boost in the swing direction
       // feel fix: grade the release. good = a real swing let go inside the window
       const st = fix ? swingStat() : null;
+      const pulled = !!w.pull; // a jump off a pull keeps the pull's speed, ungraded
       const good = !fix || (!!st && st.real && st.phi >= F.windowMin && st.phi <= F.windowMax);
       const carry = v2 && good ? SWING.releaseCarry : 1;
-      const vy = w.vy > T.ropeJumpKeepAbove ? T.ropeJumpVelocity : w.vy * carry + (v2 ? SWING.releaseUpKick : T.ropeJumpExtra);
+      const vy = pulled ? Math.min(w.vy, T.ropeJumpVelocity * 0.5) : w.vy > T.ropeJumpKeepAbove ? T.ropeJumpVelocity : w.vy * carry + (v2 ? SWING.releaseUpKick : T.ropeJumpExtra);
       const coy = !w.anchor;
       if (v2) cutAttack('jump');
       release('jump');
       w.vy = vy; w.grounded = false; w.coyote = 0; w.jumpBuf = 0; w.lineCoyote = 0;
-      if (fix) {
+      if (pulled) { w.relAt = w.time; w.relGood = true; emit('pull-release', { vx: w.vx, vy: w.vy }); }
+      else if (fix) {
         if (good) { w.vx = w.vx * carry + swingDir * SWING.releaseBoostX; w.chain = Math.min(F.chainMax, w.chain + 1); }
         else { w.vx *= F.missKeep; w.chain = Math.max(0, w.chain - 1); }
         w.vx = Math.max(-F.releaseMaxVx, Math.min(F.releaseMaxVx, w.vx));
         w.lastGrade = good ? 'GOOD' : !st || !st.real ? 'EARLY' : st.phi < F.windowMin ? 'EARLY' : 'LATE';
+        w.relAt = w.time; w.relGood = good;
         w.ledgeAssist = SWING.ledgeAssistTime; w.relStat = null; w.hopCap = false;
         emit('release-grade', { good, grade: w.lastGrade, chain: w.chain });
       } else if (v2) { w.vx = w.vx * carry + swingDir * SWING.releaseBoostX; w.ledgeAssist = SWING.ledgeAssistTime; }
@@ -687,8 +774,9 @@ export function createWorld(levelDef, opts = {}) {
     }
     if (v2) w.yankCd = Math.max(0, w.yankCd - dt);
     if (w.yank && w.anchor) stepYank(dt);
+    if (w.pull && w.anchor) stepPull(dt);
     const dodging = !!(v2 && w.dodge);
-    w.vy += T.gravity * dt * (w.yank ? SWING.yankGravityMul : dodging ? FEEL.dodgeGravityMul : 1);
+    w.vy += T.gravity * dt * (w.yank ? SWING.yankGravityMul : w.pull ? PULL.gravityMul : dodging ? FEEL.dodgeGravityMul : 1);
     const fallCap = v2 ? SWING.fallMax : T.maxFall;
     if (w.vy > fallCap) w.vy = fallCap;
 
@@ -701,6 +789,8 @@ export function createWorld(levelDef, opts = {}) {
     } else if (w.roll > 0 && w.grounded) {
       w.roll -= dt;
       w.vx = w.rollDir * T.rollSpeed;
+    } else if (w.pull && !w.grounded) {
+      // pulling: no air control, the spring steers
     } else if (fix && (!w.taut || w.grounded) && !w.yank) {
       moveFix(dir, speed, dt);
     } else if ((!w.taut || w.grounded) && !w.yank) {
@@ -745,9 +835,12 @@ export function createWorld(levelDef, opts = {}) {
     const preRopeY = w.y;
     if (!w.anchor) w.taut = false;
     else {
-      w.taut = solveRope(w, w.anchor, w.ropeLen, undefined, w.snapCatch ? SWING.attachKeep : 0);
+    if (w.pull) w.taut = false; // pulling: the spring, not a rope length
+    else {
+      w.taut = solveRope(w, w.anchor, w.ropeLen, undefined, w.snapCatch ? w.catchKeep : 0);
       if (w.snapCatch && w.snapped) { w.snapCatch = false; emit('snap', { speed: Math.hypot(w.vx, w.vy) }); }
-      if (w.taut && w.anchor && !w.yank) pumpSwing(w, w.anchor, dir, dt, v2);
+      if (w.taut && w.anchor && !w.yank) pumpSwing(w, w.anchor, dir, dt, v2, fix2 ? F2.pumpMul : 1);
+    }
     }
     // the line never drags her into stone: undo the rope move if it would
     if (bodyBlocked(level, w.x, w.y, w.h, w.doorsOpen)) { w.x = prevX; w.y = preRopeY; w.vx = 0; }
@@ -756,7 +849,7 @@ export function createWorld(levelDef, opts = {}) {
 
     // grappleable architecture: hooked on a ledge's corner or edge and reeled all the way in
     // (or zipping in on a yank), she pulls herself up onto THAT ledge. No direction needed.
-    if (parkour && !w.grounded && w.anchor?.ledge && (w.yank || w.ropeLen <= T.lineMin + 1e-6)) {
+    if (parkour && !w.grounded && w.anchor?.ledge && (w.yank || w.pull || w.ropeLen <= T.lineMin + 1e-6)) {
       const lg = w.anchor.ledge;
       const feetBelow = w.y - lg.top;
       if (feetBelow > 1 / 16 && feetBelow <= ARCH.lineClimbReach && Math.abs(w.x - w.anchor.x) <= ARCH.lineClimbDx) {
@@ -919,6 +1012,7 @@ export function createWorld(levelDef, opts = {}) {
   w.step = step;
   w.release = release;
   w.attach = attach;
+  w.setGrappleMode = setGrappleMode;
   w.bestRing = bestRing;
   w.center = center;
   w.tileAt = (c, r) => tileAt(level, c, r);

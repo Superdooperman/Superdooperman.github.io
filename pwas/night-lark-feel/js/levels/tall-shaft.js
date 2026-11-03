@@ -24,11 +24,16 @@ import { SETTINGS } from '../config.js';
 
 export const TALL_SEED = 1;
 /** Seed -> its first finishable route attempt (towerRoute(seed, attempt)), found by
- *  tallAttempt() with the solver. A seed not listed is solved at load (about 3 s a try in
- *  node). test/tall-shaft.test.mjs re-checks every entry; regenerate it if the generator changes
+ *  tallAttempt() with the solver. Seeds 1..TALL_REROLL_N not listed are attempt 0 with no solve;
+ *  any other seed is solved at load (about 8 s a try in node for the dense tower). test/tall-shaft.test.mjs re-checks every entry; regenerate it if the generator changes
  *  (node tools/tall-reroll.mjs). */
-export const TALL_REROLL = Object.freeze({ 2: 1, 3: 3, 6: 3, 7: 4, 8: 1, 12: 8, 15: 2, 17: 1 }); // seeds 1-20; unlisted = attempt 0
+export const TALL_REROLL = Object.freeze({ 5: 1, 13: 1, 19: 1, 28: 2, 39: 1 }); // seeds 1-40; unlisted = attempt 0
+export const TALL_REROLL_N = 40;
 export const TALL_MAX_ATTEMPTS = 16;
+/** The table's attempt for a seed, or undefined when the seed is outside the table. */
+export function tallTableAttempt(seed) {
+  return Number.isInteger(seed) && seed >= 1 && seed <= TALL_REROLL_N ? (TALL_REROLL[seed] ?? 0) : undefined;
+}
 
 /** The built route for a seed (assembly, facade, steps), for the room, tests and docs. */
 export function tallShaftKit(seed = TALL_SEED, attempt = TALL_REROLL[seed] ?? 0) { return towerRoute(seed, attempt); }
@@ -52,7 +57,7 @@ export function tallAttempt(seed) {
 /** The room for a seed. The generator rejects a route its solver can't finish and rerolls
  *  (attempt 1, 2, ... each its own stream), so every seed is finishable. attempt: force one. */
 export function tallShaft({ fallCost = 'height', seed = TALL_SEED, attempt } = {}) {
-  return buildTall(seed, attempt ?? TALL_REROLL[seed] ?? tallAttempt(seed), fallCost);
+  return buildTall(seed, attempt ?? tallTableAttempt(seed) ?? tallAttempt(seed), fallCost);
 }
 
 function buildTall(seed, attempt, fallCost = 'height') {

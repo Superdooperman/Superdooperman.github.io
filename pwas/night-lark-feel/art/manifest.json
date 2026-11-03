@@ -45,19 +45,15 @@
     {
       "name": "lark-run",
       "file": "in/lark-run.png",
-      "frameW": 32,
+      "frameW": 48,
       "frameH": 48,
       "frames": 8,
       "fps": 16,
       "pivot": [
-        16,
+        32,
         47
       ],
       "accentKey": true,
-      "tailAnchor": [
-        11,
-        40
-      ],
       "speedPxPerSec": 100,
       "footPxPerFrame": 6.25,
       "frameNames": [
@@ -80,8 +76,30 @@
           7
         ]
       },
-      "ownsCloak": false,
-      "note": "Faces right. Jog/run loop for walkSpeed 100 px/s at 16 fps (50 px per cycle, 25 px per step). Each foot is planted 3 frames (ankle x 21, 15, 9 = 6 px per frame vs 6.25 px of travel, 0.25 px/frame slip). Frames 3 and 7 are flight frames (both feet off row 47). Body is lark-idle frame 0 leaned ~2 px forward with a 1 px bob (down +1, flight -1). Poncho closed and hanging; the engine draws the cloak swing and rope tail. Throat in key greens like idle. If the engine scales fps by actual speed, 16 fps is the rate at exactly 100 px/s."
+      "ownsCloak": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "note": "v5 (Nov 3, 2026, approved by Azzato). Faces right, 48x48 cells (384x48 strip), pivot [32,47] (was 32x48 / [16,47]: 16 px of padding on the left for the cloak and rope trailing behind). Jog/run loop for 100 px/s at 16 fps, 6.25 px/frame; frames 3 and 7 are flight frames. The flapping scalloped cloak AND the rope-loop tail are painted into every frame (the rope hangs from the belt between the far-side lining and the near dark panel), so the engine must NOT draw its own cloak swing or rope tail on lark-run (no tailAnchor). Throat in key greens (48 px). Playback stays tied to her actual speed: 16 fps at exactly 100 px/s, scale fps by |vx|/100.",
+      "ropePainted": true,
+      "ownsTail": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "engineCloak": false,
+      "engineTail": false
     },
     {
       "name": "tiles-harbor",
@@ -263,6 +281,411 @@
         ]
       ],
       "note": "Faces right. The two gun-out poses at 48x48 with Azzato's full, unclipped grapple hook. Frame 00 = turnaround side view; frame 01 = cloak-open frame 02. Each is the pass-3 32x48 frame padded 8 px left and right, so its (16,47) pivot lands on (24,47), and with the 2 hook-prong columns restored at x40-41. Same palette, throat key greens and WL1/WL0 lining as pass 3. muzzle is per frame [x,y] in 48x48 coordinates: the hook tip column (x41) on the barrel's centre row, between the two prongs. tailAnchor = the 32-px [11,40] + 8 x. The 32-px turnaround and cloak-open strips are unchanged; Vegapunk decides how this strip replaces or overlays them."
+    },
+    {
+      "name": "lark-idle-bell",
+      "file": "in/lark-idle-bell.png",
+      "frameW": 32,
+      "frameH": 48,
+      "frames": 4,
+      "fps": 6,
+      "pivot": [
+        16,
+        47
+      ],
+      "accentKey": true,
+      "anims": {
+        "idle": [
+          0,
+          3
+        ]
+      },
+      "ownsCloak": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "ownsTail": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "ropePainted": true,
+      "engineCloak": false,
+      "engineTail": false,
+      "note": "Standing bell-belly idle (Azzato approved Nov 3): cloak breathes/sways, scalloped hem, rope loop hangs nearly straight from the belt under the hem and sways with the cloak. Painted in, so no engine cloak or rope tail. Throat key greens (24 px). lark-idle.png is unchanged and still exists."
+    },
+    {
+      "name": "lark-swing",
+      "file": "in/lark-swing.png",
+      "frameW": 48,
+      "frameH": 48,
+      "frames": 8,
+      "fps": 8,
+      "pivot": [
+        24,
+        47
+      ],
+      "frameNames": [
+        "back-high",
+        "back-mid",
+        "bottom-tuck",
+        "front-mid",
+        "front-high",
+        "apex-hang",
+        "back-90",
+        "front-90"
+      ],
+      "angleDeg": [
+        -65,
+        -35,
+        0,
+        35,
+        65,
+        55,
+        -90,
+        90
+      ],
+      "grip": [
+        [
+          39,
+          6
+        ],
+        [
+          36,
+          5
+        ],
+        [
+          29,
+          4
+        ],
+        [
+          16,
+          4
+        ],
+        [
+          5,
+          8
+        ],
+        [
+          13,
+          5
+        ],
+        [
+          46,
+          14
+        ],
+        [
+          0,
+          18
+        ]
+      ],
+      "accentKey": {
+        "light": "#00FF00",
+        "mid": "#00C800",
+        "dark": "#009600"
+      },
+      "tailAnchor": [
+        [
+          18,
+          39
+        ],
+        [
+          7,
+          25
+        ],
+        [
+          7,
+          32
+        ],
+        [
+          4,
+          38
+        ],
+        [
+          8,
+          39
+        ],
+        [
+          16,
+          33
+        ],
+        [
+          9,
+          36
+        ],
+        [
+          22,
+          41
+        ]
+      ],
+      "ownsCloak": [
+        false,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "note": "Pass 4. Pendulum poses drawn at their angle (engine does not rotate). angleDeg = grip->body from straight down, + = body right of grip. grip[i] = gun-nose pixel (SL5) where the rope leaves. Poncho painted per pose; ownsCloak[i]=true means the whole streaming/spread poncho is in the frame, so skip the engine cloak tail on that frame. tailAnchor = one pixel past the back-most hem point of the painted poncho (auto-measured). Pass 5: frames 6-7 (back-90, front-90) are polish frames for the full-extension stall, rope horizontal; poncho spread with the lavender back-half lining behind the legs."
+    },
+    {
+      "name": "lark-air",
+      "file": "in/lark-air.png",
+      "frameW": 48,
+      "frameH": 48,
+      "frames": 4,
+      "fps": 10,
+      "pivot": [
+        24,
+        47
+      ],
+      "frameNames": [
+        "release",
+        "rise",
+        "fall",
+        "spread"
+      ],
+      "accentKey": {
+        "light": "#00FF00",
+        "mid": "#00C800",
+        "dark": "#009600"
+      },
+      "tailAnchor": [
+        [
+          16,
+          42
+        ],
+        [
+          15,
+          37
+        ],
+        [
+          13,
+          35
+        ],
+        [
+          18,
+          42
+        ]
+      ],
+      "ownsCloak": [
+        false,
+        false,
+        true,
+        true
+      ],
+      "note": "release (straight line, cloak tight), rise (legs trailing, cloak dragged down), fall (poncho halves thrown up as wings, legs reaching down), spread (pass 5: optional held/dramatic version of fall, wings wider and flung higher, lavender back-half lining behind the legs). Release stays 1 frame; no tumble. Bottom-aligned to the pivot row. tailAnchor = one pixel past the back-most hem point of the painted poncho (auto-measured)."
+    },
+    {
+      "name": "lark-freefall",
+      "file": "in/lark-freefall.png",
+      "frameW": 48,
+      "frameH": 48,
+      "frames": 3,
+      "fps": 10,
+      "pivot": [
+        24,
+        47
+      ],
+      "frameNames": [
+        "dive-0",
+        "dive-1",
+        "dive-2"
+      ],
+      "accentKey": {
+        "light": "#00FF00",
+        "mid": "#00C800",
+        "dark": "#009600"
+      },
+      "tailAnchor": [
+        [
+          4,
+          4
+        ],
+        [
+          2,
+          5
+        ],
+        [
+          5,
+          5
+        ]
+      ],
+      "ownsCloak": [
+        true,
+        true,
+        true
+      ],
+      "note": "Head-down dive, poncho streaming up and spread; 3-frame flutter (play 0,1,2,1). Pass 5 repaint: the poncho is one piece split only at the centre-front seam, so the inside of the back half (lining, WL1 with WL0 folds) shows behind the legs; hood re-lit so light comes from above in the final head-down orientation. tailAnchor here is the top-back corner of the streaming poncho. tailAnchor = one pixel past the back-most hem point of the painted poncho (auto-measured)."
+    },
+    {
+      "name": "lark-yank",
+      "file": "in/lark-yank.png",
+      "frameW": 48,
+      "frameH": 48,
+      "frames": 2,
+      "fps": 12,
+      "pivot": [
+        24,
+        47
+      ],
+      "frameNames": [
+        "snap",
+        "launch"
+      ],
+      "angleDeg": [
+        -40,
+        -58
+      ],
+      "grip": [
+        [
+          36,
+          4
+        ],
+        [
+          37,
+          8
+        ]
+      ],
+      "accentKey": {
+        "light": "#00FF00",
+        "mid": "#00C800",
+        "dark": "#009600"
+      },
+      "tailAnchor": [
+        [
+          7,
+          31
+        ],
+        [
+          17,
+          37
+        ]
+      ],
+      "ownsCloak": [
+        true,
+        true
+      ],
+      "note": "snap (rope taut, both arms straight to the hook, knees braced, poncho flaring away) then launch (stretched line past the anchor, poncho streaming). grip[i] = gun nose (SL5). tailAnchor = one pixel past the back-most hem point of the painted poncho (auto-measured)."
+    },
+    {
+      "name": "lark-roll",
+      "file": "in/lark-roll.png",
+      "frameW": 48,
+      "frameH": 48,
+      "frames": 4,
+      "fps": 12,
+      "pivot": [
+        24,
+        47
+      ],
+      "frameNames": [
+        "land-tuck",
+        "roll-1",
+        "roll-2",
+        "rise"
+      ],
+      "accentKey": {
+        "light": "#00FF00",
+        "mid": "#00C800",
+        "dark": "#009600"
+      },
+      "tailAnchor": [
+        [
+          11,
+          45
+        ],
+        [
+          13,
+          43
+        ],
+        [
+          16,
+          46
+        ],
+        [
+          12,
+          39
+        ]
+      ],
+      "ownsCloak": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "note": "Landing roll: land-tuck, ball (~-110 deg), ball (~-220 deg), kneel-rise. Bottom-aligned to the pivot row; poncho wrapped, engine tail allowed. tailAnchor = one pixel past the back-most hem point of the painted poncho (auto-measured)."
+    },
+    {
+      "name": "lark-ledge",
+      "file": "in/lark-ledge.png",
+      "frameW": 48,
+      "frameH": 48,
+      "frames": 4,
+      "fps": 10,
+      "pivot": [
+        24,
+        47
+      ],
+      "frameNames": [
+        "reach",
+        "hang",
+        "pull-up",
+        "crouch-top"
+      ],
+      "ledgeHand": [
+        [
+          36,
+          9
+        ],
+        [
+          31,
+          11
+        ],
+        [
+          27,
+          21
+        ],
+        [
+          29,
+          39
+        ]
+      ],
+      "accentKey": {
+        "light": "#00FF00",
+        "mid": "#00C800",
+        "dark": "#009600"
+      },
+      "tailAnchor": [
+        [
+          14,
+          38
+        ],
+        [
+          16,
+          36
+        ],
+        [
+          14,
+          37
+        ],
+        [
+          14,
+          33
+        ]
+      ],
+      "ownsCloak": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "note": "Ledge grab + pull-up: reach, hang, pull-up (knee hooked on lip), crouch-top. ledgeHand[i] = the frame pixel that should sit on the ledge lip corner (hand for 0-2, front toe for 3); align the frame so that pixel lands on the lip. Frames are bbox-centred, not pivot-locked. tailAnchor = one pixel past the back-most hem point of the painted poncho (auto-measured)."
     }
   ],
   "kits": [
