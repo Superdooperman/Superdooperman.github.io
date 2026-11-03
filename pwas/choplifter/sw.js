@@ -1,4 +1,4 @@
-const CACHE = 'choplifter-v33';
+const CACHE = 'choppa-v34';
 const ASSETS = [
   './',
   './index.html',
@@ -10,12 +10,12 @@ const ASSETS = [
   './icons/icon-box-512.png',
   './assets/boxart.jpg',
   './assets/boxart.webp',
-  './js/main.js?v=33',
-  './js/audio.js?v=33',
-  './js/motion.js?v=33',
-  './js/input.js?v=33',
-  './js/sprites.js?v=33',
-  './js/game.js?v=33',
+  './js/main.js?v=34',
+  './js/audio.js?v=34',
+  './js/motion.js?v=34',
+  './js/input.js?v=34',
+  './js/sprites.js?v=34',
+  './js/game.js?v=34',
   './art/chopper.png',
   './art/people.png',
   './art/enemies.png',
@@ -29,7 +29,7 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter((k) => k.startsWith('choplifter-') && k !== CACHE).map((k) => caches.delete(k)));
+    await Promise.all(keys.filter((k) => (k.startsWith('choplifter-') || k.startsWith('choppa-')) && k !== CACHE).map((k) => caches.delete(k)));
     await self.clients.claim();
   })());
 });

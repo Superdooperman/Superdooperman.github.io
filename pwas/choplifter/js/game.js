@@ -2,7 +2,7 @@
 // in public notes (thrust, climb, map, boarding, spawns, sorties).
 // Every picture here is newly drawn. No original bytes, shapes, or samples.
 (function (root) {
-  const BUILD = 'v33';
+  const BUILD = 'v34';
   const RUBBLE = '#8aa4c8';
   const W = 280;
   const H = 192;
@@ -1226,7 +1226,7 @@
   }
 
   function drawPlanet(ctx) {
-    // Title logo ends near x=222. Keep the moon clear of that R.
+    // GIT TO DA / CHOPPA! ends near x=203. Keep the moon clear of the mark.
     const cx = S.mode === 'title' ? 252 : 222;
     const cy = S.mode === 'title' ? 76 : 80;
     const r = 11;
@@ -1444,7 +1444,7 @@
     ctx.fillRect(1, 22, W - 2, 3);
   }
 
-  const CREDIT = 'A tribute to Choplifter by Dan Gorlin, Broderbund 1982';
+  const DISCLAIMER = 'A love letter to the Apple II classic Choplifter. Not affiliated with or endorsed by its owners.';
 
   function roundBox(ctx, x, y, w, h, fill) {
     ctx.fillStyle = fill;
@@ -1490,28 +1490,36 @@
     }
   }
 
+  function creditLines() {
+    const words = DISCLAIMER.toUpperCase().split(' ');
+    const lines = [];
+    let line = '';
+    words.forEach((word) => {
+      const next = line ? line + ' ' + word : word;
+      if (next.length > 40 && line) {
+        lines.push(line);
+        line = word;
+      } else line = next;
+    });
+    if (line) lines.push(line);
+    return lines;
+  }
+
   function creditLine(ctx, y) {
-    ctx.save();
-    ctx.fillStyle = INK.W;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    ctx.font = '7px "Courier New", Courier, monospace';
-    if (ctx.measureText(CREDIT).width > 272) ctx.font = '6px "Courier New", Courier, monospace';
-    ctx.fillText(CREDIT, W / 2, y);
-    ctx.restore();
+    creditLines().forEach((line, i) => textCenter(ctx, line, y + i * 8, INK.W, 1));
   }
 
   function drawMessages(ctx) {
     if (S.mode === 'title') {
-      logo(ctx, 48);
+      logo(ctx, 36);
       creditLine(ctx, 96);
       textCenter(ctx, 'ARROWS  Z TURN  SPACE FIRE  M MONITOR', 150, INK.O, 1);
       return;
     }
     if (S.mode === 'attract') {
-      creditLine(ctx, 34);
-      textCenter(ctx, 'YOUR MISSION:', 58, INK.W, 1);
-      barText(ctx, 'RESCUE HOSTAGES', 78);
+      creditLine(ctx, 36);
+      textCenter(ctx, 'YOUR MISSION:', 68, INK.W, 1);
+      barText(ctx, 'RESCUE HOSTAGES', 100);
       return;
     }
     if (S.paused) {
@@ -1537,13 +1545,15 @@
   }
 
   function logo(ctx, y) {
-    const word = 'CHOPLIFTER';
+    textCenter(ctx, 'GIT TO DA', y, INK.O, 1);
+    const word = 'CHOPPA!';
     const scale = 3;
     const width = word.length * 6 * scale;
-    const x = Math.round((W - width) / 2) - 6;
-    text(ctx, word, x + 1, y - 1, INK.O, scale);
-    text(ctx, word, x - 1, y + 2, INK.B, scale);
-    text(ctx, word, x, y, INK.W, scale);
+    const x = Math.round((W - width) / 2);
+    const by = y + 12;
+    text(ctx, word, x + 1, by - 1, INK.O, scale);
+    text(ctx, word, x - 1, by + 2, INK.B, scale);
+    text(ctx, word, x, by, INK.W, scale);
   }
 
   function textCenter(ctx, str, y, color, scale) {

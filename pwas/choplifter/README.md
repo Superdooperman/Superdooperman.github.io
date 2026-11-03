@@ -1,6 +1,6 @@
-# Choplifter!
+# Git to da Choppa!
 
-A tribute to Choplifter by Dan Gorlin, Broderbund 1982
+A love letter to the Apple II classic Choplifter. Not affiliated with or endorsed by its owners.
 
 ## Play
 

@@ -1,7 +1,7 @@
 {
-  "name": "Choplifter!",
-  "short_name": "Choplifter",
-  "description": "A tribute to Choplifter by Dan Gorlin, Broderbund 1982",
+  "name": "Git to da Choppa!",
+  "short_name": "Choppa!",
+  "description": "A love letter to the Apple II classic Choplifter. Not affiliated with or endorsed by its owners.",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "landscape",
