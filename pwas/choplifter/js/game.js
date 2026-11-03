@@ -2,7 +2,7 @@
 // in public notes (thrust, climb, map, boarding, spawns, sorties).
 // Every picture here is newly drawn. No original bytes, shapes, or samples.
 (function (root) {
-  const BUILD = 'v28';
+  const BUILD = 'v29';
   const RUBBLE = '#8aa4c8';
   const W = 280;
   const H = 192;
@@ -26,16 +26,16 @@
   };
 
   const DIGIT = {
-    0: ['111', '101', '101', '101', '111'],
-    1: ['010', '110', '010', '010', '111'],
-    2: ['111', '001', '111', '100', '111'],
-    3: ['111', '001', '111', '001', '111'],
-    4: ['101', '101', '111', '001', '001'],
-    5: ['111', '100', '111', '001', '111'],
-    6: ['111', '100', '111', '101', '111'],
-    7: ['111', '001', '010', '010', '010'],
-    8: ['111', '101', '111', '101', '111'],
-    9: ['111', '101', '111', '001', '111'],
+    0: ['11111', '11011', '11011', '11011', '11011', '11011', '11111'],
+    1: ['00110', '01110', '00110', '00110', '00110', '00110', '11111'],
+    2: ['11111', '00011', '00011', '11111', '11000', '11000', '11111'],
+    3: ['11111', '00011', '00011', '11111', '00011', '00011', '11111'],
+    4: ['11011', '11011', '11011', '11111', '00011', '00011', '00011'],
+    5: ['11111', '11000', '11000', '11111', '00011', '00011', '11111'],
+    6: ['11111', '11000', '11000', '11111', '11011', '11011', '11111'],
+    7: ['11111', '00011', '00011', '00110', '01100', '01100', '01100'],
+    8: ['11111', '11011', '11011', '11111', '11011', '11011', '11111'],
+    9: ['11111', '11011', '11011', '11111', '00011', '00011', '11111'],
   };
 
   const FONT = {};
@@ -195,6 +195,28 @@
     let scale = Math.floor(Math.min(cssW / W, cssH / H));
     if (scale < 1) scale = 1;
     return scale;
+  }
+
+  // Largest uniform scale that fits. Portrait (narrower than 280:192) fills the
+  // width and leaves room below. Landscape fills the height and leaves side margins.
+  function fitFrame(viewW, viewH, safe) {
+    const pad = safe || { top: 0, right: 0, bottom: 0, left: 0 };
+    const availW = Math.max(1, viewW - (pad.left || 0) - (pad.right || 0));
+    const availH = Math.max(1, viewH - (pad.top || 0) - (pad.bottom || 0));
+    const gameAspect = W / H;
+    const portrait = availW / availH < gameAspect;
+    const cssW = portrait ? availW : availH * gameAspect;
+    const cssH = portrait ? availW / gameAspect : availH;
+    const scale = cssW / W;
+    return {
+      cssW,
+      cssH,
+      left: (pad.left || 0) + (availW - cssW) / 2,
+      top: (pad.top || 0) + (portrait ? 0 : (availH - cssH) / 2),
+      scale,
+      sharp: Math.max(1, Math.ceil(scale - 1e-4)),
+      portrait,
+    };
   }
 
   function paintFrame() {
@@ -1205,46 +1227,74 @@
     }
   }
 
+  // i = 0 is nearest the camera (lowest on screen, largest). Later posts rise and shrink.
+  function fencePosts() {
+    const count = 7;
+    const posts = [];
+    for (let i = 0; i < count; i++) {
+      const t = i / (count - 1);
+      const scale = 1 - t * 0.65;
+      const h = Math.max(3, Math.round(10 * scale));
+      const w = Math.max(2, Math.round(4 * scale));
+      const lift = Math.sin(t * Math.PI * 0.85) * 6;
+      const foot = GROUND + Math.round((1 - t) * 10 - lift);
+      posts.push({ x: FENCE - 4 + i * 8, foot, w, h });
+    }
+    return posts;
+  }
+
   function drawFence(ctx) {
-    const posts = [
-      [0, 16, 22], [18, 12, 16], [34, 9, 12], [48, 7, 9], [60, 5, 7],
-    ];
-    posts.forEach(([dx, w, hgt], i) => {
-      const x = sxOf(FENCE - 10 + dx * 1.6);
-      if (x < -20 || x > W + 10) return;
-      ctx.fillStyle = INK.W;
-      const top = GROUND - Math.floor(hgt * 0.45) + i;
-      ctx.fillRect(Math.round(x), top, Math.max(2, Math.round(w / 3)), GROUND - top + 2);
-      ctx.fillRect(Math.round(x) - 2, top + 2, Math.max(4, Math.round(w / 2)), 2);
+    ctx.fillStyle = INK.W;
+    fencePosts().forEach((p) => {
+      const x = Math.round(sxOf(p.x));
+      if (x < -12 || x > W + 8) return;
+      const y = p.foot - p.h;
+      ctx.fillRect(x, y, p.w, p.h);
+      ctx.fillRect(x - 1, y, p.w + 2, 2);
     });
   }
 
+  function fillTrapezoid(ctx, top, rows, botLeft, topW, botW) {
+    for (let i = 0; i < rows; i++) {
+      const t = rows <= 1 ? 1 : i / (rows - 1);
+      const w = topW + (botW - topW) * t;
+      const x = botLeft + (botW - w) / 2;
+      ctx.fillRect(Math.round(x), top + i, Math.max(1, Math.round(w)), 1);
+    }
+  }
+
   function drawBase(ctx) {
-    const x = sxOf(BASE - 6);
-    if (x > W + 30 || x < -160) return;
+    const anchor = sxOf(BASE);
+    if (anchor > W + 20 || anchor < -140) return;
+    const botW = 108;
+    const topW = 62;
+    const botLeft = anchor - 6;
     ctx.fillStyle = INK.G;
-    ctx.fillRect(x, GROUND - 4, 96, 4);
-    hiresRun(ctx, x, GROUND - 5, 96);
-    const bx = x + 70;
+    fillTrapezoid(ctx, GROUND, 10, botLeft, topW, botW);
+    const farLeft = botLeft + (botW - topW) / 2;
+    const bw = 40;
+    const bh = 8;
+    const bx = Math.round(farLeft + topW - bw - 1);
+    const by = GROUND - bh;
     ctx.fillStyle = INK.O;
-    ctx.fillRect(bx, GROUND - 18, 88, 18);
-    hiresRun(ctx, bx, GROUND - 20, 88);
-    hiresRun(ctx, bx, GROUND - 19, 88);
+    ctx.fillRect(bx, by, bw, bh);
+    hiresRun(ctx, bx, by - 1, bw);
     ctx.fillStyle = INK.W;
-    for (let n = 0; n < 4; n++) ctx.fillRect(bx + 6 + n * 20, GROUND - 12, 12, 4);
+    ctx.fillRect(bx + 3, by + 2, 7, 3);
+    ctx.fillRect(bx + 14, by + 2, 7, 3);
+    ctx.fillRect(bx + 28, by + 2, 7, 3);
     ctx.fillStyle = INK.K;
-    ctx.fillRect(bx + 40, GROUND - 12, 8, 12);
-    const pole = bx + 80;
-    for (let y = GROUND - 36; y < GROUND - 18; y++) {
+    ctx.fillRect(bx + 16, by + 3, 5, 5);
+    const pole = bx + bw - 3;
+    for (let y = by - 11; y < by; y++) {
       ctx.fillStyle = INK.W;
       ctx.fillRect(pole, y, 1, 1);
     }
     const wave = (S.frame & 4) ? 0 : 1;
     ctx.fillStyle = INK.B;
-    ctx.fillRect(pole + 1, GROUND - 36 + wave, 4, 4);
+    ctx.fillRect(pole + 1, by - 11 + wave, 3, 3);
     ctx.fillStyle = INK.O;
-    ctx.fillRect(pole + 1, GROUND - 32 + wave, 11, 3);
-    hiresRun(ctx, pole + 1, GROUND - 29 + wave, 11);
+    ctx.fillRect(pole + 1, by - 8 + wave, 8, 2);
   }
 
   function drawBarracks(ctx, b) {
@@ -1378,33 +1428,39 @@
   }
 
   function lemon(ctx, cx, color, value) {
-    const x = cx - 18;
-    const y = 12;
-    const w = 36;
-    const h = 9;
+    const w = 58;
+    const h = 11;
+    const x = cx - 29;
+    const y = 11;
     ctx.fillStyle = INK.K;
     for (let row = 0; row < h; row++) {
-      const taper = row < 2 ? 2 - row : row > h - 3 ? row - (h - 3) : 0;
-      ctx.fillRect(x + taper, y + row, w - taper * 2, 1);
+      const taper = row < 3 ? (3 - row) : row > h - 4 ? (row - (h - 4)) : 0;
+      ctx.fillRect(x + taper * 2, y + row, w - taper * 4, 1);
     }
     ctx.fillStyle = inkColor(color);
-    const dx = x + 6;
-    const dy = y + 3;
-    ctx.fillRect(dx + 1, dy, 2, 1);
-    ctx.fillRect(dx, dy + 1, 4, 1);
-    ctx.fillRect(dx + 1, dy + 2, 2, 1);
+    const dx = x + 8;
+    const dy = y + 2;
+    ctx.fillRect(dx + 3, dy, 1, 1);
+    ctx.fillRect(dx + 2, dy + 1, 3, 1);
+    ctx.fillRect(dx + 1, dy + 2, 5, 1);
+    ctx.fillRect(dx, dy + 3, 7, 1);
+    ctx.fillRect(dx + 1, dy + 4, 5, 1);
+    ctx.fillRect(dx + 2, dy + 5, 3, 1);
+    ctx.fillRect(dx + 3, dy + 6, 1, 1);
     const text = String(clamp(value, 0, 99)).padStart(2, '0');
-    drawDigits(ctx, text, x + 14, y + 2);
+    drawDigits(ctx, text, x + 20, y + 2);
   }
 
   function drawDigits(ctx, text, x, y) {
+    let cx = x;
     for (let i = 0; i < text.length; i++) {
       const rows = DIGIT[text[i]] || DIGIT[0];
       rows.forEach((row, ry) => {
         for (let rx = 0; rx < row.length; rx++) {
-          if (row[rx] === '1') plotWhite(ctx, x + i * 5 + rx, y + ry);
+          if (row[rx] === '1') plotWhite(ctx, cx + rx, y + ry);
         }
       });
+      cx += rows[0].length + 1;
     }
   }
 
@@ -1728,11 +1784,20 @@
     update({ stickX: 0, stickY: 10 });
     expect(S.killed === crushed + 1, 'hostage-crush event');
 
-    const scale = integerScale(844, 390);
-    expect(Number.isInteger(scale) && scale >= 1, 'integer scale');
-    expect(W * scale <= 844 && H * scale <= 390, 'letterbox fits the viewport');
-    const dpr = 3;
-    expect((W * scale * dpr) % W === 0, 'device pixels are an integer multiple of the backbuffer');
+    const phoneP = fitFrame(390, 844);
+    expect(phoneP.portrait, 'portrait layout');
+    expect(Math.abs(phoneP.cssW - 390) < 0.5, 'portrait fills the width');
+    expect(Math.abs(phoneP.cssW / phoneP.cssH - W / H) < 0.001, 'portrait keeps the aspect');
+    expect(phoneP.sharp === Math.ceil(phoneP.scale - 1e-4), 'sharp step is the next integer');
+    const phoneL = fitFrame(844, 390);
+    expect(!phoneL.portrait, 'landscape layout');
+    expect(Math.abs(phoneL.cssH - 390) < 0.5, 'landscape fills the height');
+    expect(Math.abs(phoneL.cssW / phoneL.cssH - W / H) < 0.001, 'landscape keeps the aspect');
+    const desk = fitFrame(1280, 800);
+    expect(desk.cssW <= 1280 + 0.1 && desk.cssH <= 800 + 0.1, 'desktop fits the viewport');
+    expect(Math.abs(desk.cssW / desk.cssH - W / H) < 0.001, 'desktop keeps the aspect');
+    const inset = fitFrame(844, 390, { top: 20, right: 30, bottom: 10, left: 40 });
+    expect(inset.cssH <= 360.1 && inset.left >= 39.9, 'safe area insets the frame');
 
     beginPlay();
     S.quiet = true;
@@ -1876,6 +1941,52 @@
     expect(frame[80 * W + 222] !== magenta, 'the moon is not the ground colour');
     const band = H - GROUND;
     expect(band / H >= 0.10 && band / H <= 0.18, 'the ground is a thin band');
+    expect(DIGIT[0].length >= 7 && DIGIT[0][0].length >= 5, 'counter digits are chunky');
+    const nearPost = fencePosts()[0];
+    const farPost = fencePosts()[fencePosts().length - 1];
+    expect(nearPost.h > farPost.h && nearPost.foot > farPost.foot, 'near fence posts are bigger and lower');
+
+    beginPlay();
+    S.quiet = true;
+    S.mode = 'play';
+    S.banner = 0;
+    S.debug = false;
+    S.monitor = 'colour';
+    S.heli.alive = false;
+    S.tanks = [];
+    S.jets = [];
+    S.drones = [];
+    S.hostages = [];
+    S.walkers = [];
+    S.booms = [];
+    S.shots = [];
+    S.view = VIEW_MAX;
+    const baseFrame = paintFrame();
+    const green = 0x14f53c;
+    const orange = 0xff6a3c;
+    function countColor(y, color) {
+      let n = 0;
+      for (let x = 0; x < W; x++) if (baseFrame[y * W + x] === color) n += 1;
+      return n;
+    }
+    expect(countColor(GROUND + 8, green) > countColor(GROUND + 1, green), 'the pad is wider at the near edge');
+    let officeW = 0;
+    let officeRows = 0;
+    for (let y = GROUND - 24; y < GROUND; y++) {
+      let run = 0;
+      let maxRun = 0;
+      for (let x = 0; x <= W; x++) {
+        if (x < W && baseFrame[y * W + x] === orange) {
+          run += 1;
+          if (run > maxRun) maxRun = run;
+        } else run = 0;
+      }
+      if (maxRun >= 12) {
+        officeRows += 1;
+        if (maxRun > officeW) officeW = maxRun;
+      }
+    }
+    expect(officeW > 0 && officeW <= 48 && officeRows <= 14, 'the post office is a small building');
 
     beginPlay();
     S.quiet = true;
@@ -2019,7 +2130,7 @@
   }
 
   root.GameApp = {
-    boot, frame, update, draw, scene, selfTest, debugSetup, integerScale, paintFrame, state: S,
+    boot, frame, update, draw, scene, selfTest, debugSetup, integerScale, fitFrame, paintFrame, state: S,
     GROUND, BASE, BARRACKS_X,
   };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
