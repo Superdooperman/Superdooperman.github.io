@@ -13,7 +13,7 @@ export const SAVE_LIST_CAP = 200;
 
 export function defaultSave() {
   return { version: SAVE_VERSION, stash: null, bestRankBySeed: {}, returned: [], revealSeen: false, unmasked: false,
-    nights: 0, clears: 0, nextSeed: null, settings: { mute: false, volume: 0.5, motion: 'auto' } };
+    nights: 0, clears: 0, nextSeed: null, settings: { mute: false, volume: 0.5, motion: 'auto', touch: 'auto' } };
 }
 
 /** Make any parsed value a valid save (unknown or broken fields fall back to the defaults). */
@@ -32,7 +32,8 @@ export function sanitize(v) {
   out.nextSeed = Number.isInteger(v.nextSeed) && v.nextSeed > 0 ? v.nextSeed : null;
   const s = v.settings || {};
   out.settings = { mute: !!s.mute, volume: Number.isFinite(s.volume) ? Math.max(0, Math.min(1, s.volume)) : d.settings.volume,
-    motion: ['auto', 'full', 'reduced'].includes(s.motion) ? s.motion : 'auto' }; // M5: 'auto' follows prefers-reduced-motion
+    motion: ['auto', 'full', 'reduced'].includes(s.motion) ? s.motion : 'auto', // M5: 'auto' follows prefers-reduced-motion
+    touch: ['on', 'off', 'auto'].includes(s.touch) ? s.touch : 'auto' };
   return out;
 }
 

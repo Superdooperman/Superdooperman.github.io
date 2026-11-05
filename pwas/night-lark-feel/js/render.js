@@ -13,6 +13,12 @@ import { drawText } from './font.js';
 import { beamPolygon } from './los.js';
 import { drawFacade, drawPieces, drawProps, drawArchAnchor } from './kit/draw.js';
 import { drawBackdrop, drawLighting, drawCloak, drawRope, drawLarkLight, drawParticles, drawFlash } from './fx.js';
+import { drawSkyline, drawFrontParallax } from './skyline.js';
+import {
+  drawHarborTile, drawLampSprite, drawPickupSprite, drawGuardSprite, drawGrappleMarker,
+  drawReticleSprite, gunHookPx, drawHookHead, drawSearchlightProp, drawHudBand, drawFeathers,
+  drawMoonPieces, drawMiniTowers,
+} from './draw-sprites.js';
 import { feelLines, tuneLines } from './feel.js';
 import { lookOf, zoomInfo } from './zoom.js';
 
@@ -102,7 +108,8 @@ export function render(ctx, world, sheets = null, opts = {}) {
   ctx.imageSmoothingEnabled = false;
   ctx.fillStyle = C.sky;
   ctx.fillRect(0, 0, VIEW_W, VIEW_H);
-  if (fx) drawBackdrop(ctx, fx, world, cam);
+  if (sheets) drawSkyline(ctx, sheets, world, cam);
+  else if (fx) drawBackdrop(ctx, fx, world, cam);
   const kit = (sheets && sheets.kit) || null; // Brook's tower kit atlases, if loaded
   drawFacade(ctx, L, cam, T, { w: VIEW_W, h: VIEW_H }, kit); // tower kit layer a (art only)
   // lamp pools: the visible edge is the hide-rule radius, so what you see is the rule
@@ -123,28 +130,36 @@ export function render(ctx, world, sheets = null, opts = {}) {
   const r1 = outRows ? Math.floor((cam.y + VIEW_H) / T) : Math.min(L.rows - 1, Math.floor((cam.y + VIEW_H) / T));
   for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
     const ch = (r < 0 || r >= L.rows) ? '#' : tileAt(L, c, r); const x = c * T - cam.x; const y = r * T - cam.y;
-    if (ch === '#' || ch === 's') {
-      ctx.fillStyle = ch === 's' ? C.shadow : C.ground; ctx.fillRect(x, y, T, T);
-      if (isStandable(L, c, r, world.doorsOpen)) { ctx.fillStyle = ch === 's' ? C.shadowTop : C.groundTop; ctx.fillRect(x, y, T, 2); }
-    } else if (isWood(ch)) {
-      // one-way wooden beam: a plank across the top third of the tile, gaps between boards
-      const sh = ch === '~';
-      ctx.fillStyle = sh ? C.shadowWood : C.wood; ctx.fillRect(x, y, T, 6);
-      ctx.fillStyle = sh ? C.shadowWoodTop : C.woodTop; ctx.fillRect(x, y, T, 1);
-      ctx.fillStyle = C.woodGap; ctx.fillRect(x + T - 1, y + 1, 1, 5);
-    } else if (ch === 'b') { ctx.fillStyle = C.hideStone; ctx.fillRect(x + 1, y + 2, T - 2, T - 2); }
-    else if (ch === 'D' && !world.doorsOpen) { ctx.fillStyle = C.door; ctx.fillRect(x + 2, y, T - 4, T); }
-    else if (ch === 'L') { // M4: a snuffed lamp (no longer in level.lamps) shows a dark glass
-      const lit = L.lamps.some((l) => Math.floor(l.x) === c && Math.floor(l.y) === r);
-      if (lit && kit && L.pieces && kit.cells['hanging-lantern']) continue; // the kit lantern art is the lamp
-      ctx.fillStyle = C.lampHousing; ctx.fillRect(x + 4, y + 2, 8, 2); ctx.fillStyle = lit ? C.lamp : C.shadow; ctx.fillRect(x + 5, y + 4, 6, 5);
+    if (ch === '#' || ch === 's' || isWood(ch) || ch === 'b') {
+      if (sheets && drawHarborTile(ctx, sheets, L, c, r, cam, T, world.doorsOpen)) continue;
+      if (ch === '#' || ch === 's') {
+        ctx.fillStyle = ch === 's' ? C.shadow : C.ground; ctx.fillRect(x, y, T, T);
+        if (isStandable(L, c, r, world.doorsOpen)) { ctx.fillStyle = ch === 's' ? C.shadowTop : C.groundTop; ctx.fillRect(x, y, T, 2); }
+      } else if (isWood(ch)) {
+        const sh = ch === '~';
+        ctx.fillStyle = sh ? C.shadowWood : C.wood; ctx.fillRect(x, y, T, 6);
+        ctx.fillStyle = sh ? C.shadowWoodTop : C.woodTop; ctx.fillRect(x, y, T, 1);
+        ctx.fillStyle = C.woodGap; ctx.fillRect(x + T - 1, y + 1, 1, 5);
+      } else if (ch === 'b') { ctx.fillStyle = C.hideStone; ctx.fillRect(x + 1, y + 2, T - 2, T - 2); }
+    } else if (ch === 'D' && !world.doorsOpen) {
+      const door = sheets && sheets['door-locked'];
+      if (door && door.img) { drawFrame(ctx, door, 0, x + 8, y + 48, 1); }
+      else { ctx.fillStyle = C.door; ctx.fillRect(x + 2, y, T - 4, T); }
+    } else if (ch === 'L') { // M4: a snuffed lamp (no longer in level.lamps) shows a dark glass
+      const lamp = L.lamps.find((l) => Math.floor(l.x) === c && Math.floor(l.y) === r);
+      if (lamp && kit && L.pieces && kit.cells['hanging-lantern']) continue; // the kit lantern art is the lamp
+      if (lamp && drawLampSprite(ctx, sheets, lamp, cam, T, true)) continue;
+      ctx.fillStyle = C.lampHousing; ctx.fillRect(x + 4, y + 2, 8, 2); ctx.fillStyle = lamp ? C.lamp : C.shadow; ctx.fillRect(x + 5, y + 4, 6, 5);
     }
   }
   drawPieces(ctx, L, cam, T, { w: VIEW_W, h: VIEW_H }, kit); // tower kit layer b art over its tiles
+  if (sheets) drawMoonPieces(ctx, sheets, L, cam, T);
   if (fx) drawLighting(ctx, fx, world, cam); // darkness + light pools; rings, items, guards stay crisp on top
   const target = world.anchor ? null : (world.controls === 'v2' ? world.target : world.bestRing());
   drawProps(ctx, L, cam, T, kit); // tower kit layer c
+  if (sheets) drawMiniTowers(ctx, sheets, L, cam, T);
   for (const r of L.rings) {
+    if (drawGrappleMarker(ctx, sheets, r, cam, T, r === target)) continue;
     if (r.kind && r.kind !== 'ring') { drawArchAnchor(ctx, r, cam, T, r === target); continue; }
     const rx = Math.round(r.x * T - cam.x); const ry = Math.round(r.y * T - cam.y);
     ctx.fillStyle = C.ring; ctx.fillRect(rx - 4, ry - 4, 8, 8);
@@ -153,16 +168,19 @@ export function render(ctx, world, sheets = null, opts = {}) {
       ctx.strokeStyle = C.ringTarget; ctx.lineWidth = 1; ctx.strokeRect(rx - 6.5, ry - 6.5, 13, 13);
     }
   }
-  if (world.aiming && world.aimDir) drawAimLine(ctx, world, cam, T); // feel fix 2: the aim line
-  if (world.aiming && world.reticle) { // manual aim: snapping reticle (corner brackets)
-    const rx = Math.round(world.reticle.x * T - cam.x); const ry = Math.round(world.reticle.y * T - cam.y);
-    ctx.fillStyle = C.reticle;
-    for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-      ctx.fillRect(rx + sx * 9 - (sx < 0 ? 0 : 3), ry + sy * 9 - (sy < 0 ? 0 : 1), 4, 1);
-      ctx.fillRect(rx + sx * 9 - (sx < 0 ? 0 : 1), ry + sy * 9 - (sy < 0 ? 0 : 3), 1, 4);
+  if (world.aiming && world.aimDir) drawAimLine(ctx, world, cam, T, sheets); // feel fix 2: the aim line
+  if (world.aiming && world.reticle) { // manual aim: snapping reticle (sprite, pull frame in pull mode)
+    if (!drawReticleSprite(ctx, sheets, world, cam, T)) {
+      const rx = Math.round(world.reticle.x * T - cam.x); const ry = Math.round(world.reticle.y * T - cam.y);
+      ctx.fillStyle = C.reticle;
+      for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+        ctx.fillRect(rx + sx * 9 - (sx < 0 ? 0 : 3), ry + sy * 9 - (sy < 0 ? 0 : 1), 4, 1);
+        ctx.fillRect(rx + sx * 9 - (sx < 0 ? 0 : 1), ry + sy * 9 - (sy < 0 ? 0 : 3), 1, 4);
+      }
     }
   }
   for (const it of L.items) {
+    if (drawPickupSprite(ctx, sheets, it, cam, T, world.time)) continue;
     ctx.fillStyle = C[{ m: 'mote', n: 'note', E: 'exit', k: 'key', '*': 'spark' }[it.t]] || C.hud;
     const s = it.t === 'E' ? 12 : 6;
     ctx.fillRect(Math.round(it.x * T - cam.x) - s / 2, Math.round(it.y * T - cam.y) - s / 2, s, s);
@@ -185,7 +203,8 @@ export function render(ctx, world, sheets = null, opts = {}) {
   if (!wren) drawPlaceholderLark(ctx, world, cam, sheets, fx);
   drawMeter(ctx, world, cam);
   if (fx) drawFlash(ctx, fx);
-  drawOverlays(ctx, world, opts);
+  if (sheets) drawFrontParallax(ctx, sheets, world, cam);
+  drawOverlays(ctx, world, opts, sheets);
 }
 
 function drawPlaceholderLark(ctx, world, cam, sheets, fx) {
@@ -249,8 +268,8 @@ function drawSwingWren(ctx, world, cam, p, fx, cloak = true) {
   }
 }
 
-function drawOverlays(ctx, world, opts) {
-  drawHud(ctx, world);
+function drawOverlays(ctx, world, opts, sheets) {
+  drawHud(ctx, world, sheets);
   if (world.prompt) {
     const txt = promptText(world.prompt.text, opts.device || 'key');
     const wpx = txt.length * 8;
@@ -270,7 +289,7 @@ function drawOverlays(ctx, world, opts) {
     centerText(ctx, `CAUGHT ${world.catches} TIMES`, VIEW_H / 2 + 2, C.hudDim, 1);
     if (world.overT >= TUNING.nightOverDelay) centerText(ctx, `${promptText('{A}', opts.device || 'key')} OR START: A NEW NIGHT`, VIEW_H / 2 + 16, C.hud, 1);
   }
-  if (world.abilities?.pullGrapple) drawText(ctx, world.grappleMode === 'pull' ? 'G PULL' : 'G SWING', VIEW_W - 34, HUD_H + 3, C.hudDim || C.hud, 1);
+  if (world.abilities?.pullGrapple) drawGrappleTag(ctx, world);
   if (opts.debug) drawText(ctx, `X ${world.x.toFixed(2)} Y ${world.y.toFixed(2)}`, 8, HUD_H + 4, C.hud, 1);
   if (opts.feel) feelLines(world).forEach((line, i) => drawText(ctx, line, 4, HUD_H + 4 + i * 7, C.hud, 1));
   if (opts.tune) {
@@ -282,6 +301,17 @@ function drawOverlays(ctx, world, opts) {
 }
 
 const centerText = (ctx, txt, y, color, scale) => drawText(ctx, txt, Math.round(VIEW_W / 2 - (txt.length * 4 * scale) / 2), y, color, scale);
+
+/** PULL / SWING sits in the playfield under the room name. A plate keeps the glyphs readable
+ *  when Wren is in the top-right corner (the font's empty pixels would otherwise show her). */
+function drawGrappleTag(ctx, world) {
+  const label = world.grappleMode === 'pull' ? 'PULL' : 'SWING';
+  const tx = VIEW_W - 28;
+  const ty = HUD_H + 3;
+  ctx.fillStyle = C.promptBg;
+  ctx.fillRect(tx - 2, ty - 2, label.length * 4 + 3, 9);
+  drawText(ctx, label, tx, ty, world.grappleMode === 'pull' ? C.reticle : (C.hudDim || C.hud), 1);
+}
 
 function lerpHex(a, b, t) {
   const A = hexToRgb(a); const B = hexToRgb(b);
@@ -308,20 +338,24 @@ function drawWatchers(ctx, world, cam, sheets) {
     // M3: the beam stops at stone (same samples as its line of sight), wood lets it through
     const poly = beamPolygon(L, s.x, s.y, s.angle - s.half, s.angle + s.half, s.range, 24, world.doorsOpen);
     fan(ex, ey, s.angle - s.half, s.angle + s.half, s.range * T, s, poly.map((p) => [p.x * T - cam.x, p.y * T - cam.y]));
-    ctx.fillStyle = C.searchlight; ctx.fillRect(Math.round(ex) - 4, Math.round(ey) - 3, 8, 6);
-    ctx.fillStyle = C.searchlightCore; ctx.fillRect(Math.round(ex) - 2, Math.round(ey) - 1, 4, 2);
+    if (!drawSearchlightProp(ctx, sheets, s, cam, T)) {
+      ctx.fillStyle = C.searchlight; ctx.fillRect(Math.round(ex) - 4, Math.round(ey) - 3, 8, 6);
+      ctx.fillStyle = C.searchlightCore; ctx.fillRect(Math.round(ex) - 2, Math.round(ey) - 1, 4, 2);
+    }
   }
   for (const g of L.guards) {
     const ex = g.x * T - cam.x + (g.state === 'stagger' ? -Math.sign(g.kbVx || g.dir || 1) * 2 : 0);
     const ey = (g.floorY - TUNING.guardEyeHeight) * T - cam.y;
     const f = g.dir > 0 ? 0 : Math.PI; const A = TUNING.coneHalfAngle;
     if (g.state !== 'tied') fan(ex, ey, f - A, f + A, TUNING.coneRange * T, g); // M4 Tie-Line: no cone
-    drawSprite(ctx, sheets, 'guard', 0, ex, g.floorY * T - cam.y);
-    ctx.fillStyle = C.guardCap; ctx.fillRect(Math.round(ex - 5), Math.round(g.floorY * T - cam.y) - 16, 10, 2);
-    ctx.fillStyle = C.guardDark; ctx.fillRect(Math.round(ex + (g.dir > 0 ? 2 : -4)), Math.round(ey) - 1, 2, 2); // which way he looks
+    if (!drawGuardSprite(ctx, sheets, g, cam, T, world.time)) {
+      drawSprite(ctx, sheets, 'guard', 0, ex, g.floorY * T - cam.y);
+      ctx.fillStyle = C.guardCap; ctx.fillRect(Math.round(ex - 5), Math.round(g.floorY * T - cam.y) - 16, 10, 2);
+      ctx.fillStyle = C.guardDark; ctx.fillRect(Math.round(ex + (g.dir > 0 ? 2 : -4)), Math.round(ey) - 1, 2, 2);
+    }
     const head = { x: ex, y: g.floorY * T - cam.y - 20 };
     if (g.state === 'search' || g.state === 'listen') drawText(ctx, '?', head.x - 1, head.y - 6, C.hud, 1);
-    if (g.state === 'tied') { // the line wound round him
+    if (g.state === 'tied' && !(sheets && (sheets['guard-watchman-v2'] || sheets['guard-watchman']))) {
       ctx.fillStyle = C.rope;
       for (const dy of [7, 11, 15]) ctx.fillRect(Math.round(ex - 6), Math.round(g.floorY * T - cam.y) - dy, 12, 1);
     }
@@ -353,27 +387,18 @@ function drawMeter(ctx, world, cam) {
 
 /** The HUD strip across the top (HUD_H px, outside the playfield): feathers (or a life gauge,
  *  HEALTH.hud) on the left, the room name on the right. */
-function drawHud(ctx, world) {
-  ctx.fillStyle = C.hudStrip; ctx.fillRect(0, 0, VIEW_W, HUD_H);
+function drawHud(ctx, world, sheets) {
+  drawHudBand(ctx, sheets);
   const name = String(world.level.name || '');
   drawText(ctx, name, VIEW_W - 8 - name.length * 4, 5, C.hud, 1);
-  const max = Math.max(world.maxFeathers, world.feathers);
-  if (HEALTH.hud === 'gauge') {
-    ctx.fillStyle = C.featherLost; ctx.fillRect(8, 6, 40, 5);
-    ctx.fillStyle = C.feather; ctx.fillRect(8, 6, Math.round((40 * world.feathers) / max), 5);
-    return;
-  }
-  for (let i = 0; i < max; i++) {
-    ctx.fillStyle = i < world.feathers ? C.feather : C.featherLost;
-    const x = 8 + i * 9; // a small quill: shaft and vane
-    ctx.fillRect(x + 3, 4, 1, 9); ctx.fillRect(x + 1, 5, 2, 5); ctx.fillRect(x + 4, 6, 2, 4);
-  }
+  drawFeathers(ctx, sheets, world);
 }
 
-/** Feel fix 2 aim line: a dotted line from her centre to the reticle (or along the aim when
+/** Feel fix 2 aim line: a dotted line from the gun hook to the reticle (or along the aim when
  *  nothing is picked). Whole pixels, the reticle colour. */
-function drawAimLine(ctx, world, cam, T) {
-  const x0 = world.x * T - cam.x; const y0 = world.center() * T - cam.y;
+function drawAimLine(ctx, world, cam, T, sheets) {
+  const origin = gunHookPx(world, sheets, cam, T);
+  const x0 = origin.x; const y0 = origin.y;
   let x1, y1;
   if (world.reticle) { x1 = world.reticle.x * T - cam.x; y1 = world.reticle.y * T - cam.y; }
   else { const r = 6 * T; x1 = x0 + world.aimDir.x * r; y1 = y0 + world.aimDir.y * r; }
@@ -384,5 +409,5 @@ function drawAimLine(ctx, world, cam, T) {
     const t = (i * dash) / len;
     ctx.fillRect(Math.round(x0 + (x1 - x0) * t), Math.round(y0 + (y1 - y0) * t), 1, 1);
   }
-  if (world.grappleMode === 'pull') drawText(ctx, 'PULL', Math.round(x0) - 7, Math.round(y0) - 22, C.reticle, 1);
+  drawHookHead(ctx, sheets, origin, { x: x1, y: y1 });
 }

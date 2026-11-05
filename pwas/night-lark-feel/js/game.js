@@ -41,8 +41,9 @@ export function createGame(opts = {}) {
     cardRendered: !opts.needsRender, genMs: 0,
     steps: 0, events: [], sfx: [],
     menu() {
+      const touch = (g.save.settings.touch || 'auto').toUpperCase();
       return ['NEW NIGHT', 'RETURNED SHELF', 'TRAINING', ...(g.save.revealSeen ? ['UNMASKED'] : []), `SOUND: ${g.save.settings.mute ? 'OFF' : 'ON'}`,
-        `MOTION: ${g.reducedMotion() ? 'REDUCED' : 'FULL'}`];
+        `MOTION: ${g.reducedMotion() ? 'REDUCED' : 'FULL'}`, `TOUCH: ${touch}`];
     },
     stashOptions() { return g.run ? [...stashChoices(g.run), null] : [null]; },
     step, setMute, noteRendered() { g.cardRendered = true; },
@@ -141,6 +142,13 @@ export function createGame(opts = {}) {
           else if (it === 'TRAINING') g.events.push({ type: 'training' }); // feel fix 2: the page opens ?room=training
           else if (it === 'UNMASKED') { g.reveal = 0; g.revealFromMenu = true; go('reveal'); }
           else if (it.startsWith('MOTION')) { g.save.settings.motion = g.reducedMotion() ? 'full' : 'reduced'; persist(); }
+          else if (it.startsWith('TOUCH')) {
+            const order = ['auto', 'on', 'off'];
+            const cur = g.save.settings.touch || 'auto';
+            g.save.settings.touch = order[(order.indexOf(cur) + 1) % order.length];
+            persist();
+            g.events.push({ type: 'touch-setting', touch: g.save.settings.touch });
+          }
           else setMute(!g.save.settings.mute);
         }
         return;

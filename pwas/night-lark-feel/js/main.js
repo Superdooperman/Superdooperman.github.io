@@ -11,7 +11,9 @@ import { firstRing } from './levels/first-ring.js';
 import { watchRoom } from './levels/watch-room.js';
 import { tallShaft, tallShaftRings } from './levels/tall-shaft.js';
 import { trainingRoom } from './levels/training.js';
+import { moonMast } from './levels/moon-mast.js';
 import { createInput, bindKeyboard, bindGamepads } from './input.js';
+import { blockPageZoom } from './ios-zoom.js';
 import { createLoop, prefersReducedMotion } from './loop.js';
 import { setupCanvas } from './canvas.js';
 import { render, cameraFor, withLerp } from './render.js';
@@ -36,14 +38,12 @@ const params = new URLSearchParams(location.search);
 // Feel fix 2 (Azzato, Nov 3 2026) is the default in the browser; ?physics=fix1 plays fix 1,
 // ?physics=legacy the old one. The generator plans with the same feel (gen/moves.js).
 { const ph = params.get('physics'); SETTINGS.feel = ph === 'legacy' || ph === 'fix1' ? ph : 'fix2'; }
-// Warp-pull grapple (the abilities.pullGrapple ability, no pickup yet): ?grapple=pull grants it and
-// starts in pull mode; G (or pad Select) switches classic / pull in game.
-if (params.get('grapple') === 'pull') { SETTINGS.abilities.pullGrapple = true; SETTINGS.grapple = 'pull'; }
-/** G: switch the grapple mode (classic / pull) when Wren has the pull ability; the choice carries to the next room. */
-function grappleToggleKey(e, w) {
-  if (e.code !== 'KeyG' || e.repeat || !w || !w.abilities?.pullGrapple) return;
-  SETTINGS.grapple = w.setGrappleMode();
-}
+// Warp-pull is always had. ?grapple=pull starts in pull mode (an alias); G / Y / touch PULL
+// toggles classic / pull for the current world. A new world starts from this setting again
+// (swing, unless ?grapple=pull). ?grapple=classic pins classic.
+if (params.get('grapple') === 'pull') SETTINGS.grapple = 'pull';
+if (params.get('grapple') === 'classic') SETTINGS.grapple = 'classic';
+blockPageZoom();
 // The test build (tools/build-beta.mjs --test) sets <html data-storage="...">: every
 // 'nightlark.v2.' key then lives under that prefix instead, so it never shares a save or a
 // setting with the dev page, the beta or v1 on the same origin.
@@ -122,7 +122,7 @@ loadArt().then((s) => {
 if (params.has('room')) bootShell(); else bootGame();
 
 function bootShell() {
-const ROOMS = { first: firstRing, watch: watchRoom, training: trainingRoom };
+const ROOMS = { first: firstRing, watch: watchRoom, training: trainingRoom, 'moon-mast': moonMast };
 const genTower = params.get('room') === 'gen' ? generateTower(Number(params.get('seed')) || 1) : null;
 // ?room=tall: the swing-feel tall-shaft prototype on its own; &fall=feather makes a big fall cost a feather
 // &seed=N picks the seeded kit route (default TALL_SEED); &anchors=rings plays the old ring shaft;
@@ -133,8 +133,10 @@ const tall = params.get('anchors') === 'rings' ? () => tallShaftRings({ fallCost
   : () => tallShaft({ fallCost, seed: params.has('seed') && params.get('room') === 'tall' ? Number(params.get('seed')) : undefined });
 ROOMS.tall = tall;
 const order = genTower ? genTower.floors.flatMap((f) => f.rooms).map((def) => () => structuredClone(def))
-  : params.get('room') === 'tall' ? [tall] : params.get('room') === 'training' ? [trainingRoom] : [firstRing, watchRoom];
-const shell = createShell(order, { startRoom: Math.max(0, order.indexOf(ROOMS[params.get('room')])) });
+  : params.get('room') === 'tall' ? [tall] : params.get('room') === 'training' ? [trainingRoom]
+    : params.get('room') === 'moon-mast' ? [moonMast] : [firstRing, watchRoom];
+const startIdx = params.has('start') ? Math.max(0, Number(params.get('start')) || 0) : Math.max(0, order.indexOf(ROOMS[params.get('room')]));
+const shell = createShell(order, { startRoom: startIdx });
 const rotate = document.getElementById('rotate');
 function onViewport() {
   shell.setViewport(innerWidth, innerHeight);
@@ -148,6 +150,8 @@ document.addEventListener('visibilitychange', () => { if (document.hidden && !sh
 
 const touch = bindTouch(input, document.getElementById('touch'), {
   forceShow: params.has('touch'),
+  getMode: () => SETTINGS.touch,
+  hasPad: () => input.pads.size > 0,
 });
 
 // Tap or click a grapple point to fire at it (BRIEF: "Tap a point to fire at it").
@@ -162,11 +166,14 @@ canvas.addEventListener('pointermove', (e) => { if (e.pointerType === 'touch') i
 canvas.addEventListener('pointerup', (e) => { if (e.pointerType === 'touch') input.endTouch(); });
 canvas.addEventListener('pointercancel', () => input.cancelTouch());
 
-addEventListener('keydown', (e) => grappleToggleKey(e, shell.world));
+addEventListener('gamepadconnected', () => touch.refresh());
+addEventListener('gamepaddisconnected', () => touch.refresh());
 const loop = createLoop({
   step(dt) {
     if (shell.world) shell.world.reducedMotion = fx.reduced;
-    const ran = shell.step(dt, input.sample());
+    const inp = input.sample();
+    touch.notePad(input.padUsed);
+    const ran = shell.step(dt, inp);
     if (ran) fx.step(dt, shell.world, shell.events);
     for (const e of shell.events) {
       if (e.type === 'attach' && input.device === 'touch' && navigator.vibrate) navigator.vibrate(12);
@@ -217,11 +224,17 @@ function bootGame() {
   addEventListener('orientationchange', onViewport);
   onViewport();
   document.addEventListener('visibilitychange', () => { if (document.hidden) game.pause(); });
-  const touch = bindTouch(input, document.getElementById('touch'), { forceShow: params.has('touch') });
+  SETTINGS.touch = game.save.settings.touch || 'auto';
+  const touch = bindTouch(input, document.getElementById('touch'), {
+    forceShow: params.has('touch'),
+    getMode: () => game.save.settings.touch || SETTINGS.touch,
+    hasPad: () => input.pads.size > 0,
+  });
+  addEventListener('gamepadconnected', () => touch.refresh());
+  addEventListener('gamepaddisconnected', () => touch.refresh());
   const wake = () => audio.start();
   addEventListener('keydown', (e) => {
     wake();
-    if (game.screen === 'play') grappleToggleKey(e, game.world);
     if (e.code === 'KeyM') { game.setMute(!game.save.settings.mute); audio.setMute(game.save.settings.mute); }
   });
   canvas.addEventListener('pointerdown', (e) => {
@@ -248,6 +261,7 @@ function bootGame() {
   const loop = createLoop({
     step(dt) {
       const inp = input.sample();
+      touch.notePad(input.padUsed);
       lastHeld = Object.keys(inp.held).filter((k) => inp.held[k]);
       if (portrait) return;
       game.step(dt, inp);
@@ -259,6 +273,7 @@ function bootGame() {
         if (e.type === 'training') { const q = new URLSearchParams(location.search); q.set('room', 'training'); location.search = q.toString(); }
         if (e.type === 'attach' && input.device === 'touch' && navigator.vibrate) navigator.vibrate(12);
         if (e.type === 'screen' && e.screen === 'title') audio.setMute(game.save.settings.mute);
+        if (e.type === 'touch-setting') { SETTINGS.touch = e.touch; touch.refresh(); }
       }
       game.events.length = 0;
     },

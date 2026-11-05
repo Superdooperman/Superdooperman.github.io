@@ -12,8 +12,9 @@ export const ART_SCALE = 1;
 
 /** Reserved accent key ramp painted into every Lark frame (pure hues no other art uses). */
 export const ACCENT_KEY_RAMP = Object.freeze([[0, 255, 0], [0, 200, 0], [0, 150, 0]]);
-/** The locked palette (STYLE-GUIDE section 3, v1 LOCKED Oct 28 2026). Every placeholder colour
- *  below is one of these; base art must use only these exact values. */
+/** The locked palette (STYLE-GUIDE section 3, nightlark-v3-base.hex). Warm/amber = home;
+ *  cold SW = Company danger. CK0/CK1 = hub-city glow. Every placeholder colour below is one
+ *  of these; base art must use only these exact values. */
 export const PALETTE = Object.freeze({
   WP0: '#170F3D', WP1: '#2E1A64', WP2: '#4C2C94', WP3: '#8058D6', WP4: '#B086EE',
   WL0: '#9283D8', WL1: '#BBA8F0', WL2: '#E2CDFB', WL3: '#FBF3FF',
@@ -24,7 +25,7 @@ export const PALETTE = Object.freeze({
   TB0: '#1C1614', TB1: '#352821', TB2: '#574031', TB3: '#7A5F48',
   FG0: '#182C36', FG1: '#365461', FG2: '#6A8A96', MN0: '#7AA2C8', MN1: '#B5D2EA',
   LG0: '#5C2E0E', LG1: '#A85A18', LG2: '#E3952C', LG3: '#FFC45E', LG4: '#FFE8AE',
-  SW0: '#9DADC2', SW1: '#D8E2EE', SW2: '#FFFFFF',
+  SW0: '#A3ABC7', SW1: '#E8EDF7', SW2: '#FFFFFF',
   AR0: '#4E0B17', AR1: '#991A22', AR2: '#D9322B', AR3: '#FF6B50',
   PC0: '#2B8645', PC1: '#4CC566', PC2: '#93F2A0', PR0: '#0F7F7C', PR1: '#1EC2B6', PR2: '#7DF2E6',
   PL0: '#2A5BC8', PL1: '#4C90FF', PL2: '#A2CEFF',
@@ -32,6 +33,7 @@ export const PALETTE = Object.freeze({
   GD0: '#182124', GD1: '#2D3A3E', GD2: '#4A5C5E', GD3: '#728A87',
   UI0: '#090C13', UI1: '#242B39', UI2: '#556073', UI3: '#A4ADBB', UI4: '#EEF1F5',
   IX0: '#3A9ED6', IX1: '#8FDCFF', FX0: '#6A798B', FX1: '#8EA6BF', FX2: '#8E959E', FX3: '#C3C8CE',
+  CK0: '#313B49', CK1: '#3D4A5C',
 });
 export const hexToRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 const ramp = (...ids) => Object.freeze(ids.map((id) => Object.freeze(hexToRgb(PALETTE[id]))));
@@ -140,6 +142,12 @@ export async function loadArt(baseUrl = './art/') {
     }));
     const kit = kitIndex(kits.filter(Boolean));
     if (kit) sheets.kit = kit;
+    if (manifest.skyline) {
+      try { sheets.skyline = await (await fetch(`${baseUrl}${manifest.skyline}`)).json(); } catch { /* optional */ }
+    }
+    if (manifest.miniTower) {
+      try { sheets.miniTower = await (await fetch(`${baseUrl}${manifest.miniTower}`)).json(); } catch { /* optional */ }
+    }
   } catch { /* no manifest yet: placeholders */ }
   return sheets;
 }
@@ -210,30 +218,49 @@ function buildRotCache(sheet, mk) {
   }
 }
 
+/** Source rect of a frame in a strip or grid sheet. */
+export function frameSrc(sheet, frame) {
+  const fw = (sheet.frameW || 16) * ART_SCALE;
+  const fh = (sheet.frameH || 16) * ART_SCALE;
+  const n = Math.max(1, sheet.frames || 1);
+  const i = ((frame % n) + n) % n;
+  const cols = sheet.cols || (sheet.layout === 'grid' ? Math.max(1, sheet.cols || n) : n);
+  return { sx: (i % cols) * fw, sy: Math.floor(i / cols) * fh, fw, fh };
+}
+
 /** Draw one frame of a loaded sheet with its pivot at (x, y) logical px; face < 0 mirrors.
  *  img: which copy of the strip (default the remapped base). */
 export function drawFrame(ctx, sheet, frame, x, y, face = 1, img = sheet.img) {
   const b = frameBox(sheet, x, y, face);
-  const fw = sheet.frameW * ART_SCALE; const fh = sheet.frameH * ART_SCALE;
-  const sx = (frame % sheet.frames) * fw;
+  const { sx, sy, fw, fh } = frameSrc(sheet, frame);
+  const im = img || sheet.img;
+  if (!im) return b;
   if (face < 0) {
     ctx.save(); ctx.translate(b.left + b.w, b.top); ctx.scale(-1, 1);
-    ctx.drawImage(img, sx, 0, fw, fh, 0, 0, b.w, b.h);
+    ctx.drawImage(im, sx, sy, fw, fh, 0, 0, b.w, b.h);
     ctx.restore();
-  } else ctx.drawImage(img, sx, 0, fw, fh, b.left, b.top, b.w, b.h);
+  } else ctx.drawImage(im, sx, sy, fw, fh, b.left, b.top, b.w, b.h);
   return b;
 }
 
 /** Draw one frame with its top-left at (left, top) logical px (a pose that places its own box,
  *  e.g. the ledge climb); face < 0 mirrors inside the box. */
 export function drawFrameBox(ctx, sheet, frame, left, top, face = 1, img = sheet.img) {
-  const fw = sheet.frameW * ART_SCALE; const fh = sheet.frameH * ART_SCALE;
-  const sx = (frame % sheet.frames) * fw;
+  const { sx, sy, fw, fh } = frameSrc(sheet, frame);
+  const im = img || sheet.img;
+  if (!im) return;
   if (face < 0) {
     ctx.save(); ctx.translate(left + sheet.frameW, top); ctx.scale(-1, 1);
-    ctx.drawImage(img, sx, 0, fw, fh, 0, 0, sheet.frameW, sheet.frameH);
+    ctx.drawImage(im, sx, sy, fw, fh, 0, 0, sheet.frameW, sheet.frameH);
     ctx.restore();
-  } else ctx.drawImage(img, sx, 0, fw, fh, left, top, sheet.frameW, sheet.frameH);
+  } else ctx.drawImage(im, sx, sy, fw, fh, left, top, sheet.frameW, sheet.frameH);
+}
+
+/** Blit a frame with its top-left at (left, top). */
+export function blitFrame(ctx, sheet, frame, left, top, img = sheet.img) {
+  if (!sheet || !img) return;
+  const { sx, sy, fw, fh } = frameSrc(sheet, frame);
+  ctx.drawImage(img, sx, sy, fw, fh, Math.round(left), Math.round(top), sheet.frameW, sheet.frameH);
 }
 
 /** Draw a sprite frame with feet at (x, y) logical px, or its placeholder rect. */

@@ -81,7 +81,7 @@ export function parseLevel(def, opts = {}) {
       const x = c + 0.5;
       const y = r + 0.5;
       if (ch === 'a') rings.push({ x, y, id: `${c}:${r}` });
-      else if (ch === 'L') lamps.push({ x, y });
+      else if (ch === 'L') lamps.push({ x, y, kind: def.lampKind || 'company' });
       else if (ch === 'P') spawn = { x, y: r + 1 - TUNING.footEps };
       else if (ITEM_TILES.has(ch)) {
         items.push({ t: ch, x, y, id: `${def.name}:${ch}:${c}:${r}`,
@@ -99,12 +99,15 @@ export function parseLevel(def, opts = {}) {
     period: s.period ?? TUNING.searchlightPeriod, phase: s.phase ?? 0,
     range: s.range ?? TUNING.searchlightRange, half: s.half ?? TUNING.searchlightHalf,
     angle: s.base, sweepT: 0, sees: false, state: 'sweep', t: 0, aim: null,
+    size: s.size === 'big' ? 'big' : 'small',
   }));
   const anchorMode = opts.anchors || def.anchors || 'rings';
   const level = { name: def.name, cols: nCols, rows: nRows, grid: rows, rings, lamps, items, spawn, guards, searchlights,
     prompts: (def.prompts || []).map((p) => ({ ...p, shown: false, done: false })), autoExit: !!def.autoExit,
     checkpoints: (def.checkpoints || []).map((k) => ({ ...k })),
-    props: (def.props || []).map((p) => ({ ...p })), anchorMode, facade: def.facade || null, pieces: def.pieces || null };
+    props: (def.props || []).map((p) => ({ ...p })), anchorMode, facade: def.facade || null, pieces: def.pieces || null,
+    miniTowers: (def.miniTowers || []).map((t) => ({ ...t })),
+    moonMast: def.moonMast || null, skylineRelit: def.skylineRelit ?? 0 };
   for (const r of rings) r.kind = 'ring';
   if (anchorMode === 'arch' || anchorMode === 'mixed') rings.push(...archAnchors(level, level.props));
   return level;

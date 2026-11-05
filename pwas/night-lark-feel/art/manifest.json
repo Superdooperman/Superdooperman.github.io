@@ -1,5 +1,5 @@
 {
-  "note": "Brook's sprites. Files live in art/in/ (paths below are relative to art/). Names are the strip names; the M4 renderer still draws placeholder rects (art is wired in M6). Strips are horizontal, frame 00 on the left; pivot bottom-centre unless given.",
+  "note": "Brook's sprites. Files live in art/in/ (paths below are relative to art/). Names are the strip names; the M4 renderer still draws placeholder rects (art is wired in M6). Strips are horizontal, frame 00 on the left; pivot bottom-centre unless given. Feel-fix-3: Brook gap-art wired (b1-b4, flip, v32, mini). wren-portrait is a DRAFT.",
   "artScale": 1,
   "sprites": [
     {
@@ -686,15 +686,2328 @@
         false
       ],
       "note": "Ledge grab + pull-up: reach, hang, pull-up (knee hooked on lip), crouch-top. ledgeHand[i] = the frame pixel that should sit on the ledge lip corner (hand for 0-2, front toe for 3); align the frame so that pixel lands on the lip. Frames are bbox-centred, not pivot-locked. tailAnchor = one pixel past the back-most hem point of the painted poncho (auto-measured)."
+    },
+    {
+      "name": "bg-harbor-moon",
+      "file": "in/bg-harbor-moon.png",
+      "frameW": 32,
+      "frameH": 32,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        16,
+        16
+      ],
+      "note": "Gibbous moon, ~27 px disc; engine adds glow.",
+      "layer": "L0",
+      "scroll": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "tiles-harbor-b1",
+      "file": "in/tiles-harbor-b1.png",
+      "frameW": 16,
+      "frameH": 16,
+      "frames": 26,
+      "fps": 0,
+      "pivot": [
+        0,
+        0
+      ],
+      "tileNames": [
+        "floor_corner_bl",
+        "floor_corner_br",
+        "floor_inner_tl",
+        "floor_inner_tr",
+        "floor_inner_bl",
+        "floor_inner_br",
+        "floor_fill_v2",
+        "floor_fill_v3",
+        "shadow_floor_side_l",
+        "shadow_floor_side_r",
+        "shadow_floor_bottom",
+        "shadow_corner_bl",
+        "shadow_corner_br",
+        "shadow_inner_tl",
+        "shadow_inner_tr",
+        "shadow_inner_bl",
+        "shadow_inner_br",
+        "shadow_floor_fill_v2",
+        "shadow_floor_fill_v3",
+        "plank_l",
+        "plank_mid_v2",
+        "plank_r",
+        "plank_shadow_l",
+        "plank_shadow_mid",
+        "plank_shadow_r",
+        "hide_stone"
+      ],
+      "anchor": "top-left",
+      "layer": "B"
+    },
+    {
+      "name": "door-locked",
+      "file": "in/door-locked.png",
+      "frameW": 16,
+      "frameH": 48,
+      "frames": 2,
+      "fps": 0,
+      "pivot": [
+        8,
+        47
+      ],
+      "note": "One-column 'D' door, 3 tiles tall. Align pivot to the bottom of the lowest D tile. Locked = padlock shape on the hasp; open = shackle sprung, leaf swung in.",
+      "layer": "B",
+      "layout": "grid",
+      "cols": 2,
+      "rows": 1
+    },
+    {
+      "name": "exit-hatch",
+      "file": "in/exit-hatch.png",
+      "frameW": 32,
+      "frameH": 16,
+      "frames": 2,
+      "fps": 0,
+      "pivot": [
+        16,
+        15
+      ],
+      "note": "IX1 blink is engine-drawn (1 px outline), not painted.",
+      "layer": "C",
+      "layout": "grid",
+      "cols": 2,
+      "rows": 1
+    },
+    {
+      "name": "pickups",
+      "file": "in/pickups.png",
+      "frameW": 16,
+      "frameH": 16,
+      "frames": 16,
+      "fps": 8,
+      "pivot": [
+        8,
+        8
+      ],
+      "anims": {
+        "mote": {
+          "row": 0,
+          "frames": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        "note": {
+          "row": 1,
+          "frames": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        "key": {
+          "row": 2,
+          "frames": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        "spark": {
+          "row": 3,
+          "frames": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      },
+      "note": "1 px bob + neutral UI4/FX3 sparkle (no tier colours: these are not power-ups). Key is silver, never gold.",
+      "layer": "C",
+      "layout": "grid",
+      "cols": 4,
+      "rows": 4
+    },
+    {
+      "name": "grapple-marker",
+      "file": "in/grapple-marker.png",
+      "frameW": 16,
+      "frameH": 16,
+      "frames": 2,
+      "fps": 0,
+      "pivot": [
+        8,
+        8
+      ],
+      "frameNames": [
+        "idle",
+        "targeted"
+      ],
+      "anims": {
+        "idle": [
+          0,
+          0
+        ],
+        "targeted": [
+          1,
+          1
+        ]
+      },
+      "note": "Ring = training-room hook ring (7x7, corners cut). Engine blinks IX1 by swapping idle/targeted; no blink frames painted. Centre the pivot on the hook/ring grip.",
+      "layer": "C (overlay on the grapple point)"
+    },
+    {
+      "name": "hook-head",
+      "file": "in/hook-head.png",
+      "frameW": 8,
+      "frameH": 8,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        0,
+        4
+      ],
+      "frameNames": [
+        "fly"
+      ],
+      "anims": {
+        "fly": [
+          0,
+          0
+        ]
+      },
+      "tip": [
+        7,
+        4
+      ],
+      "note": "Rope end. Metal matches Wren's gun hook in lark-gun-out (SL3/4/5); rope stub WH1. Engine rotates along the rope; hand-drawn angles are a later upgrade (style-pass Q12).",
+      "layer": "C"
+    },
+    {
+      "name": "reticle",
+      "file": "in/reticle.png",
+      "frameW": 16,
+      "frameH": 16,
+      "frames": 3,
+      "fps": 0,
+      "pivot": [
+        8,
+        8
+      ],
+      "frameNames": [
+        "idle",
+        "locked",
+        "pull"
+      ],
+      "anims": {
+        "idle": [
+          0,
+          0
+        ],
+        "locked": [
+          1,
+          1
+        ],
+        "pull": [
+          2,
+          2
+        ]
+      },
+      "note": "pull frame uses a 3x5 PULL glyph (HUD font still open, SG Q6); replace frame 2 if the font changes.",
+      "layer": "UI"
+    },
+    {
+      "name": "searchlight-head",
+      "file": "in/searchlight-head.png",
+      "frameW": 16,
+      "frameH": 16,
+      "frames": 2,
+      "fps": 0,
+      "pivot": [
+        8,
+        15
+      ],
+      "frameNames": [
+        "off",
+        "lit"
+      ],
+      "anims": {
+        "off": [
+          0,
+          0
+        ],
+        "lit": [
+          1,
+          1
+        ]
+      },
+      "lensCenter": [
+        8,
+        7
+      ],
+      "note": "Neutral iron housing, cold search-white lens (SW = danger). No gold. Beam/cone is engine-drawn from lensCenter in any direction; housing does not rotate. pivot = base of the post.",
+      "layer": "C"
+    },
+    {
+      "name": "feather",
+      "file": "in/feather.png",
+      "frameW": 16,
+      "frameH": 16,
+      "frames": 2,
+      "fps": 0,
+      "pivot": [
+        0,
+        0
+      ],
+      "frameNames": [
+        "full",
+        "lost"
+      ],
+      "anims": {
+        "full": [
+          0,
+          0
+        ],
+        "lost": [
+          1,
+          1
+        ]
+      },
+      "note": "SG 8.10 / style pass 14. Lark feather, 45 deg, neutral UI: full = UI4 lit side + UI3 shade side + UI2 shaft; lost = UI2 outline only. Ink sits in rows 1-12 so the 16x16 cell at y=0 fits the 14 px band (Q14). Lavender only if Azzato rules the feathers are 'of Wren' (OPEN Q13): swap UI4->WL1, UI3->WL0 in sprites.py.",
+      "layer": "UI"
+    },
+    {
+      "name": "hud-band",
+      "file": "in/hud-band.png",
+      "frameW": 16,
+      "frameH": 14,
+      "frames": 3,
+      "fps": 0,
+      "pivot": [
+        0,
+        0
+      ],
+      "frameNames": [
+        "cap_l",
+        "mid",
+        "cap_r"
+      ],
+      "nineSlice": {
+        "left": "cap_l",
+        "middle": "mid (tile horizontally)",
+        "right": "cap_r",
+        "height": 14
+      },
+      "note": "Style pass 14: 14 px UI0 row with a 1 px UI1 bottom edge; caps add a 2 px UI1 tick. Solid (SG Q9 see-through still open: engine can draw it at alpha). Top by default (SG Q7).",
+      "layer": "UI"
+    },
+    {
+      "name": "font-3x5",
+      "file": "in/font-3x5.png",
+      "frameW": 4,
+      "frameH": 6,
+      "frames": 45,
+      "fps": 0,
+      "pivot": [
+        0,
+        0
+      ],
+      "frameNames": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "U",
+        "V",
+        "W",
+        "X",
+        "Y",
+        "Z",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "'",
+        ".",
+        ":",
+        "-",
+        "x",
+        "/",
+        "!",
+        "?",
+        " "
+      ],
+      "order": "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.:-x/!? ",
+      "cell": [
+        4,
+        6
+      ],
+      "advance": 4,
+      "glyph": [
+        3,
+        5
+      ],
+      "note": "Swappable HUD font (SG Q6 3x5 vs 5x7 still open). Engine reads order/cell/advance from this JSON, so a font-5x7.png + json with the same keys drops in. Glyphs are UI4; tint in engine. 5 and 9 are distinct (BRIEF L223).",
+      "layer": "UI"
+    },
+    {
+      "name": "moon-mast",
+      "file": "in/moon-mast.png",
+      "frameW": 128,
+      "frameH": 64,
+      "frames": 3,
+      "fps": 0,
+      "pivot": [
+        0,
+        63
+      ],
+      "frameNames": [
+        "plain",
+        "cable",
+        "junction"
+      ],
+      "note": "Square lattice mast (Austin moonlight-tower look, redrawn): 6 px angle-iron legs (x 8-13, 114-119), faint back legs, two X-braced bays with gusset plates, centre ladder (rungs every 8 px), 8 px riveted I-beam girder spanning x 2-125 with end eyelets. Wear: HA1 rust streaks under joints. cable = cold StalkCamera conduit up the inside of the right leg; junction = conduit + Company junction box (UI ramp, HL1 status LED).",
+      "layer": "C (climbable structure)",
+      "climb": {
+        "ledges": [
+          {
+            "x0": 2,
+            "x1": 125,
+            "y": 56,
+            "type": "one-way"
+          }
+        ],
+        "ledgeNote": "girder top row 56 of every tile = one-way ledge every 64 px on the 16 px grid (tile y+56); Wren can also climb the centre ladder (x 58-69) if the engine wants a ladder volume",
+        "ladder": {
+          "x0": 58,
+          "x1": 69,
+          "type": "climbable volume, full tile height"
+        },
+        "grappleAnchors": [
+          [
+            3,
+            59
+          ],
+          [
+            124,
+            59
+          ],
+          [
+            35,
+            27
+          ],
+          [
+            91,
+            27
+          ]
+        ],
+        "grappleNote": "tile-local px. (3,59)/(124,59) = girder-end eyelets; (35,27)/(91,27) = X-brace crossing gussets. grapple-marker centres on them.",
+        "solid": "none (legs and braces are scenery; the girder is the only collision)"
+      },
+      "stack": {
+        "units": "level px, y grows down; Wren = 48 px tall; one screen = 480x270",
+        "alignment": {
+          "moon-mast / -collar / -transition / -pole / -base": "x = TX",
+          "moon-mast-landing": "x = TX - 16",
+          "moon-guard-shell / -battlement / -crumble": "x = TX - 8 (144 wide: 8 px past each side of the 128 px mast canvas)",
+          "moon-crown": "x = TX - 64 (256 wide, pole centred on the mast ladder)",
+          "moon-rubble-big row (192)": "x = TX - 32",
+          "moon-crown-halo": "x = TX - 448, y = crownTop - 40 (halo pivot (512,110) = crown-local (128,70))"
+        },
+        "bottomToTop": [
+          "moon-mast-base (128x32) on the floor (bottom row = floor contact)",
+          "moon-mast-pole x n (128x16, repeat)",
+          "moon-mast-transition (128x64): legs taper onto the pole",
+          "moon-mast frame 'plain' x m (128x64) up to the guard-tower roof (all hidden inside the shell until it crumbles)",
+          "moon-mast-collar (128x64): bottom row = top of the battlement's bottom row (it stands on the roof, behind the battlement)",
+          "ABOVE THE GUARD TOWER (the climb): moon-mast x 3-5, moon-mast-landing, repeat; 12 mast tiles + 3 landings = 960 px = 3.6 screens",
+          "top landing = crown base: moon-crown bottom row = the top landing's deck row 56 - 1 (crown pivot (128,127) at landing (80,55))"
+        ],
+        "shell": "moon-guard-shell 'top' at the roof, 'mid_*' downward to the floor, moon-guard-battlement on top of 'top' (bottom row = 1 px above 'top' row 0). Shell + battlement hide the base, pole, transition and lower mast; the mast rises clear of the battlement.",
+        "cables": "moon-mast frames 'cable'/'junction' and moon-mast-landing 'cable' carry a StalkCamera conduit at mast x 106-107; stack them contiguously (a run of cable tiles from the collar up to the top landing) or not at all.",
+        "suggestedDefault": "collar, mast x4 (2nd = junction), landing, mast x4, landing, mast x4, landing(top), crown = 1064 px from the battlement top to the crown top (3.9 screens, 22 Wrens; 1120 px from the roof)"
+      }
+    },
+    {
+      "name": "moon-mast-base",
+      "file": "in/moon-mast-base.png",
+      "frameW": 128,
+      "frameH": 32,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        64,
+        31
+      ],
+      "frameNames": [
+        "base"
+      ],
+      "note": "Pole foot flange with gusset fins and anchor bolts on a stone plinth (SL ramp, SL4 lip, HA2 moss). Bottom row = floor.",
+      "layer": "C",
+      "climb": {
+        "ledges": [
+          {
+            "x0": 24,
+            "x1": 103,
+            "y": 16,
+            "type": "solid (plinth top)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "moon-mast-collar",
+      "file": "in/moon-mast-collar.png",
+      "frameW": 128,
+      "frameH": 64,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        0,
+        63
+      ],
+      "frameNames": [
+        "collar"
+      ],
+      "note": "Where the mast leaves the guard-tower roof: doubled ring girder (rows 48-63) over the full 128 px with guy-wire lugs/eyelets at both ends (grapple), first braced bay above. Guy wires: engine line or skip.",
+      "layer": "C (behind moon-guard-battlement)",
+      "climb": {
+        "ledges": [
+          {
+            "x0": 0,
+            "x1": 127,
+            "y": 48,
+            "type": "one-way"
+          }
+        ],
+        "grappleAnchors": [
+          [
+            2,
+            40
+          ],
+          [
+            125,
+            40
+          ],
+          [
+            35,
+            23
+          ],
+          [
+            91,
+            23
+          ]
+        ]
+      }
+    },
+    {
+      "name": "moon-mast-landing",
+      "file": "in/moon-mast-landing.png",
+      "frameW": 160,
+      "frameH": 64,
+      "frames": 2,
+      "fps": 0,
+      "pivot": [
+        16,
+        63
+      ],
+      "frameNames": [
+        "plain",
+        "cable"
+      ],
+      "note": "Maintenance landing spanning the mast and 16 px past each leg: grating deck (rows 56-63, GD3 walkable lip), top/mid rails + toe board, posts with caps (grapple), winch wheel on an A-frame with the hoist cable running up the mast, tool locker. Mast legs and braces read behind the rails. Also the crown base when used as the top piece.",
+      "layer": "C",
+      "climb": {
+        "ledges": [
+          {
+            "x0": 0,
+            "x1": 159,
+            "y": 56,
+            "type": "one-way (deck)"
+          }
+        ],
+        "grappleAnchors": [
+          [
+            2,
+            27
+          ],
+          [
+            158,
+            27
+          ],
+          [
+            38,
+            38
+          ]
+        ],
+        "rails": "decor (the top rail at row 28 is a perch only if the engine wants: not a ledge)",
+        "ladderHatch": [
+          74,
+          85
+        ]
+      }
+    },
+    {
+      "name": "moon-mast-pole",
+      "file": "in/moon-mast-pole.png",
+      "frameW": 128,
+      "frameH": 16,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        0,
+        15
+      ],
+      "frameNames": [
+        "pole"
+      ],
+      "note": "16 px cylindrical pole (x 56-71) with a clamp band per tile. Widened from 3b's 3 px pole.",
+      "layer": "C"
+    },
+    {
+      "name": "moon-mast-transition",
+      "file": "in/moon-mast-transition.png",
+      "frameW": 128,
+      "frameH": 64,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        0,
+        63
+      ],
+      "frameNames": [
+        "transition"
+      ],
+      "note": "Legs taper from the 112 px mast to the 16 px pole (collar plate rows 44-51), with a girder and braces; mostly seen after the crumble.",
+      "layer": "C",
+      "climb": {
+        "ledges": [
+          {
+            "x0": 22,
+            "x1": 108,
+            "y": 22,
+            "type": "one-way (approx: tapered girder)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "moon-crown",
+      "file": "in/moon-crown.png",
+      "frameW": 256,
+      "frameH": 128,
+      "frames": 4,
+      "fps": 10,
+      "pivot": [
+        128,
+        127
+      ],
+      "frameNames": [
+        "dark",
+        "flicker_a",
+        "flicker_b",
+        "relit"
+      ],
+      "anims": {
+        "dark": [
+          0
+        ],
+        "flickerOn": [
+          1,
+          0,
+          2,
+          1,
+          2,
+          3
+        ],
+        "relit": [
+          3
+        ]
+      },
+      "note": "Big central pole + finial, 44 px hub ring with spokes, upper spreader arms (236 px truss), lower arms (152 px), top lamp bracket, wire stays, small railed crown deck, struts down onto the landing. Six bell lamps in two tiers + top + under-deck. dark = HA1 globes, GD3 glint; dim = LG0/LG1; lit = LG2 rim, LG3 body, LG4 core, LG1/LG2 under the shade.",
+      "layer": "C (above everything else in the tower)",
+      "climb": {
+        "ledges": [
+          {
+            "x0": 10,
+            "x1": 245,
+            "y": 40,
+            "type": "one-way (upper spreader arms)"
+          },
+          {
+            "x0": 52,
+            "x1": 203,
+            "y": 80,
+            "type": "one-way (lower arms)"
+          },
+          {
+            "x0": 96,
+            "x1": 159,
+            "y": 98,
+            "type": "one-way (crown deck)"
+          }
+        ],
+        "grappleAnchors": [
+          [
+            12,
+            44
+          ],
+          [
+            243,
+            44
+          ],
+          [
+            54,
+            84
+          ],
+          [
+            201,
+            84
+          ],
+          [
+            127,
+            22
+          ],
+          [
+            176,
+            9
+          ]
+        ],
+        "route": "top landing deck -> crown deck (y98, 29 px up) -> lower arms (y80) -> grapple the hub ring (127,22) or arm-end eyelets -> upper arms (y40). Upper arm tips are 118 px from the pole."
+      }
+    },
+    {
+      "name": "moon-crown-camera",
+      "file": "in/moon-crown-camera.png",
+      "frameW": 16,
+      "frameH": 16,
+      "frames": 6,
+      "fps": 0,
+      "pivot": [
+        8,
+        15
+      ],
+      "frameNames": [
+        "watch",
+        "alert",
+        "drop_spark",
+        "drop_tilt",
+        "drop_tumble_a",
+        "drop_tumble_b"
+      ],
+      "anims": {
+        "watch": [
+          0
+        ],
+        "alert": [
+          1
+        ],
+        "drop": [
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "anchor": "frame (8,15) on moon-crown cameraAnchors[i].clamp (crown-local). Lens faces left; facing R = flipX",
+      "note": "Company StalkCamera (no text or logo) at level scale: hooded UI housing, SW0/SW1 lit lens, steady SW1 LED with SW2 core (Company light never pulses), alert frame AR2/AR3. Spark on the cut = cold FX3/FX1/FX0 + UI4 (palette v3, Nov 3).",
+      "layer": "C (in front of the crown)"
+    },
+    {
+      "name": "moon-crown-halo",
+      "file": "in/moon-crown-halo.png",
+      "frameW": 1024,
+      "frameH": 640,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        512,
+        110
+      ],
+      "frameNames": [
+        "halo"
+      ],
+      "note": "Warm light pool for the relit crown as a pixel layer: opaque LG0 (outer) / LG1 (core) 8x8 ordered dither, ~26% at the crown falling to 0 at 540 px (quadratic-ish), stretched downward onto the town. Use EITHER this or moon-crown.light (engine additive), not both.",
+      "layer": "B/C (behind the tower and actors, in front of mid backdrop)"
+    },
+    {
+      "name": "moon-guard-battlement",
+      "file": "in/moon-guard-battlement.png",
+      "frameW": 144,
+      "frameH": 32,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        0,
+        31
+      ],
+      "frameNames": [
+        "battlement"
+      ],
+      "note": "Parapet: five 20 px merlons (24 px tall = half a Wren), 11 px crenels down to a continuous parapet wall, kit capstones, two arrow slits.",
+      "layer": "C (in front of moon-mast-collar)",
+      "climb": {
+        "ledges": [
+          {
+            "x0": 0,
+            "x1": 19,
+            "y": 8,
+            "type": "solid (merlon top)"
+          },
+          {
+            "x0": 31,
+            "x1": 50,
+            "y": 8,
+            "type": "solid (merlon top)"
+          },
+          {
+            "x0": 62,
+            "x1": 81,
+            "y": 8,
+            "type": "solid (merlon top)"
+          },
+          {
+            "x0": 93,
+            "x1": 112,
+            "y": 8,
+            "type": "solid (merlon top)"
+          },
+          {
+            "x0": 124,
+            "x1": 143,
+            "y": 8,
+            "type": "solid (merlon top)"
+          },
+          {
+            "x0": 20,
+            "x1": 30,
+            "y": 20,
+            "type": "solid (crenel floor)"
+          },
+          {
+            "x0": 51,
+            "x1": 61,
+            "y": 20,
+            "type": "solid (crenel floor)"
+          },
+          {
+            "x0": 82,
+            "x1": 92,
+            "y": 20,
+            "type": "solid (crenel floor)"
+          },
+          {
+            "x0": 113,
+            "x1": 123,
+            "y": 20,
+            "type": "solid (crenel floor)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "moon-guard-battlement-crumble",
+      "file": "in/moon-guard-battlement-crumble.png",
+      "frameW": 144,
+      "frameH": 32,
+      "frames": 6,
+      "fps": 12,
+      "pivot": [
+        0,
+        31
+      ],
+      "frameNames": [
+        "bat_0",
+        "bat_1",
+        "bat_2",
+        "bat_3",
+        "bat_4",
+        "bat_5"
+      ],
+      "anims": {
+        "crumble": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "note": "The parapet crumbling (first).",
+      "layer": "C"
+    },
+    {
+      "name": "moon-guard-crumble",
+      "file": "in/moon-guard-crumble.png",
+      "frameW": 144,
+      "frameH": 16,
+      "frames": 12,
+      "fps": 12,
+      "pivot": [
+        0,
+        0
+      ],
+      "frameNames": [
+        "top_0",
+        "top_1",
+        "top_2",
+        "top_3",
+        "top_4",
+        "top_5",
+        "mid_0",
+        "mid_1",
+        "mid_2",
+        "mid_3",
+        "mid_4",
+        "mid_5"
+      ],
+      "anims": {
+        "crumbleTop": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "crumbleMid": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ]
+      },
+      "order": "battlement first (moon-guard-battlement-crumble), then 'top', then each mid section downward; start the next ~3 frames early; spawn moon-shell-particles (batch 3b, reused) from removed chunks",
+      "note": "Same 6-step crumble as 3b, regenerated at 144 px.",
+      "layer": "C"
+    },
+    {
+      "name": "moon-guard-shell",
+      "file": "in/moon-guard-shell.png",
+      "frameW": 144,
+      "frameH": 16,
+      "frames": 6,
+      "fps": 0,
+      "pivot": [
+        0,
+        0
+      ],
+      "frameNames": [
+        "top",
+        "mid_a",
+        "mid_b",
+        "mid_c",
+        "mid_crack_a",
+        "mid_crack_b"
+      ],
+      "note": "Guard-tower brick shell around the lower mast only, kit tower tile pixels (9 tiles wide). crack_a/b: SL0 cracks with peek holes.",
+      "layer": "C (in front of the mast)"
+    },
+    {
+      "name": "moon-rubble-big",
+      "file": "in/moon-rubble-big.png",
+      "frameW": 32,
+      "frameH": 32,
+      "frames": 7,
+      "fps": 0,
+      "pivot": [
+        16,
+        31
+      ],
+      "frameNames": [
+        "left",
+        "mid_a",
+        "mid_b",
+        "mid_c",
+        "right",
+        "pole_l",
+        "pole_r"
+      ],
+      "note": "Brick heap after the crumble, scaled to the 128 px base (up to 27 px high; buries the plinth, leaves the flange and pole showing).",
+      "layer": "C (in front of the base)"
+    },
+    {
+      "name": "moon-rubble-big-settle",
+      "file": "in/moon-rubble-big-settle.png",
+      "frameW": 192,
+      "frameH": 32,
+      "frames": 3,
+      "fps": 8,
+      "pivot": [
+        96,
+        31
+      ],
+      "frameNames": [
+        "landing",
+        "bounce",
+        "settled"
+      ],
+      "anims": {
+        "settle": [
+          0,
+          1,
+          2
+        ]
+      },
+      "note": "The default 192 px row building up; frame 2 == the modular pieces."
+    },
+    {
+      "name": "bg-far-district-glow",
+      "file": "in/bg-far-district-glow.png",
+      "frameW": 200,
+      "frameH": 110,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        100,
+        60
+      ],
+      "frameNames": [
+        "glow"
+      ],
+      "note": "Warm district light under a relit far tower: sparse opaque LG0 ordered dither (max ~22%). Baked into bg-harbor-far-v3; separate for engine use.",
+      "layer": "L1 far (over buildings only; mask by the skyline)"
+    },
+    {
+      "name": "bg-far-moontowers-v3",
+      "file": "in/bg-far-moontowers-v3.png",
+      "frameW": 48,
+      "frameH": 288,
+      "frames": 4,
+      "fps": 0,
+      "pivot": [
+        23,
+        287
+      ],
+      "frameNames": [
+        "shelled_short",
+        "revealed_short",
+        "shelled_tall",
+        "revealed_tall"
+      ],
+      "note": "Far moon towers rising well above every building: 9 px lattice, 37 px crown with two lamp tiers. Shelled = dark brick guard tower round the base, dark bulbs, HL0/HL1 camera glints. Revealed = mast to the ground + rubble lip, LG crown.",
+      "layer": "L1 far"
+    },
+    {
+      "name": "bg-b3d-sky",
+      "file": "in/bg-b3d-sky.png",
+      "frameW": 960,
+      "frameH": 480,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        0,
+        0
+      ],
+      "anchor": "bottom-left",
+      "note": "NV0 top -> NV1 -> NV2 horizon, ordered-dither steps. Optional: replaces the engine sky gradient on skyline views.",
+      "layer": "L0 sky",
+      "scroll": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "bg-core-car",
+      "file": "in/bg-core-car.png",
+      "frameW": 4,
+      "frameH": 1,
+      "frames": 2,
+      "fps": 0,
+      "pivot": [
+        3,
+        0
+      ],
+      "frameNames": [
+        "right",
+        "left"
+      ],
+      "note": "Flying-car speck: SW2 1 px headlight + CK1/CK0 trail. Engine moves it slowly (4-8 px/s) along the core lanes; counts toward the 0.05% point-light cap.",
+      "layer": "L1 far (scroll 0.15 like bg-harbor-far). Far-layer rules: STYLE-GUIDE v3 section 3 exception + v3.1"
+    },
+    {
+      "name": "bg-core-far",
+      "file": "in/bg-core-far.png",
+      "frameW": 260,
+      "frameH": 200,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        130,
+        199
+      ],
+      "note": "The Core (hub city): CK0 bodies, CK1 neon edges/ring bands/halo rings/skybridges, NV3 shade side, NV2 window grid, 1 px SW2 spire tips + a few SW2 windows (budgeted), CK0/CK1 ordered-dither glow dome. Bottom ~30 px sits behind the neighbourhood roofs. Static (no sweep).",
+      "layer": "L1 far (scroll 0.15 like bg-harbor-far). Far-layer rules: STYLE-GUIDE v3 section 3 exception + v3.1; swappable Core layer",
+      "scroll": [
+        0.12,
+        0.12
+      ]
+    },
+    {
+      "name": "bg-core-near",
+      "file": "in/bg-core-near.png",
+      "frameW": 560,
+      "frameH": 300,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        280,
+        299
+      ],
+      "note": "The Core (hub city): CK0 bodies, CK1 neon edges/ring bands/halo rings/skybridges, NV3 shade side, NV2 window grid, 1 px SW2 spire tips + a few SW2 windows (budgeted), CK0/CK1 ordered-dither glow dome. Bottom ~30 px sits behind the neighbourhood roofs. Static (no sweep).",
+      "layer": "L1 far (scroll 0.15 like bg-harbor-far). Far-layer rules: STYLE-GUIDE v3 section 3 exception + v3.1; swappable Core layer",
+      "scroll": [
+        0.12,
+        0.12
+      ]
+    },
+    {
+      "name": "bg-core-searchlight",
+      "file": "in/bg-core-searchlight.png",
+      "frameW": 96,
+      "frameH": 160,
+      "frames": 8,
+      "fps": 1,
+      "pivot": [
+        48,
+        159
+      ],
+      "anims": {
+        "swing": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 1,
+          "mode": "pingpong"
+        }
+      },
+      "note": "Hub searchlight (STYLE-GUIDE Company light kit 'backdrop only'): CK1 <=10% ordered dither, never SW, never over the playfield, slow swing, steady.",
+      "layer": "L1 far (scroll 0.15 like bg-harbor-far). Far-layer rules: STYLE-GUIDE v3 section 3 exception + v3.1"
+    },
+    {
+      "name": "bg-core-side",
+      "file": "in/bg-core-side.png",
+      "frameW": 280,
+      "frameH": 160,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        140,
+        159
+      ],
+      "note": "The Core (hub city): CK0 bodies, CK1 neon edges/ring bands/halo rings/skybridges, NV3 shade side, NV2 window grid, 1 px SW2 spire tips + a few SW2 windows (budgeted), CK0/CK1 ordered-dither glow dome. Bottom ~30 px sits behind the neighbourhood roofs. Static (no sweep).",
+      "layer": "L1 far (scroll 0.15 like bg-harbor-far). Far-layer rules: STYLE-GUIDE v3 section 3 exception + v3.1; swappable Core layer",
+      "scroll": [
+        0.12,
+        0.12
+      ]
+    },
+    {
+      "name": "bg-hoods-back",
+      "file": "in/bg-hoods-back.png",
+      "frameW": 960,
+      "frameH": 150,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        0,
+        0
+      ],
+      "anchor": "bottom-left",
+      "note": "Gothic roofs (gables, spires, domes, crenellations, chimneys), HF1 body + HF2 moon rim. No windows.",
+      "layer": "L1 far, back neighbourhood row",
+      "scroll": [
+        0.15,
+        0.15
+      ]
+    },
+    {
+      "name": "bg-spoke-glow",
+      "file": "in/bg-spoke-glow.png",
+      "frameW": 280,
+      "frameH": 150,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        140,
+        112
+      ],
+      "note": "Warm district glow for a relit spoke: LG0 ordered dither (<=36%) + sparse LG1 core (<=10%). Place on each relit tower foot.",
+      "layer": "L1 far, OPTIONAL toggle layer: behind the towers and front row, over the back row"
+    },
+    {
+      "name": "bg-spoke-link-node",
+      "file": "in/bg-spoke-link-node.png",
+      "frameW": 5,
+      "frameH": 3,
+      "frames": 2,
+      "fps": 0,
+      "pivot": [
+        2,
+        1
+      ],
+      "frameNames": [
+        "live",
+        "dead"
+      ],
+      "note": "Optional relay node sprite for engines that prefer a sprite over the 3-px CK1 cross drawn every 48 px on a live link.",
+      "layer": "L1 far (scroll 0.15 like bg-harbor-far). Far-layer rules: STYLE-GUIDE v3 section 3 exception + v3.1"
+    },
+    {
+      "name": "bg-spoke-tower",
+      "file": "in/bg-spoke-tower.png",
+      "frameW": 48,
+      "frameH": 208,
+      "frames": 4,
+      "fps": 0,
+      "pivot": [
+        23,
+        207
+      ],
+      "frameNames": [
+        "tall_shell",
+        "tall_relit",
+        "short_shell",
+        "short_relit"
+      ],
+      "note": "Spoke moon tower for skylines. shell: brick guard tower, dark bulbs, CK relay box on the crown pole (link leaves at anchors.link), 1 px SW2 StalkCamera LED. relit: shell gone, LG2/LG1 1 px bulbs, rubble mound, relay box torn off, cut CK0 cable stub.",
+      "layer": "L1 far (scroll 0.15 like bg-harbor-far). Far-layer rules: STYLE-GUIDE v3 section 3 exception + v3.1; between the back and front neighbourhood rows",
+      "anchors": {
+        "tall": {
+          "link": [
+            29,
+            24
+          ],
+          "foot": [
+            23,
+            207
+          ],
+          "crown": [
+            23,
+            7
+          ]
+        },
+        "short": {
+          "link": [
+            29,
+            64
+          ],
+          "foot": [
+            23,
+            207
+          ],
+          "crown": [
+            23,
+            47
+          ]
+        }
+      }
+    },
+    {
+      "name": "powerups-16",
+      "file": "in/powerups-16.png",
+      "frameW": 16,
+      "frameH": 16,
+      "frames": 19,
+      "fps": 0,
+      "pivot": "frame centre",
+      "frameNames": [
+        "soft-soles",
+        "long-line",
+        "quick-reel",
+        "smoke-pellet",
+        "pickpocket",
+        "shadow-cloak",
+        "lamp-snuffer",
+        "double-line",
+        "whistle",
+        "ear-to-the-wall",
+        "owl-eyes",
+        "ghost-step",
+        "tie-line",
+        "ninth-feather",
+        "relic-snag-hook",
+        "relic-keepers-pole",
+        "relic-glimmer-lens",
+        "relic-double-line",
+        "relic-amber-powerset"
+      ],
+      "order": [
+        {
+          "index": 0,
+          "id": "soft-soles",
+          "name": "Soft Soles",
+          "tier": "common",
+          "briefNo": 1
+        },
+        {
+          "index": 1,
+          "id": "long-line",
+          "name": "Long Line",
+          "tier": "common",
+          "briefNo": 2
+        },
+        {
+          "index": 2,
+          "id": "quick-reel",
+          "name": "Quick Reel",
+          "tier": "common",
+          "briefNo": 3
+        },
+        {
+          "index": 3,
+          "id": "smoke-pellet",
+          "name": "Smoke Pellet",
+          "tier": "common",
+          "briefNo": 4
+        },
+        {
+          "index": 4,
+          "id": "pickpocket",
+          "name": "Pickpocket",
+          "tier": "common",
+          "briefNo": 5
+        },
+        {
+          "index": 5,
+          "id": "shadow-cloak",
+          "name": "Shadow Cloak",
+          "tier": "rare",
+          "briefNo": 6
+        },
+        {
+          "index": 6,
+          "id": "lamp-snuffer",
+          "name": "Lamp Snuffer",
+          "tier": "rare",
+          "briefNo": 7
+        },
+        {
+          "index": 7,
+          "id": "double-line",
+          "name": "Double Line",
+          "tier": "rare",
+          "briefNo": 8
+        },
+        {
+          "index": 8,
+          "id": "whistle",
+          "name": "Whistle",
+          "tier": "rare",
+          "briefNo": 9
+        },
+        {
+          "index": 9,
+          "id": "ear-to-the-wall",
+          "name": "Ear to the Wall",
+          "tier": "rare",
+          "briefNo": 10
+        },
+        {
+          "index": 10,
+          "id": "owl-eyes",
+          "name": "Owl Eyes",
+          "tier": "legendary",
+          "briefNo": 11
+        },
+        {
+          "index": 11,
+          "id": "ghost-step",
+          "name": "Ghost Step",
+          "tier": "legendary",
+          "briefNo": 12
+        },
+        {
+          "index": 12,
+          "id": "tie-line",
+          "name": "Tie-Line",
+          "tier": "legendary",
+          "briefNo": 13
+        },
+        {
+          "index": 13,
+          "id": "ninth-feather",
+          "name": "Ninth Feather",
+          "tier": "legendary",
+          "briefNo": 14
+        },
+        {
+          "index": 14,
+          "id": "relic-snag-hook",
+          "name": "Snag Hook",
+          "tier": "relic",
+          "level": "harbor"
+        },
+        {
+          "index": 15,
+          "id": "relic-keepers-pole",
+          "name": "Keeper's Pole",
+          "tier": "relic",
+          "level": "docks"
+        },
+        {
+          "index": 16,
+          "id": "relic-glimmer-lens",
+          "name": "Glimmer Lens",
+          "tier": "relic",
+          "level": "clocktower"
+        },
+        {
+          "index": 17,
+          "id": "relic-double-line",
+          "name": "Double Line (tool)",
+          "tier": "relic",
+          "level": "cathedral / power plant"
+        },
+        {
+          "index": 18,
+          "id": "relic-amber-powerset",
+          "name": "Amber Powerset",
+          "tier": "relic",
+          "level": "hub city"
+        }
+      ],
+      "note": "16x16 HUD icons redrawn by hand as 12x12 maps on a 16 px plate (no auto-downscale). No pips at this size: the ring colour carries the tier; legendary keeps the PL2 outer ring.",
+      "layer": "UI (HUD power-up slot)"
+    },
+    {
+      "name": "powerups-32",
+      "file": "in/powerups-32.png",
+      "frameW": 32,
+      "frameH": 32,
+      "frames": 19,
+      "fps": 0,
+      "pivot": "frame centre",
+      "frameNames": [
+        "soft-soles",
+        "long-line",
+        "quick-reel",
+        "smoke-pellet",
+        "pickpocket",
+        "shadow-cloak",
+        "lamp-snuffer",
+        "double-line",
+        "whistle",
+        "ear-to-the-wall",
+        "owl-eyes",
+        "ghost-step",
+        "tie-line",
+        "ninth-feather",
+        "relic-snag-hook",
+        "relic-keepers-pole",
+        "relic-glimmer-lens",
+        "relic-double-line",
+        "relic-amber-powerset"
+      ],
+      "order": [
+        {
+          "index": 0,
+          "id": "soft-soles",
+          "name": "Soft Soles",
+          "tier": "common",
+          "briefNo": 1
+        },
+        {
+          "index": 1,
+          "id": "long-line",
+          "name": "Long Line",
+          "tier": "common",
+          "briefNo": 2
+        },
+        {
+          "index": 2,
+          "id": "quick-reel",
+          "name": "Quick Reel",
+          "tier": "common",
+          "briefNo": 3
+        },
+        {
+          "index": 3,
+          "id": "smoke-pellet",
+          "name": "Smoke Pellet",
+          "tier": "common",
+          "briefNo": 4
+        },
+        {
+          "index": 4,
+          "id": "pickpocket",
+          "name": "Pickpocket",
+          "tier": "common",
+          "briefNo": 5
+        },
+        {
+          "index": 5,
+          "id": "shadow-cloak",
+          "name": "Shadow Cloak",
+          "tier": "rare",
+          "briefNo": 6
+        },
+        {
+          "index": 6,
+          "id": "lamp-snuffer",
+          "name": "Lamp Snuffer",
+          "tier": "rare",
+          "briefNo": 7
+        },
+        {
+          "index": 7,
+          "id": "double-line",
+          "name": "Double Line",
+          "tier": "rare",
+          "briefNo": 8
+        },
+        {
+          "index": 8,
+          "id": "whistle",
+          "name": "Whistle",
+          "tier": "rare",
+          "briefNo": 9
+        },
+        {
+          "index": 9,
+          "id": "ear-to-the-wall",
+          "name": "Ear to the Wall",
+          "tier": "rare",
+          "briefNo": 10
+        },
+        {
+          "index": 10,
+          "id": "owl-eyes",
+          "name": "Owl Eyes",
+          "tier": "legendary",
+          "briefNo": 11
+        },
+        {
+          "index": 11,
+          "id": "ghost-step",
+          "name": "Ghost Step",
+          "tier": "legendary",
+          "briefNo": 12
+        },
+        {
+          "index": 12,
+          "id": "tie-line",
+          "name": "Tie-Line",
+          "tier": "legendary",
+          "briefNo": 13
+        },
+        {
+          "index": 13,
+          "id": "ninth-feather",
+          "name": "Ninth Feather",
+          "tier": "legendary",
+          "briefNo": 14
+        },
+        {
+          "index": 14,
+          "id": "relic-snag-hook",
+          "name": "Snag Hook",
+          "tier": "relic",
+          "level": "harbor"
+        },
+        {
+          "index": 15,
+          "id": "relic-keepers-pole",
+          "name": "Keeper's Pole",
+          "tier": "relic",
+          "level": "docks"
+        },
+        {
+          "index": 16,
+          "id": "relic-glimmer-lens",
+          "name": "Glimmer Lens",
+          "tier": "relic",
+          "level": "clocktower"
+        },
+        {
+          "index": 17,
+          "id": "relic-double-line",
+          "name": "Double Line (tool)",
+          "tier": "relic",
+          "level": "cathedral / power plant"
+        },
+        {
+          "index": 18,
+          "id": "relic-amber-powerset",
+          "name": "Amber Powerset",
+          "tier": "relic",
+          "level": "hub city"
+        }
+      ],
+      "note": "32x32 perch icons: framed square, object ~70%, 1 px UI0 outline, tier ramp + UI0-UI4 neutrals, 1/2/3 corner pips (top-left), legendary +PL2 ring. Relics: amber gilt frame on NV1.",
+      "layer": "UI (perch choice cards)"
+    },
+    {
+      "name": "title-key-art",
+      "file": "in/title-key-art.png",
+      "frameW": 480,
+      "frameH": 270,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        0,
+        0
+      ],
+      "frameNames": [
+        "title"
+      ],
+      "logoBox": [
+        16,
+        14,
+        250,
+        112
+      ],
+      "note": "1x pixel scale throughout (Wren ~55 px incl. tufts). Lark colours only on Wren. Q16: title size/spec not in SG; 480x270 = game screen.",
+      "layer": "title screen background (no text)"
+    },
+    {
+      "name": "title-logo",
+      "file": "in/title-logo.png",
+      "frameW": 163,
+      "frameH": 88,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        0,
+        0
+      ],
+      "frameNames": [
+        "logo"
+      ],
+      "anchor": [
+        20,
+        20
+      ],
+      "note": "Swappable 'NIGHT LARK' pixel wordmark (custom 9x11 glyphs at 3 px cells, chipped corners). Moonlit face UI4->MN1->MN0, SL3/SL2 3 px extrusion, NV0 outline, hemp rope swash (WH1/WH2). No 'Batguy' anywhere. Not painted into the key art.",
+      "layer": "title screen, above title-key-art"
+    },
+    {
+      "name": "wren-portrait",
+      "file": "in/wren-portrait.png",
+      "frameW": 96,
+      "frameH": 96,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        48,
+        95
+      ],
+      "frameNames": [
+        "unmasked"
+      ],
+      "draft": true,
+      "bestGuess": "Face after Azzato's sketch (centre figure). Eye colour, lip tone and exact skin tone are not specified anywhere -> Azzato to confirm.",
+      "note": "Hood-down Wren, face and silhouette only: centre-parted shoulder-length light hair (WH), skin WS, heavy-lidded dark eyes with the Lark's pale WL3 glint, dark lips, turned-up WK collar, WL2 throat patch (no WK0 ring), hood bunched at her left shoulder with the folded tuft, purple poncho with the pale WL front, moonlight from upper right (MN1 rim). Card NV1/NV2 with a faint moon disc, UI0 1 px frame.",
+      "layer": "UI (end card / Unmasked option / title)"
+    },
+    {
+      "name": "guard-watchman-v2",
+      "file": "in/guard-watchman-v2.png",
+      "frameW": 32,
+      "frameH": 48,
+      "frames": 11,
+      "fps": 10,
+      "pivot": [
+        16,
+        47
+      ],
+      "anims": {
+        "walk": [0, 5],
+        "turn": [6, 6],
+        "alert": [7, 7],
+        "search": [8, 9],
+        "tied": [10, 10]
+      },
+      "lightOrigin": [28, 19],
+      "note": "Same frames/size/pivot as guard-watchman.png; flashlight lens remapped to v3 SW1. Original kept."
+    },
+    {
+      "name": "bg-hub-glow",
+      "file": "in/bg-hub-glow.png",
+      "frameW": 960,
+      "frameH": 480,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        0,
+        0
+      ],
+      "frameNames": [
+        "glow"
+      ],
+      "note": "Company hub-city skyline glow, palette v3: CK0 halo + CK1 core (ordered dither, opaque px; far layer only). Toggle or move per level; the far skyline hides its base.",
+      "layer": "L0.5 (between sky and L1 far)",
+      "scroll": 0.15
+    },
+    {
+      "name": "bg-harbor-far-v32",
+      "file": "in/bg-harbor-far-v32.png",
+      "frameW": 960,
+      "frameH": 480,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        0,
+        0
+      ],
+      "note": "Warm home windows per STYLE-GUIDE v3.2 Q11: at most 1 in 4 windows, LG1 frame glow + LG2 pane, never animated. Far layer: windows are 1 px LG2 panes (2 px windows add a 1 px LG1 frame glow below), at most 60 windows so the layer stays under the 0.05% point-light cap. Lighthouse glass stays cold. NOT based on far-v3 (on hold).",
+      "layer": "L1 far",
+      "scroll": [
+        0.15,
+        0.15
+      ]
+    },
+    {
+      "name": "bg-harbor-mid-v32",
+      "file": "in/bg-harbor-mid-v32.png",
+      "frameW": 960,
+      "frameH": 576,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        0,
+        0
+      ],
+      "note": "Warm home windows per STYLE-GUIDE v3.2 Q11: at most 1 in 4 windows, LG1 frame glow + LG2 pane, never animated. Mid layer: 1 in 4 arched slits get an LG1 outline/arch (frame glow) and a 1x5 LG2 pane. NOT based on mid-v3 (on hold).",
+      "layer": "L2 mid",
+      "scroll": [
+        0.35,
+        0.35
+      ]
+    },
+    {
+      "name": "bg-hoods-front-v2",
+      "file": "in/bg-hoods-front-v2.png",
+      "frameW": 960,
+      "frameH": 110,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        0,
+        0
+      ],
+      "anchor": "bottom-left",
+      "note": "Warm home windows per STYLE-GUIDE v3.2 Q11: at most 1 in 4 windows, LG1 frame glow + LG2 pane, never animated. Far layer: picked from the 1-in-4 candidates, at most 34 windows (1 px LG2 pane over a 1 px LG1 frame glow inside the dark NV0 glass).",
+      "layer": "L1 far, front neighbourhood row (or L1.5 at scroll 0.2)",
+      "scroll": [
+        0.18,
+        0.18
+      ]
+    },
+    {
+      "name": "lamp-company",
+      "file": "in/lamp-company.png",
+      "frameW": 32,
+      "frameH": 32,
+      "frames": 2,
+      "fps": 0,
+      "pivot": [
+        3,
+        7
+      ],
+      "frameNames": [
+        "on",
+        "off"
+      ],
+      "lightOrigin": [
+        15,
+        20
+      ],
+      "note": "Company hazard lamp (v3.2 Q13): GD housing on lamp.png's wall plate/arm footprint, SW1 LED bar (row 19) + SW0 lens fringe, 1 px SW2 status LED. Never pulses. lamp.png stays the warm home lamp. Exposes Wren like every lamp (Q12: no lamp within 54 px).",
+      "layer": "C (props), same as lamp.png"
+    },
+    {
+      "name": "lamp-company-pool",
+      "file": "in/lamp-company-pool.png",
+      "frameW": 96,
+      "frameH": 24,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        48,
+        12
+      ],
+      "note": "Cold floor pool for lamp-company: SW0 ordered dither, <= 40% at the centre fading to 0, static. The cone of air between the LED bar and the floor is an engine one-step value lift (NV->NV+1, SL->SL+1, HM->HM+1), as the mock shows, not dots. Never overlaps a warm LG pool (Q16).",
+      "layer": "light layer over L3 tiles, under props"
+    },
+    {
+      "name": "searchlight-prop-32",
+      "file": "in/searchlight-prop-32.png",
+      "frameW": 32,
+      "frameH": 32,
+      "frames": 2,
+      "fps": 0,
+      "pivot": [
+        16,
+        31
+      ],
+      "frameNames": [
+        "off",
+        "lit"
+      ],
+      "lensCenter": [
+        16,
+        12
+      ],
+      "note": "Q14 option B (32x32 prop), drawn so Azzato can compare with option A searchlight-head (16x16, kept). GD drum + yoke, SW lens. Placement: battlements from floor 2 up and the lantern room only, max 1 per band, never sweeps the shaft. Beam is engine-drawn.",
+      "layer": "C"
+    },
+    {
+      "name": "mini-tower-camera",
+      "file": "in/mini-tower-camera.png",
+      "frameW": 8,
+      "frameH": 8,
+      "frames": 6,
+      "fps": 0,
+      "pivot": [
+        4,
+        7
+      ],
+      "frameNames": [
+        "watch",
+        "alert",
+        "drop_spark",
+        "drop_tilt",
+        "drop_tumble_a",
+        "drop_tumble_b"
+      ],
+      "anims": {
+        "watch": [
+          0
+        ],
+        "alert": [
+          1
+        ],
+        "drop": [
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "anchor": "frame (4,7) on the crown's cameraAnchors[i].clamp (crown-local); facing R = flipX",
+      "note": "Company security camera (StalkCamera in the story; no text or logo) clamped on a lamp arm. Cold housing UI1/UI2/UI3, UI0 lens, steady LED SW1 + SW2 core (Company light never pulses), alert frame LED AR2/AR3. Spark on the cut = cold FX3/FX1 + UI4 (palette v3 flip, Nov 3 11:20 PM). Palette v3 flip (Nov 3 11:20 PM) confirmed: cold UI housing, steady SW1 LED with SW2 core (Company light never pulses), alert frame AR2/AR3 red LED, cold FX/UI4 spark when cut. Mini towers clamp 2 cameras (crown lamps 0 and 2).",
+      "layer": "C (in front of crown)"
+    },
+    {
+      "name": "mini-tower-crown",
+      "file": "in/mini-tower-crown.png",
+      "frameW": 48,
+      "frameH": 32,
+      "frames": 4,
+      "fps": 10,
+      "pivot": [
+        24,
+        31
+      ],
+      "frameNames": [
+        "dark",
+        "flicker_a",
+        "flicker_b",
+        "relit"
+      ],
+      "anims": {
+        "dark": [
+          0,
+          0
+        ],
+        "flickerOn": [
+          1,
+          0,
+          2,
+          1,
+          2,
+          3
+        ],
+        "relit": [
+          3,
+          3
+        ]
+      },
+      "note": "Central pole + finial, spreader arms with stays, two tiers of bell shades with hanging globes (5 seen, the 6th is behind the pole) after Azzato's Austin moonlight-tower photos. dark = HA1 globes with a GD2 glint; relit = LG3 globe, LG4 core, LG2 lower half, LG1 spill under the shade.",
+      "layer": "C (above the battlements)"
+    },
+    {
+      "name": "mini-tower-crown-glow",
+      "file": "in/mini-tower-crown-glow.png",
+      "frameW": 64,
+      "frameH": 48,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        32,
+        47
+      ],
+      "frameNames": [
+        "glow"
+      ],
+      "note": "Optional ordered-dither warm halo ring (opaque px only). Drop it if the engine draws a warm light.",
+      "layer": "C (behind crown)"
+    },
+    {
+      "name": "mini-tower-mast",
+      "file": "in/mini-tower-mast.png",
+      "frameW": 48,
+      "frameH": 16,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        24,
+        15
+      ],
+      "frameNames": [
+        "mast"
+      ],
+      "note": "Slim square-section lattice (legs x18 GD3 / x29 GD1), rungs every 8 px, X bracing between rungs. Replaces the first-pass 16 px mast (same file name, my own file).",
+      "layer": "C"
+    },
+    {
+      "name": "mini-tower-neck",
+      "file": "in/mini-tower-neck.png",
+      "frameW": 48,
+      "frameH": 16,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        24,
+        15
+      ],
+      "frameNames": [
+        "neck"
+      ],
+      "note": "Crown pole + ladder between the platform and the crown; sits behind moon-shell-battlement and reads through its crenels.",
+      "layer": "C"
+    },
+    {
+      "name": "mini-tower-platform",
+      "file": "in/mini-tower-platform.png",
+      "frameW": 48,
+      "frameH": 16,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        24,
+        15
+      ],
+      "frameNames": [
+        "platform"
+      ],
+      "note": "Railed square service platform (deck row 11), hoist/winch wheel on the left, crown pole down to the deck, deck brackets onto the mast.",
+      "layer": "C"
+    },
+    {
+      "name": "mini-tower-pole",
+      "file": "in/mini-tower-pole.png",
+      "frameW": 48,
+      "frameH": 16,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        24,
+        15
+      ],
+      "frameNames": [
+        "pole"
+      ],
+      "note": "The single pole the tower stands on (photo 4). 3 px, one clamp band per tile.",
+      "layer": "C (behind shell)",
+      "stack": "Bottom -> top on a 48 px wide (3-tile) tower, all pieces 48 wide, left edges aligned: moon-tower-pole x2 (or more), moon-tower-transition, moon-tower-mast x2 (any count), moon-tower-platform, moon-tower-neck, moon-tower-crown (48x32) on top. The brick shell covers everything from the floor to the neck; the crown always stands above the battlements."
+    },
+    {
+      "name": "mini-tower-pool",
+      "file": "in/mini-tower-pool.png",
+      "frameW": 160,
+      "frameH": 88,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        80,
+        80
+      ],
+      "note": "Warm safe pocket of a relit mini tower: LG0-LG2 ordered dither (LG2 only near the foot), dome of radius 80 above the floor plus an 8 px lip on the floor, static (never animates). Pivot on the tower foot (anchors.poolOrigin). Fade in over the relight in the engine by revealing dither thresholds, not alpha.",
+      "layer": "light layer: over L3 tiles, under props and Wren"
+    },
+    {
+      "name": "mini-tower-rubble",
+      "file": "in/mini-tower-rubble.png",
+      "frameW": 16,
+      "frameH": 16,
+      "frames": 6,
+      "fps": 0,
+      "pivot": [
+        8,
+        15
+      ],
+      "frameNames": [
+        "left",
+        "mid_a",
+        "mid_b",
+        "mid_c",
+        "right",
+        "pole"
+      ],
+      "note": "Brick pile left on the floor around the single pole after the crumble. 'pole' is the mound that buries the pole foot (draw the pole first).",
+      "layer": "C (in front of the pole)"
+    },
+    {
+      "name": "mini-tower-rubble-settle",
+      "file": "in/mini-tower-rubble-settle.png",
+      "frameW": 48,
+      "frameH": 16,
+      "frames": 3,
+      "fps": 8,
+      "pivot": [
+        24,
+        15
+      ],
+      "frameNames": [
+        "landing",
+        "bounce",
+        "settled"
+      ],
+      "anims": {
+        "settle": [
+          0,
+          1,
+          2
+        ]
+      },
+      "note": "Optional: the 48 px pile (left + pole + right) building up as the last bricks land; frame 2 == the modular pieces."
+    },
+    {
+      "name": "mini-tower-shell",
+      "file": "in/mini-tower-shell.png",
+      "frameW": 48,
+      "frameH": 16,
+      "frames": 6,
+      "fps": 0,
+      "pivot": [
+        0,
+        0
+      ],
+      "frameNames": [
+        "top",
+        "mid_a",
+        "mid_b",
+        "mid_c",
+        "mid_crack_a",
+        "mid_crack_b"
+      ],
+      "note": "Company brick shell, pixels taken from the kit tower tiles (floor_top_l/top/top_r, floor_side_l/fill/side_r; fill_v2/v3 from batch 1) so it matches the lit tower exactly. crack_a/b: SL0 hairline cracks with a few cut-out px where the iron frame peeks through (crack_a over a platform/mast rung row, crack_b over a leg).",
+      "layer": "C (in front of the frame, = tower tiles)"
+    },
+    {
+      "name": "mini-tower-shell-battlement",
+      "file": "in/mini-tower-shell-battlement.png",
+      "frameW": 48,
+      "frameH": 16,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        0,
+        15
+      ],
+      "frameNames": [
+        "battlement"
+      ],
+      "note": "Castle-guard-tower parapet: 3 merlons with capstones from the kit floor_top lip, open crenels (the neck shows through), SL0 arrow slit. Crumbles first (use crumble 'top' frames).",
+      "layer": "C"
+    },
+    {
+      "name": "mini-tower-shell-crumble",
+      "file": "in/mini-tower-shell-crumble.png",
+      "frameW": 48,
+      "frameH": 16,
+      "frames": 12,
+      "fps": 12,
+      "pivot": [
+        0,
+        0
+      ],
+      "frameNames": [
+        "top_0",
+        "top_1",
+        "top_2",
+        "top_3",
+        "top_4",
+        "top_5",
+        "mid_0",
+        "mid_1",
+        "mid_2",
+        "mid_3",
+        "mid_4",
+        "mid_5"
+      ],
+      "anims": {
+        "crumbleTop": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "crumbleMid": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ]
+      },
+      "order": "battlement, top, then each mid section downward; start the next section ~3 frames before the previous ends; spawn particles from removed chunks",
+      "note": "0 intact -> 1 cracks (SL0 seams) -> 2 chunks loosen and drop 1 px, first ones gone -> 3/4 most gone (top first, edges hang on) -> 5 a few stubs on the outer edges. Frames have holes; the frame behind shows through.",
+      "layer": "C"
+    },
+    {
+      "name": "mini-tower-shell-particles",
+      "file": "in/mini-tower-shell-particles.png",
+      "frameW": 8,
+      "frameH": 8,
+      "frames": 10,
+      "fps": 12,
+      "pivot": [
+        4,
+        4
+      ],
+      "frameNames": [
+        "brick_0",
+        "brick_1",
+        "brick_2",
+        "brick_3",
+        "chip_0",
+        "chip_1",
+        "dust_0",
+        "dust_1",
+        "dust_2",
+        "dust_3"
+      ],
+      "anims": {
+        "brickTumble": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "chip": [
+          4,
+          5
+        ],
+        "dustPuff": [
+          6,
+          7,
+          8,
+          9
+        ]
+      },
+      "note": "Falling bricks tumble while the engine applies gravity; land on the rubble. Dust FX0/FX2/FX3 expands and thins (ordered pattern, no alpha).",
+      "layer": "C/D"
+    },
+    {
+      "name": "mini-tower-stack",
+      "file": "in/mini-tower-stack.png",
+      "frameW": 48,
+      "frameH": 112,
+      "frames": 2,
+      "fps": 0,
+      "pivot": [
+        23,
+        111
+      ],
+      "frameNames": [
+        "dark",
+        "relit"
+      ],
+      "note": "Pre-assembled mini moon tower, 1 pole + 1 mast sections (112 px = 2.33 Wrens). dark = Company brick shell, battlement, dark crown, 2 cameras on watch (cold LED); relit = shell gone, rubble mound, crown relit (warm). The modular pieces + mini-tower.json build the same thing with the crumble/drop animations in between.",
+      "layer": "C (props/structures, playfield)",
+      "anchors": {
+        "checkpoint": [
+          23,
+          111
+        ],
+        "spawn": [
+          59,
+          111
+        ],
+        "poolOrigin": [
+          23,
+          111
+        ],
+        "crown": [
+          23,
+          16
+        ],
+        "cameras": [
+          {
+            "lamp": 0,
+            "xy": [
+              6,
+              0
+            ],
+            "facing": "L"
+          },
+          {
+            "lamp": 2,
+            "xy": [
+              33,
+              0
+            ],
+            "facing": "R"
+          }
+        ]
+      }
+    },
+    {
+      "name": "mini-tower-stack-tall",
+      "file": "in/mini-tower-stack-tall.png",
+      "frameW": 48,
+      "frameH": 144,
+      "frames": 2,
+      "fps": 0,
+      "pivot": [
+        23,
+        143
+      ],
+      "frameNames": [
+        "dark",
+        "relit"
+      ],
+      "note": "Pre-assembled mini moon tower, 2 pole + 2 mast sections (144 px = 3.0 Wrens). dark = Company brick shell, battlement, dark crown, 2 cameras on watch (cold LED); relit = shell gone, rubble mound, crown relit (warm). The modular pieces + mini-tower.json build the same thing with the crumble/drop animations in between.",
+      "layer": "C (props/structures, playfield)",
+      "anchors": {
+        "checkpoint": [
+          23,
+          143
+        ],
+        "spawn": [
+          59,
+          143
+        ],
+        "poolOrigin": [
+          23,
+          143
+        ],
+        "crown": [
+          23,
+          16
+        ],
+        "cameras": [
+          {
+            "lamp": 0,
+            "xy": [
+              6,
+              0
+            ],
+            "facing": "L"
+          },
+          {
+            "lamp": 2,
+            "xy": [
+              33,
+              0
+            ],
+            "facing": "R"
+          }
+        ]
+      }
+    },
+    {
+      "name": "mini-tower-transition",
+      "file": "in/mini-tower-transition.png",
+      "frameW": 48,
+      "frameH": 16,
+      "frames": 1,
+      "fps": 0,
+      "pivot": [
+        24,
+        15
+      ],
+      "frameNames": [
+        "transition"
+      ],
+      "note": "Square mast legs neck down onto the pole at a collar plate; two guy wires run out to the tower corners (rows 1-15).",
+      "layer": "C"
+    },
+    {
+      "name": "pickups-glimmer",
+      "file": "in/pickups-glimmer.png",
+      "frameW": 16,
+      "frameH": 16,
+      "frames": 4,
+      "fps": 8,
+      "pivot": [
+        8,
+        8
+      ],
+      "frameNames": [
+        "glint0",
+        "glint1",
+        "glint2",
+        "sparkle"
+      ],
+      "anims": {
+        "idle": [
+          0,
+          1,
+          2,
+          3,
+          0,
+          0,
+          0
+        ]
+      },
+      "note": "Glimmer = amber memory crystal (BRIEF world draft), replaces the mote. Old pickups.png untouched; swap by pointing the pickup at this file. LG ramp is SG 'DANGER' -> Pappag ruling needed. Glimmer (amber memory crystal) pickup.",
+      "layer": "C"
     }
   ],
   "kits": [
-    "in/kit-harbor-facade.json",
+    "in/kit-harbor-facade-v2.json",
     "in/kit-harbor-platforms.json",
     "in/kit-harbor-props.json",
     "in/kit-harbor-front.json"
   ],
-  "palette": "in/nightlark-v1.hex",
+  "palette": "in/nightlark-v3-base.hex",
   "mock": {
     "file": "in/mockroom-style-target.png",
     "size": [
@@ -702,5 +3015,7 @@
       270
     ],
     "note": "Style target, not a game asset. Composite with engine-style lighting, so off-palette pixels are expected."
-  }
+  },
+  "skyline": "in/skyline-levels.json",
+  "miniTower": "in/mini-tower.json"
 }

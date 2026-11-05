@@ -18,7 +18,7 @@
 // M2 stealth (stealth.js): a catch costs a feather, plays the bark for catchHold, then resets
 // the whole room (level, items, doors, guards, the Lark at the spawn). At 0 feathers the phase
 // becomes 'night-over' and the sim stops.
-import { TUNING, SWING, SETTINGS, SIM_DT_CLAMP, HEALTH, TALL, ARCH, FEEL, FEELFIX, FEELFIX2, PULL } from './config.js';
+import { TUNING, SWING, SETTINGS, SIM_DT_CLAMP, HEALTH, TALL, ARCH, FEEL, FEELFIX, FEELFIX2, AIM_PLANT, PULL } from './config.js';
 import { parseLevel, tileAt } from './level.js';
 import { bodyBlocked, findLanding, pushOut, woodUnderFeet, findLedge } from './physics.js';
 import { solveRope, pumpSwing, reel, conserveSwing } from './rope.js';
@@ -26,6 +26,7 @@ import { lineOfSight } from './los.js';
 import { stepStealth, noiseRadius, tieCheck } from './stealth.js';
 import { chooseTarget, reachable, stepReticle, pickAt, aimPick } from './targeting.js';
 import { canCancelAttack, attackLimit, guardBump, attackReaches } from './feel.js';
+import { stepMiniTowers, warmLightBuff } from './mini-tower.js';
 
 const NO_INPUT = Object.freeze({ held: {}, pressed: {}, released: {} });
 
@@ -56,7 +57,8 @@ export function createWorld(levelDef, opts = {}) {
     // line
     anchor: null, ropeLen: T.lineRange, taut: false, everHooked: false,
     // v2 grapple controls
-    target: null, targetAge: 0, fireBuf: 0, lineCoyote: 0, ledgeAssist: 0, snapCatch: false, snapped: false, yank: null, yanks: 0, yankCd: 0, bLine: null, lineFall: false, bArmed: false, bTime: 0,
+    target: null, targetAge: 0, fireBuf: 0, lineCoyote: 0, ledgeAssist: 0, snapCatch: false, snapped: false, yank: null, yanks: 0, yankCd: 0, bLine: null, lineFall: false, bArmed: false, bTime: 0, bHoldFrames: 0,
+    aimPlantSkip: false, airPlantsLeft: AIM_PLANT.perAir, airPlanting: false,
     aiming: false, reticle: null,
     // parkour
     peakY: level.spawn.y, roll: 0, rollDir: 1, climb: null, dropRow: null,
@@ -91,9 +93,11 @@ export function createWorld(levelDef, opts = {}) {
     landT: 1, hopCap: false, airCap: 0, lastGrade: null, cleanCatches: 0,
     // feel fix 2: aim direction (render draws the aim line), the last jump-off (mash damping), catch keep
     feelFix2: fix2, aimDir: null, relAt: -1, relGood: true, catchKeep: SWING.attachKeep, mashCatches: 0, upTapAt: -1, snapReelT: 0,
-    // abilities (Metroid-style; no pickups yet). pullGrapple: the warp-pull grapple mode.
+    // abilities (Metroid-style). pullGrapple: the warp-pull grapple mode (on by default).
     abilities: { pullGrapple: !!(opts.abilities?.pullGrapple ?? SETTINGS.abilities?.pullGrapple) },
     grappleMode: (opts.grapple ?? SETTINGS.grapple) === 'pull' ? 'pull' : 'classic', pull: null,
+    // TODO(Azzato): warm-light buff is NOT decided. Stub hook, no effect.
+    warmBuff: false,
   };
 
   const roomStart = { hasSpark: !!opts.hasSpark, motes: [] };
@@ -144,7 +148,8 @@ export function createWorld(levelDef, opts = {}) {
     release('respawn');
     const cp = (reason === 'fall' || levelDef.tall) && w.checkpoint ? w.checkpoint : level.spawn; // tall rooms: a catch also goes back to the last perch
     w.x = cp.x; w.y = cp.y; w.vx = 0; w.vy = 0; w.grounded = true;
-    w.roll = 0; w.climb = null; w.dropRow = null; w.peakY = w.y; w.lineFall = false; w.fireBuf = 0; w.aiming = false; w.bArmed = false;
+    w.roll = 0; w.climb = null; w.dropRow = null; w.peakY = w.y; w.lineFall = false; w.fireBuf = 0; w.aiming = false; w.bArmed = false; w.bHoldFrames = 0;
+    w.aimPlantSkip = false; w.airPlantsLeft = AIM_PLANT.perAir; w.airPlanting = false;
     w.dodge = null; w.dodgeCd = 0; w.invuln = 0; w.dodgeLatch = null; w.atk = null; w.atkLatch = false; w.hitStop = 0;
     if (fix) { w.chain = 0; w.hopCap = false; w.relStat = null; }
     w.px = w.x; w.py = w.y;
@@ -187,6 +192,7 @@ export function createWorld(levelDef, opts = {}) {
     w.snapReelT = 0; w.upTapAt = -1;
     w.yanks = 0; w.yank = null; w.bLine = null; w.lineFall = false; w.ledgeAssist = 0; // assist is for arriving off a line, not on one
     w.everHooked = true;
+    w.airPlantsLeft = AIM_PLANT.perAir; w.airPlanting = false; // a hook spends the airtime; the next one can plant again
     w.taut = inAir;
     w.fireBuf = 0;
     w.roll = 0;
@@ -220,7 +226,8 @@ export function createWorld(levelDef, opts = {}) {
   }
   /** Warp-pull grapple: the ability is had and the mode is on. */
   const pullMode = () => w.abilities.pullGrapple && w.grappleMode === 'pull';
-  /** Switch classic / pull (the in-game toggle). Only with the ability. */
+  /** Switch classic / pull for this world only. The next world starts again from
+   *  opts.grapple or SETTINGS.grapple (boot / ?grapple=pull), not from this toggle. */
   function setGrappleMode(mode) {
     if (!w.abilities.pullGrapple) return w.grappleMode;
     w.grappleMode = mode ?? (w.grappleMode === 'pull' ? 'classic' : 'pull');
@@ -327,7 +334,11 @@ export function createWorld(levelDef, opts = {}) {
     return { x: (H.right ? 1 : 0) - (H.left ? 1 : 0), y: (H.down ? 1 : 0) - (H.up ? 1 : 0) };
   }
   /** Feel fix 2 aim: the held D-pad (8-way), else her facing tilted up. Unit vector. */
-  function aimDirection(H) {
+  function aimDirection(H, stick) {
+    if (stick && Math.hypot(stick.x, stick.y) >= 0.25) {
+      const l = Math.hypot(stick.x, stick.y);
+      return { x: stick.x / l, y: stick.y / l };
+    }
     let d = heldDir(H);
     if (!d.x && !d.y) d = { x: w.face, y: -F2.aimFacingUp };
     const l = Math.hypot(d.x, d.y);
@@ -408,15 +419,18 @@ export function createWorld(levelDef, opts = {}) {
       }
       if (refired) { w.bArmed = false; }
       else if (w.anchor) { release('letgo'); w.lineCoyote = T.lineCoyote; w.bArmed = false; if (v2 && !w.grounded) w.ledgeAssist = SWING.ledgeAssistTime; emit('letgo'); }
-      else { w.bArmed = true; w.bTime = 0; }
+      else { w.bArmed = true; w.bTime = 0; w.bHoldFrames = 0; }
     }
     if (w.bArmed && H.fire) {
       w.bTime += realDt;
+      w.bHoldFrames += 1;
       if (!w.aiming && w.bTime >= (fix ? F.aimHoldTime : T.aimHoldTime)) {
         const cands = reachable(level, w.x, center(), range, w.doorsOpen);
-        if (!(fix && F.aimNeedsTarget && !cands.length)) { // fix: nothing in reach = no aim, no slow-mo (the release still taps)
+        // A second mid-air hold in the same airtime does not aim (that would slow-mo a mash into a hover).
+        const airLocked = fix2 && !w.grounded && !w.airPlanting && w.airPlantsLeft <= 0;
+        if (!airLocked && !(fix && F.aimNeedsTarget && !cands.length)) { // fix: nothing in reach = no aim, no slow-mo (the release still taps)
           w.aiming = true;
-          w.reticle = fix2 ? aimPick(cands, w.x, center(), aimDirection(H), F2.aimConeHalf) : (w.target || cands[0] || null);
+          w.reticle = fix2 ? aimPick(cands, w.x, center(), aimDirection(H, input.aimStick), F2.aimConeHalf) : (w.target || cands[0] || null);
           emit('aim-start');
         }
       }
@@ -425,7 +439,7 @@ export function createWorld(levelDef, opts = {}) {
       const cands = reachable(level, w.x, center(), range, w.doorsOpen);
       if (w.reticle && !cands.includes(w.reticle)) w.reticle = null;
       if (fix2) { // the reticle follows the aim: nearest reachable point to the held direction
-        w.aimDir = aimDirection(H);
+        w.aimDir = aimDirection(H, input.aimStick);
         w.reticle = aimPick(cands, w.x, center(), w.aimDir, F2.aimConeHalf);
       } else if (!w.reticle && cands.length) w.reticle = w.target || cands[0];
       if (w.reticle && !fix2) {
@@ -665,6 +679,22 @@ export function createWorld(levelDef, opts = {}) {
     if (P.attack) w.atkLatch = true;
   }
 
+  /** True when this step should freeze her for an aim hold. Speed is left as it is. */
+  function aimPlant(fireHeld, jumpPressed) {
+    if (!fix2 || !F2.aimFreeze || w.anchor || !fireHeld || jumpPressed) return false;
+    const pastTap = w.bHoldFrames > AIM_PLANT.tapFrames;
+    const preAim = w.bArmed && pastTap && w.bTime < F.aimHoldTime;
+    if (!w.aiming && !preAim) return false;
+    if (w.grounded) return true;
+    if (w.aimPlantSkip && !w.aiming) return false;
+    if (w.airPlanting) return true;
+    if (w.airPlantsLeft <= 0) return false;
+    if (!w.aiming && !reachable(level, w.x, center(), lineRange() + T.targetSlack, w.doorsOpen).length) return false;
+    w.airPlantsLeft -= 1;
+    w.airPlanting = true;
+    return true;
+  }
+
   /** v1 At(): one step of the Lark. dt = physics dt (half while aiming), realDt = wall step. */
   function stepLark(input, dt, realDt) {
     const H = input.held;
@@ -676,14 +706,20 @@ export function createWorld(levelDef, opts = {}) {
     if (right && !left) w.face = 1;
     w.stepStartGrounded = w.grounded;
     let jumpPressed = !!P.jump;
+    if (P.pullToggle) setGrappleMode();
     if (v2) { const g = grappleControls(input, realDt); if (g.ateJump) jumpPressed = false; }
+    stepMiniTowers(w, input);
+    warmLightBuff(w);
     if (!w.aiming) w.aimDir = null;
-    // feel fix 2: holding to aim, she does not move at all (speed kept for when the aim ends).
-    // On the ground this starts on the first frame B is down: until aimHoldTime tells a tap from a
-    // hold she stays put, and a tap (B let go sooner) or a jump moves her again with her speed kept.
-    // If nothing is in reach once the hold time is up (no aim starts), she moves again.
-    const preAim = w.bArmed && !w.anchor && w.grounded && !!H.fire && !jumpPressed && w.bTime < F.aimHoldTime;
-    if (fix2 && F2.aimFreeze && (w.aiming || preAim)) { w.jumpBuf = 0; return; }
+    // Aim plant (AIM_PLANT): a tap keeps moving. Past tapFrames a hold plants her, speed kept,
+    // until B is let go, she jumps, or the hold expires with nothing to aim at. In the air the
+    // plant is once per airtime and only when a point is in reach (or she is already aiming),
+    // so mashing or holding B over empty air cannot hover. Landing or a hook refills it.
+    // A jump during the tap window is a jump, not an aim: that press does not pre-plant in the air.
+    if (w.grounded) { w.airPlantsLeft = AIM_PLANT.perAir; w.airPlanting = false; }
+    if (jumpPressed && (w.grounded || w.coyote > 0) && w.bArmed && w.bHoldFrames <= AIM_PLANT.tapFrames && !w.anchor) w.aimPlantSkip = true;
+    if (!w.bArmed || !H.fire) { w.airPlanting = false; w.aimPlantSkip = false; }
+    if (aimPlant(!!H.fire, jumpPressed)) { w.jumpBuf = 0; return; }
     if (v2 && stepFeel(input, dt, left, right)) { jumpPressed = false; w.jumpBuf = 0; }
     if (w.climb) { stepClimb(dt); afterMove(); return; }
 
@@ -707,7 +743,8 @@ export function createWorld(levelDef, opts = {}) {
       // feel fix 2 snap reel: double-tap UP on a line = a short fast burst reel-in, on top of the
       // normal (slow, unchanged) reel. Angular momentum is kept, so at the bottom of the arc it slingshots.
       if (fix2 && F2.snapReel && !w.pull && !w.yank) {
-        if (P.up) {
+        if (P.snap) { w.snapReelT = F2.snapReelLen; w.upTapAt = -1; emit('snap-reel'); }
+        else if (P.up) {
           if (w.time - w.upTapAt <= F2.snapReelTap) { w.snapReelT = F2.snapReelLen; w.upTapAt = -1; emit('snap-reel'); }
           else w.upTapAt = w.time;
         }

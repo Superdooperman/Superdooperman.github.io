@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en" data-build="test" data-storage="nightlark.v2test" data-commit="1d0ce12">
+<html lang="en" data-build="test" data-storage="nightlark.v2test" data-commit="e9b992f">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; worker-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#090C13">
 <link rel="manifest" href="manifest.webmanifest">
@@ -32,6 +32,7 @@
   #touch .ab { width: 64px; height: 64px; border-radius: 50%; }
   #touch .A { right: calc(20px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); }
   #touch .B { right: calc(96px + env(safe-area-inset-right)); bottom: calc(68px + env(safe-area-inset-bottom)); }
+  #touch .P { width: 52px; height: 52px; font-size: 11px; right: calc(164px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); border-radius: 12px; }
   /* ZIP (yank) only with ?yank=button; the default yank is holding B on the line */
   #touch .Z { display: none; width: 52px; height: 52px; font-size: 11px; right: calc(28px + env(safe-area-inset-right)); bottom: calc(104px + env(safe-area-inset-bottom)); }
   body.yank-button #touch .Z { display: flex; }
@@ -53,6 +54,7 @@
   <div class="b dpad" aria-label="D-pad"></div>
   <div class="b ab B" data-action="fire" aria-label="B">B</div>
   <div class="b ab Z" data-action="yank" aria-label="Zip">ZIP</div>
+  <div class="b ab P" data-action="pullToggle" aria-label="Pull">PULL</div>
   <div class="b ab A" data-action="jump" aria-label="A">A</div>
   <div class="b sys start" data-action="start" aria-label="Start">START</div>
   <div class="b sys select" data-action="select" aria-label="Select">SELECT</div>

@@ -185,7 +185,7 @@ export const ARCH = Object.freeze({
  *  pad R1, touch ZIP; B is unchanged) or 'hold' (hold B on the line to zip, release B to launch).
  *  main.js sets it from ?yank= or localStorage. Default is 'button' because 'hold' defers B's
  *  let-go to the release, which breaks the browser walkthrough (FEEL-PLAN.md, "B-hold clash"). */
-export const SETTINGS = { yankInput: 'button', anchors: null, feel: 'fix2', grapple: 'classic', abilities: { pullGrapple: false } }; // feel: 'fix2' (default), 'fix1' (?physics=fix1) or 'legacy'; grapple: 'classic' or 'pull' (needs abilities.pullGrapple; ?grapple=pull grants it, no pickup yet) // anchors: null (room decides) or 'mixed' (?anchors=arch)
+export const SETTINGS = { yankInput: 'button', anchors: null, feel: 'fix2', grapple: 'classic', abilities: { pullGrapple: true }, touch: 'auto' }; // feel: 'fix2' (default), 'fix1' (?physics=fix1) or 'legacy'; grapple: 'classic' or 'pull' (always had; ?grapple=pull starts in pull as an alias); touch: 'on'|'off'|'auto' // anchors: null (room decides) or 'mixed' (?anchors=arch)
 
 export const SWING = Object.freeze({
   // pumping (Worms rope style): holding the way the swing is already going adds more than
@@ -319,7 +319,7 @@ export const FEELFIX = Object.freeze({
 /** Feel fix 2 (Nov 3 2026, Azzato's playtest notes). On top of FEELFIX, only with feel 'fix2'
  *  (the default; ?physics=fix1 keeps the fix-1 feel, ?physics=legacy the old one). */
 export const FEELFIX2 = Object.freeze({
-  // hold to aim: Wren holds perfectly still (no drift at all) until B is let go or the aim is cancelled
+  // hold to aim: once the plant starts (AIM_PLANT), Wren holds perfectly still until B is let go or the aim is cancelled
   aimFreeze: true,
   // aim: the reticle is the reachable point nearest the aim direction (held D-pad, else facing,
   // tilted up), inside aimConeHalf if any is; ledges and props win over rings
@@ -342,10 +342,43 @@ export const FEELFIX2 = Object.freeze({
   mashKeep: 0.45,
 });
 
-/** Warp-pull grapple (Metroid-style ability, abilities.pullGrapple; ?grapple=pull or the in-game
- *  toggle). The hook point is an invisible anchor; a spring pulls her straight at it. Let go
- *  mid-pull and she keeps the pull's speed (flies on past); hold on and once she is close (or
- *  the pull stalls) the line becomes a normal swing at that length. */
+/** Feel fix 3b: when the aim plant (FEELFIX2.aimFreeze) is allowed to start.
+ *  A B press held for tapFrames or fewer is a tap: she keeps moving, on the ground and in the air.
+ *  Past that it is a hold and she plants. In the air that plant is once per airtime (a real
+ *  hold stops her; mashing B cannot stack freezes into a hover). The count resets on landing
+ *  or a successful hook. Nothing in reach: no air plant at all, she keeps falling. */
+export const AIM_PLANT = Object.freeze({
+  tapFrames: 8, // 6-frame tap, and mash patterns 5/1, 8/2, 3/3, stay inside this and do not plant
+  perAir: 1, // mid-air plants before she lands or hooks
+});
+
+/** Searchlights and lamps (Azzato, feel-fix-3). Tunable in one place. Warm/amber = home;
+ *  cold SW = Company. Every lamp, warm or cold, counts for the 54 px hide rule. */
+export const LIGHT = Object.freeze({
+  hideRadiusPx: 54, // TUNING.hideLampRadius is this in tiles
+  // Searchlights: battlements floor 2+ and the lantern room only. Max 1 per band. Never the shaft.
+  searchFromFloor: 2,
+  searchMaxPerBand: 1,
+  searchSizes: Object.freeze(['small', 'big']), // small = searchlight-head 16px, big = searchlight-prop-32
+  // TODO(Azzato): warm-light buff is NOT decided. Stub hook, no effect.
+  warmBuff: false,
+});
+
+/** Mini moon towers: a few per level. Relight = checkpoint + small safe pocket + map reveal.
+ *  revealRadius 320 is a PLACEHOLDER. */
+export const MINI_TOWER = Object.freeze({
+  perLevelMin: 2,
+  perLevelMax: 3,
+  revealRadius: 320, // px, placeholder
+  poolRadius: 80, // px
+  useRange: 1.6, // tiles
+});
+
+/** Warp-pull grapple (Metroid-style ability, abilities.pullGrapple; always on in feel-fix-3.
+ *  ?grapple=pull starts in pull mode as an alias; G / Y / the touch toggle switches). The hook
+ *  point is an invisible anchor; a spring pulls her straight at it. Let go mid-pull and she
+ *  keeps the pull's speed (flies on past); hold on and once she is close (or the pull stalls)
+ *  the line becomes a normal swing at that length. */
 export const PULL = Object.freeze({
   spring: 120, // t/s^2 per tile of stretch toward the anchor (pull toward it)
   maxAccel: 260, // t/s^2 cap on the spring

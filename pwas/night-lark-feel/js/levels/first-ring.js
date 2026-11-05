@@ -12,6 +12,7 @@
 //   Plus the materials: the landing is stone with a wooden awning over it; landing on the awning
 //   shows "DOWN+A: DROP" (or walk off it: a 4-tile drop rolls).
 import { blankRows, fillRect, putTile } from '../level.js';
+import { dressGenerated } from '../kit/dress.js';
 
 export function firstRingV1() {
   const t = blankRows(40, 14);
@@ -63,7 +64,7 @@ export function firstRing() {
   putTile(t, g.exit.r, g.exit.c, 'E');
   const B = '{B}';
   const A = '{A}';
-  return {
+  const def = {
     name: 'FIRST RING',
     rows: t,
     guards: [],
@@ -84,4 +85,6 @@ export function firstRing() {
       { c0: 25, c1: 29, x: 26.5, top: g.land.top },
     ],
   };
+  dressGenerated(def, 1, { keepAnchors: true });
+  return def;
 }

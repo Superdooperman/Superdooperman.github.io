@@ -7,7 +7,7 @@ import { swipeDodge } from './feel.js';
 // Actions follow the v2 pad (BRIEF: D-pad, A jump, B line, Start, Select), plus two
 // v1-compat actions the ported engine still uses until M1's controls replace them:
 // 'use' (v1 E / Enter) and 'crouch' (v1 C).
-export const ACTIONS = ['left', 'right', 'up', 'down', 'jump', 'fire', 'start', 'select', 'use', 'crouch', 'yank', 'dodge', 'attack'];
+export const ACTIONS = ['left', 'right', 'up', 'down', 'jump', 'fire', 'start', 'select', 'use', 'crouch', 'yank', 'dodge', 'attack', 'pullToggle', 'snap'];
 
 /** Keyboard per BRIEF (arrows/WASD, Z/Space = A, X/J = B, Enter = Start, Shift = Select),
  *  plus v1's E (use) and C (crouch). (M0 also mapped Enter to use like v1; in M1 Enter is
@@ -25,11 +25,17 @@ export const KEY_MAP = Object.freeze({
   KeyK: ['yank'], KeyV: ['yank'], // swing-feel: the separate zip key (only with ?yank=button)
   KeyQ: ['dodge'], // feel pass 1: the dash. Touch uses a swipe (feel.js), not a button.
   KeyF: ['attack'],
+  KeyG: ['pullToggle'], // warp-pull / swing toggle (also pad Y, touch PULL)
 });
 
-/** Gamepad API "standard" mapping. */
-export const PAD_BUTTONS = Object.freeze({ 0: 'jump', 1: 'fire', 2: 'fire', 3: 'use', 4: 'dodge', 5: 'yank', 7: 'attack', 8: 'select', 9: 'start', 12: 'up', 13: 'down', 14: 'left', 15: 'right' });
+/** Gamepad API "standard" mapping (feel-fix-3).
+ *  0 A jump, 1 B / 2 X fire, 3 Y pull-toggle, 4 LB dodge, 5 RB yank,
+ *  6 LT attack, 7 RT analog snap-reel, 8 select, 9 Start pause,
+ *  12-15 D-pad. Left stick moves. Right stick aims (see PAD_AIM_DEADZONE). */
+export const PAD_BUTTONS = Object.freeze({ 0: 'jump', 1: 'fire', 2: 'fire', 3: 'pullToggle', 4: 'dodge', 5: 'yank', 6: 'attack', 8: 'select', 9: 'start', 12: 'up', 13: 'down', 14: 'left', 15: 'right' });
 export const PAD_DEADZONE = 0.5;
+export const PAD_AIM_DEADZONE = 0.25;
+export const PAD_SNAP_THRESHOLD = 0.6; // RT analog (button 7)
 
 export function actionsFromKeys(codes) {
   const out = new Set();
@@ -44,6 +50,7 @@ export function actionsFromPads(pads) {
     p.buttons.forEach((b, i) => {
       const a = PAD_BUTTONS[i];
       if (a && (b.pressed || b.value > 0.5)) out.add(a);
+      if (i === 7 && (b.value > PAD_SNAP_THRESHOLD || b.pressed)) out.add('snap');
     });
     const [ax = 0, ay = 0] = p.axes || [];
     if (ax < -PAD_DEADZONE) out.add('left');
@@ -52,6 +59,16 @@ export function actionsFromPads(pads) {
     if (ay > PAD_DEADZONE) out.add('down');
   }
   return out;
+}
+
+/** Right-stick aim vector in [-1,1], or null when under the deadzone / no pad. */
+export function aimStickFromPads(pads) {
+  for (const p of pads || []) {
+    if (!p || !p.connected) continue;
+    const ax = p.axes?.[2] || 0; const ay = p.axes?.[3] || 0;
+    if (Math.hypot(ax, ay) >= PAD_AIM_DEADZONE) return { x: ax, y: ay };
+  }
+  return null;
 }
 
 /** The browser's pad list (Gamepad API), or [] when there is none. */
@@ -73,6 +90,8 @@ export function createInput({ getGamepads = navigatorPads } = {}) {
   const input = {
     /** 'key' | 'touch' | 'pad': whichever was used last (prompts show matching button names). */
     device: 'key',
+    /** True only for the sample that just read a pad button or the right stick. */
+    padUsed: false,
     /** Gamepads seen as connected (index -> id), kept by gamepadconnected/disconnected. */
     pads: new Map(),
     keyDown(code) { keys.add(code); for (const a of KEY_MAP[code] || []) tapped.add(a); if (KEY_MAP[code]) input.device = 'key'; },
@@ -118,10 +137,15 @@ export function createInput({ getGamepads = navigatorPads } = {}) {
       for (const a of tapped) now.add(a);
       const fresh = new Set(tapped);
       tapped.clear();
+      let aimStick = null;
+      input.padUsed = false;
       if (getGamepads) {
-        const padActs = actionsFromPads(getGamepads());
-        if (padActs.size) input.device = 'pad';
+        const pads = getGamepads();
+        const padActs = actionsFromPads(pads);
+        if (padActs.size) { input.device = 'pad'; input.padUsed = true; }
         for (const a of padActs) now.add(a);
+        aimStick = aimStickFromPads(pads);
+        if (aimStick) { input.device = 'pad'; input.padUsed = true; }
       }
       const held = {};
       const pressed = {};
@@ -136,7 +160,7 @@ export function createInput({ getGamepads = navigatorPads } = {}) {
       point = null;
       const dodgeDir = input._dodgeDir || 0;
       input._dodgeDir = 0;
-      return { held, pressed, released, aimAt, dodgeDir };
+      return { held, pressed, released, aimAt, dodgeDir, aimStick };
     },
   };
   return input;

@@ -3,6 +3,16 @@
 // roll-over (slide a thumb between directions, diagonals included); A and B on the right,
 // Start and Select small at the top. Every button is at least 48 CSS px. Pointer capture keeps
 // a held button held while the thumb drifts; a lost pointer releases it.
+//
+// Visibility (feel-fix-3): menu setting On / Off / Auto. Auto hides the pad when a gamepad
+// connects and shows it again on the next touch. Once that pad is actually used, auto hides
+// the controls again. Persisted via save.settings.touch.
+
+/** Auto mode hides the on-screen controls when a connected pad is used. Idle connection
+ *  does not: a touch may show them until the next pad button or stick. */
+export function autoHidesOnPadUse(mode, padConnected, padUsed) {
+  return (mode || 'auto') === 'auto' && !!padConnected && !!padUsed;
+}
 export const DPAD_DEAD = 0.25; // fraction of the pad radius ignored at the centre
 
 /** Pure: which directions a point on the D-pad means. dx, dy are offsets from its centre,
@@ -17,16 +27,36 @@ export function dpadDirs(dx, dy, r) {
   return out;
 }
 
-export function bindTouch(input, root, { forceShow = false } = {}) {
+export function bindTouch(input, root, { forceShow = false, getMode = () => 'auto', hasPad = () => false } = {}) {
   const api = {
     shown: false,
-    show() { if (!api.shown) { api.shown = true; root.hidden = false; } },
+    lastTouch: 0,
+    show() {
+      if (mode() === 'off') { hide(); return; }
+      if (!api.shown) { api.shown = true; root.hidden = false; }
+    },
+    hide: hide,
+    refresh() { apply(); },
+    /** Call after each input sample. `used` is true when that sample read the pad. */
+    notePad(used) { if (autoHidesOnPadUse(mode(), hasPad(), used)) hide(); },
   };
-  const coarse = typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches;
-  if (forceShow || coarse) api.show();
-  addEventListener('touchstart', () => api.show(), { passive: true, capture: true });
+  function mode() { return getMode() || 'auto'; }
+  function hide() { if (api.shown || !root.hidden) { api.shown = false; root.hidden = true; } }
+  function apply() {
+    const m = mode();
+    if (m === 'on' || forceShow) { api.show(); return; }
+    if (m === 'off') { hide(); return; }
+    // auto: hide while a pad is connected, unless a touch happened after the last pad sample
+    if (hasPad() && (typeof performance === 'undefined' || performance.now() - api.lastTouch > 400)) hide();
+    else if (api.shown || (typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches)) api.show();
+  }
+  apply();
+  addEventListener('touchstart', () => {
+    api.lastTouch = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    if (mode() !== 'off') api.show();
+  }, { passive: true, capture: true });
 
-  // A, B, Start, Select: one action each.
+  // A, B, Start, Select, PULL: one action each.
   for (const el of root.querySelectorAll('[data-action]')) {
     const action = el.dataset.action;
     const down = (e) => { e.preventDefault(); el.setPointerCapture?.(e.pointerId); el.classList.add('on'); input.touchSet(action, true); };
