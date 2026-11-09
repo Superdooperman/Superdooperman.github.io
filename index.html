@@ -117,10 +117,12 @@
                linear-gradient(0deg, rgba(11,13,18,.55), transparent 40%);
     pointer-events:none;
   }
-  .slide-art picture,.cover picture{display:block;width:100%;height:100%}
+  .slide-art picture,.cover picture{display:block;width:100%;height:100%;min-width:0;min-height:0;overflow:hidden}
   .slide-art picture{align-self:stretch;justify-self:stretch}
   .slide-art img{
-    width:100%;height:100%;object-fit:contain;object-position:center;display:block;
+    width:100%;height:100%;max-width:100%;max-height:100%;
+    min-width:0;min-height:0;
+    object-fit:contain;object-position:center;display:block;
   }
   .slide-art.fit img{
     width:72%;height:auto;max-height:78%;object-fit:contain;margin:auto;
@@ -210,7 +212,10 @@
     display:grid;place-items:center;
   }
   .cover img{
-    width:100%;height:100%;object-fit:contain;object-position:center;display:block;
+    /* min 0 beats grid/flex intrinsic min-size so tall art is not clipped by overflow:hidden */
+    width:100%;height:100%;max-width:100%;max-height:100%;
+    min-width:0;min-height:0;
+    object-fit:contain;object-position:center;display:block;
   }
   .cover.placeholder{
     background:
