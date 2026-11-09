@@ -3,111 +3,724 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Superdoop Arcade &amp; Tools</title>
-<meta name="description" content="Tiny apps. Big fun. No installs, no accounts, they even work offline.">
-<meta name="theme-color" content="#0a0a0a">
+<title>Superdooper Software</title>
+<meta name="description" content="Games, apps, comics, music, and art from Superdooper Software.">
+<meta name="theme-color" content="#0b0d12">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Superdoop">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <style>
-:root{--bg:#0a0a0a;--bg2:#141414;--txt:#fff;--mut:#b8b8b8;--acc:#d6322e;--acc2:#ff4a44;--cy:#ff6a64;--glass:#141414;--line:rgba(255,255,255,.12)}
-*{box-sizing:border-box}
-html{color-scheme:dark}
-body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--txt);line-height:1.55;min-height:100vh;overflow-x:hidden}
-body::before{content:"";position:fixed;inset:0;z-index:-2;background:radial-gradient(60% 40% at 50% 0%,rgba(214,50,46,.16),transparent 70%)}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-a{color:var(--cy)}
-:focus-visible{outline:3px solid var(--acc);outline-offset:3px;border-radius:12px}
-.skip{position:absolute;left:-999px}.skip:focus{left:12px;top:12px;background:#000;padding:8px 12px;z-index:9}
-.wrap{max-width:1180px;margin:0 auto;padding:0 18px}
-header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0;flex-wrap:wrap}
-.logo{font-weight:800;letter-spacing:.02em;text-decoration:none;color:var(--txt);font-size:1.05rem}
-.logo{display:inline-flex;align-items:center;gap:10px}.logo img{height:40px;width:auto;display:block}.logo span{color:var(--acc)}
-.nav{display:flex;gap:8px;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--glass);color:var(--txt);text-decoration:none;font-weight:600;font-size:.9rem;}
-.btn:hover{border-color:var(--acc);box-shadow:0 0 16px rgba(214,50,46,.55)}
-.btn.primary{background:var(--acc);color:#fff;border:0}.btn.primary:hover{background:var(--acc2)}
-.hero{text-align:center;padding:36px 0 22px}
-.hero h1{font-size:clamp(2.1rem,7vw,4rem);line-height:1.05;margin:0 0 14px;font-weight:850;letter-spacing:-.02em}
-.hero h1 .g{color:var(--acc)}.hero-mark{display:block;margin:0 auto 18px;max-width:min(520px,86vw);height:auto}.hero-mark.box{max-width:min(440px,80vw);margin-bottom:14px;border-radius:6px}
-.hero p{color:var(--mut);font-size:clamp(1rem,2.6vw,1.2rem);max-width:620px;margin:0 auto}
-.glass{background:var(--glass);border:1px solid var(--line);border-radius:20px;}
-.featured{display:grid;gap:20px;padding:24px;margin:22px 0 10px;position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(214,50,46,.20),transparent 60%),var(--bg2);border-color:rgba(214,50,46,.5)}
-.featured .icon{font-size:56px;width:92px;height:92px}
-.featured h2{margin:6px 0;font-size:clamp(1.6rem,5vw,2.4rem)}
-.kicker{font-size:.75rem;text-transform:uppercase;letter-spacing:.18em;color:var(--acc);font-weight:700}
-.featured .hook{font-size:1.1rem;color:var(--txt);margin:0 0 6px}
-.featured .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-.featured .btn.primary{font-size:1.05rem;padding:13px 24px}
-@media(min-width:760px){.featured{grid-template-columns:auto 1fr;align-items:center;padding:36px}}
-section h2.row{font-size:1.35rem;margin:34px 0 14px;display:flex;align-items:center;gap:10px}
-section h2.row::after{content:"";flex:1;height:1px;background:var(--line)}
-.grid{display:grid;gap:16px;grid-template-columns:1fr}
-@media(min-width:600px){.grid{grid-template-columns:repeat(2,1fr)}}
-@media(min-width:980px){.grid{grid-template-columns:repeat(3,1fr)}}
-.card{display:flex;flex-direction:column;gap:8px;padding:20px;text-decoration:none;color:inherit;transition:transform .2s,border-color .2s;position:relative}
-.card:hover{transform:translateY(-3px);border-color:var(--acc);box-shadow:0 0 22px rgba(214,50,46,.35)}
-.icon{width:58px;height:58px;border-radius:16px;display:grid;place-items:center;font-size:30px;background:#1e1e1e;border-left:3px solid var(--acc);box-shadow:inset 0 0 0 1px var(--line)}
-.name{font-weight:750;font-size:1.2rem;margin-top:4px}
-.hook{color:var(--txt);font-weight:500;margin:0}
-.desc{color:var(--mut);font-size:.93rem;margin:0}
-.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:8px}
-.chip{font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--txt)}
-.chip.game{background:rgba(214,50,46,.25)}.chip.tool{background:rgba(255,255,255,.08)}.chip.off{background:rgba(255,255,255,.04)}
-.badge{position:absolute;top:14px;right:14px;font-size:.68rem;font-weight:700;padding:4px 8px;border-radius:8px;background:rgba(0,0,0,.45);border:1px solid var(--line);color:#fff}
-.install{margin:40px 0 0;padding:22px;display:grid;gap:14px}
-.install h2{margin:0;font-size:1.25rem}
-.install ol{margin:0;padding-left:20px;color:var(--mut)}
-.install b{color:var(--txt)}
-@media(min-width:760px){.install{grid-template-columns:1fr 1fr 1fr}.install h2{grid-column:1/-1}}
-.signup{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:40px 0 0;padding:22px;text-align:center}
-.signup h2{width:100%;margin:0 0 4px;font-size:1.25rem}
-.signup input{flex:1 1 220px;max-width:320px;padding:11px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--txt);font:inherit}
-footer{padding:36px 0 50px;text-align:center;color:var(--mut);font-size:.9rem}
-footer .links{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
-.soon{opacity:.8;cursor:default}
+  :root{
+    --bg:#0b0d12;
+    --bg2:#12151c;
+    --panel:#171b24;
+    --panel2:#1d2330;
+    --line:rgba(255,255,255,.08);
+    --line2:rgba(255,255,255,.14);
+    --txt:#f4f6fb;
+    --mut:#9aa3b5;
+    --mut2:#6f788a;
+    --acc:#e23b36;
+    --acc2:#ff5a52;
+    --acc-soft:rgba(226,59,54,.16);
+    --shadow:0 18px 50px rgba(0,0,0,.45);
+    --radius:18px;
+    --font:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{color-scheme:dark}
+  body{
+    margin:0;font-family:var(--font);background:var(--bg);color:var(--txt);
+    line-height:1.5;min-height:100vh;
+    background-image:
+      radial-gradient(900px 420px at 50% -10%, rgba(226,59,54,.18), transparent 60%),
+      radial-gradient(700px 360px at 90% 10%, rgba(125,211,252,.06), transparent 55%),
+      linear-gradient(180deg,#0b0d12 0%, #0a0c10 100%);
+  }
+  a{color:inherit;text-decoration:none}
+  img{max-width:100%;display:block}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+  :focus-visible{outline:2px solid var(--acc2);outline-offset:3px;border-radius:10px}
+  .skip{position:absolute;left:-999px}.skip:focus{left:12px;top:12px;z-index:20;background:#000;padding:8px 12px;border-radius:8px}
 
-.hub{display:grid;gap:18px;grid-template-columns:1fr;margin-top:10px}
-@media(min-width:760px){.hub{grid-template-columns:repeat(2,1fr)}.hub .big{grid-column:1/-1}}
-.hub .card{padding:26px;min-height:170px}.hub .big{min-height:240px;background:linear-gradient(135deg,rgba(214,50,46,.28),transparent 65%),var(--bg2);border-color:rgba(214,50,46,.55)}
-.hub .big .name{font-size:clamp(1.6rem,4vw,2.4rem)}.hub .k{font-size:2.2rem}
-.cta{margin-top:auto;font-weight:800;color:var(--acc2)}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 18px 64px}
+
+  header.top{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:18px 0 8px;flex-wrap:wrap;
+  }
+  .brand{
+    display:inline-flex;align-items:center;gap:12px;min-width:0;
+  }
+  .brand .mark{height:40px;width:auto;flex:0 0 auto}
+  .brand .wordmark{
+    display:flex;flex-direction:column;gap:1px;line-height:1.05;min-width:0;
+  }
+  .brand .wordmark strong{
+    font-size:clamp(1.05rem,2.4vw,1.28rem);font-weight:800;letter-spacing:-.02em;
+    white-space:nowrap;
+  }
+  .brand .wordmark em{
+    font-style:normal;font-size:.72rem;font-weight:650;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--mut2);
+  }
+  .nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:10px 16px;border-radius:999px;border:1px solid var(--line2);
+    background:rgba(255,255,255,.03);color:var(--txt);font-weight:650;font-size:.92rem;
+    transition:border-color .18s, background .18s, transform .18s, box-shadow .18s;
+  }
+  .btn:hover{border-color:rgba(226,59,54,.55);background:rgba(226,59,54,.08);box-shadow:0 0 0 1px rgba(226,59,54,.15)}
+  .btn.primary{
+    background:linear-gradient(180deg,var(--acc2),var(--acc));
+    border:0;color:#fff;box-shadow:0 8px 24px rgba(226,59,54,.35);
+  }
+  .btn.primary:hover{filter:brightness(1.06);transform:translateY(-1px)}
+  .btn.ghost{background:transparent}
+
+  /* ===== Hero slideshow ===== */
+  .hero{
+    margin-top:18px;border:1px solid var(--line2);border-radius:24px;overflow:hidden;
+    background:var(--panel);box-shadow:var(--shadow);
+    position:relative;isolation:isolate;
+  }
+  .hero-track{position:relative;min-height:360px}
+  .slide{
+    position:absolute;inset:0;display:grid;grid-template-columns:1.15fr .85fr;
+    opacity:0;visibility:hidden;pointer-events:none;
+    transform:translateX(28px);
+    transition:opacity .55s ease, transform .55s ease, visibility 0s linear .55s;
+  }
+  .slide.is-active{
+    opacity:1;visibility:visible;pointer-events:auto;transform:translateX(0);
+    transition:opacity .55s ease, transform .55s ease, visibility 0s;
+    z-index:1;
+  }
+  .slide.is-exit{
+    opacity:0;visibility:visible;transform:translateX(-18px);
+    transition:opacity .45s ease, transform .45s ease;
+    z-index:0;
+  }
+  .slide-art{
+    position:relative;min-height:320px;background:#0a0a0e;overflow:hidden;
+    display:grid;place-items:center;
+  }
+  .slide-art::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(90deg, transparent 55%, rgba(23,27,36,.92) 100%),
+               linear-gradient(0deg, rgba(11,13,18,.55), transparent 40%);
+    pointer-events:none;
+  }
+  .slide-art picture,.cover picture{display:block;width:100%;height:100%}
+  .slide-art picture{align-self:stretch;justify-self:stretch}
+  .slide-art img{
+    width:100%;height:100%;object-fit:cover;object-position:center top;
+  }
+  .slide-art.fit img{
+    width:72%;height:auto;max-height:78%;object-fit:contain;margin:auto;
+  }
+  .slide-art.fit.nl{background:linear-gradient(160deg,#2a1f55,#0d1018 70%)}
+  .slide-copy{
+    padding:34px 34px 30px;display:flex;flex-direction:column;justify-content:center;gap:12px;
+    position:relative;z-index:1;background:linear-gradient(135deg, rgba(226,59,54,.12), transparent 50%), var(--panel);
+  }
+  .kicker{
+    display:inline-flex;align-items:center;gap:8px;width:fit-content;
+    font-size:.72rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--acc2);background:var(--acc-soft);border:1px solid rgba(226,59,54,.35);
+    padding:6px 10px;border-radius:999px;
+  }
+  .slide h2{margin:0;font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.08;letter-spacing:-.03em}
+  .slide .hook{margin:0;color:var(--mut);font-size:1.02rem;max-width:38ch}
+  .slide .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+  .chip{
+    font-size:.72rem;font-weight:750;padding:4px 10px;border-radius:999px;
+    border:1px solid var(--line2);color:var(--txt);background:rgba(255,255,255,.04);
+  }
+  .chip.game{background:rgba(226,59,54,.18);border-color:rgba(226,59,54,.35)}
+  .chip.app{background:rgba(125,211,252,.12);border-color:rgba(125,211,252,.28)}
+  .chip.offline{background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.28);color:#a7f3d0}
+  .slide .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+
+  .hero-controls{
+    position:absolute;left:0;right:0;bottom:14px;z-index:5;
+    display:flex;align-items:center;justify-content:center;gap:12px;
+    pointer-events:none;padding:0 16px;
+  }
+  .hero-controls > *{pointer-events:auto}
+  .hero-arrow{
+    width:40px;height:40px;border-radius:999px;border:1px solid var(--line2);
+    background:rgba(0,0,0,.45);backdrop-filter:blur(8px);
+    display:grid;place-items:center;color:#fff;font-size:1.1rem;font-weight:700;
+    transition:background .15s, border-color .15s;
+  }
+  .hero-arrow:hover{background:rgba(226,59,54,.35);border-color:rgba(226,59,54,.55)}
+  .hero-dots{display:flex;gap:8px;align-items:center;padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid var(--line)}
+  .hero-dot{
+    width:9px;height:9px;border-radius:999px;background:rgba(255,255,255,.28);
+    transition:transform .15s, background .15s, width .15s;
+  }
+  .hero-dot[aria-current="true"]{background:var(--acc2);width:22px}
+  .hero-progress{
+    position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.06);z-index:6;
+  }
+  .hero-progress > i{
+    display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--acc),var(--acc2));
+    transform-origin:left center;
+  }
+  .hero.is-paused .hero-progress > i{animation-play-state:paused}
+
+  .section-head{
+    display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    margin:38px 0 16px;
+  }
+  .section-head h2{
+    margin:0;font-size:1.35rem;letter-spacing:-.02em;
+    display:flex;align-items:center;gap:10px;
+  }
+  .section-head h2::after{
+    content:"";display:block;width:48px;height:2px;border-radius:2px;
+    background:linear-gradient(90deg,var(--acc),transparent);
+  }
+  .section-head p{margin:0;color:var(--mut2);font-size:.92rem}
+
+  .shelf{
+    display:grid;gap:16px;
+    grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+  }
+  .card{
+    background:linear-gradient(180deg,var(--panel2),var(--panel));
+    border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+    display:flex;flex-direction:column;transition:transform .2s, border-color .2s, box-shadow .2s;
+    position:relative;
+  }
+  .card:hover{
+    transform:translateY(-4px);
+    border-color:rgba(226,59,54,.45);
+    box-shadow:0 16px 36px rgba(0,0,0,.4), 0 0 0 1px rgba(226,59,54,.12);
+  }
+  .cover{
+    aspect-ratio:3/4;background:#0e1118;position:relative;overflow:hidden;
+  }
+  .cover img{width:100%;height:100%;object-fit:cover}
+  .cover.placeholder{
+    display:grid;place-items:center;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,.08), transparent 40%),
+      linear-gradient(160deg, #1a2030, #0d1018 70%);
+  }
+  .cover .badge{
+    position:absolute;top:10px;left:10px;z-index:2;
+    font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+    padding:5px 8px;border-radius:8px;background:rgba(0,0,0,.55);
+    border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(6px);
+  }
+  .cover .badge.dev{color:#c4b5fd;border-color:rgba(167,139,250,.35)}
+  .body{padding:14px 14px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .name{font-weight:780;font-size:1.02rem;letter-spacing:-.01em;line-height:1.25}
+  .desc{margin:0;color:var(--mut);font-size:.86rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:3.9em}
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+  .playrow{display:flex;gap:8px;margin-top:10px}
+  .playrow .btn{flex:1;padding:9px 12px;font-size:.86rem}
+
+  .hub{
+    margin-top:42px;display:grid;gap:14px;
+    grid-template-columns:repeat(4,1fr);
+  }
+  .hub .tile{
+    border:1px solid var(--line);border-radius:16px;padding:18px;
+    background:rgba(255,255,255,.02);min-height:128px;
+    display:flex;flex-direction:column;gap:6px;transition:border-color .18s, transform .18s;
+  }
+  .hub a.tile:hover{border-color:rgba(226,59,54,.4);transform:translateY(-2px)}
+  .hub .tile.soon{opacity:.72}
+  .hub .emoji{font-size:1.4rem}
+  .hub .t-name{font-weight:750}
+  .hub .t-desc{color:var(--mut);font-size:.88rem;margin:0}
+  .hub .cta{margin-top:auto;color:var(--acc2);font-weight:750;font-size:.88rem}
+
+  footer{
+    margin-top:48px;padding-top:22px;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    color:var(--mut2);font-size:.88rem;
+  }
+  footer .links{display:flex;gap:8px;flex-wrap:wrap}
+
+  @media (max-width:900px){
+    .slide{grid-template-columns:1fr}
+    .slide-art{min-height:220px}
+    .slide-art::after{
+      background:linear-gradient(0deg, rgba(23,27,36,.95) 0%, transparent 55%);
+    }
+    .slide-copy{padding:22px 20px 56px}
+    .hub{grid-template-columns:1fr 1fr}
+    .hero-track{min-height:520px}
+  }
+  @media (max-width:560px){
+    .shelf{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .hub{grid-template-columns:1fr}
+    .brand .mark{height:34px}
+    .slide h2{font-size:1.55rem}
+    .hero-track{min-height:560px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .slide,.slide.is-active,.slide.is-exit{transition:none!important;transform:none!important}
+    .hero-progress > i{display:none!important}
+    .card,.btn,.hub .tile{transition:none!important}
+  }
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <div class="wrap">
-<header class="top">
-  <a class="logo" href="./"><img src="logo-inkblob.svg" alt="Superdoop"></a>
-  <nav class="nav" aria-label="Main">
-    <a class="btn" href="pwas/">🕹️ Games &amp; Apps</a>
-    <a class="btn" href="https://www.redbubble.com/people/superdooperman/shop?asc=u" target="_blank" rel="noopener">🛍️ Shop</a>
-  </nav>
-</header>
-<main id="main">
-<section class="hero">
-  <h1><img class="hero-mark" src="logo-inkblob.svg" alt="Superdoop"></h1>
-  <p>Games, apps, comics, music, and art.</p>
-</section>
-<section class="hub" aria-label="Superdoop sections">
-  <a class="glass card big" href="pwas/"><span class="k">🕹️</span><div class="name">Games &amp; Apps</div><p class="desc">Browser games and small web apps. Many work offline and can be added to your home screen.</p><span class="cta">Browse the shelf →</span></a>
-  <div class="glass card soon" aria-disabled="true"><span class="k">🐓</span><div class="name">Comics</div><p class="desc">Radioactive Rooster.</p><span class="cta">Coming soon</span></div>
-  <a class="glass card" href="https://suno.com/playlist/22a46bb9-8f92-4e54-aa71-5a254d1f896c" target="_blank" rel="noopener"><span class="k">🎵</span><div class="name">Music</div><p class="desc">Eternal Log P(r)ose: Songs of the Grand Line.</p><span class="cta">Listen on Suno →</span></a>
-  <div class="glass card soon" aria-disabled="true"><span class="k">🎨</span><div class="name">Art &amp; Design</div><p class="desc">Art and design work.</p><span class="cta">Coming soon</span></div>
-  <a class="glass card" href="https://www.redbubble.com/people/superdooperman/shop?asc=u" target="_blank" rel="noopener"><span class="k">🛍️</span><div class="name">Shop</div><p class="desc">Superdooperman on Redbubble.</p><span class="cta">Visit the shop →</span></a>
-</section>
-</main>
-<footer>
-  <div class="links">
-    <a class="btn" href="#" data-placeholder="tip-jar">🪙 Tip jar</a>
-  </div>
-  Hosted on GitHub Pages
-</footer>
+  <header class="top">
+    <a class="brand" href="/" aria-label="Superdooper Software home">
+      <img class="mark" src="/store/logo-inkblob.svg" alt="">
+      <span class="wordmark">
+        <strong>Superdooper Software</strong>
+        <em>Games · Apps · Arcade</em>
+      </span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a class="btn" href="#games">Games</a>
+      <a class="btn" href="#apps">Apps</a>
+      <a class="btn" href="https://www.redbubble.com/people/superdooperman/shop?asc=u" target="_blank" rel="noopener">Shop</a>
+      <a class="btn primary" href="#games">Browse the shelf</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="featured" aria-roledescription="carousel" aria-label="Featured games">
+      <div class="hero-track" id="heroTrack">
+        <!-- 1 Moon Axis -->
+        <article class="slide is-active" data-index="0" aria-hidden="false" aria-label="1 of 5">
+          <div class="slide-art">
+            <img src="/store/boxart/moon-axis-cover.webp" alt="Moon Axis cover art" width="600" height="805">
+          </div>
+          <div class="slide-copy">
+            <span class="kicker">Featured · 1 / 5</span>
+            <h2>Moon Axis</h2>
+            <p class="hook"><strong>Hellcats of the Void.</strong> A first-person vector shooter in the 1983 Star Wars arcade mold: glowing wireframe ships, a cockpit rail, seven sorties from the dark side into the Staff.</p>
+            <div class="meta">
+              <span class="chip game">Game</span>
+              <span class="chip offline">Works offline</span>
+              <span class="chip">Browser / PWA</span>
+            </div>
+            <div class="acts">
+              <a class="btn primary" href="/pwas/moon-axis/">▶ Play Moon Axis</a>
+              <a class="btn ghost" href="#games">See the full library</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- 2 Night Lark -->
+        <article class="slide" data-index="1" aria-hidden="true" aria-label="2 of 5">
+          <div class="slide-art">
+            <picture>
+              <source srcset="/store/boxart/night-lark-cover-gold.webp" type="image/webp">
+              <img src="/store/boxart/night-lark-cover-gold.jpg" alt="Night Lark cover art" width="620" height="1200">
+            </picture>
+          </div>
+          <div class="slide-copy">
+            <span class="kicker">Featured · 2 / 5</span>
+            <h2>Night Lark</h2>
+            <p class="hook">A roguelike stealth action game. Plays in your browser and works offline after the first visit.</p>
+            <div class="meta">
+              <span class="chip game">Game</span>
+              <span class="chip offline">Works offline</span>
+              <span class="chip">In progress</span>
+            </div>
+            <div class="acts">
+              <a class="btn primary" href="/pwas/night-lark/">▶ Play Night Lark</a>
+              <a class="btn ghost" href="#games">See the full library</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- 3 Git to da Choppa! -->
+        <article class="slide" data-index="2" aria-hidden="true" aria-label="3 of 5">
+          <div class="slide-art">
+            <img src="/store/boxart/choppa.jpg" alt="Git to da Choppa! cover art" width="600" height="840">
+          </div>
+          <div class="slide-copy">
+            <span class="kicker">Featured · 3 / 5</span>
+            <h2>Git to da Choppa!</h2>
+            <p class="hook"><strong>Apple II rescue tribute.</strong> A love letter to the 1982 Apple II classic. Rescue hostages from the enemy and fly them home to base. Not affiliated with or endorsed by its owners.</p>
+            <div class="meta">
+              <span class="chip game">Game</span>
+              <span class="chip">Browser / PWA</span>
+            </div>
+            <div class="acts">
+              <a class="btn primary" href="/pwas/choppa/">▶ Play Git to da Choppa!</a>
+              <a class="btn ghost" href="#games">See the full library</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- 4 Radioactive Rooster -->
+        <article class="slide" data-index="3" aria-hidden="true" aria-label="4 of 5">
+          <div class="slide-art">
+            <img src="/store/boxart/radioactive-rooster-cover.webp" alt="Radioactive Rooster cover art" width="600" height="900">
+          </div>
+          <div class="slide-copy">
+            <span class="kicker">Featured · 4 / 5</span>
+            <h2>Radioactive Rooster</h2>
+            <p class="hook"><strong>Yolk of Midnight.</strong> A one-sitting point-and-click. Cross Cluck County in a bad disguise and get the Atomic Egg back from The Cock Gobbler before she hard-boils it.</p>
+            <div class="meta">
+              <span class="chip game">Game</span>
+              <span class="chip">Browser / PWA</span>
+            </div>
+            <div class="acts">
+              <a class="btn primary" href="/pwas/radioactive-rooster/">▶ Play Radioactive Rooster</a>
+              <a class="btn ghost" href="#games">See the full library</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- 5 Lamprey -->
+        <article class="slide" data-index="4" aria-hidden="true" aria-label="5 of 5">
+          <div class="slide-art">
+            <img src="/store/boxart/lamprey-cover.webp" alt="Lamprey: In Too Deep cover art" width="600" height="912">
+          </div>
+          <div class="slide-copy">
+            <span class="kicker">Featured · 5 / 5</span>
+            <h2>Lamprey: In Too Deep</h2>
+            <p class="hook"><strong>Trust no inbox.</strong> A Papers, Please-style security desk. Triage flagged emails and texts: stamp PHISH, LEGIT, or ESCALATE using headers, links, and the handbook.</p>
+            <div class="meta">
+              <span class="chip game">Game</span>
+              <span class="chip offline">Works offline</span>
+              <span class="chip">Browser / PWA</span>
+            </div>
+            <div class="acts">
+              <a class="btn primary" href="/pwas/phish-desk/">▶ Play Lamprey</a>
+              <a class="btn ghost" href="#games">See the full library</a>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="hero-controls">
+        <button class="hero-arrow" type="button" id="heroPrev" aria-label="Previous featured game">‹</button>
+        <div class="hero-dots" id="heroDots" role="tablist" aria-label="Featured slides"></div>
+        <button class="hero-arrow" type="button" id="heroNext" aria-label="Next featured game">›</button>
+      </div>
+      <div class="hero-progress" aria-hidden="true"><i id="heroBar"></i></div>
+    </section>
+
+    <div class="section-head" id="games">
+      <h2>Games</h2>
+      <p>Playable in the browser. Many install as PWAs.</p>
+    </div>
+    <section class="shelf" aria-label="Games shelf">
+      <article class="card">
+        <a class="cover" href="/pwas/moon-axis/">
+          <img src="/store/boxart/moon-axis-cover.webp" alt="Moon Axis box art" width="600" height="805">
+        </a>
+        <div class="body">
+          <div class="name">Moon Axis</div>
+          <p class="desc">Hellcats of the Void. First-person vector shooter with glowing wireframe ships and seven sorties.</p>
+          <div class="tags"><span class="chip game">Game</span><span class="chip offline">Offline</span></div>
+          <div class="playrow"><a class="btn primary" href="/pwas/moon-axis/">Play</a></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <a class="cover" href="/pwas/radioactive-rooster/">
+          <img src="/store/boxart/radioactive-rooster-cover.webp" alt="Radioactive Rooster box art" width="600" height="900">
+        </a>
+        <div class="body">
+          <div class="name">Radioactive Rooster</div>
+          <p class="desc">Yolk of Midnight. A one-sitting point-and-click across Cluck County for the Atomic Egg.</p>
+          <div class="tags"><span class="chip game">Game</span></div>
+          <div class="playrow"><a class="btn primary" href="/pwas/radioactive-rooster/">Play</a></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <a class="cover" href="/pwas/phish-desk/">
+          <img src="/store/boxart/lamprey-cover.webp" alt="Lamprey: In Too Deep box art" width="600" height="912">
+        </a>
+        <div class="body">
+          <div class="name">Lamprey: In Too Deep</div>
+          <p class="desc">Trust no inbox. Papers, Please-style security desk — stamp PHISH, LEGIT, or ESCALATE.</p>
+          <div class="tags"><span class="chip game">Game</span></div>
+          <div class="playrow"><a class="btn primary" href="/pwas/phish-desk/">Play</a></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <a class="cover" href="/pwas/moon-axis-unleashed/">
+          <img src="/store/boxart/moon-axis-unleashed-cover.webp" alt="Moon Axis Unleashed box art" width="600" height="812">
+        </a>
+        <div class="body">
+          <div class="name">Moon Axis Unleashed</div>
+          <p class="desc">Chase-rail remake of Moon Axis. Same story, sorties, and recorded lines.</p>
+          <div class="tags"><span class="chip game">Game</span></div>
+          <div class="playrow"><a class="btn primary" href="/pwas/moon-axis-unleashed/">Play</a></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <a class="cover" href="/pwas/choppa/">
+          <img src="/store/boxart/choppa.jpg" alt="Git to da Choppa! box art" width="600" height="840">
+        </a>
+        <div class="body">
+          <div class="name">Git to da Choppa!</div>
+          <p class="desc">Apple II rescue tribute. Fly hostages home — a love letter to the 1982 classic.</p>
+          <div class="tags"><span class="chip game">Game</span></div>
+          <div class="playrow"><a class="btn primary" href="/pwas/choppa/">Play</a></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <a class="cover" href="/pwas/night-lark/">
+          <span class="badge dev">In progress</span>
+          <picture>
+            <source srcset="/store/boxart/night-lark-cover-gold.webp" type="image/webp">
+            <img src="/store/boxart/night-lark-cover-gold.jpg" alt="Night Lark box art" width="620" height="1200">
+          </picture>
+        </a>
+        <div class="body">
+          <div class="name">Night Lark</div>
+          <p class="desc">A roguelike stealth action game. Plays in your browser and works offline after the first visit.</p>
+          <div class="tags"><span class="chip game">Game</span><span class="chip offline">Offline</span></div>
+          <div class="playrow"><a class="btn primary" href="/pwas/night-lark/">Play</a></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <a class="cover placeholder" href="/pwas/stick-shift/" style="background:linear-gradient(160deg,#3a1014,#0d1018 70%)">
+          <img src="/store/boxart/stick-shift.svg" alt="Stick Shift Simulator box art" style="width:70%;height:auto;object-fit:contain;margin:auto">
+        </a>
+        <div class="body">
+          <div class="name">Stick Shift Simulator</div>
+          <p class="desc">Manual transmission trainer for a 6-speed H-pattern — clutch bite, stalls, rev-matching.</p>
+          <div class="tags"><span class="chip game">Game</span></div>
+          <div class="playrow"><a class="btn primary" href="/pwas/stick-shift/">Play</a></div>
+        </div>
+      </article>
+    </section>
+
+    <div class="section-head" id="apps">
+      <h2>Apps &amp; tools</h2>
+      <p>Small web apps. No accounts required.</p>
+    </div>
+    <section class="shelf" aria-label="Apps shelf">
+      <article class="card">
+        <a class="cover placeholder" href="/pwas/dazed-map/" style="background:linear-gradient(160deg,#3a2a10,#0d1018 70%)">
+          <img src="/store/boxart/dazed-map.svg" alt="Dazed &amp; Confused box art" style="width:70%;height:auto;object-fit:contain;margin:auto">
+        </a>
+        <div class="body">
+          <div class="name">Dazed &amp; Confused</div>
+          <p class="desc">Austin Film Map — interactive filming locations from Linklater’s 1993 classic.</p>
+          <div class="tags"><span class="chip app">App</span></div>
+          <div class="playrow"><a class="btn primary" href="/pwas/dazed-map/">Open</a></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <a class="cover" href="/pwas/TimeTracker.html">
+          <img src="/store/boxart/rooster-timer-cover.webp" alt="Rooster Timer box art" width="600" height="912">
+        </a>
+        <div class="body">
+          <div class="name">Rooster Timer</div>
+          <p class="desc">Pomodoro egg timer starring Radioactive Rooster — wobbles, cracks, then crows PAH KAW!</p>
+          <div class="tags"><span class="chip app">App</span></div>
+          <div class="playrow"><a class="btn primary" href="/pwas/TimeTracker.html">Open</a></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <a class="cover" href="/pwas/yolk-box/">
+          <img src="/store/boxart/yolk-box-cover.webp" alt="Midnight's Yolk Box box art" width="600" height="747">
+        </a>
+        <div class="body">
+          <div class="name">Midnight's Yolk Box</div>
+          <p class="desc">Groovebox in your browser — PAH-KAW B0B drums and YOLK E0E bass synth.</p>
+          <div class="tags"><span class="chip app">App</span></div>
+          <div class="playrow"><a class="btn primary" href="/pwas/yolk-box/">Open</a></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <a class="cover placeholder" href="/pwas/video-toolbox.html" style="background:linear-gradient(160deg,#3a1010,#0d1018 70%)">
+          <img src="/store/boxart/video-toolbox.svg" alt="Video Toolbox box art" style="width:70%;height:auto;object-fit:contain;margin:auto">
+        </a>
+        <div class="body">
+          <div class="name">Video Toolbox</div>
+          <p class="desc">Trim, compress, convert, and caption clips in-browser with ffmpeg — nothing uploaded.</p>
+          <div class="tags"><span class="chip app">App</span></div>
+          <div class="playrow"><a class="btn primary" href="/pwas/video-toolbox.html">Open</a></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="hub" aria-label="More Superdooper Software">
+      <div class="tile soon" aria-disabled="true">
+        <span class="emoji" aria-hidden="true">🐓</span>
+        <div class="t-name">Comics</div>
+        <p class="t-desc">Radioactive Rooster.</p>
+        <span class="cta">Coming soon</span>
+      </div>
+      <a class="tile" href="https://suno.com/playlist/22a46bb9-8f92-4e54-aa71-5a254d1f896c" target="_blank" rel="noopener">
+        <span class="emoji" aria-hidden="true">🎵</span>
+        <div class="t-name">Music</div>
+        <p class="t-desc">Eternal Log P(r)ose: Songs of the Grand Line.</p>
+        <span class="cta">Listen on Suno →</span>
+      </a>
+      <div class="tile soon" aria-disabled="true">
+        <span class="emoji" aria-hidden="true">🎨</span>
+        <div class="t-name">Art &amp; Design</div>
+        <p class="t-desc">Art and design work.</p>
+        <span class="cta">Coming soon</span>
+      </div>
+      <a class="tile" href="https://www.redbubble.com/people/superdooperman/shop?asc=u" target="_blank" rel="noopener">
+        <span class="emoji" aria-hidden="true">🛍️</span>
+        <div class="t-name">Shop</div>
+        <p class="t-desc">Superdooperman on Redbubble.</p>
+        <span class="cta">Visit the shop →</span>
+      </a>
+    </section>
+  </main>
+
+  <footer>
+    <div>© Superdooper Software · azzato.live</div>
+    <div class="links">
+      <a class="btn" href="/pwas/archive/">Tinkerer's Archive</a>
+      <a class="btn" href="#" data-placeholder="tip-jar">Tip jar</a>
+    </div>
+  </footer>
 </div>
+
+<script>
+(function () {
+  const root = document.getElementById('featured');
+  const track = document.getElementById('heroTrack');
+  const slides = Array.from(track.querySelectorAll('.slide'));
+  const dotsWrap = document.getElementById('heroDots');
+  const prevBtn = document.getElementById('heroPrev');
+  const nextBtn = document.getElementById('heroNext');
+  const bar = document.getElementById('heroBar');
+  const INTERVAL = 6000;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let index = 0;
+  let timer = null;
+  let start = 0;
+  let paused = false;
+  let remaining = INTERVAL;
+
+  slides.forEach((_, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'hero-dot';
+    b.setAttribute('role', 'tab');
+    b.setAttribute('aria-label', 'Show featured game ' + (i + 1));
+    if (i === 0) b.setAttribute('aria-current', 'true');
+    b.addEventListener('click', () => go(i, true));
+    dotsWrap.appendChild(b);
+  });
+  const dots = Array.from(dotsWrap.children);
+
+  function paint(from, to) {
+    slides.forEach((s, i) => {
+      s.classList.remove('is-active', 'is-exit');
+      s.setAttribute('aria-hidden', i === to ? 'false' : 'true');
+      if (i === from && from !== to && !reduce) s.classList.add('is-exit');
+      if (i === to) s.classList.add('is-active');
+    });
+    dots.forEach((d, i) => {
+      if (i === to) d.setAttribute('aria-current', 'true');
+      else d.removeAttribute('aria-current');
+    });
+    index = to;
+  }
+
+  function go(to, user) {
+    const next = ((to % slides.length) + slides.length) % slides.length;
+    if (next === index && !user) return;
+    paint(index, next);
+    restart(user);
+  }
+
+  function tick(now) {
+    if (paused || reduce) return;
+    const elapsed = now - start;
+    const pct = Math.min(100, (elapsed / INTERVAL) * 100);
+    bar.style.width = pct + '%';
+    if (elapsed >= INTERVAL) {
+      go(index + 1, false);
+      return;
+    }
+    timer = requestAnimationFrame(tick);
+  }
+
+  function restart(user) {
+    if (timer) cancelAnimationFrame(timer);
+    remaining = INTERVAL;
+    bar.style.width = '0%';
+    if (reduce) return;
+    start = performance.now();
+    if (!paused) timer = requestAnimationFrame(tick);
+  }
+
+  function pause() {
+    if (reduce) return;
+    paused = true;
+    root.classList.add('is-paused');
+    remaining = Math.max(0, INTERVAL - (performance.now() - start));
+    if (timer) cancelAnimationFrame(timer);
+  }
+
+  function resume() {
+    if (reduce) return;
+    paused = false;
+    root.classList.remove('is-paused');
+    start = performance.now() - (INTERVAL - remaining);
+    timer = requestAnimationFrame(tick);
+  }
+
+  prevBtn.addEventListener('click', () => go(index - 1, true));
+  nextBtn.addEventListener('click', () => go(index + 1, true));
+  root.addEventListener('mouseenter', pause);
+  root.addEventListener('mouseleave', resume);
+  root.addEventListener('focusin', pause);
+  root.addEventListener('focusout', (e) => {
+    if (!root.contains(e.relatedTarget)) resume();
+  });
+
+  // Swipe (mobile)
+  let tx = null;
+  track.addEventListener('touchstart', (e) => {
+    tx = e.changedTouches[0].clientX;
+    pause();
+  }, { passive: true });
+  track.addEventListener('touchend', (e) => {
+    if (tx == null) return;
+    const dx = e.changedTouches[0].clientX - tx;
+    tx = null;
+    if (Math.abs(dx) > 40) go(index + (dx < 0 ? 1 : -1), true);
+    else resume();
+  }, { passive: true });
+
+  // Keyboard when hero focused
+  root.tabIndex = 0;
+  root.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); go(index - 1, true); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); go(index + 1, true); }
+  });
+
+  // Expose for screenshot helper
+  window.__heroGo = (i) => go(i, true);
+  window.__heroIndex = () => index;
+
+  if (!reduce) restart(false);
+})();
+</script>
 </body>
 </html>
