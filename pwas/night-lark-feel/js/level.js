@@ -11,10 +11,6 @@
 import { TUNING } from './config.js';
 import { archAnchors } from './anchors.js';
 
-export const STONE_TILES = Object.freeze(['#', 's']);
-export const WOOD_TILES = Object.freeze(['=', '~']);
-export const SHADOW_TILES = Object.freeze(['s', '~']);
-
 export const isStone = (ch) => ch === '#' || ch === 's';
 export const isWood = (ch) => ch === '=' || ch === '~';
 export const isShadow = (ch) => ch === 's' || ch === '~';
@@ -89,6 +85,7 @@ export function parseLevel(def, opts = {}) {
       }
     }
   }
+  // speed stays in v1 px/s, as every def writes it; stealth converts it with v1px() (exact, / 16)
   const guards = (def.guards || []).map((g) => ({
     kind: 'guard', x: g.c + 0.5, dir: g.dir, c0: g.c0, c1: g.c1, speed: g.speed, floorY: g.floor, sees: false,
     state: 'patrol', t: 0, flipT: 0, searchX: null,
@@ -107,15 +104,28 @@ export function parseLevel(def, opts = {}) {
     checkpoints: (def.checkpoints || []).map((k) => ({ ...k })),
     props: (def.props || []).map((p) => ({ ...p })), anchorMode, facade: def.facade || null, pieces: def.pieces || null,
     miniTowers: (def.miniTowers || []).map((t) => ({ ...t })),
-    moonMast: def.moonMast || null, skylineRelit: def.skylineRelit ?? 0 };
+    moonMast: def.moonMast || null, skylineRelit: def.skylineRelit ?? 0,
+    offRoom: offRoomRule(def.offRoom), flow: def.flow || null }; // flow 'up': the vertical section (camera anchor)
   for (const r of rings) r.kind = 'ring';
   if (anchorMode === 'arch' || anchorMode === 'mixed') rings.push(...archAnchors(level, level.props));
   return level;
 }
 
-/** v1 Me(): above/below the room is open air, left/right of it is solid stone. */
+/** The off-room rule (feel pass 1, G; audit I9): what the rows above and below the room are,
+ *  per room, { above, below } each 'air' or 'stone'. Physics (tileAt) and render (render.js,
+ *  which draws through tileAt) read the same rule. Default: open air both ways, which is the
+ *  physics every room has always had. */
+export function offRoomRule(o) {
+  const pick = (v) => (v === 'stone' ? 'stone' : 'air');
+  return Object.freeze({ above: pick(o?.above), below: pick(o?.below) });
+}
+const OFF_AIR = offRoomRule();
+
+/** v1 Me(): above/below the room is open air (level.offRoom can make either side stone),
+ *  left/right of it is solid stone. */
 export function tileAt(level, c, r) {
-  if (r < 0 || r >= level.rows) return '.';
+  if (r < 0) return (level.offRoom || OFF_AIR).above === 'stone' ? '#' : '.';
+  if (r >= level.rows) return (level.offRoom || OFF_AIR).below === 'stone' ? '#' : '.';
   if (c < 0 || c >= level.cols) return '#';
   return level.grid[r][c] ?? '.';
 }
@@ -125,10 +135,9 @@ export function tileAt(level, c, r) {
 export function isBlockingTile(ch, doorsOpen) {
   return isStone(ch) || ch === 'b' || (ch === 'D' && !doorsOpen);
 }
-/** Tiles that block sight and the line (v1 Ye). Wood is thin and does not. */
-export function isOpaqueTile(ch, doorsOpen) {
-  return isStone(ch) || ch === 'b' || (ch === 'D' && !doorsOpen);
-}
+/** Tiles that block sight and the line (v1 Ye). Wood is thin and does not. Today the same set
+ *  as isBlockingTile; the name is kept apart because sight and the body may diverge later. */
+export const isOpaqueTile = isBlockingTile;
 /** Every tile the body must never end up inside (used by push-out). Wood is allowed. */
 export const isSolidTile = isBlockingTile;
 

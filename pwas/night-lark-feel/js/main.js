@@ -7,11 +7,14 @@
 // ?room=first / ?room=watch / ?room=gen stay on the old room shell (walkthroughs 1-3).
 // ?room=tall[&fall=feather] plays the tall-shaft prototype (swing-feel branch).
 // ?room=training plays the feel fix 2 training room (also TRAINING on the title menu).
+// ?room=climb plays THE HARBOR SHAFT on its own (js/levels/vertical.js): the same one continuous
+// room (three kit climbs stacked, the roof perch on top) that opens every generated night.
 import { firstRing } from './levels/first-ring.js';
 import { watchRoom } from './levels/watch-room.js';
 import { tallShaft, tallShaftRings } from './levels/tall-shaft.js';
 import { trainingRoom } from './levels/training.js';
 import { moonMast } from './levels/moon-mast.js';
+import { verticalSection } from './levels/vertical.js';
 import { createInput, bindKeyboard, bindGamepads } from './input.js';
 import { blockPageZoom } from './ios-zoom.js';
 import { createLoop, prefersReducedMotion } from './loop.js';
@@ -33,14 +36,18 @@ import { createFx } from './fx.js';
 import { registerServiceWorker } from './pwa.js';
 import { drawText } from './font.js';
 import { PLACEHOLDER } from './art.js';
+import { probeIntro } from './shaft-intro.js';
 
 const params = new URLSearchParams(location.search);
 // Feel fix 2 (Azzato, Nov 3 2026) is the default in the browser; ?physics=fix1 plays fix 1,
 // ?physics=legacy the old one. The generator plans with the same feel (gen/moves.js).
 { const ph = params.get('physics'); SETTINGS.feel = ph === 'legacy' || ph === 'fix1' ? ph : 'fix2'; }
-// Warp-pull is always had. ?grapple=pull starts in pull mode (an alias); G / Y / touch PULL
-// toggles classic / pull for the current world. A new world starts from this setting again
-// (swing, unless ?grapple=pull). ?grapple=classic pins classic.
+// Feel pass 1 (H): SWING (B: X / J, pad B) and PULL (C / L, pad X, touch PULL) are separate
+// buttons. Warp-pull is an earned suit power, off at a fresh start: the shaft's first mini boss
+// knocks it loose (js/shaft-intro.js) and the save keeps it (save.abilities). ?pull=1 grants it on
+// the dev page without saving it; ?grapple=pull grants it too and makes B fire pull (the old
+// alias); G / pad Y switch what B fires, and that carries to the next room.
+if (params.get('pull') === '1' || params.get('grapple') === 'pull') SETTINGS.abilities = { ...SETTINGS.abilities, pullGrapple: true };
 if (params.get('grapple') === 'pull') SETTINGS.grapple = 'pull';
 if (params.get('grapple') === 'classic') SETTINGS.grapple = 'classic';
 blockPageZoom();
@@ -102,6 +109,29 @@ function toView(e) {
   const r = canvas.getBoundingClientRect();
   return { x: ((e.clientX - r.left) / r.width) * VIEW_W, y: ((e.clientY - r.top) / r.height) * VIEW_H };
 }
+/** Pointer -> world tiles under it, for both boots. It uses cameraFor() without the screen shake
+ *  or the render interpolation, exactly as the picking always has (audit D7 notes the ~1 px
+ *  offset; it is kept on purpose, so tap targets do not move). */
+function pointerToWorld(world, e) {
+  const cam = cameraFor(world); const v = toView(e);
+  return { x: (v.x + cam.x) / TILE_PX, y: (v.y + cam.y) / TILE_PX };
+}
+/** The touch drag / lift / cancel and pad connect wiring, which both boots share (audit D6). */
+function bindTouchTail() {
+  canvas.addEventListener('pointermove', (e) => { if (e.pointerType === 'touch') input.moveTouch(e.clientX, e.clientY); });
+  canvas.addEventListener('pointerup', (e) => { if (e.pointerType === 'touch') input.endTouch(); });
+  canvas.addEventListener('pointercancel', () => input.cancelTouch());
+}
+function bindPadRefresh(touch) {
+  addEventListener('gamepadconnected', () => touch.refresh());
+  addEventListener('gamepaddisconnected', () => touch.refresh());
+}
+/** Touch PULL shows only once the warp-pull is earned (index.html body.has-pull). */
+let hasPullShown = null;
+function notePullButton(world) {
+  const on = !!world?.abilities?.pullGrapple;
+  if (on !== hasPullShown) { hasPullShown = on; document.body.classList.toggle('has-pull', on); }
+}
 const input = createInput();
 bindKeyboard(input);
 bindGamepads(input);
@@ -134,7 +164,7 @@ const tall = params.get('anchors') === 'rings' ? () => tallShaftRings({ fallCost
 ROOMS.tall = tall;
 const order = genTower ? genTower.floors.flatMap((f) => f.rooms).map((def) => () => structuredClone(def))
   : params.get('room') === 'tall' ? [tall] : params.get('room') === 'training' ? [trainingRoom]
-    : params.get('room') === 'moon-mast' ? [moonMast] : [firstRing, watchRoom];
+    : params.get('room') === 'moon-mast' ? [moonMast] : params.get('room') === 'climb' ? verticalSection() : [firstRing, watchRoom];
 const startIdx = params.has('start') ? Math.max(0, Number(params.get('start')) || 0) : Math.max(0, order.indexOf(ROOMS[params.get('room')]));
 const shell = createShell(order, { startRoom: startIdx });
 const rotate = document.getElementById('rotate');
@@ -156,24 +186,20 @@ const touch = bindTouch(input, document.getElementById('touch'), {
 
 // Tap or click a grapple point to fire at it (BRIEF: "Tap a point to fire at it").
 canvas.addEventListener('pointerdown', (e) => {
-  const cam = cameraFor(shell.world); const v = toView(e);
-  const wx = (v.x + cam.x) / TILE_PX;
-  const wy = (v.y + cam.y) / TILE_PX;
+  const { x: wx, y: wy } = pointerToWorld(shell.world, e);
   if (e.pointerType === 'touch') { input.beginTouch(e.clientX, e.clientY, wx, wy); touch.show(); return; }
   input.pointAt(wx, wy, 'key');
 });
-canvas.addEventListener('pointermove', (e) => { if (e.pointerType === 'touch') input.moveTouch(e.clientX, e.clientY); });
-canvas.addEventListener('pointerup', (e) => { if (e.pointerType === 'touch') input.endTouch(); });
-canvas.addEventListener('pointercancel', () => input.cancelTouch());
+bindTouchTail();
 
-addEventListener('gamepadconnected', () => touch.refresh());
-addEventListener('gamepaddisconnected', () => touch.refresh());
+bindPadRefresh(touch);
 const loop = createLoop({
   step(dt) {
     if (shell.world) shell.world.reducedMotion = fx.reduced;
     const inp = input.sample();
     touch.notePad(input.padUsed);
     const ran = shell.step(dt, inp);
+    notePullButton(shell.world);
     if (ran) fx.step(dt, shell.world, shell.events);
     for (const e of shell.events) {
       if (e.type === 'attach' && input.device === 'touch' && navigator.vibrate) navigator.vibrate(12);
@@ -188,6 +214,9 @@ const loop = createLoop({
 loop.start();
 
 // ?probe=1: a read-only snapshot for the headless walkthrough. Never writes game state.
+// Nov 7 2026: the campaign probe also reports intro (probeIntro), actor gap, last step events,
+// boot/loop identity and abilities.pullGrapple. Still JSON.parse(JSON.stringify(...)) of a
+// snapshot: calling it cannot change gameplay.
 if (params.has('probe')) {
   window.__nlProbe = () => {
     const w = shell.world;
@@ -230,8 +259,7 @@ function bootGame() {
     getMode: () => game.save.settings.touch || SETTINGS.touch,
     hasPad: () => input.pads.size > 0,
   });
-  addEventListener('gamepadconnected', () => touch.refresh());
-  addEventListener('gamepaddisconnected', () => touch.refresh());
+  bindPadRefresh(touch);
   const wake = () => audio.start();
   addEventListener('keydown', (e) => {
     wake();
@@ -241,8 +269,7 @@ function bootGame() {
     wake();
     const point = () => {
       if (!(game.world && game.screen === 'play')) return null;
-      const cam = cameraFor(game.world); const v = toView(e);
-      return { x: (v.x + cam.x) / TILE_PX, y: (v.y + cam.y) / TILE_PX };
+      return pointerToWorld(game.world, e);
     };
     if (e.pointerType === 'touch') {
       const p = point();
@@ -253,11 +280,11 @@ function bootGame() {
     const p = point();
     if (p) input.pointAt(p.x, p.y, 'key');
   });
-  canvas.addEventListener('pointermove', (e) => { if (e.pointerType === 'touch') input.moveTouch(e.clientX, e.clientY); });
-  canvas.addEventListener('pointerup', (e) => { if (e.pointerType === 'touch') input.endTouch(); });
-  canvas.addEventListener('pointercancel', () => input.cancelTouch());
+  bindTouchTail();
   let lastHeld = [];
   const renderMs = [];
+  // ?probe=1 only: a copy of this step's events, taken before game.js clears them. Read-only.
+  let probeEvents = [];
   const loop = createLoop({
     step(dt) {
       const inp = input.sample();
@@ -265,6 +292,10 @@ function bootGame() {
       lastHeld = Object.keys(inp.held).filter((k) => inp.held[k]);
       if (portrait) return;
       game.step(dt, inp);
+      if (game.world) notePullButton(game.world);
+      if (params.has('probe')) {
+        probeEvents = game.events.map((e) => ({ type: e.type, x: e.x, y: e.y, from: e.from, to: e.to, fromX: e.fromX, fromY: e.fromY, gap: e.gap, bossX: e.bossX }));
+      }
       fx.setReduced(fxOff || game.reducedMotion());
       if (game.screen === 'play') fx.step(dt, game.world, game.events);
       for (const s of game.sfx) audio.sfx(s);
@@ -305,7 +336,18 @@ function bootGame() {
           lineCoyote: w.lineCoyote, phase: w.phase, chain: w.chain, airCap: w.airCap, room: w.level.name, feathers: w.feathers, catches: w.catches,
           alerts: w.alerts, time: w.time, motes: w.motes ? w.motes.size : 0, smoke: w.smoke, cloaked: w.cloaked,
           cam: cameraFor(w), cols: w.level.cols, rows: w.level.rows,
+          lineKind: w.lineKind || null,
+          abilities: { pullGrapple: !!w.abilities?.pullGrapple },
         } : null,
+        // read-only intro/event telemetry (js/shaft-intro.js probeIntro). The probe never writes
+        // the world, abilities, save, camera or input. Query: ?probe=1 (existing walkthrough hook).
+        intro: w ? probeIntro(w) : null,
+        events: probeEvents,
+        boot: 'game',
+        loop: 'createLoop',
+        main: 'js/main.js',
+        probe: { readOnly: true, query: 'probe', writes: false },
+        hasStoryHost: typeof window.__story === 'object',
         save: game.save,
         mute: game.save.settings.mute, audio: audio.started,
         fx: { reduced: fx.reduced, parts: fx.parts.length, spawned: fx.stats.spawned, shake: fx.shake.t, flash: fx.flash,

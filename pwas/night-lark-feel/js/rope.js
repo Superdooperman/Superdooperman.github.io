@@ -2,6 +2,7 @@
 // ropeIterations times per step, radial outward velocity removed when taut, then
 // swing pumping along the tangent. Mutates body { x, y, vx, vy, h }.
 import { TUNING, SWING, v1px } from './config.js';
+import { bodyCenterY } from './physics.js';
 
 /** The one inextensible-line rule, shared by the grapple (below) and the M5 cloak and rope-tail
  *  point chains (chain.js): if (dx, dy) is longer than len, the unit direction and how far over. */
@@ -18,7 +19,7 @@ export function solveRope(body, anchor, ropeLen, iterations = TUNING.ropeIterati
   let taut = false;
   let snapped = false;
   for (let i = 0; i < iterations; i++) {
-    const cy = body.y - body.h * 0.5;
+    const cy = bodyCenterY(body);
     const dx = body.x - anchor.x;
     const dy = cy - anchor.y;
     const ex = overLength(dx, dy, ropeLen, v1px(1e-4));
@@ -49,7 +50,7 @@ export function solveRope(body, anchor, ropeLen, iterations = TUNING.ropeIterati
 /** Swing pump: input along the swing adds tangential acceleration. dir is -1/0/+1.
  *  feel (v2, SWING): input with the swing pumps at pumpWithMul, against it at pumpAgainstMul. */
 export function pumpSwing(body, anchor, dir, dt, feel = false, mul = 1) { // mul: feel fix 2's stronger pump
-  const cy = body.y - body.h * 0.5;
+  const cy = bodyCenterY(body);
   const dx = body.x - anchor.x;
   const dy = cy - anchor.y;
   const d = Math.hypot(dx, dy) || v1px(1);
@@ -70,7 +71,7 @@ export function pumpSwing(body, anchor, dir, dt, feel = false, mul = 1) { // mul
 /** v2 feel: reeling from oldLen to newLen keeps angular momentum, so the speed along the arc
  *  scales by oldLen/newLen (only when shortening a taut line), then the arc speed is capped. */
 export function conserveSwing(body, anchor, oldLen, newLen) {
-  const cy = body.y - body.h * 0.5;
+  const cy = bodyCenterY(body);
   const dx = body.x - anchor.x;
   const dy = cy - anchor.y;
   const d = Math.hypot(dx, dy);

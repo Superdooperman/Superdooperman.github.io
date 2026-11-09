@@ -20,7 +20,6 @@ import { towerRoute } from '../kit/route.js';
 
 import { validateRoom } from '../gen/validator.js';
 import { movesFor } from '../gen/moves.js';
-import { SETTINGS } from '../config.js';
 
 export const TALL_SEED = 1;
 /** Seed -> its first finishable route attempt (towerRoute(seed, attempt)), found by
@@ -42,11 +41,8 @@ export function tallShaftKit(seed = TALL_SEED, attempt = TALL_REROLL[seed] ?? 0)
  *  legacy feel (feel fix 1 did not retune it, and TALL_REROLL was found with it): it is solved,
  *  and played (def.feel), in 'legacy'. */
 export function tallSolve(def) {
-  const was = SETTINGS.feel;
-  SETTINGS.feel = 'legacy';
-  try {
-    return validateRoom(def, movesFor({ id: `tall-${def.seed}-${def.attempt}`, flip: false, phys: def.rows, anchors: def.anchors, props: def.props }));
-  } finally { SETTINGS.feel = was; }
+  // the feel goes to the probes directly; the global SETTINGS is never changed (audit F6)
+  return validateRoom(def, movesFor({ id: `tall-${def.seed}-${def.attempt}`, flip: false, phys: def.rows, anchors: def.anchors, props: def.props }, 'legacy'));
 }
 /** The first attempt whose route the solver can finish. Deterministic: same seed, same answer. */
 export function tallAttempt(seed) {
@@ -60,10 +56,16 @@ export function tallShaft({ fallCost = 'height', seed = TALL_SEED, attempt } = {
   return buildTall(seed, attempt ?? tallTableAttempt(seed) ?? tallAttempt(seed), fallCost);
 }
 
-function buildTall(seed, attempt, fallCost = 'height') {
-  const R = towerRoute(seed, attempt);
+function buildTall(seed, attempt, fallCost = 'height') { return buildKitTower(seed, attempt, { fallCost }); }
+
+/** The kit tower room for a seed and attempt. Defaults are the tall-shaft prototype (legacy feel,
+ *  ROUTE.towerRows). Feel pass 1 (G) builds its vertical rooms with this too: opts.feel,
+ *  opts.towerRows (taller), opts.name. Nothing here is new generation: the same seeded route,
+ *  dressing and kit. */
+export function buildKitTower(seed, attempt, { fallCost = 'height', feel = 'legacy', towerRows, name } = {}) {
+  const R = towerRoute(seed, attempt, towerRows ? { towerRows } : {});
   const A = R.assembly;
-  const spawn = { c: R.steps[0].side === 'L' ? 22 : 4, r: R.floorTop - 1 };
+  const spawn = { c: R.steps[0].side === 'L' ? 22 : 4, r: R.floorTop - 1 }; // (28-col tower: audit S8)
   const last = R.steps[R.steps.length - 1];
   const exit = { c: last.side === 'L' ? last.c0 + 1 : last.c1 - 1, r: last.top - 1 };
   A.mark('P', spawn.c, spawn.r);
@@ -74,7 +76,7 @@ function buildTall(seed, attempt, fallCost = 'height') {
   const mids = R.steps.slice(0, -1).filter((_, k) => k % 2 === 1);
   const guardOn = R.steps.slice(1, -1).find((s) => s.c1 - s.c0 >= 7 && !s.stacked);
   return {
-    name: attempt ? `TALL SHAFT #${seed}.${attempt}` : `TALL SHAFT #${seed}`,
+    name: name ?? (attempt ? `TALL SHAFT #${seed}.${attempt}` : `TALL SHAFT #${seed}`),
     ...def,
     facade: R.facade,
     pieces: A.layout().map((q) => ({ ...q })), // layer b placements, for the kit art (js/kit/draw.js)
@@ -82,7 +84,7 @@ function buildTall(seed, attempt, fallCost = 'height') {
     seed,
     attempt,
     tall: true,
-    feel: 'legacy',
+    feel,
     fallCost,
     autoExit: true,
     guards: guardOn ? [{ c: Math.floor((guardOn.c0 + guardOn.c1) / 2), dir: 1, c0: guardOn.c0, c1: guardOn.c1, speed: 30, floor: guardOn.top }] : [],
@@ -106,6 +108,7 @@ export function tallShaftRings({ fallCost = 'height' } = {}) {
   for (const [c, r] of TR.rings) putTile(t, r, c, 'a');
   putTile(t, 30, 26, 'L'); putTile(t, 42, 3, 'P'); putTile(t, 5, 27, 'E');
   return { name: 'TALL SHAFT (rings)', rows: t, anchors: 'rings', tall: true, fallCost, autoExit: true,
-    guards: [{ c: 13, dir: 1, c0: 11, c1: 16, speed: 30, floor: 25 }], searchlights: [], prompts: [],
+    // Side ledge: a flashlight on the centre perch (28 px up) covers the whole climb.
+    guards: [{ c: 4, dir: 1, c0: 0, c1: 9, speed: 30, floor: 31 }], searchlights: [], prompts: [],
     checkpoints: [{ c0: 0, c1: 29, x: 3.5, top: 43 }, { c0: 0, c1: 9, x: 4.5, top: 31 }, { c0: 11, c1: 16, x: 13.5, top: 25 }, { c0: 23, c1: 29, x: 25.5, top: 19 }, { c0: 0, c1: 9, x: 4.5, top: 13 }] };
 }

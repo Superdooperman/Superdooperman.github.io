@@ -7,8 +7,10 @@
 import { TILE_PX, VIEW_W, VIEW_H, HUD_H, TUNING, FEEL } from './config.js';
 import { PALETTE as P } from './art.js';
 import { mulberry32 } from './gen/rng.js';
+import { bodyCenterY } from './physics.js';
 import { createChain, stepChain, poseChain } from './chain.js';
 import { createWrenAnim, stepWrenAnim } from './wren.js';
+import { backdropRise, RISE_PARALLAX } from './skyline.js';
 
 export const FX = Object.freeze({
   maxParticles: 220,
@@ -75,7 +77,7 @@ export function createFx(opts = {}) {
       else if (e.type === 'roll') { burst(8, w.x, w.y, dust); kick(FX.shakeRoll); }
       else if (e.type === 'jump' && e.from === 'ground') burst(3, w.x, w.y, dust);
       else if (e.type === 'attach' && e.ring) burst(7, e.ring.x, e.ring.y, spark);
-      else if (e.type === 'pickup') burst(6, w.x, w.y - w.h * 0.5, glint);
+      else if (e.type === 'pickup') burst(6, w.x, bodyCenterY(w), glint);
       else if (e.type === 'snuff') burst(6, e.x, e.y, puff);
       else if (e.type === 'hit' || e.type === 'tie') kick({ amp: FEEL.hitShakeAmp, dur: FEEL.hitShakeDur });
       else if (e.type === 'caught') { kick(FX.shakeCaught); if (!fx.reduced) fx.flash = FX.flashCaught; }
@@ -111,7 +113,7 @@ export function createFx(opts = {}) {
       if (w.grounded) for (const ch of [fx.cloak, fx.tail]) for (const p of ch.pts) if (p.y > w.y - 0.02) p.y = w.y - 0.02; // hem rests on the floor
     }
     if (w.anchor) {
-      const hand = (fx.ropeOrigin && fx.ropeOrigin(w)) || { x: w.x, y: w.y - w.h * 0.5 };
+      const hand = (fx.ropeOrigin && fx.ropeOrigin(w)) || { x: w.x, y: bodyCenterY(w) };
       if (fx.ropeFor !== w.anchor) {
         fx.ropeFor = w.anchor;
         fx.rope = createChain(FX.ropePoints, 1, hand.x, hand.y);
@@ -151,15 +153,16 @@ function darkLayer() {
 /** A far skyline and the moon behind the room (safe light only: MN, NV). Parallax 0.25. */
 export function drawBackdrop(ctx, fx, world, cam) {
   const px = -cam.x * 0.25;
+  const dy = Math.round(backdropRise(world, cam) * RISE_PARALLAX.mid); // feel pass 1 (G): y parallax in tall rooms, 0 elsewhere
   const mx = Math.round(VIEW_W - 88 + px * 0.2);
-  ctx.fillStyle = P.MN1; ctx.fillRect(mx, HUD_H + 22, 12, 12);
-  ctx.fillStyle = P.MN0; ctx.fillRect(mx, HUD_H + 30, 4, 4);
+  ctx.fillStyle = P.MN1; ctx.fillRect(mx, HUD_H + 22 + dy, 12, 12);
+  ctx.fillStyle = P.MN0; ctx.fillRect(mx, HUD_H + 30 + dy, 4, 4);
   ctx.fillStyle = P.NV2;
   const span = Math.max(600, VIEW_W + 120); const n = Math.ceil((24 * span) / 600);
   for (let i = 0; i < n; i++) {
     const w = 18 + ((i * 37) % 23); const h = 30 + ((i * 53) % 70);
     const x = Math.round(((i * 41 + px) % span + span) % span - 60);
-    ctx.fillRect(x, VIEW_H - h - 30, w, h + 30);
+    ctx.fillRect(x, VIEW_H - h - 30 + dy, w, h + 30);
   }
 }
 

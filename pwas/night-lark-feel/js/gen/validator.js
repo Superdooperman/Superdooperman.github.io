@@ -18,11 +18,12 @@
 //      with a few running steps are not allowed within earshot of any point of a guard's patrol.
 //   Hide spot: a shadow tile ('s' or '~') with no lamp within the hide radius; crouched there
 //   she is hidden (los.js isHidden), so it is safe at any time.
-import { TUNING } from '../config.js';
+import { TUNING, PX1 } from '../config.js';
+import { wrapAngle } from '../geom.js';
 import { parseLevel, tileAt, isShadow } from '../level.js';
-import { lineOfSight } from '../los.js';
+import { lineOfSight, guardEyeOf } from '../los.js';
 import { patrol, stepSearchlight } from '../stealth.js';
-import { FRAME, FRAMES_PER_SLOT, WALK_SLOTS } from './moves.js';
+import { FRAME, FRAMES_PER_SLOT, WALK_SLOTS, unpackSample } from './moves.js';
 
 export const HORIZON_SLOTS = 300; // 30 s
 const M = Object.freeze({ range: 0.4, angle: 0.08, lamp: 0.3, touch: 0.2, noise: 0.5 });
@@ -48,7 +49,7 @@ function cellInCone(level, c, r, ex, ey, face, range, half) {
     const px = c + PTS[i % 3]; const py = r + PTS[(i / 3) | 0];
     const dx = px - ex; const dy = py - ey;
     const d = Math.sqrt(dx * dx + dy * dy);
-    if (d < 1 / 16) return true;
+    if (d < PX1) return true;
     if (d >= range || dx * fx + dy * fy <= ch * d) continue; // angle off the facing >= half
     if (lineOfSight(level, ex, ey, px, py)) return true;
   }
@@ -64,14 +65,16 @@ function guardConeCells(level, cache, floorY, q, dir) {
   const T = TUNING;
   const { cols, rows } = level;
   const gx = q / 4;
-  const ey = floorY - T.guardEyeHeight;
+  const e = guardEyeOf({ x: gx, floorY, dir });
   const face = dir > 0 ? 0 : Math.PI;
   const R = T.coneRange + M.range;
   cells = [];
-  for (let r = Math.max(0, Math.floor(ey - R)); r <= Math.min(rows - 1, Math.floor(ey + R)); r++) {
-    for (let c = Math.max(0, Math.floor(gx - R)); c <= Math.min(cols - 1, Math.floor(gx + R)); c++) {
+  const x0 = Math.min(gx, e.x);
+  const x1 = Math.max(gx, e.x);
+  for (let r = Math.max(0, Math.floor(e.y - R)); r <= Math.min(rows - 1, Math.floor(e.y + R)); r++) {
+    for (let c = Math.max(0, Math.floor(x0 - R)); c <= Math.min(cols - 1, Math.floor(x1 + R)); c++) {
       const touch = r >= floorY - 2 && r <= floorY - 1 && c + 1 > gx - T.touchRange - M.touch && c < gx + T.touchRange + M.touch;
-      if (touch || cellInCone(level, c, r, gx, ey, face, R, T.coneHalfAngle + M.angle)) cells.push(r * cols + c);
+      if (touch || cellInCone(level, c, r, e.x, e.y, face, R, T.coneHalfAngle + M.angle)) cells.push(r * cols + c);
     }
   }
   cache.set(key, cells);
@@ -93,11 +96,11 @@ function beamCells(level, cache, s) {
       for (let i = 0; i < 9; i++) {
         const px = c + PTS[i % 3]; const py = r + PTS[(i / 3) | 0];
         const d = Math.hypot(px - s.x, py - s.y);
-        if (d >= R || d < 1 / 16) continue;
+        if (d >= R || d < PX1) continue;
         if (!lineOfSight(level, s.x, s.y, px, py)) continue;
         // angles measured from straight down, in (-PI, PI]: generated beams always point down
         // (base PI/2 +- 0.35, amp <= 0.45, half 0.15), so nothing above the lamp is ever lit
-        const a = Math.atan2(Math.sin(Math.atan2(py - s.y, px - s.x) - DOWN), Math.cos(Math.atan2(py - s.y, px - s.x) - DOWN));
+        const a = wrapAngle(Math.atan2(py - s.y, px - s.x) - DOWN);
         if (Math.abs(a) > Math.PI / 2) continue;
         lo = Math.min(lo, a); hi = Math.max(hi, a);
       }
@@ -142,11 +145,11 @@ export function buildCoverage(level, slots = HORIZON_SLOTS, cache = new Map()) {
     if (list) return list;
     list = [];
     const face = dir > 0 ? 0 : Math.PI;
-    const ey = floorY - T.guardEyeHeight;
     for (const cell of litCells) {
       const c = cell % cols; const r = (cell / cols) | 0;
       for (let dq = -1; dq <= 1; dq++) {
-        if (cellInCone(level, c, r, (q + dq) / 4, ey, face, T.litSightRange + M.range, T.litHalfAngle + M.angle)) { list.push(cell); break; }
+        const e = guardEyeOf({ x: (q + dq) / 4, floorY, dir });
+        if (cellInCone(level, c, r, e.x, e.y, face, T.litSightRange + M.range, T.litHalfAngle + M.angle)) { list.push(cell); break; }
       }
     }
     cache.set(key, list);
@@ -154,7 +157,7 @@ export function buildCoverage(level, slots = HORIZON_SLOTS, cache = new Map()) {
   };
   // guards patrol and searchlights sweep exactly as stealth.js does (they never react: she is
   // never seen or heard), stepped forward a slot at a time as the search needs them
-  const guards = level.guards.map((g0) => ({ g: { ...g0 }, xs: new Float32Array(slots), ey: g0.floorY - T.guardEyeHeight }));
+  const guards = level.guards.map((g0) => ({ g: { ...g0 }, xs: new Float32Array(slots), ey: g0.floorY - T.standHeight }));
   const gpos = guards.map(({ xs, ey }) => ({ xs, ey }));
   const lights = (level.searchlights || []).map((s0) => {
     const s = { ...s0 };
@@ -178,7 +181,7 @@ export function buildCoverage(level, slots = HORIZON_SLOTS, cache = new Map()) {
     }
     for (const L of lights) {
       const { s, list, half } = L;
-      const a = Math.atan2(Math.sin(s.angle - DOWN), Math.cos(s.angle - DOWN));
+      const a = wrapAngle(s.angle - DOWN);
       for (const { cell, lo, hi } of list) if (a + half > lo && a - half < hi) mark(cell);
       for (let f = 0; f < FRAMES_PER_SLOT; f++) stepSearchlight(s, FRAME, () => {});
     }
@@ -226,11 +229,11 @@ function audible(gpos, x, y, r, k) {
   return false;
 }
 
-/** An edge's samples (slot * 4096 + cell) as [slot << 8 | word, mask] pairs over covBits. */
-function sampleBits(samples, W) {
+/** An edge's samples (packSample: slot * cells + cell) as [slot << 8 | word, mask] pairs over covBits. */
+function sampleBits(samples, W, stride) {
   const by = new Map();
   for (const v of samples) {
-    const slot = (v / 4096) | 0; const cell = v & 4095;
+    const [slot, cell] = unpackSample(v, stride);
     const key = (slot << 8) | (cell >> 5);
     by.set(key, (by.get(key) | 0) | (1 << (cell & 31)));
   }
@@ -348,7 +351,7 @@ export function validateRoom(def, moves, opts = {}) {
         // the wait from (to, k2 - 1) when it gets to that slot): no path is lost, only re-checks
         if (k2 >= S || reach[k2 * N + e.to] || (reach[(k2 - 1) * N + e.to] && safe(e.to, k2))) continue;
         let ok = true;
-        const bm = e.sampleBits || (e.sampleBits = sampleBits(e.samples, W));
+        const bm = e.sampleBits || (e.sampleBits = sampleBits(e.samples, W, cols * moves.rows));
         for (let j = 0; j < bm.length; j += 2) {
           if (covBits[(k + (bm[j] >> 8)) * W + (bm[j] & 255)] & bm[j + 1]) { ok = false; break; }
         }

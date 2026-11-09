@@ -23,7 +23,7 @@ export const COST = Object.freeze({ guard: 3, sweep: 2, lamp: 1 });
 /** Difficulty budget per room. Floor 1 low (the tutorial tower), the vault high. */
 export const BUDGET = Object.freeze({ 1: 6, 2: 8, 3: 10, perch: 2, vault: 13 });
 export const MAX_GUARDS_FLOOR1 = 2; // BRIEF: "Floor 1: two guards per room at most and lots of dark"
-export const SEARCHLIGHT_FROM_FLOOR = 2; // BRIEF: "Searchlight ... shows up from floor 2"
+export const SEARCHLIGHT_FROM_FLOOR = LIGHT.searchFromFloor; // BRIEF: "Searchlight ... shows up from floor 2" (tuned in config LIGHT)
 export const REROLLS = 6; // socket re-rolls per template before trying another template
 /** Re-rolls after the first FULL_BUDGET_ROLLS spend two points less each time, so a crowded fill
  *  gives way to a lighter one before the generator gives up on a template. */
@@ -43,7 +43,7 @@ const setTile = (rows, c, r, ch) => { rows[r] = rows[r].slice(0, c) + ch + rows[
 
 /** Fill a parsed template's sockets with rng; empty = nothing optional at all (the fallback). */
 export function fillTemplate(pt, rng, budget, floor, empty = false) {
-  const rows = pt.src.map((row) => row.replace(/[gSlh$vo]/g, (ch) => (ch === 'h' ? '#' : ch === 'v' ? '=' : '.')).replace(/a/g, 'a'));
+  const rows = pt.src.map((row) => row.replace(/[gSlh$vo]/g, (ch) => (ch === 'h' ? '#' : ch === 'v' ? '=' : '.')));
   const guards = [];
   const searchlights = [];
   let spent = 0;

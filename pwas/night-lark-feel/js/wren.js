@@ -336,14 +336,16 @@ export function swingPose(w, sheets) {
   const st = swingState(w);
   const face = st.s; // art faces right: she faces the way she is swinging
   const real = sheets[SWING_SHEET];
-  const yank = w.yank && sheets[YANK_SHEET] && gripAt(sheets[YANK_SHEET], 0) ? sheets[YANK_SHEET] : null;
+  // feel pass 1: the warp-pull uses Brook's yank strip too (pulled straight at the anchor, like a zip)
+  const zip = w.yank || w.pull;
+  const yank = zip && sheets[YANK_SHEET] && gripAt(sheets[YANK_SHEET], 0) ? sheets[YANK_SHEET] : null;
   const lift = Math.max(0, Math.min(SWING_LOOK.gripLift, st.dist * TILE_PX - 4));
   const gx = st.cx * TILE_PX - Math.sin(st.theta) * lift; const gy = st.cy * TILE_PX - Math.cos(st.theta) * lift;
   const real0 = yank || (real && gripAt(real, 0) ? real : null);
   if (real0) {
     // Brook's art: frame picked by angle (STYLE-GUIDE §5), turned only by the leftover, whole px
     let frame; let pick = null; let face = st.s;
-    if (yank) { frame = w.yank.t < 1 / (yank.fps || 12) ? 0 : 1; face = Math.sign(w.anchor.x - st.cx) || (w.face < 0 ? -1 : 1); }
+    if (yank) { frame = zip.t < 1 / (yank.fps || 12) ? 0 : 1; face = Math.sign(w.anchor.x - st.cx) || (w.face < 0 ? -1 : 1); }
     else { pick = swingPick(st, real.angleDeg || SWING_LOOK.baked); frame = pick.frame; }
     const grip = gripAt(real0, frame);
     const rad = pick && pick.rotate ? artRad(pick.leftover) : 0;

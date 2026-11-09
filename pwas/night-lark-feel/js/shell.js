@@ -13,7 +13,10 @@ export function createShell(rooms, opts = {}) {
   const list = Array.isArray(rooms) ? rooms : [rooms];
   const first = Math.max(0, Math.min(list.length - 1, opts.startRoom ?? 0));
   const { startRoom, ...worldOpts } = opts;
-  const make = (i, feathers) => createWorld(list[i](), { ...worldOpts, feathers });
+  // grapple: what B fires carries from room to room (feel pass 1, H); a new night starts from the boot setting
+  // abilities: a warp-pull earned in this session (the shaft's mini boss) carries too; the dev
+  // shell has no save, so a reload starts without it (?pull=1 grants it)
+  const make = (i, feathers, grapple, abilities) => createWorld(list[i](), { ...worldOpts, feathers, ...(grapple ? { grapple } : {}), ...(abilities?.pullGrapple ? { abilities: { pullGrapple: true } } : {}) });
   const sh = {
     roomIndex: first,
     world: null,
@@ -50,7 +53,7 @@ export function createShell(rooms, opts = {}) {
         if (e.type === 'room-done') {
           sh.clears++;
           sh.roomIndex = (sh.roomIndex + 1) % list.length;
-          sh.world = make(sh.roomIndex, w.feathers);
+          sh.world = make(sh.roomIndex, w.feathers, w.grappleMode, w.abilities);
         }
       }
       w.events.length = 0;

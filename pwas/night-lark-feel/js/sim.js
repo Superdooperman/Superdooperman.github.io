@@ -18,15 +18,16 @@
 // M2 stealth (stealth.js): a catch costs a feather, plays the bark for catchHold, then resets
 // the whole room (level, items, doors, guards, the Lark at the spawn). At 0 feathers the phase
 // becomes 'night-over' and the sim stops.
-import { TUNING, SWING, SETTINGS, SIM_DT_CLAMP, HEALTH, TALL, ARCH, FEEL, FEELFIX, FEELFIX2, AIM_PLANT, PULL } from './config.js';
+import { TUNING, SWING, SETTINGS, SIM_DT_CLAMP, HEALTH, TALL, ARCH, FEEL, FEELFIX, FEELFIX2, AIM_PLANT, PULL, PX1, CAUGHT_BARK } from './config.js';
 import { parseLevel, tileAt } from './level.js';
-import { bodyBlocked, findLanding, pushOut, woodUnderFeet, findLedge } from './physics.js';
+import { bodyBlocked, findLanding, pushOut, woodUnderFeet, findLedge, bodyCenterY } from './physics.js';
 import { solveRope, pumpSwing, reel, conserveSwing } from './rope.js';
 import { lineOfSight } from './los.js';
 import { stepStealth, noiseRadius, tieCheck } from './stealth.js';
 import { chooseTarget, reachable, stepReticle, pickAt, aimPick } from './targeting.js';
 import { canCancelAttack, attackLimit, guardBump, attackReaches } from './feel.js';
 import { stepMiniTowers, warmLightBuff } from './mini-tower.js';
+import { createIntro, introCheck, stepIntro, introActive } from './shaft-intro.js';
 
 const NO_INPUT = Object.freeze({ held: {}, pressed: {}, released: {} });
 
@@ -74,6 +75,7 @@ export function createWorld(levelDef, opts = {}) {
     note: null, hold: 0,
     // stealth (M2)
     meter: 0, alerts: 0, alert: null, meterSrc: null, hidden: false, lit: false,
+    noise: 0, // feel pass 1 (F): this step's footstep / landing noise radius, the hearing rule (render draws the ring)
     escapes: 0, catches: 0, caughtBy: null, overT: 0,
     feathers: opts.feathers ?? HEALTH.startFeathers, maxFeathers: Math.max(HEALTH.startFeathers, opts.feathers ?? 0),
     hearingMul: opts.hearingMul ?? 1, graceMul: opts.graceMul ?? 1,
@@ -93,12 +95,22 @@ export function createWorld(levelDef, opts = {}) {
     landT: 1, hopCap: false, airCap: 0, lastGrade: null, cleanCatches: 0,
     // feel fix 2: aim direction (render draws the aim line), the last jump-off (mash damping), catch keep
     feelFix2: fix2, aimDir: null, relAt: -1, relGood: true, catchKeep: SWING.attachKeep, mashCatches: 0, upTapAt: -1, snapReelT: 0,
-    // abilities (Metroid-style). pullGrapple: the warp-pull grapple mode (on by default).
+    // abilities (Metroid-style). pullGrapple: the warp-pull suit power. Earned, so off at a fresh
+    // start (SETTINGS.abilities; ?pull=1 grants it on the dev page). Without it the PULL button
+    // fires a swing, and B can't be switched to pull.
     abilities: { pullGrapple: !!(opts.abilities?.pullGrapple ?? SETTINGS.abilities?.pullGrapple) },
+    // grappleMode: what B (the SWING button) fires: 'classic' (swing) or 'pull'. The PULL button
+    // always fires pull once the ability is had, so this is only the one-button accessibility
+    // toggle (G / pad Y). game.js and shell.js carry it into the next room.
     grappleMode: (opts.grapple ?? SETTINGS.grapple) === 'pull' ? 'pull' : 'classic', pull: null,
-    // TODO(Azzato): warm-light buff is NOT decided. Stub hook, no effect.
-    warmBuff: false,
+    // grapple button state (audit F3/F4): bBtn is the physical button that owns the B state
+    // machine ('fire' = SWING, 'pull' = PULL) while it is held; fireKind is what the armed press
+    // will fire ('swing' | 'pull'); lineKind is what the live line was fired as.
+    bBtn: null, fireKind: null, lineKind: null, fireHeld: false,
+    warmBuff: false, // read by the warm-light buff stub (mini-tower.js warmLightBuff, the one TODO)
   };
+  // the shaft's first mini boss (shaft-intro.js): a scripted scene, only while pull is not had
+  w.intro = createIntro(levelDef, w.abilities);
 
   const roomStart = { hasSpark: !!opts.hasSpark, motes: [] };
   const emit = (type, data) => {
@@ -109,7 +121,7 @@ export function createWorld(levelDef, opts = {}) {
       else if (p.showOn === type) p.shown = true; // M2: a prompt shown by an event (no area)
     }
   };
-  const center = () => w.y - w.h * 0.5;
+  const center = () => bodyCenterY(w);
   const lineRange = () => (w.hasSpark ? T.lineRangeSpark : T.lineRange) * w.lineMul;
   const lampKey = (l) => `${l.x},${l.y}`;
   if (w.snuffed.size) level.lamps = level.lamps.filter((l) => !w.snuffed.has(lampKey(l)));
@@ -139,7 +151,7 @@ export function createWorld(levelDef, opts = {}) {
     if (fix) w.relStat = swingStat();
     w.anchor = null;
     w.taut = false;
-    w.yank = null; w.bLine = null; w.snapCatch = false; w.pull = null; // a pull let go keeps its speed: she flies on past
+    w.yank = null; w.bLine = null; w.snapCatch = false; w.pull = null; w.lineKind = null; // a pull let go keeps its speed: she flies on past
     if (!w.grounded && why !== 'respawn' && why !== 'caught') w.lineFall = true; // a fall from here is a missed swing
     emit('release', { why });
   }
@@ -148,12 +160,19 @@ export function createWorld(levelDef, opts = {}) {
     release('respawn');
     const cp = (reason === 'fall' || levelDef.tall) && w.checkpoint ? w.checkpoint : level.spawn; // tall rooms: a catch also goes back to the last perch
     w.x = cp.x; w.y = cp.y; w.vx = 0; w.vy = 0; w.grounded = true;
-    w.roll = 0; w.climb = null; w.dropRow = null; w.peakY = w.y; w.lineFall = false; w.fireBuf = 0; w.aiming = false; w.bArmed = false; w.bHoldFrames = 0;
+    w.roll = 0; w.climb = null; w.dropRow = null; w.peakY = w.y; w.lineFall = false; w.bHoldFrames = 0;
+    clearGrappleInput();
     w.aimPlantSkip = false; w.airPlantsLeft = AIM_PLANT.perAir; w.airPlanting = false;
     w.dodge = null; w.dodgeCd = 0; w.invuln = 0; w.dodgeLatch = null; w.atk = null; w.atkLatch = false; w.hitStop = 0;
     if (fix) { w.chain = 0; w.hopCap = false; w.relStat = null; }
     w.px = w.x; w.py = w.y;
     emit('respawn', { reason });
+  }
+
+  /** Audit D5 (part): the grapple-button fields every reset clears, in one place, so a new
+   *  field (fireKind) is cleared everywhere. Same assignments the sites made before, plus it. */
+  function clearGrappleInput() {
+    w.fireBuf = 0; w.aiming = false; w.bArmed = false; w.fireKind = null;
   }
 
   /** v1 Qe(): nearest ring in range with a clear line (v1 controls). */
@@ -169,7 +188,7 @@ export function createWorld(levelDef, opts = {}) {
 
   /** v1 ze(): never attach through solid (LOS); in the air the line is cut to length.
    *  v2: on the ground too (so walking off the edge swings instead of dropping a full line). */
-  function attach(ring, inAir, how = 'auto') {
+  function attach(ring, inAir, how = 'auto', kind) {
     const d = Math.hypot(w.x - ring.x, center() - ring.y);
     if (d > lineRange() + T.attachSlack) return false;
     if (!lineOfSight(level, w.x, center(), ring.x, ring.y, w.doorsOpen)) return false;
@@ -179,7 +198,10 @@ export function createWorld(levelDef, opts = {}) {
     // (rope.js solveRope keep). A slack hook mid-fall snaps a few frames later, not here.
     w.snapCatch = v2 && inAir && (opts.attachProject ?? SWING.attachProject);
     w.catchKeep = SWING.attachKeep;
-    w.pull = v2 && pullMode() ? { t: 0 } : null;
+    // kind (audit F4): what this line was fired as. Omitted (the old callers): B's mode.
+    const k = kind ?? (pullMode() ? 'pull' : 'swing');
+    w.pull = v2 && k === 'pull' && w.abilities.pullGrapple ? { t: 0 } : null;
+    w.lineKind = w.pull ? 'pull' : 'swing';
     if (w.pull) { w.snapCatch = false; w.ropeLen = Math.max(PULL.minLen, d); }
     else if (fix2 && inAir && !w.relGood && w.relAt >= 0 && w.time - w.relAt <= F2.mashWindow) {
       // mash damping: a re-hook straight after a jump-off that was not a GOOD release (Space+J
@@ -192,6 +214,7 @@ export function createWorld(levelDef, opts = {}) {
     w.snapReelT = 0; w.upTapAt = -1;
     w.yanks = 0; w.yank = null; w.bLine = null; w.lineFall = false; w.ledgeAssist = 0; // assist is for arriving off a line, not on one
     w.everHooked = true;
+    if (w.pull) emit('pull-start', { ring, how }); // (the shaft's PULL prompt is done on this)
     w.airPlantsLeft = AIM_PLANT.perAir; w.airPlanting = false; // a hook spends the airtime; the next one can plant again
     w.taut = inAir;
     w.fireBuf = 0;
@@ -204,7 +227,7 @@ export function createWorld(levelDef, opts = {}) {
       w.tautT = 0; w.arc = 0; w.swingAng = null; w.relStat = null;
       if (inAir) {
         // a clean hook: the ring had only just come into reach, with a chain going
-        if (w.chain > 0 && age <= F.cleanCatchWindow && how !== 'refire') {
+        if (w.chain > 0 && age <= F.cleanCatchWindow && how !== 'refire' && how !== 'chain') { // a swing-to-pull chain keeps her speed as it is
           const sp = Math.hypot(w.vx, w.vy);
           if (sp > 1e-6) { const k = (sp + F.cleanCatchKick) / sp; w.vx *= k; w.vy *= k; }
           w.cleanCatches += 1;
@@ -226,6 +249,25 @@ export function createWorld(levelDef, opts = {}) {
   }
   /** Warp-pull grapple: the ability is had and the mode is on. */
   const pullMode = () => w.abilities.pullGrapple && w.grappleMode === 'pull';
+  /** What a grapple button fires. PULL ('pull'): a pull once the suit power is had, else a swing
+   *  (so it is a second B until then). SWING ('fire') or no button (a tap on a point): B's mode. */
+  const kindFor = (b) => (b === 'pull' ? (w.abilities.pullGrapple ? 'pull' : 'swing') : (pullMode() ? 'pull' : 'swing'));
+  /** The one-B-state-machine view of the two grapple buttons (audit F3). The button that was
+   *  pressed first owns it until it is up again; the other one is ignored meanwhile (pressing
+   *  PULL while holding B to aim does nothing). Returns held/pressed/released where `fire` is the
+   *  owner's. With the PULL button untouched it returns the input's own objects, unchanged. */
+  function grappleButton(input) {
+    const H0 = input.held; const P0 = input.pressed; const R0 = input.released || {};
+    let own = w.bBtn;
+    if (own && !H0[own] && !P0[own] && !R0[own]) own = null; // up, and its release was seen
+    if (!own) own = P0.fire ? 'fire' : P0.pull ? 'pull' : H0.fire ? 'fire' : H0.pull ? 'pull' : null;
+    w.bBtn = own;
+    if (own !== 'pull' && !H0.pull && !P0.pull && !R0.pull) { w.fireHeld = !!H0.fire; return { H: H0, P: P0, R: R0 }; }
+    const of = (S) => (own ? !!S[own] : false);
+    const H = { ...H0, fire: of(H0) };
+    w.fireHeld = H.fire;
+    return { H, P: { ...P0, fire: of(P0) }, R: { ...R0, fire: of(R0) } };
+  }
   /** Switch classic / pull for this world only. The next world starts again from
    *  opts.grapple or SETTINGS.grapple (boot / ?grapple=pull), not from this toggle. */
   function setGrappleMode(mode) {
@@ -345,11 +387,45 @@ export function createWorld(levelDef, opts = {}) {
     return { x: d.x / l, y: d.y / l };
   }
 
+  /** Swing-to-pull chain (follow-up Nov 7 2026). PULL pressed while she swings on a line (fired
+   *  as a swing, or a pull that has turned into a swing), once the warp-pull is earned: re-target with the same intent Double Line uses (the held
+   *  direction, else her facing; the grip she is on is left out) and attach there as a pull,
+   *  instead of letting go. Her speed is kept as it is (no clean-catch kick, no mash damping);
+   *  the pull's spring takes it from there, with the tuned PULL numbers. It never spends a Double
+   *  Line re-fire. No point in reach: she stays on her swing and it thunks. It reads the raw PULL
+   *  press, so a held (or just-let-go) B, which owns the B state, does not swallow it. Not here:
+   *  a locked pull (PULL is a second B and lets go, as before), a pull still pulling (PULL lets
+   *  go or re-fires, as before), a zip, a held hold-yank, a dash or a committed strike.
+   *  Returns true when the press was used (the caller hides it from the B state machine). */
+  function chainToPull(input) {
+    if (!w.anchor || w.grounded || w.pull || !w.abilities.pullGrapple) return false; // swinging (a pull that turned into a swing counts)
+    if (w.bLine || w.yank || w.dodge || w.climb || (w.atk && !canCancelAttack(w.atk.phase))) return false;
+    const from = w.anchor;
+    const range = lineRange() + T.targetSlack;
+    const t = chooseTarget({ ...level, rings: level.rings.filter((r) => r !== from) },
+      { x: w.x, cy: center(), face: w.face, dir: heldDir(input.held), range, doorsOpen: w.doorsOpen }, { target: null, age: 0 });
+    const to = t.target;
+    const ok = to && Math.hypot(w.x - to.x, center() - to.y) <= lineRange() + T.attachSlack && lineOfSight(level, w.x, center(), to.x, to.y, w.doorsOpen);
+    if (!ok) { emit('thunk', { why: 'chain' }); return true; } // she keeps the swing she is on
+    const vx = w.vx; const vy = w.vy;
+    release('chain');
+    attach(to, true, 'chain', 'pull');
+    w.vx = vx; w.vy = vy; // (attach leaves speed alone for a pull; kept explicit)
+    w.bArmed = false; w.aiming = false; w.reticle = null; w.fireBuf = 0;
+    emit('pull-chain', { from: from.id, to: to.id });
+    return true;
+  }
+
   /** v2 B button and pointer taps (BRIEF "Grapple controls"). Runs before the physics. */
   function grappleControls(input, realDt) {
-    const H = input.held;
-    let P = input.pressed;
-    const R = input.released || {};
+    // SWING (fire) and PULL share one B state machine (audit F3): the button view below says
+    // what "fire" means this step, and the kind goes to attach. With only B pressed this is the
+    // old input, bit for bit.
+    if (v2 && input.pressed.pull && chainToPull(input)) input = { ...input, pressed: { ...input.pressed, pull: false } };
+    const btn = grappleButton(input);
+    const H = btn.H;
+    let P = btn.P;
+    const R = btn.R;
     const range = lineRange() + T.targetSlack;
     // auto-target, always shown before you press (no target while hanging on the line)
     if (!w.anchor) {
@@ -381,7 +457,7 @@ export function createWorld(levelDef, opts = {}) {
       const pick = pickAt(reachable(level, w.x, center(), range, w.doorsOpen), input.aimAt.x, input.aimAt.y);
       if (pick && pick !== w.anchor) {
         if (w.anchor) release('retarget');
-        attach(pick, !w.grounded, 'tap-point');
+        attach(pick, !w.grounded, 'tap-point', kindFor('fire')); // a tap on a point fires what B fires
         w.aiming = false; w.bArmed = false;
       } else if (!pick && w.snuffer) {
         const lamp = lampInReach(input.aimAt.x, input.aimAt.y);
@@ -414,12 +490,12 @@ export function createWorld(levelDef, opts = {}) {
           { x: w.x, cy: center(), face: w.face, dir: heldDir(H), range, doorsOpen: w.doorsOpen }, { target: null, age: 0 });
         if (t.target) {
           release('refire');
-          if (attach(t.target, true, 'refire')) { w.refires -= 1; refired = true; emit('refire', { left: w.refires }); }
+          if (attach(t.target, true, 'refire', kindFor(w.bBtn))) { w.refires -= 1; refired = true; emit('refire', { left: w.refires }); }
         }
       }
       if (refired) { w.bArmed = false; }
       else if (w.anchor) { release('letgo'); w.lineCoyote = T.lineCoyote; w.bArmed = false; if (v2 && !w.grounded) w.ledgeAssist = SWING.ledgeAssistTime; emit('letgo'); }
-      else { w.bArmed = true; w.bTime = 0; w.bHoldFrames = 0; }
+      else { w.bArmed = true; w.bTime = 0; w.bHoldFrames = 0; w.fireKind = kindFor(w.bBtn); }
     }
     if (w.bArmed && H.fire) {
       w.bTime += realDt;
@@ -452,16 +528,15 @@ export function createWorld(levelDef, opts = {}) {
       if (w.aiming) {
         const r = w.reticle;
         w.aiming = false; w.reticle = null;
-        if (r && attach(r, !w.grounded, 'aim')) emit('aimfire');
+        if (r && attach(r, !w.grounded, 'aim', w.fireKind ?? undefined)) emit('aimfire');
         else emit('aim-cancel');
       } else {
         w.fireBuf = T.fireBuffer; // tap: fire now, or within 100 ms if a point comes in range
-        w.fireArmedAt = w.time;
       }
       w.bArmed = false;
     }
     if (w.fireBuf > 0 && !w.anchor) {
-      if (w.target && attach(w.target, !w.grounded, 'tap')) { /* attached */ }
+      if (w.target && attach(w.target, !w.grounded, 'tap', w.fireKind ?? undefined)) { /* attached */ }
       else {
         w.fireBuf -= realDt;
         if (w.fireBuf <= 1e-9) {
@@ -538,7 +613,7 @@ export function createWorld(levelDef, opts = {}) {
     w.vy *= FEEL.dodgeVyKeep;
     w.roll = 0;
     w.face = d;
-    if (w.aiming || w.bArmed) { w.aiming = false; w.bArmed = false; w.reticle = null; w.fireBuf = 0; emit('aim-cancel'); }
+    if (w.aiming || w.bArmed) { clearGrappleInput(); w.reticle = null; emit('aim-cancel'); }
     emit('dodge', { dir: d });
   }
 
@@ -695,7 +770,20 @@ export function createWorld(levelDef, opts = {}) {
     return true;
   }
 
-  /** v1 At(): one step of the Lark. dt = physics dt (half while aiming), realDt = wall step. */
+  /** v1 At(): one step of the Lark. dt = physics dt (half while aiming), realDt = wall step.
+   *
+   *  Timer clocks (audit I13; tuned feel, do NOT unify). While aim slow-mo runs, dt is half of
+   *  realDt, so the two clocks drift apart:
+   *    - on dt (physics time, slowed while aiming): coyote, yankCd.
+   *    - on realDt (wall time): jumpBuf, lineCoyote, ledgeAssist, and grappleControls' bTime and
+   *      bLine.t.
+   *  A new timer must pick its clock on purpose. Use dt if it is part of the motion, and realDt
+   *  if it is a player-input window.
+   *
+   *  B hold, frames vs seconds (audit I14): the same hold is counted twice. bHoldFrames counts
+   *  fixed steps against AIM_PLANT.tapFrames (tap vs plant, so 60 Hz is assumed). bTime counts
+   *  realDt seconds against aimHoldTime (when the aim starts). Both reset together when B is
+   *  armed. Keep both as they are; a later grapple-button state object should carry both. */
   function stepLark(input, dt, realDt) {
     const H = input.held;
     const P = input.pressed;
@@ -718,8 +806,9 @@ export function createWorld(levelDef, opts = {}) {
     // A jump during the tap window is a jump, not an aim: that press does not pre-plant in the air.
     if (w.grounded) { w.airPlantsLeft = AIM_PLANT.perAir; w.airPlanting = false; }
     if (jumpPressed && (w.grounded || w.coyote > 0) && w.bArmed && w.bHoldFrames <= AIM_PLANT.tapFrames && !w.anchor) w.aimPlantSkip = true;
-    if (!w.bArmed || !H.fire) { w.airPlanting = false; w.aimPlantSkip = false; }
-    if (aimPlant(!!H.fire, jumpPressed)) { w.jumpBuf = 0; return; }
+    const fireHeld = v2 ? !!w.fireHeld : !!H.fire; // v2: whichever grapple button owns B (SWING or PULL)
+    if (!w.bArmed || !fireHeld) { w.airPlanting = false; w.aimPlantSkip = false; }
+    if (aimPlant(fireHeld, jumpPressed)) { w.jumpBuf = 0; return; }
     if (v2 && stepFeel(input, dt, left, right)) { jumpPressed = false; w.jumpBuf = 0; }
     if (w.climb) { stepClimb(dt); afterMove(); return; }
 
@@ -889,7 +978,7 @@ export function createWorld(levelDef, opts = {}) {
     if (parkour && !w.grounded && w.anchor?.ledge && (w.yank || w.pull || w.ropeLen <= T.lineMin + 1e-6)) {
       const lg = w.anchor.ledge;
       const feetBelow = w.y - lg.top;
-      if (feetBelow > 1 / 16 && feetBelow <= ARCH.lineClimbReach && Math.abs(w.x - w.anchor.x) <= ARCH.lineClimbDx) {
+      if (feetBelow > PX1 &&feetBelow <= ARCH.lineClimbReach && Math.abs(w.x - w.anchor.x) <= ARCH.lineClimbDx) {
         const face = lg.side === 'L' ? 1 : lg.side === 'R' ? -1 : (Math.sign(w.anchor.x - w.x) || w.face);
         const ledge = findLedge(level, w.x, w.y, face, w.doorsOpen, null, ARCH.lineClimbReach);
         if (ledge && ledge.row === lg.top) { w.anchorClimbed = true; startClimb(ledge); afterMove(); return; }
@@ -940,6 +1029,7 @@ export function createWorld(levelDef, opts = {}) {
       if (it.t === 'n' || it.t === 'E') continue;
       if (Math.hypot(w.x - it.x, center() - it.y) < T.pickupRadius) collect(it);
     }
+    if (w.intro && introCheck(w, introApi)) return; // the shaft roof, no pull yet: the mini boss scene
     if (level.autoExit && w.grounded) {
       const ex = level.items.find((i) => i.t === 'E');
       if (ex && Math.hypot(w.x - ex.x, center() - ex.y) < T.useRadius) { takeExit(); return; }
@@ -970,9 +1060,9 @@ export function createWorld(levelDef, opts = {}) {
     w.caughtBy = by;
     w.meter = 1;
     release('caught');
-    w.vx = 0; w.vy = 0; w.aiming = false; w.reticle = null; w.bArmed = false;
+    w.vx = 0; w.vy = 0; clearGrappleInput(); w.reticle = null; // (fireBuf too: unused while caught; respawn cleared it anyway)
     w.dodge = null; w.atk = null; w.hitStop = 0; w.invuln = 0;
-    emit('caught', { by: by.kind, bark: "IT'S BATGUY!" });
+    emit('caught', { by: by.kind, bark: CAUGHT_BARK });
     emit('feather-lost', { left: w.feathers });
   }
 
@@ -995,6 +1085,26 @@ export function createWorld(levelDef, opts = {}) {
     emit('room-reset', { feathers: w.feathers });
   }
 
+  /** What the shaft intro may do to the world (shaft-intro.js). */
+  const introApi = {
+    emit, release, clearGrappleInput,
+    get bottomY() { return level.spawn.y; }, // the shaft floor, where she started
+    get spawnX() { return level.spawn.x; },
+    /** The scene is over: the guards are on their rounds as at the start of the room. */
+    resetGuards() {
+      level.guards = parseLevel(levelDef, anchorOpt).guards;
+      w.meter = 0; w.alert = null; w.meterSrc = null;
+      w.checkpoint = { x: level.spawn.x, y: level.spawn.y };
+      w.peakY = w.y; w.lineFall = false; w.px = w.x; w.py = w.y;
+    },
+    /** She has his gear: the warp-pull suit power (game.js saves it). */
+    grant() {
+      w.abilities.pullGrapple = true;
+      emit('pickup', { item: 'gear' });
+      emit('pull-earned');
+    },
+  };
+
   /** v1 xt(): one fixed step. input = { held, pressed, released?, aimAt? }. */
   function step(dt, input = NO_INPUT) {
     const n = Math.min(SIM_DT_CLAMP, dt);
@@ -1013,6 +1123,8 @@ export function createWorld(levelDef, opts = {}) {
       return;
     }
     if (w.note) { if (input.pressed.use) w.note = null; return; }
+    // the shaft intro (shaft-intro.js): a short script; no input, no physics, no stealth meanwhile
+    if (introActive(w)) { w.hitStop = 0; w.time += n; stepIntro(w, n, introApi); stepPrompts(); return; }
     // Hit-stop: whole steps that fit in the freeze. A leftover shorter than one step does not
     // add another step (that would push a 70 ms stop past 80 ms). Presses during it are latched.
     if (w.hitStop > 1e-9 && n <= w.hitStop + 1e-12) {
@@ -1040,7 +1152,8 @@ export function createWorld(levelDef, opts = {}) {
     if (w.phase === 'play') {
       let landDrop = null;
       for (let i = ev0; i < w.events.length; i++) if (w.events[i].type === 'land') landDrop = Math.max(landDrop ?? 0, w.events[i].drop);
-      const by = stepStealth(w, level, phys, emit, noiseRadius(w, landDrop));
+      w.noise = noiseRadius(w, landDrop); // the same value hearing uses, kept for the ring
+      const by = stepStealth(w, level, phys, emit, w.noise);
       if (by) caught(by);
     }
     stepPrompts();

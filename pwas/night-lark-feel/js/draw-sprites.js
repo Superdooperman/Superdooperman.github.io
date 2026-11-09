@@ -140,7 +140,7 @@ export function drawGrappleMarker(ctx, sheets, r, cam, T, targeted) {
 export function drawReticleSprite(ctx, sheets, world, cam, T) {
   const sheet = sheets && sheets.reticle;
   if (!sheet || !sheet.img || !world.reticle) return false;
-  const frame = world.grappleMode === 'pull' ? 2 : 1;
+  const frame = (world.fireKind ?? (world.grappleMode === 'pull' ? 'pull' : 'swing')) === 'pull' ? 2 : 1; // the armed button's kind
   drawFrame(ctx, sheet, frame, world.reticle.x * T - cam.x, world.reticle.y * T - cam.y, 1);
   return true;
 }
@@ -160,7 +160,6 @@ export function drawHookHead(ctx, sheets, from, to) {
   if (!sheet || !sheet.img) return;
   const ang = Math.atan2(to.y - from.y, to.x - from.x);
   const tip = sheet.tip || [7, 4];
-  const pv = sheet.pivot || [0, 4];
   ctx.save();
   ctx.translate(Math.round(to.x), Math.round(to.y));
   ctx.rotate(ang);

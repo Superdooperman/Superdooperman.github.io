@@ -30,7 +30,6 @@ export const STRIP_FRAMES = Object.freeze({
   'lark-ledge-climb': Object.freeze({ w: 32, h: 64 }),
 });
 export const frameSizeFor = (strip) => STRIP_FRAMES[strip] || STRIP_FRAMES.default;
-export const STRIP_PIVOT = 'bottom-centre';
 /** v2 template room size in tiles: a 30x16 playfield (480x256 px) under a 14 px HUD strip
  *  (VIEW_H 270 = HUD_H 14 + 16 rows x 16 px). Ported v1 rooms are 40x14. */
 export const ROOM_COLS = 30;
@@ -46,6 +45,8 @@ export const SIM_DT_CLAMP = 0.05; // v1: Math.min(0.05, e) inside step
 /** v1 tile was 16 v1-pixels. */
 export const V1_TILE_PX = 16;
 export const v1px = (v) => v / V1_TILE_PX;
+/** One v1 pixel in tiles (1/16, exact): v1's "within 1 px" landing, lip, climb and sight rules. */
+export const PX1 = v1px(1);
 
 /** Gameplay tuning, in tiles and seconds. Comments give the v1 value in v1 px. */
 export const TUNING = Object.freeze({
@@ -83,7 +84,11 @@ export const TUNING = Object.freeze({
   losStep: v1px(4),
   coneRange: v1px(78),
   coneHalfAngle: 0.62,
-  guardEyeHeight: v1px(12),
+  // Watchman flashlight lens (art/manifest.json lightOrigin [28, 19] on pivot [16, 47]).
+  // 12 px in front of the body, 28 px above the feet. Was v1px(12), which sat at the
+  // knees of the 48 px sprite. Vision and the drawn cone share this origin.
+  guardFlashTipX: 12 / TILE_PX,
+  guardEyeHeight: 28 / TILE_PX,
   hideLampRadius: v1px(54),
   meterFill: 0.85,
   meterSparkMul: 0.7, // v1 applies x0.7 while the spark/charm is held
@@ -185,7 +190,7 @@ export const ARCH = Object.freeze({
  *  pad R1, touch ZIP; B is unchanged) or 'hold' (hold B on the line to zip, release B to launch).
  *  main.js sets it from ?yank= or localStorage. Default is 'button' because 'hold' defers B's
  *  let-go to the release, which breaks the browser walkthrough (FEEL-PLAN.md, "B-hold clash"). */
-export const SETTINGS = { yankInput: 'button', anchors: null, feel: 'fix2', grapple: 'classic', abilities: { pullGrapple: true }, touch: 'auto' }; // feel: 'fix2' (default), 'fix1' (?physics=fix1) or 'legacy'; grapple: 'classic' or 'pull' (always had; ?grapple=pull starts in pull as an alias); touch: 'on'|'off'|'auto' // anchors: null (room decides) or 'mixed' (?anchors=arch)
+export const SETTINGS = { yankInput: 'button', anchors: null, feel: 'fix2', grapple: 'classic', abilities: { pullGrapple: false }, touch: 'auto' }; // feel: 'fix2' (default), 'fix1' (?physics=fix1) or 'legacy'; grapple: what B fires, 'classic' or 'pull' (?grapple=pull); abilities.pullGrapple: the earned warp-pull, off at a fresh start (feel pass 1; ?pull=1 or ?grapple=pull grant it on the dev page); touch: 'on'|'off'|'auto' // anchors: null (room decides) or 'mixed' (?anchors=arch)
 
 export const SWING = Object.freeze({
   // pumping (Worms rope style): holding the way the swing is already going adds more than
@@ -278,7 +283,8 @@ export const FEEL = Object.freeze({
 });
 
 /** Feel fix 1 (Azzato, Nov 1 2026: "Yes let's fix this mess"). v2 only, and only in worlds made
- *  with feel 'fix1' (createWorld opts.feel, or SETTINGS.feel, 'fix1' by default). The generator's
+ *  with feel 'fix1' or 'fix2' (createWorld opts.feel, or SETTINGS.feel; 'fix2', a superset of
+ *  this, is the default). The generator's
  *  move probes (gen/moves.js) plan with SETTINGS.feel too, so every generated room is proven
  *  finishable in the feel it is played with (towers differ from the legacy-feel ones). All speeds in tiles/s (1 tile = 16 px). */
 export const FEELFIX = Object.freeze({
@@ -353,16 +359,17 @@ export const AIM_PLANT = Object.freeze({
 });
 
 /** Searchlights and lamps (Azzato, feel-fix-3). Tunable in one place. Warm/amber = home;
- *  cold SW = Company. Every lamp, warm or cold, counts for the 54 px hide rule. */
+ *  cold SW = Company. Every lamp, warm or cold, counts for the 54 px hide rule
+ *  (TUNING.hideLampRadius, the one definition of that radius). */
 export const LIGHT = Object.freeze({
-  hideRadiusPx: 54, // TUNING.hideLampRadius is this in tiles
   // Searchlights: battlements floor 2+ and the lantern room only. Max 1 per band. Never the shaft.
   searchFromFloor: 2,
   searchMaxPerBand: 1,
   searchSizes: Object.freeze(['small', 'big']), // small = searchlight-head 16px, big = searchlight-prop-32
-  // TODO(Azzato): warm-light buff is NOT decided. Stub hook, no effect.
-  warmBuff: false,
 });
+
+/** The watchman's bark when he catches her (the sim's 'caught' event, the game, the render). */
+export const CAUGHT_BARK = "IT'S BATGUY!";
 
 /** Mini moon towers: a few per level. Relight = checkpoint + small safe pocket + map reveal.
  *  revealRadius 320 is a PLACEHOLDER. */
@@ -374,8 +381,9 @@ export const MINI_TOWER = Object.freeze({
   useRange: 1.6, // tiles
 });
 
-/** Warp-pull grapple (Metroid-style ability, abilities.pullGrapple; always on in feel-fix-3.
- *  ?grapple=pull starts in pull mode as an alias; G / Y / the touch toggle switches). The hook
+/** Warp-pull grapple (Metroid-style suit power, abilities.pullGrapple: earned, so off at a fresh
+ *  start; ?pull=1 grants it on the dev page. Fired by the PULL button: C / L, pad X, touch PULL;
+ *  G / pad Y switch what B fires, for one-button play). The hook
  *  point is an invisible anchor; a spring pulls her straight at it. Let go mid-pull and she
  *  keeps the pull's speed (flies on past); hold on and once she is close (or the pull stalls)
  *  the line becomes a normal swing at that length. */

@@ -2,8 +2,12 @@
 // a canvas scale and is not touched. Viewport meta is set in index.html (maximum-scale=1,
 // user-scalable=no); this file is the JS belt: preventDefault on gesture/dblclick/double
 // touchend, and snap visualViewport.scale back to 1 if the page still zooms.
+// Only a cancelable event is prevented. Chrome sends touchend with cancelable=false once a
+// finger has slid far enough to start a (blocked, touch-action: none) scroll gesture, e.g. a
+// thumb rolled from D-pad left to up; no page zoom can follow that, and calling
+// preventDefault() on it only logs "Ignored attempt to cancel a touchend event" (Nov 7 2026).
 export function blockPageZoom(target = window, doc = document) {
-  const prevent = (e) => { e.preventDefault(); };
+  const prevent = (e) => { if (e.cancelable !== false) e.preventDefault(); };
   target.addEventListener('gesturestart', prevent, { capture: true, passive: false });
   target.addEventListener('gesturechange', prevent, { capture: true, passive: false });
   target.addEventListener('gestureend', prevent, { capture: true, passive: false });

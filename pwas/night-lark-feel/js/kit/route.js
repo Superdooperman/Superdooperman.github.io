@@ -43,9 +43,11 @@ export const DENSE = Object.freeze({
 
 /** attempt: the generator's reroll counter (js/levels/tall-shaft.js rejects a route the solver
  *  can't finish and asks for attempt + 1). Attempt 0 is the seed's own stream. */
-export function towerRoute(seed = 1, attempt = 0) {
+export function towerRoute(seed = 1, attempt = 0, opts = {}) {
   const rng = createRng(attempt ? hashSeed('tower', seed, attempt) : seed);
-  const towerRows = ROUTE.dense ? ROUTE.towerRows : TOWER.rows;
+  // opts.towerRows (feel pass 1, G): a taller tower in block rows (6 tiles each) for the vertical
+  // rooms. Omitted: the tall-shaft size, so every existing seed builds exactly as before.
+  const towerRows = opts.towerRows ?? (ROUTE.dense ? ROUTE.towerRows : TOWER.rows);
   const cols = TOWER.cols * TOWER.blockW; const rows = towerRows * TOWER.blockH;
   const A = createAssembly(cols, rows);
   const facade = dressFacade(facadeColumn(rng, { rows: towerRows }), hashSeed('facade-art', seed, attempt));

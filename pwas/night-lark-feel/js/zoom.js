@@ -11,7 +11,7 @@
 //    columns never jump between 3 and 4 device px as the camera moves (no shimmer), at the cost of a 1-device-px soft edge.
 //    'nearest' is the same buffer with a plain nearest blit at every scale (for comparison).
 //  - 'direct': draw the scene straight into the device-pixel canvas with a scale transform.
-import { ZOOM, BASE_W, BASE_H, TILE_PX, setViewSize, VIEW_W, VIEW_H } from './config.js';
+import { ZOOM, BASE_W, BASE_H, setViewSize, VIEW_W, VIEW_H } from './config.js';
 import { integerScale } from './canvas.js';
 
 const clamp01 = (v) => Math.max(0, Math.min(1, v));
@@ -190,6 +190,5 @@ export function createPresenter(canvas, win = window, { mode = ZOOM.render, doc 
   }
   resize();
   win.addEventListener('resize', resize);
-  return { ctx, frame, resize, toLogical, state: st, setMode(m) { st.mode = m; } };
+  return { ctx, frame, resize, toLogical, state: st };
 }
-export const ZOOM_TILE = TILE_PX; // re-export for tools that only import zoom.js

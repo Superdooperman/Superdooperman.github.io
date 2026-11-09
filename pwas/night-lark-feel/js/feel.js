@@ -2,6 +2,7 @@
 // The rope and zip solvers do not live here and do not read these helpers. Dodge, the
 // strike and hit-stop are applied by sim.js only while she is off the line.
 import { FEEL, FEELFIX, TILE_PX } from './config.js';
+import { bodyCenterY } from './physics.js';
 
 /** Recovery is the only part of a strike that jump, dodge or the grapple can cancel. */
 export function canCancelAttack(phase) { return phase === 'recover'; }
@@ -33,7 +34,7 @@ export function swipeDodge(dx, dy, dtMs) {
  *  the sight test: stealth never reads this. */
 export function guardBump(w, g) {
   if (!w || !g || g.kind !== 'guard') return false;
-  const py = w.y - w.h * 0.5;
+  const py = bodyCenterY(w);
   return Math.abs(w.x - g.x) < FEEL.contactRange && py > g.floorY - FEEL.contactAbove && py < g.floorY;
 }
 

@@ -6,11 +6,14 @@ import { swipeDodge } from './feel.js';
 //
 // Actions follow the v2 pad (BRIEF: D-pad, A jump, B line, Start, Select), plus two
 // v1-compat actions the ported engine still uses until M1's controls replace them:
-// 'use' (v1 E / Enter) and 'crouch' (v1 C).
-export const ACTIONS = ['left', 'right', 'up', 'down', 'jump', 'fire', 'start', 'select', 'use', 'crouch', 'yank', 'dodge', 'attack', 'pullToggle', 'snap'];
+// 'use' (v1 E / Enter) and 'crouch' (v1 C; in v2 DOWN crouches, and C is the PULL key now).
+// H controls (feel pass 1): 'fire' is the SWING grapple button (B), 'pull' the PULL grapple button
+// (the earned warp-pull; until it is had PULL fires a swing too). 'pullToggle' switches what B fires
+// (one-button accessibility option), and that choice carries from room to room.
+export const ACTIONS = ['left', 'right', 'up', 'down', 'jump', 'fire', 'start', 'select', 'use', 'crouch', 'yank', 'dodge', 'attack', 'pullToggle', 'snap', 'pull'];
 
 /** Keyboard per BRIEF (arrows/WASD, Z/Space = A, X/J = B, Enter = Start, Shift = Select),
- *  plus v1's E (use) and C (crouch). (M0 also mapped Enter to use like v1; in M1 Enter is
+ *  plus v1's E (use), and C / L = PULL (C was v1's crouch; DOWN crouches). (M0 also mapped Enter to use like v1; in M1 Enter is
  *  Start only, which pauses. The v1-controls parity replay uses E.) */
 export const KEY_MAP = Object.freeze({
   ArrowLeft: ['left'], KeyA: ['left'],
@@ -21,18 +24,19 @@ export const KEY_MAP = Object.freeze({
   KeyJ: ['fire'], KeyX: ['fire'],
   Enter: ['start'], Escape: ['start'],
   ShiftLeft: ['select'], ShiftRight: ['select'],
-  KeyE: ['use'], KeyC: ['crouch'],
-  KeyK: ['yank'], KeyV: ['yank'], // swing-feel: the separate zip key (only with ?yank=button)
+  KeyE: ['use'],
+  KeyC: ['pull'], KeyL: ['pull'], // PULL grapple: Z jump / X swing / C pull / V zip, or J swing / K zip / L pull
+  KeyK: ['yank'], KeyV: ['yank'], // swing-feel: the separate zip key (always mapped; the sim acts on it when yankInput is 'button', the default, and ignores it with ?yank=hold)
   KeyQ: ['dodge'], // feel pass 1: the dash. Touch uses a swipe (feel.js), not a button.
   KeyF: ['attack'],
-  KeyG: ['pullToggle'], // warp-pull / swing toggle (also pad Y, touch PULL)
+  KeyG: ['pullToggle'], // what B fires, swing / pull (also pad Y). Accessibility; PULL has its own buttons.
 });
 
 /** Gamepad API "standard" mapping (feel-fix-3).
- *  0 A jump, 1 B / 2 X fire, 3 Y pull-toggle, 4 LB dodge, 5 RB yank,
+ *  0 A jump, 1 B swing (fire), 2 X pull, 3 Y pull-toggle (what B fires), 4 LB dodge, 5 RB yank,
  *  6 LT attack, 7 RT analog snap-reel, 8 select, 9 Start pause,
  *  12-15 D-pad. Left stick moves. Right stick aims (see PAD_AIM_DEADZONE). */
-export const PAD_BUTTONS = Object.freeze({ 0: 'jump', 1: 'fire', 2: 'fire', 3: 'pullToggle', 4: 'dodge', 5: 'yank', 6: 'attack', 8: 'select', 9: 'start', 12: 'up', 13: 'down', 14: 'left', 15: 'right' });
+export const PAD_BUTTONS = Object.freeze({ 0: 'jump', 1: 'fire', 2: 'pull', 3: 'pullToggle', 4: 'dodge', 5: 'yank', 6: 'attack', 8: 'select', 9: 'start', 12: 'up', 13: 'down', 14: 'left', 15: 'right' });
 export const PAD_DEADZONE = 0.5;
 export const PAD_AIM_DEADZONE = 0.25;
 export const PAD_SNAP_THRESHOLD = 0.6; // RT analog (button 7)

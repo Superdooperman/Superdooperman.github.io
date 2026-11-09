@@ -1,9 +1,11 @@
 // Placeholder renderer: coloured rects at the 480x270 logical frame, in locked-palette colours.
-// Physics is in tiles; this is the only place that multiplies by TILE_PX.
+// Physics is in tiles; render converts to pixels with TILE_PX. It is not the only place that
+// does: the other draw modules (fx, skyline, wren, draw-sprites, zoom), main.js's pointer
+// picking and a few px-valued rules (mini-tower reveal, feel) do too.
 // M2: lamp pools (edge at the hide radius), cones (SW0 fill, edge lerps SW1 -> AR3 with the
 // meter), searchlight beams, the meter over the watcher who sees her, the grace "!", the search
 // "?", the catch bark, the hidden look, the feathers HUD and the NIGHT OVER card.
-import { VIEW_W, VIEW_H, HUD_H, TILE_PX, TUNING, HEALTH, FEELFIX, FEELFIX2 } from './config.js';
+import { VIEW_W, VIEW_H, HUD_H, TILE_PX, TUNING, HEALTH, FEELFIX, FEELFIX2, CAUGHT_BARK } from './config.js';
 import { tileAt, isStandable, isWood } from './level.js';
 import { promptText } from './prompts.js';
 import { PLACEHOLDER as C, PALETTE, drawSprite, drawFrame, drawFrameBox, hexToRgb, ART_SCALE } from './art.js';
@@ -17,7 +19,7 @@ import { drawSkyline, drawFrontParallax } from './skyline.js';
 import {
   drawHarborTile, drawLampSprite, drawPickupSprite, drawGuardSprite, drawGrappleMarker,
   drawReticleSprite, gunHookPx, drawHookHead, drawSearchlightProp, drawHudBand, drawFeathers,
-  drawMoonPieces, drawMiniTowers,
+  drawMoonPieces, drawMiniTowers, drawPowerupIcon,
 } from './draw-sprites.js';
 import { feelLines, tuneLines } from './feel.js';
 import { lookOf, zoomInfo } from './zoom.js';
@@ -44,6 +46,28 @@ export function updateFallLook(world, dt = 1 / 60) {
   return next;
 }
 
+// Rise look (feel pass 1, G: "the camera must look upward during climbs"). Mirror of the fall
+// look: rising faster than RISE_LOOK.from tiles/s (a jump off a line, a zip, a warp-pull) eases
+// her lower on the screen, by up to .max of the play height, so the climb above is in view. In a
+// room whose flow is 'up' (def.flow, the vertical section) she also sits at .flowAnchor instead
+// of 0.62 at rest. Rooms no taller than the view are clamped, so neither changes them; the fall
+// look is applied after and still wins when she drops.
+export const RISE_LOOK = Object.freeze({ from: 6, full: 18, max: 0.2, ease: 4, flowAnchor: 0.7 });
+const riseLook = new WeakMap();
+export function updateRiseLook(world, dt = 1 / 60) {
+  const target = Math.max(0, Math.min(1, (-world.vy - RISE_LOOK.from) / (RISE_LOOK.full - RISE_LOOK.from)));
+  const cur = riseLook.get(world) || 0;
+  const k = Math.min(1, RISE_LOOK.ease * dt * (target > cur ? 1 : 0.5)); // in, then out slowly (no bob on each swing)
+  const next = cur + (target - cur) * k;
+  riseLook.set(world, next < 1e-3 ? 0 : next);
+  return next;
+}
+/** Where her feet sit down the play height (0 top .. 1 bottom), before the clamp. */
+export function cameraAnchor(world) {
+  const base = world.level?.flow === 'up' ? RISE_LOOK.flowAnchor : 0.62;
+  return base + RISE_LOOK.max * (riseLook.get(world) || 0) - FALL_LOOK.max * (fallLook.get(world) || 0);
+}
+
 export function cameraFor(world, view = { w: VIEW_W, h: VIEW_H, hud: HUD_H }) {
   const hud = view.hud ?? 0;
   const playH = view.h - hud;
@@ -55,10 +79,28 @@ export function cameraFor(world, view = { w: VIEW_W, h: VIEW_H, hud: HUD_H }) {
   // whole logical px: then her drawn x relative to the screen never flickers 1 px while it eases
   const look = lk == null ? null : Math.round(lk);
   let cx = world.x * TILE_PX - view.w / 2 + (look ?? world.face * 24 * (TILE_PX / 16));
-  let cy = world.y * TILE_PX - hud - playH * (0.62 - FALL_LOOK.max * (fallLook.get(world) || 0));
+  let cy = world.y * TILE_PX - hud - playH * cameraAnchor(world);
   cx = roomW <= view.w ? -(view.w - roomW) / 2 : Math.max(0, Math.min(roomW - view.w, cx));
   cy = roomH <= playH ? -hud - (playH - roomH) / 2 : Math.max(-hud, Math.min(roomH - view.h, cy));
   return { x: Math.round(cx) + 0, y: Math.round(cy) + 0 }; // +0: no -0 when centred
+}
+
+/** Footstep sound ring (feel pass 1, Notion F). Its radius is the hearing rule itself
+ *  (world.noise = stealth.noiseRadius: Soft Soles halves it, a hard landing is louder), centred
+ *  where hearing measures from, so what you see is what a guard can hear (stone between halves
+ *  it again). It pulses once per SOUND_RING.period while she makes noise; reduced motion draws it
+ *  steady and fainter. Render only. */
+export const SOUND_RING = Object.freeze({ period: 0.3, alpha: 0.45 });
+export function drawSoundRing(ctx, world, cam, T, reduced = false) {
+  const r = world.noise || 0;
+  if (r <= 0 || world.phase !== 'play' || world.note) return false;
+  const cx = Math.round(world.x * T - cam.x); const cy = Math.round((world.center ? world.center() : world.y) * T - cam.y);
+  const k = reduced ? 0.6 : 1 - ((world.time % SOUND_RING.period) / SOUND_RING.period);
+  ctx.globalAlpha = SOUND_RING.alpha * k;
+  ctx.strokeStyle = C.hud; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(cx, cy, r * T, 0, Math.PI * 2); ctx.stroke();
+  ctx.globalAlpha = 1;
+  return true;
 }
 
 /** Render interpolation (feel fix 1): draw her between the last two sim steps, alpha = the
@@ -101,7 +143,7 @@ function drawTrail(ctx, world, cam, t) {
 export function render(ctx, world, sheets = null, opts = {}) {
   const T = TILE_PX;
   const fx = opts.fx || null; // M5 look layers (fx.js); without it the M4 placeholder look is drawn
-  if (!opts.still) updateFallLook(world);
+  if (!opts.still) { updateFallLook(world); updateRiseLook(world); }
   const cam = cameraFor(world);
   if (fx) { const o = fx.offset(); cam.x += o.x; cam.y += o.y; }
   const L = world.level;
@@ -124,12 +166,15 @@ export function render(ctx, world, sheets = null, opts = {}) {
 
   // columns past the room's sides are its stone walls (tileAt), drawn when the view is wider
   const c0 = Math.floor(cam.x / T); const c1 = Math.floor((cam.x + VIEW_W) / T);
-  // feel fix 1 (zoom): rows above and below the room are stone too, so a wide view never shows void
+  // feel fix 1 (zoom): a wide view also draws the rows above and below the room. Feel pass 1
+  // (G, audit I9): they are drawn by the room's off-room rule (level.offRoom, through tileAt),
+  // the same rule physics uses, so a stone ceiling is never drawn where she can jump through.
+  // Open air (the default) shows the backdrop.
   const outRows = !!world.feelFix;
   const r0 = outRows ? Math.floor((cam.y + HUD_H) / T) : Math.max(0, Math.floor(cam.y / T));
   const r1 = outRows ? Math.floor((cam.y + VIEW_H) / T) : Math.min(L.rows - 1, Math.floor((cam.y + VIEW_H) / T));
   for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
-    const ch = (r < 0 || r >= L.rows) ? '#' : tileAt(L, c, r); const x = c * T - cam.x; const y = r * T - cam.y;
+    const ch = tileAt(L, c, r); const x = c * T - cam.x; const y = r * T - cam.y;
     if (ch === '#' || ch === 's' || isWood(ch) || ch === 'b') {
       if (sheets && drawHarborTile(ctx, sheets, L, c, r, cam, T, world.doorsOpen)) continue;
       if (ch === '#' || ch === 's') {
@@ -186,6 +231,8 @@ export function render(ctx, world, sheets = null, opts = {}) {
     ctx.fillRect(Math.round(it.x * T - cam.x) - s / 2, Math.round(it.y * T - cam.y) - s / 2, s, s);
   }
   drawWatchers(ctx, world, cam, sheets);
+  drawIntro(ctx, world, cam, sheets);
+  drawSoundRing(ctx, world, cam, T, !!opts.reducedMotion);
   const wren = hasWren(sheets); // Brook's Wren strips loaded: draw her art, not the placeholder
   if (world.feelFix) { const tr = opts.still ? trails.get(world) : stepTrail(world); drawTrail(ctx, world, cam, tr); }
   if (fx) {
@@ -303,14 +350,20 @@ function drawOverlays(ctx, world, opts, sheets) {
 const centerText = (ctx, txt, y, color, scale) => drawText(ctx, txt, Math.round(VIEW_W / 2 - (txt.length * 4 * scale) / 2), y, color, scale);
 
 /** PULL / SWING sits in the playfield under the room name. A plate keeps the glyphs readable
- *  when Wren is in the top-right corner (the font's empty pixels would otherwise show her). */
+ *  when Wren is in the top-right corner (the font's empty pixels would otherwise show her).
+ *  Feel pass 1 (audit F4): on a line it names what that line was fired as (world.lineKind);
+ *  off the line, what B fires (world.grappleMode). Shown once the warp-pull is earned. */
+export function grappleTagLabel(world) {
+  const pull = world.anchor && world.lineKind ? world.lineKind === 'pull' : world.grappleMode === 'pull';
+  return pull ? 'PULL' : 'SWING';
+}
 function drawGrappleTag(ctx, world) {
-  const label = world.grappleMode === 'pull' ? 'PULL' : 'SWING';
+  const label = grappleTagLabel(world);
   const tx = VIEW_W - 28;
   const ty = HUD_H + 3;
   ctx.fillStyle = C.promptBg;
   ctx.fillRect(tx - 2, ty - 2, label.length * 4 + 3, 9);
-  drawText(ctx, label, tx, ty, world.grappleMode === 'pull' ? C.reticle : (C.hudDim || C.hud), 1);
+  drawText(ctx, label, tx, ty, label === 'PULL' ? C.reticle : (C.hudDim || C.hud), 1);
 }
 
 function lerpHex(a, b, t) {
@@ -344,23 +397,67 @@ function drawWatchers(ctx, world, cam, sheets) {
     }
   }
   for (const g of L.guards) {
-    const ex = g.x * T - cam.x + (g.state === 'stagger' ? -Math.sign(g.kbVx || g.dir || 1) * 2 : 0);
-    const ey = (g.floorY - TUNING.guardEyeHeight) * T - cam.y;
+    const stagger = g.state === 'stagger' ? -Math.sign(g.kbVx || g.dir || 1) * 2 : 0;
+    const bodyX = g.x * T - cam.x + stagger;
+    const e = eyeOf(g);
+    const ex = e.x * T - cam.x + stagger;
+    const ey = e.y * T - cam.y;
     const f = g.dir > 0 ? 0 : Math.PI; const A = TUNING.coneHalfAngle;
     if (g.state !== 'tied') fan(ex, ey, f - A, f + A, TUNING.coneRange * T, g); // M4 Tie-Line: no cone
     if (!drawGuardSprite(ctx, sheets, g, cam, T, world.time)) {
-      drawSprite(ctx, sheets, 'guard', 0, ex, g.floorY * T - cam.y);
-      ctx.fillStyle = C.guardCap; ctx.fillRect(Math.round(ex - 5), Math.round(g.floorY * T - cam.y) - 16, 10, 2);
-      ctx.fillStyle = C.guardDark; ctx.fillRect(Math.round(ex + (g.dir > 0 ? 2 : -4)), Math.round(ey) - 1, 2, 2);
+      drawSprite(ctx, sheets, 'guard', 0, bodyX, g.floorY * T - cam.y);
+      ctx.fillStyle = C.guardCap; ctx.fillRect(Math.round(bodyX - 5), Math.round(g.floorY * T - cam.y) - 16, 10, 2);
+      ctx.fillStyle = C.guardDark; ctx.fillRect(Math.round(ex) - 1, Math.round(ey) - 1, 2, 2);
     }
-    const head = { x: ex, y: g.floorY * T - cam.y - 20 };
+    const head = { x: bodyX, y: g.floorY * T - cam.y - 20 };
     if (g.state === 'search' || g.state === 'listen') drawText(ctx, '?', head.x - 1, head.y - 6, C.hud, 1);
     if (g.state === 'tied' && !(sheets && (sheets['guard-watchman-v2'] || sheets['guard-watchman']))) {
       ctx.fillStyle = C.rope;
-      for (const dy of [7, 11, 15]) ctx.fillRect(Math.round(ex - 6), Math.round(g.floorY * T - cam.y) - dy, 12, 1);
+      for (const dy of [7, 11, 15]) ctx.fillRect(Math.round(bodyX - 6), Math.round(g.floorY * T - cam.y) - dy, 12, 1);
     }
   }
 }
+
+/** The shaft's first mini boss and his loose gear (shaft-intro.js). PLACEHOLDER look, no new
+ *  art: Brook's watchman at twice the size (else the placeholder guard box, doubled) with a
+ *  MINI BOSS plate; his line during the scuffle; the gear is the existing Quick Reel power-up
+ *  icon (16 px), else a small IX1 box. Returns what it drew (for the tests). */
+export const MINI_BOSS_PLATE = 'MINI BOSS';
+export function drawIntro(ctx, world, cam, sheets) {
+  const I = world.intro; if (!I) return null;
+  const T = TILE_PX; const drawn = { boss: false, gear: false, bark: false };
+  const b = I.boss;
+  if (!b.gone) {
+    const bx = b.x * T - cam.x; const by = b.floorY * T - cam.y;
+    const sheet = sheets && (sheets['guard-watchman-v2'] || sheets['guard-watchman']);
+    const shake = I.phase === 'struggle' ? (Math.floor(I.t * 20) % 2 ? 1 : -1) : 0;
+    ctx.save(); ctx.translate(Math.round(bx + shake), Math.round(by)); ctx.scale(2, 2);
+    // approach uses the walk/idle frame so he is visibly closing; struggle uses the grab frame
+    if (sheet && sheet.img) drawFrame(ctx, sheet, I.phase === 'struggle' ? 7 : 0, 0, 0, b.dir < 0 ? -1 : 1);
+    else { ctx.fillStyle = C.guard || C.hud; ctx.fillRect(-5, -24, 10, 24); ctx.fillStyle = C.guardCap || C.hudDim; ctx.fillRect(-5, -24, 10, 3); }
+    ctx.restore();
+    const plate = MINI_BOSS_PLATE; const pw = plate.length * 4;
+    ctx.fillStyle = C.promptBg; ctx.fillRect(Math.round(bx - pw / 2 - 3), Math.round(by - 62), pw + 5, 9);
+    drawText(ctx, plate, Math.round(bx - pw / 2), Math.round(by - 60), C.hud, 1);
+    drawn.boss = true;
+  }
+  if (I.phase === 'struggle' || (I.phase === 'fall' && I.t < 0.8)) {
+    const t = 'STAY DOWN, BATGUY!'; const tw = t.length * 4;
+    const bx = b.x * T - cam.x; const by = Math.max(HUD_H + 4, b.floorY * T - cam.y - 74);
+    ctx.fillStyle = C.promptBg; ctx.fillRect(Math.round(bx - tw / 2 - 3), Math.round(by - 2), tw + 5, 10);
+    drawText(ctx, t, Math.round(bx - tw / 2), Math.round(by), C.hud, 1);
+    drawn.bark = true;
+  }
+  const G = I.gear;
+  if (G && !G.taken) {
+    const gx = Math.round(G.x * T - cam.x); const gy = Math.round(G.y * T - cam.y);
+    const spin = Math.floor(world.time * 10) % 2;
+    if (!drawPowerupIconAt(ctx, sheets, gx - 8, gy - 8 + spin)) { ctx.fillStyle = PALETTE.IX1; ctx.fillRect(gx - 4, gy - 4, 8, 8); ctx.fillStyle = PALETTE.IX0; ctx.fillRect(gx - 2, gy - 2, 4, 4); }
+    drawn.gear = true;
+  }
+  return drawn;
+}
+function drawPowerupIconAt(ctx, sheets, x, y) { return drawPowerupIcon(ctx, sheets, 'quick-reel', x, y, 16); }
 
 /** The meter sits over the watcher who sees her (BRIEF HUD rule), plus the "!" and the bark. */
 function drawMeter(ctx, world, cam) {
@@ -378,7 +475,7 @@ function drawMeter(ctx, world, cam) {
   ctx.fillStyle = C.meterBg; ctx.fillRect(x - 9, y, 18, 4);
   ctx.fillStyle = C.meterFill; ctx.fillRect(x - 8, y + 1, Math.round(16 * Math.min(1, world.meter)), 2);
   if (world.phase === 'caught') {
-    const bark = "IT'S BATGUY!";
+    const bark = CAUGHT_BARK;
     const w = bark.length * 4;
     ctx.fillStyle = C.promptBg; ctx.fillRect(x - w / 2 - 3, y - 26, w + 5, 10);
     drawText(ctx, bark, x - w / 2, y - 24, C.hud, 1);

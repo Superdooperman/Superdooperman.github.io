@@ -2,6 +2,7 @@
 // Auto-target: the nearest reachable point in the facing direction, preferring points above
 // her, biased by a held D-pad direction, with hysteresis so it does not flicker.
 import { TUNING, ARCH } from './config.js';
+import { acosClamped } from './geom.js';
 //
 // Grappleable architecture (Oct 28 2026): in rooms whose anchors come from the map
 // (level.anchorMode 'arch' | 'mixed'), auto-aim also
@@ -30,7 +31,7 @@ export function targetScore(ring, x, cy, face, dir = { x: 0, y: 0 }) {
   if (dir.x || dir.y) {
     const dl = Math.hypot(dir.x, dir.y);
     const cos = d > 1e-9 ? (dx * dir.x + dy * dir.y) / (d * dl) : 1;
-    s += T.targetDirBias * (Math.acos(Math.max(-1, Math.min(1, cos))) / Math.PI);
+    s += T.targetDirBias * (acosClamped(cos) / Math.PI);
   }
   return s;
 }
@@ -69,7 +70,7 @@ export function archFilter(cands, x, cy, dir = { x: 0, y: 0 }) {
     const dl = Math.hypot(dir.x, dir.y);
     const cone = out.filter((r) => {
       const dx = r.x - x; const dy = r.y - cy; const d = Math.hypot(dx, dy) || 1;
-      return Math.acos(Math.max(-1, Math.min(1, (dx * dir.x + dy * dir.y) / (d * dl)))) <= ARCH.aimConeHalf;
+      return acosClamped((dx * dir.x + dy * dir.y) / (d * dl)) <= ARCH.aimConeHalf;
     });
     if (cone.length) out = cone;
   }
@@ -113,7 +114,7 @@ export function aimPick(cands, x, cy, dir, coneHalf) {
   if (!cands.length) return null;
   const ang = (r) => {
     const dx = r.x - x, dy = r.y - cy; const d = Math.hypot(dx, dy) || 1e-6;
-    return Math.acos(Math.max(-1, Math.min(1, (dx * dir.x + dy * dir.y) / d)));
+    return acosClamped((dx * dir.x + dy * dir.y) / d);
   };
   const scored = cands.map((r) => ({ r, a: ang(r), d: Math.hypot(r.x - x, r.y - cy), solid: !!r.kind && r.kind !== 'ring' }));
   const better = (p, q) => (Math.abs(p.a - q.a) > 0.035 ? p.a < q.a : p.d < q.d); // ~2 degrees counts as a tie

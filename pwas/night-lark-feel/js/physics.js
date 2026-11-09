@@ -1,7 +1,11 @@
 // Body vs tile collision (ported from v1 Ie / et) plus the v2 push-out fix.
 // The body is an AABB: x is the centre, y is the feet, h the height, all in tiles.
-import { TUNING } from './config.js';
+import { TUNING, PX1 } from './config.js';
 import { tileAt, isBlockingTile, isSolidTile, isStandable, isWood, isStone } from './level.js';
+
+/** The body's centre height: half way up from the feet (y) by its height h. One expression for
+ *  the sim, rope, feel, fx and the generator's probes (x / 2 and x * 0.5 are the same double). */
+export const bodyCenterY = (b) => b.y - b.h * 0.5;
 
 /** v1 Ie(): does the body overlap a blocking tile (stone, 'b' or a closed door)?
  *  Also: with the doors shut, poking above the room over a door column is blocked.
@@ -24,7 +28,7 @@ export function bodyBlocked(level, x, y, h, doorsOpen) {
 /** The top 1 v1 px of an open-topped stone tile is a "lip": feet that dip into it are not
  *  blocked (v1 landed you on any top your feet were within 1 px of, findLanding snaps her up).
  *  Without this, v1's step-up-a-pixel landings at a ledge corner would be blocked. */
-export const LIP = 1 / 16;
+export const LIP = PX1;
 function onLip(level, c, r, bottom, doorsOpen) {
   return bottom < r + LIP && bottom >= r && isStone(tileAt(level, c, r)) && isStandable(level, c, r, doorsOpen);
 }
@@ -77,12 +81,18 @@ export function findLanding(level, x, y, prevY, doorsOpen, skipRow = null) {
   const c0 = Math.floor(x - hw);
   const c1 = Math.floor(x + hw - eps);
   let top = null;
+  // Only rows with y - 1 < r <= y + eps can pass the test below, i.e. floor(y) and (within eps
+  // of a top) floor(y) + 1. Scan one more row each side so float rounding can never matter; the
+  // test itself is unchanged (audit F13: this used to scan every row, tall rooms pay for it).
+  const yr = Math.floor(y);
+  const r0 = Math.max(0, yr - 1);
+  const r1 = Math.min(level.rows - 1, yr + 1);
   for (let c = c0; c <= c1; c++)
-    for (let r = 0; r < level.rows; r++) {
+    for (let r = r0; r <= r1; r++) {
       if (!isStandable(level, c, r, doorsOpen)) continue;
       const wood = isWood(tileAt(level, c, r));
       if (wood && r === skipRow) continue;
-      const fromAbove = wood ? prevY <= r + WOOD_PREV_EPS : prevY <= r + 1 / 16;
+      const fromAbove = wood ? prevY <= r + WOOD_PREV_EPS : prevY <= r + PX1;
       if (fromAbove && y >= r - eps && y < r + 1 && (top === null || r < top)) top = r;
     }
   return top;
@@ -132,4 +142,4 @@ export function findLedge(level, x, y, face, doorsOpen, skipRow = null, climbRea
   }
   return best;
 }
-const climbMinBelow = 1 / 16; // feet must be at least 1 v1 px below the top (else it is a landing)
+const climbMinBelow = PX1; // feet must be at least 1 v1 px below the top (else it is a landing)

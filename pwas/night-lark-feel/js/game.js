@@ -5,7 +5,7 @@
 //
 // opts: { storage, generate(seed) -> tower, createWorld, seed, needsRender }
 //   needsRender: the start card must be drawn once before the (blocking, ~2 s) generation runs.
-import { TUNING } from './config.js';
+import { TUNING, SETTINGS } from './config.js';
 import { createWorld as defaultCreateWorld } from './sim.js';
 import { generateTower } from './gen/generator.js';
 import { loadSave, writeSave } from './save.js';
@@ -16,7 +16,7 @@ import {
 } from './run.js';
 
 export const ALERT_BARKS = Object.freeze(['BATGUY?!', 'I SAW A CAPE!', 'WHO GOES THERE?', 'WAS THAT A BAT?']);
-export const CAUGHT_BARK = "IT'S BATGUY!";
+export { CAUGHT_BARK } from './config.js'; // defined once there; the sim and the render use it too
 /** The reveal (placeholder staging): the first cleared night only; UNMASKED on the title replays it. */
 export const REVEAL = Object.freeze([
   { who: 'THE HARBORMASTER', lines: ['WHO ARE YOU, BATGUY?'] },
@@ -63,7 +63,11 @@ export function createGame(opts = {}) {
   }
   function startRoom() {
     const r = g.run;
-    g.world = createWorld(structuredClone(currentRoom(r)), { ...worldOpts(r.held, r.smokeLeft), feathers: r.feathers, reducedMotion: g.reducedMotion() });
+    // what B fires (G / pad Y) carries into the next room of the night (feel pass 1, H); a new night starts from the boot setting
+    const grapple = g.world ? { grapple: g.world.grappleMode } : {};
+    // the warp-pull: earned for good in the save (the shaft's mini boss), or the dev page's ?pull=1
+    const abilities = { pullGrapple: !!(g.save.abilities?.pullGrapple || SETTINGS.abilities?.pullGrapple) };
+    g.world = createWorld(structuredClone(currentRoom(r)), { ...worldOpts(r.held, r.smokeLeft), ...grapple, abilities, feathers: r.feathers, reducedMotion: g.reducedMotion() });
     g.bark = null;
     go('play');
   }
@@ -104,6 +108,14 @@ export function createGame(opts = {}) {
       else if (e.type === 'tie') { g.bark = { text: 'MMPH!', t: 1, src: null, at: e.x }; g.sfx.push('tie'); }
       else if (e.type === 'attach') g.sfx.push('attach');
       else if (e.type === 'pickup') g.sfx.push('pickup');
+      else if (e.type === 'pull-earned') {
+        // his gear, picked up at the bottom of the shaft: the warp-pull is hers for good. Saved now
+        // (not at the end of the night), so a later catch, a quit or a reload keeps it.
+        g.save.abilities = { ...(g.save.abilities || {}), pullGrapple: true };
+        persist();
+        g.toast = { text: 'WARP-PULL! HIS GEAR IS YOURS', t: 3.5 };
+        g.sfx.push('powerup');
+      } else if (e.type === 'boss-intro') g.sfx.push('alert'); // (render.js draws his plate and line)
       else if (e.type === 'snuff' || e.type === 'smoke') g.sfx.push(e.type);
       else if (e.type === 'room-done') {
         absorbWorld(g.run, w);
