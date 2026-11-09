@@ -1,0 +1,200 @@
+import { swipeDodge } from './feel.js';
+
+// Input abstraction: keyboard, touch buttons and gamepads all feed one set of actions.
+// The sim reads a snapshot { held, pressed } taken once per fixed step, so edges
+// ("pressed this step") match v1, which compared each step's keys with the previous step's.
+//
+// Actions follow the v2 pad (BRIEF: D-pad, A jump, B line, Start, Select), plus two
+// v1-compat actions the ported engine still uses until M1's controls replace them:
+// 'use' (v1 E / Enter) and 'crouch' (v1 C; in v2 DOWN crouches, and C is the PULL key now).
+// H controls (feel pass 1): 'fire' is the SWING grapple button (B), 'pull' the PULL grapple button
+// (the earned warp-pull; until it is had PULL fires a swing too). 'pullToggle' switches what B fires
+// (one-button accessibility option), and that choice carries from room to room.
+export const ACTIONS = ['left', 'right', 'up', 'down', 'jump', 'fire', 'start', 'select', 'use', 'crouch', 'yank', 'dodge', 'attack', 'pullToggle', 'snap', 'pull'];
+
+/** Keyboard per BRIEF (arrows/WASD, Z/Space = A, X/J = B, Enter = Start, Shift = Select),
+ *  plus v1's E (use), and C / L = PULL (C was v1's crouch; DOWN crouches). (M0 also mapped Enter to use like v1; in M1 Enter is
+ *  Start only, which pauses. The v1-controls parity replay uses E.) */
+export const KEY_MAP = Object.freeze({
+  ArrowLeft: ['left'], KeyA: ['left'],
+  ArrowRight: ['right'], KeyD: ['right'],
+  ArrowUp: ['up'], KeyW: ['up'],
+  ArrowDown: ['down'], KeyS: ['down'],
+  Space: ['jump'], KeyZ: ['jump'],
+  KeyJ: ['fire'], KeyX: ['fire'],
+  Enter: ['start'], Escape: ['start'],
+  ShiftLeft: ['select'], ShiftRight: ['select'],
+  KeyE: ['use'],
+  KeyC: ['pull'], KeyL: ['pull'], // PULL grapple: Z jump / X swing / C pull / V zip, or J swing / K zip / L pull
+  KeyK: ['yank'], KeyV: ['yank'], // swing-feel: the separate zip key (always mapped; the sim acts on it when yankInput is 'button', the default, and ignores it with ?yank=hold)
+  KeyQ: ['dodge'], // feel pass 1: the dash. Touch uses a swipe (feel.js), not a button.
+  KeyF: ['attack'],
+  KeyG: ['pullToggle'], // what B fires, swing / pull (also pad Y). Accessibility; PULL has its own buttons.
+});
+
+/** Gamepad API "standard" mapping (feel-fix-3).
+ *  0 A jump, 1 B swing (fire), 2 X pull, 3 Y pull-toggle (what B fires), 4 LB dodge, 5 RB yank,
+ *  6 LT attack, 7 RT analog snap-reel, 8 select, 9 Start pause,
+ *  12-15 D-pad. Left stick moves. Right stick aims (see PAD_AIM_DEADZONE). */
+export const PAD_BUTTONS = Object.freeze({ 0: 'jump', 1: 'fire', 2: 'pull', 3: 'pullToggle', 4: 'dodge', 5: 'yank', 6: 'attack', 8: 'select', 9: 'start', 12: 'up', 13: 'down', 14: 'left', 15: 'right' });
+export const PAD_DEADZONE = 0.5;
+export const PAD_AIM_DEADZONE = 0.25;
+export const PAD_SNAP_THRESHOLD = 0.6; // RT analog (button 7)
+
+export function actionsFromKeys(codes) {
+  const out = new Set();
+  for (const c of codes) for (const a of KEY_MAP[c] || []) out.add(a);
+  return out;
+}
+
+export function actionsFromPads(pads) {
+  const out = new Set();
+  for (const p of pads || []) {
+    if (!p || !p.connected) continue;
+    p.buttons.forEach((b, i) => {
+      const a = PAD_BUTTONS[i];
+      if (a && (b.pressed || b.value > 0.5)) out.add(a);
+      if (i === 7 && (b.value > PAD_SNAP_THRESHOLD || b.pressed)) out.add('snap');
+    });
+    const [ax = 0, ay = 0] = p.axes || [];
+    if (ax < -PAD_DEADZONE) out.add('left');
+    if (ax > PAD_DEADZONE) out.add('right');
+    if (ay < -PAD_DEADZONE) out.add('up');
+    if (ay > PAD_DEADZONE) out.add('down');
+  }
+  return out;
+}
+
+/** Right-stick aim vector in [-1,1], or null when under the deadzone / no pad. */
+export function aimStickFromPads(pads) {
+  for (const p of pads || []) {
+    if (!p || !p.connected) continue;
+    const ax = p.axes?.[2] || 0; const ay = p.axes?.[3] || 0;
+    if (Math.hypot(ax, ay) >= PAD_AIM_DEADZONE) return { x: ax, y: ay };
+  }
+  return null;
+}
+
+/** The browser's pad list (Gamepad API), or [] when there is none. */
+export function navigatorPads() {
+  const nav = globalThis.navigator;
+  if (!nav || typeof nav.getGamepads !== 'function') return [];
+  try { return Array.from(nav.getGamepads() || []); } catch { return []; }
+}
+
+const nowMs = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+
+export function createInput({ getGamepads = navigatorPads } = {}) {
+  const keys = new Set();
+  const touch = new Set();
+  const tapped = new Set(); // actions pressed since the last sample (a tap shorter than a step still counts,
+  // and a release and press again between two samples is a fresh press, not a held key)
+  let prev = new Set();
+  let point = null;
+  const input = {
+    /** 'key' | 'touch' | 'pad': whichever was used last (prompts show matching button names). */
+    device: 'key',
+    /** True only for the sample that just read a pad button or the right stick. */
+    padUsed: false,
+    /** Gamepads seen as connected (index -> id), kept by gamepadconnected/disconnected. */
+    pads: new Map(),
+    keyDown(code) { keys.add(code); for (const a of KEY_MAP[code] || []) tapped.add(a); if (KEY_MAP[code]) input.device = 'key'; },
+    keyUp(code) { keys.delete(code); },
+    setKeys(codes) { keys.clear(); for (const c of codes) keys.add(c); },
+    touchSet(action, on) { if (on) { if (!touch.has(action)) tapped.add(action); touch.add(action); input.device = 'touch'; } else touch.delete(action); },
+    /** A tap/click on the game screen at world tile coords (fires the line at a point there). */
+    pointAt(x, y, device) { point = { x, y }; if (device) input.device = device; },
+    /** Touch gesture in CSS pixels. A swipe dodges and is not also a line tap. A tap commits
+     *  on release, which is the same step as the press when both land before the next sample. */
+    beginTouch(x, y, wx, wy) { input._gesture = { x, y, wx, wy, t: nowMs(), swiped: false }; },
+    moveTouch(x, y) {
+      const g = input._gesture;
+      if (!g || g.swiped) return false;
+      if (!input.noteSwipe(x - g.x, y - g.y, nowMs() - g.t)) return false;
+      g.swiped = true;
+      return true;
+    },
+    endTouch() {
+      const g = input._gesture;
+      input._gesture = null;
+      if (!g || g.swiped) return false;
+      input.pointAt(g.wx, g.wy, 'touch');
+      return true;
+    },
+    cancelTouch() { input._gesture = null; },
+    /** Record a finished swipe. True when it counts as a dodge. */
+    noteSwipe(dx, dy, dtMs) {
+      const dir = swipeDodge(dx, dy, dtMs);
+      if (!dir) return false;
+      input._dodgeDir = dir;
+      tapped.add('dodge');
+      input.device = 'touch';
+      return true;
+    },
+    clear() { keys.clear(); touch.clear(); tapped.clear(); point = null; },
+    padConnected(pad) { if (pad) input.pads.set(pad.index, pad.id); },
+    padDisconnected(pad) { if (pad) input.pads.delete(pad.index); },
+    /** Take one snapshot per fixed step: { held, pressed, released, aimAt }. */
+    sample() {
+      const now = actionsFromKeys(keys);
+      for (const a of touch) now.add(a);
+      for (const a of tapped) now.add(a);
+      const fresh = new Set(tapped);
+      tapped.clear();
+      let aimStick = null;
+      input.padUsed = false;
+      if (getGamepads) {
+        const pads = getGamepads();
+        const padActs = actionsFromPads(pads);
+        if (padActs.size) { input.device = 'pad'; input.padUsed = true; }
+        for (const a of padActs) now.add(a);
+        aimStick = aimStickFromPads(pads);
+        if (aimStick) { input.device = 'pad'; input.padUsed = true; }
+      }
+      const held = {};
+      const pressed = {};
+      const released = {};
+      for (const a of ACTIONS) {
+        held[a] = now.has(a);
+        pressed[a] = now.has(a) && (!prev.has(a) || fresh.has(a));
+        released[a] = !now.has(a) && prev.has(a);
+      }
+      prev = now;
+      const aimAt = point;
+      point = null;
+      const dodgeDir = input._dodgeDir || 0;
+      input._dodgeDir = 0;
+      return { held, pressed, released, aimAt, dodgeDir, aimStick };
+    },
+  };
+  return input;
+}
+
+/** Wire gamepadconnected / gamepaddisconnected (browser only). On disconnect the pad's
+ *  buttons stop counting at once (the next sample no longer sees it), so nothing sticks held. */
+export function bindGamepads(input, target = window) {
+  const on = (e) => input.padConnected(e.gamepad);
+  const off = (e) => input.padDisconnected(e.gamepad);
+  target.addEventListener('gamepadconnected', on);
+  target.addEventListener('gamepaddisconnected', off);
+  return () => {
+    target.removeEventListener('gamepadconnected', on);
+    target.removeEventListener('gamepaddisconnected', off);
+  };
+}
+
+/** Wire DOM events to an input (browser only). Returns an unbind function. */
+export function bindKeyboard(input, target = window) {
+  const PREVENT = new Set(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']);
+  const down = (e) => { if (PREVENT.has(e.code)) e.preventDefault(); if (!e.repeat) input.keyDown(e.code); };
+  const up = (e) => input.keyUp(e.code);
+  const blur = () => input.clear();
+  target.addEventListener('keydown', down);
+  target.addEventListener('keyup', up);
+  target.addEventListener('blur', blur);
+  return () => {
+    target.removeEventListener('keydown', down);
+    target.removeEventListener('keyup', up);
+    target.removeEventListener('blur', blur);
+  };
+}
