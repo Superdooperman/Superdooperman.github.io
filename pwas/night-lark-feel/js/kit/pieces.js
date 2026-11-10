@@ -1,4 +1,4 @@
-// LAYER B: platforms and collision (Azzato's tower kit sheet, Oct 28 2026). The only layer
+// LAYER B: platforms and collision (Superdooperman's tower kit sheet, Oct 28 2026). The only layer
 // that makes tiles: '#' stone (solid; its exposed top is a ledge), '=' wood (one-way), '.'
 // nothing. A piece: { id, layer:'b', w, h, rows, props (layer-c railings it carries), note }.
 // Footprint w x h in tiles (16 px). Pieces carry no anchors of their own: anchors come from

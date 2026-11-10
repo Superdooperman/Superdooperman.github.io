@@ -167,7 +167,7 @@ export const TUNING = Object.freeze({
 // nothing but the climb. Tall rooms also keep the last checkpoint after a catch.
 export const TALL = Object.freeze({ featherDrop: 6 });
 
-/** Grappleable architecture (Azzato, Oct 28 2026: "all ledges are grappleable... building
+/** Grappleable architecture (Superdooperman, Oct 28 2026: "all ledges are grappleable... building
  *  pieces with statues or railings to grapple to"). js/anchors.js derives anchors from the
  *  assembled solid map; js/kit/ holds the piece library. Rooms opt in with def.anchors 'arch'
  *  (kit rooms) or 'mixed' (old rings + ledge anchors, ?anchors=arch playtest flag); old
@@ -209,7 +209,7 @@ export const SWING = Object.freeze({
   // top up to this far above her feet is caught and climbed (was climbReach 12 v1 px)
   ledgeReachAfterLine: v1px(28),
   ledgeAssistTime: 0.5,
-  // Freefall (Azzato, 9:13 PM): falling is a choice, never a penalty. v2 terminal velocity is
+  // Freefall (Superdooperman, 9:13 PM): falling is a choice, never a penalty. v2 terminal velocity is
   // higher than v1's 460 px/s, and a mid-air hook keeps her speed.
   fallMax: v1px(720), // v2 terminal velocity, 45 tiles/s (v1 maxFall 460 = 28.75)
   attachProject: true, // v2: a mid-air hook turns her velocity along the arc instead of cutting the outward part
@@ -282,7 +282,7 @@ export const FEEL = Object.freeze({
   knockbackTime: 0.12,
 });
 
-/** Feel fix 1 (Azzato, Nov 1 2026: "Yes let's fix this mess"). v2 only, and only in worlds made
+/** Feel fix 1 (Superdooperman, Nov 1 2026: "Yes let's fix this mess"). v2 only, and only in worlds made
  *  with feel 'fix1' or 'fix2' (createWorld opts.feel, or SETTINGS.feel; 'fix2', a superset of
  *  this, is the default). The generator's
  *  move probes (gen/moves.js) plan with SETTINGS.feel too, so every generated room is proven
@@ -322,7 +322,7 @@ export const FEELFIX = Object.freeze({
   trailPerChain: 4, // points per chain level
 });
 
-/** Feel fix 2 (Nov 3 2026, Azzato's playtest notes). On top of FEELFIX, only with feel 'fix2'
+/** Feel fix 2 (Nov 3 2026, Superdooperman's playtest notes). On top of FEELFIX, only with feel 'fix2'
  *  (the default; ?physics=fix1 keeps the fix-1 feel, ?physics=legacy the old one). */
 export const FEELFIX2 = Object.freeze({
   // hold to aim: once the plant starts (AIM_PLANT), Wren holds perfectly still until B is let go or the aim is cancelled
@@ -358,7 +358,7 @@ export const AIM_PLANT = Object.freeze({
   perAir: 1, // mid-air plants before she lands or hooks
 });
 
-/** Searchlights and lamps (Azzato, feel-fix-3). Tunable in one place. Warm/amber = home;
+/** Searchlights and lamps (Superdooperman, feel-fix-3). Tunable in one place. Warm/amber = home;
  *  cold SW = Company. Every lamp, warm or cold, counts for the 54 px hide rule
  *  (TUNING.hideLampRadius, the one definition of that radius). */
 export const LIGHT = Object.freeze({
@@ -405,7 +405,7 @@ export const PULL = Object.freeze({
  *  idle frames step and bob 1 px instead (stopgap, fix1 feel only). */
 export const WALK = Object.freeze({ sheet: 'lark-run', frames: 8, fps: 16, bobPx: 1, minSpeed: 0.5 });
 
-/** Dynamic camera zoom (Azzato, 6:01 PM): the art stays 1 px per art pixel in the backbuffer;
+/** Dynamic camera zoom (Superdooperman, 6:01 PM): the art stays 1 px per art pixel in the backbuffer;
  *  the visible area widens with speed and chain (Dead Cells style). zoom 1 = the normal view,
  *  0.75 = a third more each way (480x270 -> 640x360). Render only: the sim never reads it. */
 export const ZOOM = Object.freeze({

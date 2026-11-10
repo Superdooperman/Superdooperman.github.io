@@ -35,7 +35,7 @@ function relight(w, t) {
   w.events.push({ type: 'mini-relight', id: t.id, reveal: t.reveal });
 }
 
-/** TODO(Azzato): warm-light buff is NOT decided. Hook so a later pass can apply an effect. */
+/** TODO(Superdooperman): warm-light buff is NOT decided. Hook so a later pass can apply an effect. */
 export function warmLightBuff(w) {
   if (!w.warmBuff) return; // stub: no effect
 }

@@ -3,7 +3,7 @@
 // Gameplay is side view. Without all three strips loaded the renderer keeps the placeholder
 // rect, so a build with the committed (HEAD) art looks exactly as before.
 //
-// Pose rules (Azzato, Oct 28 2026):
+// Pose rules (Superdooperman, Oct 28 2026):
 //  - at rest the strips' own rope coil at her feet is the rope; the engine draws no tail;
 //  - gun draw = cloak-open frames, then the gun-out frame, played quickly while B is down
 //    (the sim fires on release, so the draw never delays a shot);
@@ -93,7 +93,7 @@ export function wrenPose(a, w, sheets) {
 /** Feel fix 2 (Brook, Nov 3 2026): the standing idle, cloak and rope loop painted in. */
 export const IDLE_BELL = 'lark-idle-bell';
 
-// ---- Frames that paint their own cloak (Azzato via Vegapunk, Oct 28 2026) -----------------------
+// ---- Frames that paint their own cloak (Superdooperman via Vegapunk, Oct 28 2026) -----------------------
 // Brook's motion strips (swing, air, freefall, yank) leave the cloak tail to the engine, except
 // frames whose art already paints the whole cloak (the fall's spread poncho, the dive's
 // streaming poncho, the front-mid swing). A manifest entry may carry `ownsCloak`: one bool for
@@ -383,7 +383,7 @@ export function drawGripFrame(ctx, sheet, frame, img, grip, x, y, rot, face, art
   ctx.restore();
 }
 
-/** Air poses from lark-air [release, rise, fall, spread]. Release is 1 frame (Azzato, Oct 28).
+/** Air poses from lark-air [release, rise, fall, spread]. Release is 1 frame (Superdooperman, Oct 28).
  *  Spread (pass 5, STYLE-GUIDE section 5 table: 2 frames = fall reused + spread, 8 fps
  *  ping-pong): once she has been falling for SPREAD.after s, spread shows first, then fall and
  *  spread alternate. From rest the freefall dive (vy >= FREEFALL_VY 18 t/s) takes over about

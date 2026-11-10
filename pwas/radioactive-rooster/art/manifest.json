@@ -74,7 +74,7 @@
     0
    ],
    "legacy": "bg-fence.jpg",
-   "source": "Azzato's approved rooster-scene-art-v2/fence.jpg, box-downscaled 1280x720 -> 320x180"
+   "source": "Superdooperman's approved rooster-scene-art-v2/fence.jpg, box-downscaled 1280x720 -> 320x180"
   },
   "bg/henhouse": {
    "kind": "bg",
@@ -87,7 +87,7 @@
     0
    ],
    "legacy": "bg-henhouse.jpg",
-   "source": "Azzato's approved henhouse A (2026-10-18; art/placeholders/bg-henhouse.jpg is its 1280x720 master): no hens or people painted in; hand patch: warm glow on Midnight's empty nest; 4x nearest copy in art/pixel-4x/bg/"
+   "source": "Superdooperman's approved henhouse A (2026-10-18; art/placeholders/bg-henhouse.jpg is its 1280x720 master): no hens or people painted in; hand patch: warm glow on Midnight's empty nest; 4x nearest copy in art/pixel-4x/bg/"
   },
   "bg/barn": {
    "kind": "bg",
@@ -100,7 +100,7 @@
     0
    ],
    "legacy": "bg-barn.jpg",
-   "source": "Azzato's approved barn C (2026-10-18; art/placeholders/bg-barn.jpg is its 1280x720 master): no people or animals painted in; LANCZOS 1280x720 then BOX 320x180, hand patches (snapped ladder rung, post nail); 4x nearest copy in art/pixel-4x/bg/"
+   "source": "Superdooperman's approved barn C (2026-10-18; art/placeholders/bg-barn.jpg is its 1280x720 master): no people or animals painted in; LANCZOS 1280x720 then BOX 320x180, hand patches (snapped ladder rung, post nail); 4x nearest copy in art/pixel-4x/bg/"
   },
   "bg/store": {
    "kind": "bg",
@@ -1275,7 +1275,7 @@
     0,
     0
    ],
-   "source": "tools/bg/rope_paint.py (hand-edited from Azzato's pavilion.jpg)"
+   "source": "tools/bg/rope_paint.py (hand-edited from Superdooperman's pavilion.jpg)"
   },
   "sprite/rooster-front-h60": {
    "kind": "sprite",
@@ -7259,7 +7259,7 @@
     0
    ],
    "base": 177,
-   "source": "Brook 2026-10-27 assets/art-placeholder/midway-rope-v2 (the rope-hot-oil painting re-cut at s=0.0696, closed; tight 60x77 at top-left (252,101); posts' feet (261,149), (302,177)); approved by Azzato Oct 27"
+   "source": "Brook 2026-10-27 assets/art-placeholder/midway-rope-v2 (the rope-hot-oil painting re-cut at s=0.0696, closed; tight 60x77 at top-left (252,101); posts' feet (261,149), (302,177)); approved by Superdooperman Oct 27"
   },
   "fg/midway--rope-open": {
    "kind": "fg",
@@ -7272,7 +7272,7 @@
     0
    ],
    "base": 177,
-   "source": "Brook 2026-10-27 assets/art-placeholder/midway-rope-v2 (open: rope unhooked from the front post, HOT OIL sign on the planks; same canvas as closed); approved by Azzato Oct 27"
+   "source": "Brook 2026-10-27 assets/art-placeholder/midway-rope-v2 (open: rope unhooked from the front post, HOT OIL sign on the planks; same canvas as closed); approved by Superdooperman Oct 27"
   },
   "fx/closeup-gloves": {
    "kind": "fx",
@@ -7440,7 +7440,7 @@
     28,
     112
    ],
-   "source": "Brook 2026-10-27 hattie-chain-pose (one-hand chain hold, src-hattie-chain-onehand.jpg; Azzato-approved drop-in, rebuild with assets/art-placeholder/hattie-chain-pose/build_hattie_chain_pose.py). Guarded by tools/sprites/keep_dropins.py: cut_oct21.py won't re-cut it"
+   "source": "Brook 2026-10-27 hattie-chain-pose (one-hand chain hold, src-hattie-chain-onehand.jpg; Superdooperman-approved drop-in, rebuild with assets/art-placeholder/hattie-chain-pose/build_hattie_chain_pose.py). Guarded by tools/sprites/keep_dropins.py: cut_oct21.py won't re-cut it"
   },
   "sprite/hattie-chain-l-h52": {
    "kind": "sprite",
@@ -7452,7 +7452,7 @@
     28,
     112
    ],
-   "source": "Brook 2026-10-27 hattie-chain-pose (one-hand chain hold, src-hattie-chain-onehand.jpg; Azzato-approved drop-in, rebuild with assets/art-placeholder/hattie-chain-pose/build_hattie_chain_pose.py). Guarded by tools/sprites/keep_dropins.py: cut_oct21.py won't re-cut it"
+   "source": "Brook 2026-10-27 hattie-chain-pose (one-hand chain hold, src-hattie-chain-onehand.jpg; Superdooperman-approved drop-in, rebuild with assets/art-placeholder/hattie-chain-pose/build_hattie_chain_pose.py). Guarded by tools/sprites/keep_dropins.py: cut_oct21.py won't re-cut it"
   },
   "sprite/hattie-flinch-r-h52": {
    "kind": "sprite",
@@ -7572,7 +7572,7 @@
     18,
     64
    ],
-   "source": "tools/sprites/cut_push_a.py (stogie-guy-sprites-v1.jpg; Azzato item 45, design per reports/gooner-character-legal-check)"
+   "source": "tools/sprites/cut_push_a.py (stogie-guy-sprites-v1.jpg; Superdooperman item 45, design per reports/gooner-character-legal-check)"
   },
   "sprite/stogie-l-h64": {
    "kind": "sprite",
@@ -7596,7 +7596,7 @@
     23,
     64
    ],
-   "source": "tools/sprites/cut_push_a.py (stogie-guy-sprites-v1.jpg; Azzato item 45, design per reports/gooner-character-legal-check)"
+   "source": "tools/sprites/cut_push_a.py (stogie-guy-sprites-v1.jpg; Superdooperman item 45, design per reports/gooner-character-legal-check)"
   },
   "sprite/stogie-arms-r-h64": {
    "kind": "sprite",
@@ -7608,7 +7608,7 @@
     18,
     64
    ],
-   "source": "tools/sprites/cut_push_a.py (stogie-guy-sprites-v1.jpg; Azzato item 45, design per reports/gooner-character-legal-check)"
+   "source": "tools/sprites/cut_push_a.py (stogie-guy-sprites-v1.jpg; Superdooperman item 45, design per reports/gooner-character-legal-check)"
   },
   "sprite/stogie-arms-l-h64": {
    "kind": "sprite",
@@ -10826,7 +10826,7 @@
     0,
     0
    ],
-   "source": "PLACEHOLDER (Push C, 2026-10-24): Brook's club interior option B3 (B2 plus Hattie's winged mask from Azzato's character sheet, face fully hidden, red rim light only; plain crate), copied from assets/art-placeholder/club/club-B3-320.png. NOT APPROVED as final; waiting on Azzato. Final art drops in by this id."
+   "source": "PLACEHOLDER (Push C, 2026-10-24): Brook's club interior option B3 (B2 plus Hattie's winged mask from Superdooperman's character sheet, face fully hidden, red rim light only; plain crate), copied from assets/art-placeholder/club/club-B3-320.png. NOT APPROVED as final; waiting on Superdooperman. Final art drops in by this id."
   },
   "club/neon-hawk": {
    "kind": "prop",
@@ -10883,7 +10883,7 @@
     1
    ],
    "fps": 12,
-   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Azzato approves Push B). Final art replaces this file by name."
+   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Superdooperman approves Push B). Final art replaces this file by name."
   },
   "fx/potato-trail": {
    "kind": "fx",
@@ -10901,7 +10901,7 @@
     1
    ],
    "fps": 12,
-   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Azzato approves Push B). Final art replaces this file by name."
+   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Superdooperman approves Push B). Final art replaces this file by name."
   },
   "sprite/carny-guard-idle": {
    "kind": "sprite",
@@ -10919,7 +10919,7 @@
     1
    ],
    "fps": 2,
-   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Azzato approves Push B). Final art replaces this file by name."
+   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Superdooperman approves Push B). Final art replaces this file by name."
   },
   "sprite/carny-guard-talk": {
    "kind": "sprite",
@@ -10937,7 +10937,7 @@
     1
    ],
    "fps": 6,
-   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Azzato approves Push B). Final art replaces this file by name."
+   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Superdooperman approves Push B). Final art replaces this file by name."
   },
   "sprite/carny-guard-run": {
    "kind": "sprite",
@@ -10955,7 +10955,7 @@
     1
    ],
    "fps": 10,
-   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Azzato approves Push B). Final art replaces this file by name."
+   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Superdooperman approves Push B). Final art replaces this file by name."
   },
   "club/hattie-sil": {
    "kind": "prop",
@@ -11071,7 +11071,7 @@
     215,
     57
    ],
-   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Azzato OK)"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Superdooperman OK)"
   },
   "fx/clubsign-lit-g2": {
    "kind": "overlay",
@@ -11083,7 +11083,7 @@
     220,
     57
    ],
-   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Azzato OK)"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Superdooperman OK)"
   },
   "fx/clubsign-lit-g3": {
    "kind": "overlay",
@@ -11095,7 +11095,7 @@
     226,
     57
    ],
-   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Azzato OK)"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Superdooperman OK)"
   },
   "fx/clubsign-lit-g4": {
    "kind": "overlay",
@@ -11107,7 +11107,7 @@
     232,
     57
    ],
-   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Azzato OK)"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Superdooperman OK)"
   },
   "fx/clubsign-lit-g5": {
    "kind": "overlay",
@@ -11119,7 +11119,7 @@
     238,
     57
    ],
-   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Azzato OK)"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Superdooperman OK)"
   },
   "fx/clubsign-lit-g6": {
    "kind": "overlay",
@@ -11131,7 +11131,7 @@
     244,
     57
    ],
-   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Azzato OK)"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Superdooperman OK)"
   },
   "fx/clubsign-lit-g7": {
    "kind": "overlay",
@@ -11143,7 +11143,7 @@
     250,
     57
    ],
-   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Azzato OK)"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Superdooperman OK)"
   },
   "pavilion/smoke-drift": {
    "kind": "fx",
@@ -11317,7 +11317,7 @@
     320,
     180
    ],
-   "source": "Brook's club sign cut sign-cut-v2 (Azzato liked it 2026-10-26), 320x180 at 0,0: dead sign, every tube unlit, GOBBLER a faint ghost (RGB, normal blend). Staged from assets/art-placeholder/club/sign-cut/base.png by tools/art_files.py (js/beats.js signCutArt)"
+   "source": "Brook's club sign cut sign-cut-v2 (Superdooperman liked it 2026-10-26), 320x180 at 0,0: dead sign, every tube unlit, GOBBLER a faint ghost (RGB, normal blend). Staged from assets/art-placeholder/club/sign-cut/base.png by tools/art_files.py (js/beats.js signCutArt)"
   },
   "signcut/hawk-glow": {
    "kind": "bg",
@@ -11325,7 +11325,7 @@
     320,
     180
    ],
-   "source": "Brook's club sign cut sign-cut-v2 (Azzato liked it 2026-10-26), 320x180 at 0,0: hawk glow, #d63a22 stepped alpha, screen blend, box 181,0-279,78. Staged from assets/art-placeholder/club/sign-cut/hawk-glow.png by tools/art_files.py (js/beats.js signCutArt)"
+   "source": "Brook's club sign cut sign-cut-v2 (Superdooperman liked it 2026-10-26), 320x180 at 0,0: hawk glow, #d63a22 stepped alpha, screen blend, box 181,0-279,78. Staged from assets/art-placeholder/club/sign-cut/hawk-glow.png by tools/art_files.py (js/beats.js signCutArt)"
   },
   "signcut/hawk-lit": {
    "kind": "bg",
@@ -11333,7 +11333,7 @@
     320,
     180
    ],
-   "source": "Brook's club sign cut sign-cut-v2 (Azzato liked it 2026-10-26), 320x180 at 0,0: hawk lit tube pixels, alpha 0/255, normal blend, box 193,6-267,75. Staged from assets/art-placeholder/club/sign-cut/hawk-lit.png by tools/art_files.py (js/beats.js signCutArt)"
+   "source": "Brook's club sign cut sign-cut-v2 (Superdooperman liked it 2026-10-26), 320x180 at 0,0: hawk lit tube pixels, alpha 0/255, normal blend, box 193,6-267,75. Staged from assets/art-placeholder/club/sign-cut/hawk-lit.png by tools/art_files.py (js/beats.js signCutArt)"
   },
   "signcut/thecock-glow": {
    "kind": "bg",
@@ -11341,7 +11341,7 @@
     320,
     180
    ],
-   "source": "Brook's club sign cut sign-cut-v2 (Azzato liked it 2026-10-26), 320x180 at 0,0: thecock glow, #d63a22 stepped alpha, screen blend, box 173,61-282,99. Staged from assets/art-placeholder/club/sign-cut/thecock-glow.png by tools/art_files.py (js/beats.js signCutArt)"
+   "source": "Brook's club sign cut sign-cut-v2 (Superdooperman liked it 2026-10-26), 320x180 at 0,0: thecock glow, #d63a22 stepped alpha, screen blend, box 173,61-282,99. Staged from assets/art-placeholder/club/sign-cut/thecock-glow.png by tools/art_files.py (js/beats.js signCutArt)"
   },
   "signcut/thecock-lit": {
    "kind": "bg",
@@ -11349,7 +11349,7 @@
     320,
     180
    ],
-   "source": "Brook's club sign cut sign-cut-v2 (Azzato liked it 2026-10-26), 320x180 at 0,0: thecock lit tube pixels, alpha 0/255, normal blend, box 185,69-270,97. Staged from assets/art-placeholder/club/sign-cut/thecock-lit.png by tools/art_files.py (js/beats.js signCutArt)"
+   "source": "Brook's club sign cut sign-cut-v2 (Superdooperman liked it 2026-10-26), 320x180 at 0,0: thecock lit tube pixels, alpha 0/255, normal blend, box 185,69-270,97. Staged from assets/art-placeholder/club/sign-cut/thecock-lit.png by tools/art_files.py (js/beats.js signCutArt)"
   },
   "signcut/gobbler-glow": {
    "kind": "bg",
@@ -11357,7 +11357,7 @@
     320,
     180
    ],
-   "source": "Brook's club sign cut sign-cut-v2 (Azzato liked it 2026-10-26), 320x180 at 0,0: gobbler glow, #d63a22 stepped alpha, screen blend, box 171,87-296,144. Staged from assets/art-placeholder/club/sign-cut/gobbler-glow.png by tools/art_files.py (js/beats.js signCutArt)"
+   "source": "Brook's club sign cut sign-cut-v2 (Superdooperman liked it 2026-10-26), 320x180 at 0,0: gobbler glow, #d63a22 stepped alpha, screen blend, box 171,87-296,144. Staged from assets/art-placeholder/club/sign-cut/gobbler-glow.png by tools/art_files.py (js/beats.js signCutArt)"
   },
   "signcut/gobbler-lit": {
    "kind": "bg",
@@ -11365,7 +11365,7 @@
     320,
     180
    ],
-   "source": "Brook's club sign cut sign-cut-v2 (Azzato liked it 2026-10-26), 320x180 at 0,0: gobbler lit tube pixels, alpha 0/255, normal blend, box 183,88-285,132. Staged from assets/art-placeholder/club/sign-cut/gobbler-lit.png by tools/art_files.py (js/beats.js signCutArt)"
+   "source": "Brook's club sign cut sign-cut-v2 (Superdooperman liked it 2026-10-26), 320x180 at 0,0: gobbler lit tube pixels, alpha 0/255, normal blend, box 183,88-285,132. Staged from assets/art-placeholder/club/sign-cut/gobbler-lit.png by tools/art_files.py (js/beats.js signCutArt)"
   },
   "fx/insert-note-clarion": {
    "kind": "fx",
@@ -11377,7 +11377,7 @@
     0,
     0
    ],
-   "source": "Brook 2026-10-27 assets/art-placeholder/insert-note-clarion (full-frame bucket note on the Clarion, text from js/logic.js readNote); approved by Azzato Oct 27"
+   "source": "Brook 2026-10-27 assets/art-placeholder/insert-note-clarion (full-frame bucket note on the Clarion, text from js/logic.js readNote); approved by Superdooperman Oct 27"
   }
  }
 }

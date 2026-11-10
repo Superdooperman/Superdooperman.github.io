@@ -1,6 +1,6 @@
 // Level grid: parsing and tile queries (v1 semantics, in tile units).
 //
-// Ledge materials (Azzato, Oct 28, 2026):
+// Ledge materials (Superdooperman, Oct 28, 2026):
 //   STONE (thick masonry) '#' lit, 's' in shadow (a hide spot): fully solid. The body is blocked
 //     on every side and pushed back out the same frame if it ever overlaps. Blocks sight and the line.
 //   WOOD (thin beams, rafters, awnings) '=' lit, '~' in shadow: ONE-WAY. She lands on it only when

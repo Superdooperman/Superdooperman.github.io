@@ -1,4 +1,4 @@
-// LAYER A: the facade (Azzato's tower kit sheet, Oct 28 2026). Seamless wall blocks on a fixed
+// LAYER A: the facade (Superdooperman's tower kit sheet, Oct 28 2026). Seamless wall blocks on a fixed
 // tower grid, art only: they never collide and never give a grapple point (collision is layer
 // b, grips are layer b ledges + layer c attachments). Every block's top and bottom edge is the
 // same masonry course, so any block stacks on any other with no visible seam; the climbing

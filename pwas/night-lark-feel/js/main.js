@@ -39,7 +39,7 @@ import { PLACEHOLDER } from './art.js';
 import { probeIntro } from './shaft-intro.js';
 
 const params = new URLSearchParams(location.search);
-// Feel fix 2 (Azzato, Nov 3 2026) is the default in the browser; ?physics=fix1 plays fix 1,
+// Feel fix 2 (Superdooperman, Nov 3 2026) is the default in the browser; ?physics=fix1 plays fix 1,
 // ?physics=legacy the old one. The generator plans with the same feel (gen/moves.js).
 { const ph = params.get('physics'); SETTINGS.feel = ph === 'legacy' || ph === 'fix1' ? ph : 'fix2'; }
 // Feel pass 1 (H): SWING (B: X / J, pad B) and PULL (C / L, pad X, touch PULL) are separate
@@ -62,7 +62,7 @@ function scopedStorage() {
   return { getItem: (k) => ls.getItem(nsKey(k)), setItem: (k, v) => ls.setItem(nsKey(k), v), removeItem: (k) => ls.removeItem(nsKey(k)) };
 }
 // swing-feel: yank input. 'button' (default) = the separate ZIP button / K / V / pad RB; 'hold' = hold B on the line.
-// ?yank=button|hold sets it and remembers it, so Azzato can compare.
+// ?yank=button|hold sets it and remembers it, so Superdooperman can compare.
 {
   let y = params.get('yank');
   try { const ls = scopedStorage(); if (y) ls.setItem('nightlark.v2.yankInput', y); else y = ls.getItem('nightlark.v2.yankInput'); } catch { /* private mode */ }

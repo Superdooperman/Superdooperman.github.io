@@ -1,5 +1,5 @@
 // TALL SHAFT (swing-feel prototype, Oct 28 2026), now the outside of a tower built from
-// Azzato's tower kit sheet: three independent layers.
+// Superdooperman's tower kit sheet: three independent layers.
 //   a facade      seamless 4 x 6-tile wall blocks on a fixed 7-block-wide grid (js/kit/facade.js),
 //                 art only: no collision, no grapple points.
 //   b platforms   short/medium/long slabs, balconies, corner balconies, open ledges

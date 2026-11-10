@@ -2,7 +2,7 @@
 // into sheets.kit) when present, else the flat placeholder art below (FEEL-PLAN §9.4).
 // Every colour is a palette entry: STYLE-GUIDE §3 v1 base (SL, NV, TB, PX, IX, LG) plus the
 // §3b Harbormaster's Tower accents (HA1 rust, HA2 verdigris). Interact cyan IX0/IX1 is used for
-// grapple points only. Banners follow STYLE-GUIDE section 3c (DECIDED, Azzato, Oct 28 2026):
+// grapple points only. Banners follow STYLE-GUIDE section 3c (DECIDED, Superdooperman, Oct 28 2026):
 // Company banners (the default) are a GD2 field, GD1 folds, GD0 outline and a PX3 crest; PX1
 // faded print red only for small (at most 1 tile wide), old, torn banners and posters. Never
 // alarm red, never a gold crest, nothing glows.

@@ -67,7 +67,7 @@ export function roomBeats(s, from) {
   return beats;
 }
 
-// The club cutaway (PLACEHOLDER content) hides the figure behind a smoke veil until VEIL.flag is set. Canon (Azzato +
+// The club cutaway (PLACEHOLDER content) hides the figure behind a smoke veil until VEIL.flag is set. Canon (Superdooperman +
 // Usopp, 2026-10-25, "Hawkeye" pass): she stays Hawkeye Hattie all game and Rooster knows it's her (noir dread, not a
 // whodunit). The smoke only clears at the Pavilion, right after the hero choice (crow-down round 2 answered right, so
 // every hero path, the Smitten one too): her "Hawkeye Hattie is dead" speech plays, the smoke whisks off her mask
@@ -106,7 +106,7 @@ export const UNMASK_LINES = [
   { who: "her", text: "I'm the Cock Gobbler. And I've been hungry for a long, long time.", names: true }, // nameplate flips here (GOBBLER_PLATE)
   // Usopp 2026-10-25: cut to the club sign across the boardwalk; GOBBLER is one tube and buzzes on all at once
   // (neon-lightup), the full name holds on the neon-hum-full loop under the sax, then back to the Pavilion (js/beats.js "sign").
-  // Azzato 2026-10-27: this line is read in the caption DURING that close-up (js/main.js showLine), worded as below.
+  // Superdooperman 2026-10-27: this line is read in the caption DURING that close-up (js/main.js showLine), worded as below.
   { who: "narration", text: "Across the boardwalk, the old bar's sign buzzes, and kicks on all at once, every tube lit for the first time.", signCut: true },
 ];
 
@@ -174,7 +174,7 @@ export function panelVoice(panel) {
   if (typeof panel === "string") return { id: voiceId(panel), text: panel, speaker: null };
   if (!panel || panel.thought) return { id: null, text: panel && panel.text, speaker: null };
   const speaker = panel.say ? SAY_KEY[panel.say] || null : null;
-  // Azzato 2026-10-24: Henny's only real words are the panel marked `real: true` ("...About time."). Her other
+  // Superdooperman 2026-10-24: Henny's only real words are the panel marked `real: true` ("...About time."). Her other
   // out-loud bubbles stay on the page as text but are heard as henny-cluck gibberish, never as a voice line.
   if (speaker === SPEAKER.henny && !panel.real) return { id: null, text: panel.text, speaker, say: panel.say, cluck: true };
   return { id: voiceId(panel.text, { speaker }), text: panel.text, speaker, say: panel.say || null };
@@ -412,7 +412,7 @@ function readNote(s, out) {
   if (!s.flags.read_note) {
     s.flags.read_note = true;
     s.mood = "embarrassed";
-    out.lines.push(line("A note in the bucket, in lipstick: \"MIDNIGHT. FAIR. BRING NOTHING. —A friend.\"", { insert: { art: "fx/insert-note-clarion" } })); // beta v17: Brook's full-frame close-up first (Azzato OK Oct 27)
+    out.lines.push(line("A note in the bucket, in lipstick: \"MIDNIGHT. FAIR. BRING NOTHING. —A friend.\"", { insert: { art: "fx/insert-note-clarion" } })); // beta v17: Brook's full-frame close-up first (Superdooperman OK Oct 27)
     out.lines.push(line("Under it, tonight's Cluck County Clarion: YOLK OF MIDNIGHT STOLEN FROM HENHOUSE. FAIR'S FRY-OFF STILL ON FOR MIDNIGHT. Legend says whoever eats the Yolk gets the Crow: a voice the whole county obeys."));
     out.lines.push(line("A friend needs help. He's sure of it. He tries his crow, just to warm up. *pah.* It's been a wheeze since that night at the fair.", { sound: "wheeze", mood: "embarrassed" }));
     return;
@@ -453,7 +453,7 @@ function lookHawkFar(s, out) {
 
 /* ---------- Fence / Henny (Henny NEVER speaks: thought bubbles only) ---------- */
 // Seated on the rail is the one state the dismount line belongs to: the rail's squat pose, in the yard. Only
-// squat_rail sets it; every way into the yard clears it. (Azzato, beta v11: the dismount played while he looked
+// squat_rail sets it; every way into the yard clears it. (Superdooperman, beta v11: the dismount played while he looked
 // unseated. The cause was the invisible rail-sit frame, not this gate; it stays explicit so it can't drift.)
 export function seatedOnRail(s) {
   return s.room === "fence" && s.pose === "squat";
@@ -473,7 +473,7 @@ function blowCover(s, out) {
   out.lines.push(henny("A real rooster doesn't explain himself."));
 }
 
-// Push gags (Azzato 2026-10-18): `anim` on a line plays a one-shot tween on that cast member / the hero (main.js).
+// Push gags (Superdooperman 2026-10-18): `anim` on a line plays a one-shot tween on that cast member / the hero (main.js).
 function pushPeck(s, out) {
   out.lines.push(line("He gives Peck a friendly nudge. Peck wobbles like a weather vane in a gust. The brass horn pops off his ear, and he fumbles it twice before it's home.", { anim: { peck: "wobble" } }));
   out.lines.push(line("\"EH? PUSHY? No, son, it's not gonna be PUSHY tonight. Clear skies by Tuesday!\"", { speaker: SPEAKER.peck }));
@@ -558,7 +558,7 @@ function photoHenny(s, out) {
     out.lines.push(line("She already has one. It's tucked under her wing like a badge."));
     return;
   }
-  s.flags.kind_henny = true; // he keeps his stack of signed photos (Azzato 2026-10-19): a fresh one, signed on the spot
+  s.flags.kind_henny = true; // he keeps his stack of signed photos (Superdooperman 2026-10-19): a fresh one, signed on the spot
   out.lines.push(line("He peels a fresh photo off the stack, signs it \"To Henny, the real guard,\" and holds it out. She takes it without a word. Then she sniffs it. Then she sniffs him. Long pause."));
   out.lines.push(henny("Something smells familiar."));
   out.lines.push(henny("...Coincidence. Lots of birds buy economy deodorant."));
@@ -805,7 +805,7 @@ function joinTicket(s, out) {
   s.mood = "embarrassed";
   // Beta v17 item 7: the joined ticket and its flashback have their own music moment ("ticket": theme-ticket-memory, js/audio.js MOMENT_THEMES)
   out.lines.push(line("The edges fit. \"ROOSTER & HATTIE: ADMIT TWO,\" dated the stunt night. Her half was pawned to Corny. The lipstick on his half is the same red.", { music: "ticket" }));
-  // Oct 21 items 15/20: the stunt-night flashback plays here, at the joined ticket (agreed with Azzato Oct 21)
+  // Oct 21 items 15/20: the stunt-night flashback plays here, at the joined ticket (agreed with Superdooperman Oct 21)
   // Oct 23 item 41: the past beats (flashStep 1..5) play on the aged Pavilion, the crowd gathering line by line, the
   // rigger's silhouette (Mayor Bantam's muscle, unnamed) in it (js/main.js flashbackLayer)
   FLASHBACK.forEach((text, i) => out.lines.push(line(text, { flashback: true, flashStep: i, music: "ticket" })));
@@ -1045,7 +1045,7 @@ function basketFryer(s, out) {
   out.lines.push(line("The basket's too low. The cage is still up on the chain, hugging the Yolk."));
 }
 
-/* ---------- Pavilion rope puzzle (Azzato, 2026-10-18): Pip lifts Corny's key ring ---------- */
+/* ---------- Pavilion rope puzzle (Superdooperman, 2026-10-18): Pip lifts Corny's key ring ---------- */
 // The front rope is padlocked; the vat beats need it open. Pip helps once she trusts him (pip_trust:
 // refused the ring-toss rig, won it straight, or gave her tickets back). Never a soft-lock: the exit
 // stays open after the crow-down, and every trust source stays available back on the Midway.
@@ -1064,7 +1064,7 @@ function pipRefuses(s, out) {
   out.lines.push(line("\"Lots of guys wear costumes to the fair. Corny wears one, kind of.\" She nods back toward the Midway. \"Corny's ring-toss. Beat the pegs without his trick, then we'll talk.\"", { speaker: SPEAKER.pip }));
 }
 
-// Beta v17 item 2 (Azzato Oct 27: the lock and rope were already open before Pip got to them). The flag is set now
+// Beta v17 item 2 (Superdooperman Oct 27: the lock and rope were already open before Pip got to them). The flag is set now
 // (saves, the walk), but the scene keeps drawing the rope up and locked (holdFlags) until Pip's hand is on the padlock
 // in the pip_unlock line (PIP_UNLOCK_OPEN_MS into it), then the open plate and the padlock click.
 const ROPE_HELD = ["rope_open"];

@@ -1,4 +1,4 @@
-// LAYER C: attachments (Azzato's tower kit sheet, Oct 28 2026). Hook points and decoration
+// LAYER C: attachments (Superdooperman's tower kit sheet, Oct 28 2026). Hook points and decoration
 // mounted on the facade behind the play plane (or on a platform). Never solid: collision is
 // only ever the platform layer's tiles. Each type: art box w x h in tiles (16 px), grip = the
 // hook point in tiles from the box's top-left, protrudes = it sticks out from its mount, so it
@@ -10,8 +10,8 @@ const T = (w, h, grip, protrudes, mount, note) => Object.freeze({ w, h, grip: gr
 const DECO = (w, h, mount, note) => Object.freeze({ w, h, grip: null, protrudes: false, mount, note, deco: true });
 // Sizes and grips match Brook's kit-harbor-props.json (module px / 16; test/tower-kit.test.mjs
 // checks every one to 1 px). Grips sit at the tip/top ring: what she would hook.
-// Names and groups follow Azzato's moonlit tower kit sheet (art-ref/tower-kit-moonlit-ref-
-// azzato-2026-10-28.png): C railings, D grapple attachments, E decorative extras; plus the
+// Names and groups follow Superdooperman's moonlit tower kit sheet (art-ref/tower-kit-moonlit-ref-
+// superdooperman-2026-10-28.png): C railings, D grapple attachments, E decorative extras; plus the
 // platform underside art (bracket, support) from group B, which never collides.
 export const PROP_TYPES = Object.freeze({
   // D. grapple attachments (layer 3)
@@ -27,7 +27,7 @@ export const PROP_TYPES = Object.freeze({
   // C. railings (end posts are grips; middle spans are placed deco:true)
   'railing-a': T(1, 1, [8 / 16, 3 / 16], true, 'top', 'railing A, plain; repeat cell'),
   'railing-b': T(1, 1, [8 / 16, 3 / 16], true, 'top', 'railing B, ornate; repeat cell'),
-  // extras from Azzato's first ask ("statues or railings to grapple to"), not on the moonlit sheet
+  // extras from Superdooperman's first ask ("statues or railings to grapple to"), not on the moonlit sheet
   statue: T(1, 2, [12 / 16, 2 / 16], false, 'top', 'statue on a platform; raised arm is a grip (flush: a stacked piece buries it)'),
   gargoyle: T(2, 1, [27 / 16, 7 / 16], true, 'wall', 'gargoyle snout jutting out'),
   // a balcony's end post: grip only (the post and railing are painted in the balcony art, Brook's

@@ -30,7 +30,7 @@ const hempRope = PALETTE.WH1; // Wren's live rope (no-fx path), the art's hemp r
  *  room, and centre (letterbox) when the room is smaller than the view. M3: the top hud px of
  *  the screen are the HUD strip, so the playfield is the view below it (480x256 for a 30x16
  *  room, which then fills it exactly). Screen y = world px - cam.y. */
-// Fall look-ahead (swing-feel, Azzato 9:13 PM: "the camera looks ahead downward when she falls
+// Fall look-ahead (swing-feel, Superdooperman 9:13 PM: "the camera looks ahead downward when she falls
 // fast"). Render-only state, kept per world and eased once per drawn frame by updateFallLook();
 // cameraFor just reads it, so the sim never sees it. Numbers: starts at FALL_LOOK.from tiles/s
 // of falling, full at .full, shifts the view down by up to .max of the play height.
