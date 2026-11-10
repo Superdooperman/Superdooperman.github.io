@@ -18,6 +18,22 @@ export function reachable(level, x, cy, range, doorsOpen) {
     && lineOfSight(level, x, cy, r.x, r.y, doorsOpen));
 }
 
+
+/** Lit lamps in range with a clear line from (x, cy). */
+export function reachableLamps(level, x, cy, range, doorsOpen) {
+  return (level.lamps || []).filter((l) => Math.hypot(l.x - x, l.y - cy) <= range
+    && lineOfSight(level, x, cy, l.x, l.y, doorsOpen));
+}
+
+/** A parsed lamp (level.js sets lamp: true). */
+export const isSnuffLamp = (p) => !!(p && p.lamp);
+
+/** Rings, plus lamps when the Lamp Snuffer is held, so hold-B aim can land on a lamp. */
+export function aimCandidates(level, x, cy, range, doorsOpen, snuffer) {
+  const rings = reachable(level, x, cy, range, doorsOpen);
+  return snuffer ? rings.concat(reachableLamps(level, x, cy, range, doorsOpen)) : rings;
+}
+
 /** Lower is better. face: -1/+1. dir: {x,y} held D-pad (0s for none). */
 export function targetScore(ring, x, cy, face, dir = { x: 0, y: 0 }) {
   const T = TUNING;
@@ -109,17 +125,21 @@ export function pickAt(cands, px, py) {
  *  centre). Inside the cone (half-angle coneHalf) the smallest angle wins, ties to the nearer
  *  point; a real ledge or prop (any kind but 'ring') beats a ring in the cone, so in a room with
  *  ledges the aim lands on stone, and a ring-only room still aims at its rings. An empty cone
- *  gives the point nearest the aim at any angle. Null with no candidates. */
+ *  gives the point nearest the aim at any angle. Lamps (only offered with the Lamp Snuffer) win only
+ *  as the closest-angle point in the cone, so an aim straight at a lamp picks it over the lantern it hangs from. Null with no candidates. */
 export function aimPick(cands, x, cy, dir, coneHalf) {
   if (!cands.length) return null;
   const ang = (r) => {
     const dx = r.x - x, dy = r.y - cy; const d = Math.hypot(dx, dy) || 1e-6;
     return acosClamped((dx * dir.x + dy * dir.y) / d);
   };
-  const scored = cands.map((r) => ({ r, a: ang(r), d: Math.hypot(r.x - x, r.y - cy), solid: !!r.kind && r.kind !== 'ring' }));
+  const scored = cands.map((r) => ({ r, a: ang(r), d: Math.hypot(r.x - x, r.y - cy), solid: !!r.kind && r.kind !== 'ring' && !r.lamp }));
   const better = (p, q) => (Math.abs(p.a - q.a) > 0.035 ? p.a < q.a : p.d < q.d); // ~2 degrees counts as a tie
   const best = (list) => list.reduce((b, c) => (!b || better(c, b) ? c : b), null);
   const cone = scored.filter((c) => c.a <= coneHalf);
-  const pick = best(cone.filter((c) => c.solid)) || best(cone) || best(scored);
+  const top = best(cone);
+  // Lamp Snuffer: a lamp wins only when it is the closest-angle point in the cone, so aiming at it
+  // beats its own lantern prop but a lamp off to the side never steals a ring or ledge aim.
+  const pick = (top && top.r.lamp ? top : null) || best(cone.filter((c) => c.solid)) || top || best(scored);
   return pick.r;
 }

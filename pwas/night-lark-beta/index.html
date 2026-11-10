@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en" data-build="beta" data-storage="nightlark.v2beta" data-commit="2bf1d1f">
+<html lang="en" data-build="beta" data-storage="nightlark.v2beta" data-commit="8084ce6">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; worker-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#090C13">
 <link rel="manifest" href="manifest.webmanifest">
@@ -11,13 +11,9 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>Night Lark (beta)</title>
 <style>
-  html, body { margin: 0; height: 100%; background: #090C13; overflow: hidden;
+  html, body { margin: 0; height: 100%; background: #090C13; overflow: hidden; touch-action: none;
     -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
-  #game { position: absolute; image-rendering: pixelated; image-rendering: crisp-edges; touch-action: pinch-zoom; }
-  /* beta pinch zoom: reset fallback, shown by js/page-zoom.js only while the page is zoomed */
-  #reset-zoom { position: fixed; left: 0; top: 0; z-index: 5; transform-origin: 0 0; margin: 8px; padding: 8px 12px;
-    font: bold 12px/1 monospace; color: #EEF1F5; background: rgba(11,17,34,0.85); border: 2px solid rgba(238,241,245,0.6); border-radius: 8px; touch-action: manipulation; }
-  #reset-zoom[hidden] { display: none; }
+  #game { position: absolute; image-rendering: pixelated; image-rendering: crisp-edges; touch-action: none; }
   #touch[hidden], #rotate[hidden] { display: none; }
   #touch { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
   /* swing-feel: Dead Cells mobile style. The controls float over the game view (no side

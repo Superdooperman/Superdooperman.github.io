@@ -465,12 +465,12 @@
           37
         ],
         [
-          13,
-          35
+          15,
+          36
         ],
         [
-          18,
-          42
+          13,
+          36
         ]
       ],
       "ownsCloak": [
@@ -479,7 +479,7 @@
         true,
         true
       ],
-      "note": "release (straight line, cloak tight), rise (legs trailing, cloak dragged down), fall (poncho halves thrown up as wings, legs reaching down), spread (pass 5: optional held/dramatic version of fall, wings wider and flung higher, lavender back-half lining behind the legs). Release stays 1 frame; no tumble. Bottom-aligned to the pivot row. tailAnchor = one pixel past the back-most hem point of the painted poncho (auto-measured). ownsCloak all true (tailfix Nov 9: painted poncho+rope; no engine ribbon)."
+      "note": "release (straight line, cloak tight), rise (legs trailing, cloak dragged down), fall (poncho halves thrown up as wings, legs reaching down), spread (pass 5: optional held/dramatic version of fall, wings wider and flung higher, lavender back-half lining behind the legs). Release stays 1 frame; no tumble. Bottom-aligned to the pivot row. tailAnchor = one pixel past the back-most hem point of the painted poncho (auto-measured). ownsCloak all true (tailfix Nov 9: painted poncho+rope; no engine ribbon). Jump-tail Nov 9 evening: fall (2) and spread (3) reuse the lark-idle-bell belt-loop (WH ramp) at the back hip so the rope tail reads like idle/run; the earlier thin wing-hem strand is gone (ownsCloak still all true)."
     },
     {
       "name": "lark-freefall",

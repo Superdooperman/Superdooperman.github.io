@@ -21,7 +21,7 @@ import { verticalSection } from './levels/vertical.js';
 import { big2x2Room } from './levels/big-2x2.js';
 import { wideShaftRoom } from './levels/wide-shaft.js';
 import { createInput, bindKeyboard, bindGamepads } from './input.js';
-import { allowPinchZoom } from './page-zoom.js';
+import { blockPageZoom } from './ios-zoom.js';
 import { createLoop, prefersReducedMotion } from './loop.js';
 import { setupCanvas } from './canvas.js';
 import { render, cameraFor, withLerp } from './render.js';
@@ -55,6 +55,7 @@ const params = new URLSearchParams(location.search);
 if (params.get('pull') === '1' || params.get('grapple') === 'pull') SETTINGS.abilities = { ...SETTINGS.abilities, pullGrapple: true };
 if (params.get('grapple') === 'pull') SETTINGS.grapple = 'pull';
 if (params.get('grapple') === 'classic') SETTINGS.grapple = 'classic';
+blockPageZoom();
 // The test build (tools/build-beta.mjs --test) sets <html data-storage="...">: every
 // 'nightlark.v2.' key then lives under that prefix instead, so it never shares a save or a
 // setting with the dev page, the beta or v1 on the same origin.
@@ -74,8 +75,6 @@ function scopedStorage() {
   document.body.classList.toggle('yank-button', SETTINGS.yankInput === 'button');
 }
 const canvas = document.getElementById('game');
-// beta-zoom: pinch zoom allowed on the page; one-finger/double-tap guards scoped to the canvas (js/page-zoom.js)
-allowPinchZoom(canvas);
 // swing-feel: the view fills the screen (no letterbox); ?letterbox=1 restores the 480x270 fit.
 // Feel fix 1: the dynamic zoom draws through zoom.js (device-pixel canvas + backbuffer);
 // ?zoom=0 turns it off (the old whole-number fill), ?zoomrender=backbuffer|nearest|direct
@@ -100,11 +99,7 @@ function present(world, alpha, draw) {
 // Feel fix 1: full screen in landscape. The first touch in landscape asks the browser for full
 // screen (it needs a user gesture; iOS Safari has no element full screen, so there it is the
 // full window, or the home-screen app). ?nofs turns it off.
-// beta-zoom (Nov 9 2026): OFF by default on this branch. Chrome does not pinch-zoom a page in
-// element full screen, so the first tap in play (which asked for it) killed the beta's pinch
-// zoom (headless 844x390 CDP: scale stayed 1 after a touch START, zoomed to 3 with ?nofs).
-// ?fs=1 asks for full screen again (pinch zoom then waits until full screen is left).
-if (params.get('fs') === '1' && !params.has('nofs')) {
+if (!params.has('nofs')) {
   const fs = (e) => {
     const de = document.documentElement;
     if (e.pointerType !== 'touch' || document.fullscreenElement || !de.requestFullscreen) return;

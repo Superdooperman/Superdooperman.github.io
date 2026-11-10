@@ -11,7 +11,7 @@
 //    columns never jump between 3 and 4 device px as the camera moves (no shimmer), at the cost of a 1-device-px soft edge.
 //    'nearest' is the same buffer with a plain nearest blit at every scale (for comparison).
 //  - 'direct': draw the scene straight into the device-pixel canvas with a scale transform.
-import { ZOOM, BASE_W, BASE_H, setViewSize, VIEW_W, VIEW_H } from './config.js';
+import { ZOOM, BASE_W, BASE_H, TILE_PX, HUD_H, setViewSize, VIEW_W, VIEW_H } from './config.js';
 import { integerScale } from './canvas.js';
 
 const clamp01 = (v) => Math.max(0, Math.min(1, v));
@@ -38,6 +38,45 @@ export function guardPull(w, cfg = ZOOM) {
 export function zoomTarget(speed, chain, cfg = ZOOM) {
   const k = Math.max(clamp01((speed - cfg.speedFrom) / (cfg.speedFull - cfg.speedFrom)), clamp01((chain || 0) / cfg.chainFull));
   return 1 - (1 - cfg.min) * k;
+}
+
+/** Tightest zoom-out (smallest zoom number is widest) that still keeps the logical view from
+ *  growing past the room on both axes at once. 0 when the room size is unknown (stub worlds,
+ *  and rooms that still have more to show on at least one axis), so ZOOM.min still applies.
+ *  A one-screen room (30x16) returns 1: the view already fills it, and zooming out would leave
+ *  the room floating in empty sky. A tall 30-col shaft still zooms out (more height to show;
+ *  the short axis is padded with the skyline). A room larger on both axes is clamped to the
+ *  zoom that first covers it. */
+export function roomZoomFloor(world, view = null, cfg = ZOOM) {
+  const cols = world?.level?.cols;
+  const rows = world?.level?.rows;
+  if (!cols || !rows) return 0;
+  const roomW = cols * TILE_PX;
+  const roomH = rows * TILE_PX + HUD_H;
+  let zW;
+  let zH;
+  if (view && view.base && view.devW && view.devH) {
+    zW = view.devW / (view.base * roomW);
+    zH = view.devH / (view.base * roomH);
+  } else {
+    zW = BASE_W / roomW;
+    zH = BASE_H / roomH;
+  }
+  const fitsW = zW >= 1 - 1e-9;
+  const fitsH = zH >= 1 - 1e-9;
+  if (fitsW && fitsH) return 1;
+  // Both axes still have more room to show: stop at the first one that fills.
+  if (!fitsW && !fitsH) return Math.min(1, Math.max(zW, zH));
+  // Only one axis has more to show: zoom out until that axis is covered (the already-fitting
+  // axis will be padded with the skyline, whose apparent scale no longer shrinks).
+  return Math.min(1, fitsW ? zH : zW);
+}
+
+/** The next whole-number screen scale at or inside (narrower than) `floor`. */
+export function wholeTargetInward(floor, base) {
+  if (!base || floor >= 1) return 1;
+  const k = Math.min(base, Math.max(1, Math.ceil(base * floor - 1e-9)));
+  return k / base;
 }
 
 /** Feel fix 2 (Chopper's zoom check): the target zoom moved to the nearest one whose scale on
@@ -70,7 +109,14 @@ export function stepZoom(w, dt, cfg = ZOOM, view = null) {
   s.guard = guard;
   let want = cfg.enabled ? zoomTarget(s.speed, w.chain, cfg) : 1;
   if (guard) want = 1;
-  if (cfg.wholeScale && view && view.base) want = wholeTarget(want, view.base);
+  const roomFloor = roomZoomFloor(w, view, cfg);
+  want = Math.max(want, roomFloor);
+  if (cfg.wholeScale && view && view.base) {
+    const snapped = wholeTarget(want, view.base);
+    // A whole scale that is wider than the room is refused; keep the unsnapped (already
+    // room-clamped) target rather than jumping all the way back to rest.
+    want = (roomFloor > 0 && snapped < roomFloor - 1e-9) ? want : snapped;
+  }
   // hysteresis: a wider target is taken at once and held holdOut s after the trigger drops
   if (want <= s.target || guard) { if (want < s.target) s.hold = cfg.holdOut; s.target = want; if (guard) s.hold = 0; }
   else if (s.hold > 0) s.hold = Math.max(0, s.hold - dt);

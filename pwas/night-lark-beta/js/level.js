@@ -83,7 +83,7 @@ export function parseLevel(def, opts = {}) {
       const x = c + 0.5;
       const y = r + 0.5;
       if (ch === 'a') rings.push({ x, y, id: `${c}:${r}` });
-      else if (ch === 'L') lamps.push({ x, y, kind: def.lampKind || 'company' });
+      else if (ch === 'L') lamps.push({ x, y, kind: def.lampKind || 'company', lamp: true });
       else if (ch === 'P') spawn = { x, y: r + 1 - TUNING.footEps };
       else if (ITEM_TILES.has(ch)) {
         items.push({ t: ch, x, y, id: `${def.name}:${ch}:${c}:${r}`,

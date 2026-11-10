@@ -16,7 +16,7 @@ export const POWERUPS = Object.freeze([
   { id: 'quick-reel', name: 'QUICK REEL', tier: 'common', text: ['UP ON THE LINE', 'REELS IN TWICE AS FAST'] },
   { id: 'smoke', name: 'SMOKE PELLET', tier: 'common', text: ['SELECT: A CLOUD NO ONE', 'SEES THROUGH. 2 A NIGHT'] },
   { id: 'cloak', name: 'SHADOW CLOAK', tier: 'rare', text: ['STAND STILL IN THE DARK:', 'CONES SEE LESS OF YOU'] },
-  { id: 'snuffer', name: 'LAMP SNUFFER', tier: 'rare', text: ['B WITH NO RING IN REACH', 'PUTS A LAMP OUT'] },
+  { id: 'snuffer', name: 'LAMP SNUFFER', tier: 'rare', text: ['AIM AT A LAMP', 'LET GO TO PUT IT OUT'] },
   { id: 'double-line', name: 'DOUBLE LINE', tier: 'rare', text: ['B ON THE LINE IN THE AIR', 'FIRES AGAIN, ONCE'] },
   { id: 'tie-line', name: 'TIE-LINE', tier: 'legendary', text: ['DROP ONTO A GUARD', 'TO TIE HIM UP'] },
 ]);

@@ -4,7 +4,7 @@
 // Its own seeded randomness (mulberry32), so the game's RNG streams are untouched.
 // Reduced motion (prefers-reduced-motion, the title menu MOTION item, or ?fx=off): no shake,
 // no flash, no particles, no flicker, no fog drift, and the cloak and rope hang at rest.
-import { TILE_PX, VIEW_W, VIEW_H, HUD_H, TUNING, FEEL } from './config.js';
+import { TILE_PX, VIEW_W, VIEW_H, HUD_H, BASE_W, BASE_H, TUNING, FEEL } from './config.js';
 import { PALETTE as P } from './art.js';
 import { mulberry32 } from './gen/rng.js';
 import { bodyCenterY } from './physics.js';
@@ -152,18 +152,24 @@ function darkLayer() {
 
 /** A far skyline and the moon behind the room (safe light only: MN, NV). Parallax 0.25. */
 export function drawBackdrop(ctx, fx, world, cam) {
-  const px = -cam.x * 0.25;
-  const dy = Math.round(backdropRise(world, cam) * RISE_PARALLAX.mid); // feel pass 1 (G): y parallax in tall rooms, 0 elsewhere
-  const mx = Math.round(VIEW_W - 88 + px * 0.2);
+  const vw = BASE_W, vh = BASE_H;
+  const sx = VIEW_W / vw, sy = VIEW_H / vh;
+  const camX = cam.x * (vw / VIEW_W);
+  const px = -camX * 0.25;
+  const dy = Math.round(backdropRise(world, cam) * (vh / VIEW_H) * RISE_PARALLAX.mid); // feel pass 1 (G): y parallax in tall rooms, 0 elsewhere
+  ctx.save();
+  if (sx !== 1 || sy !== 1) ctx.scale(sx, sy);
+  const mx = Math.round(vw - 88 + px * 0.2);
   ctx.fillStyle = P.MN1; ctx.fillRect(mx, HUD_H + 22 + dy, 12, 12);
   ctx.fillStyle = P.MN0; ctx.fillRect(mx, HUD_H + 30 + dy, 4, 4);
   ctx.fillStyle = P.NV2;
-  const span = Math.max(600, VIEW_W + 120); const n = Math.ceil((24 * span) / 600);
+  const span = Math.max(600, vw + 120); const n = Math.ceil((24 * span) / 600);
   for (let i = 0; i < n; i++) {
     const w = 18 + ((i * 37) % 23); const h = 30 + ((i * 53) % 70);
     const x = Math.round(((i * 41 + px) % span + span) % span - 60);
-    ctx.fillRect(x, VIEW_H - h - 30 + dy, w, h + 30);
+    ctx.fillRect(x, vh - h - 30 + dy, w, h + 30);
   }
+  ctx.restore();
 }
 
 /** Darkness over the room with stepped light pools punched out at the lamps, then additive

@@ -24,7 +24,7 @@ import { bodyBlocked, findLanding, pushOut, oneWayUnderFeet, findLedge, bodyCent
 import { solveRope, pumpSwing, reel, conserveSwing } from './rope.js';
 import { lineOfSight } from './los.js';
 import { stepStealth, noiseRadius, tieCheck } from './stealth.js';
-import { chooseTarget, reachable, stepReticle, pickAt, aimPick } from './targeting.js';
+import { chooseTarget, reachable, stepReticle, pickAt, aimPick, aimCandidates, isSnuffLamp } from './targeting.js';
 import { canCancelAttack, attackLimit, guardBump, attackReaches } from './feel.js';
 import { stepMiniTowers, warmLightBuff } from './mini-tower.js';
 import { createIntro, introCheck, stepIntro, introActive } from './shaft-intro.js';
@@ -144,6 +144,8 @@ export function createWorld(levelDef, opts = {}) {
     }
     return best;
   }
+  const rangeSlack = () => lineRange() + T.targetSlack;
+  const aimCands = () => aimCandidates(level, w.x, center(), rangeSlack(), w.doorsOpen, w.snuffer);
   const inArea = (p) => p.c0 !== undefined && w.x >= p.c0 && w.x < p.c1 + 1 && w.y > p.r0 && w.y <= p.r1 + 1;
 
   function release(why = 'release') {
@@ -189,6 +191,7 @@ export function createWorld(levelDef, opts = {}) {
   /** v1 ze(): never attach through solid (LOS); in the air the line is cut to length.
    *  v2: on the ground too (so walking off the edge swings instead of dropping a full line). */
   function attach(ring, inAir, how = 'auto', kind) {
+    if (isSnuffLamp(ring)) return false; // Lamp Snuffer: a lamp is snuffed, never hooked
     const d = Math.hypot(w.x - ring.x, center() - ring.y);
     if (d > lineRange() + T.attachSlack) return false;
     if (!lineOfSight(level, w.x, center(), ring.x, ring.y, w.doorsOpen)) return false;
@@ -455,13 +458,15 @@ export function createWorld(levelDef, opts = {}) {
     // tap or click directly on a point
     if (input.aimAt) {
       const pick = pickAt(reachable(level, w.x, center(), range, w.doorsOpen), input.aimAt.x, input.aimAt.y);
-      if (pick && pick !== w.anchor) {
+      const lamp = w.snuffer ? lampInReach(input.aimAt.x, input.aimAt.y) : null;
+      const lampCloser = lamp && (!pick || Math.hypot(input.aimAt.x - lamp.x, input.aimAt.y - lamp.y) < Math.hypot(input.aimAt.x - pick.x, input.aimAt.y - pick.y));
+      if (lampCloser) {
+        snuff(lamp, 'tap');
+        w.aiming = false; w.bArmed = false;
+      } else if (pick && pick !== w.anchor) {
         if (w.anchor) release('retarget');
         attach(pick, !w.grounded, 'tap-point', kindFor('fire')); // a tap on a point fires what B fires
         w.aiming = false; w.bArmed = false;
-      } else if (!pick && w.snuffer) {
-        const lamp = lampInReach(input.aimAt.x, input.aimAt.y);
-        if (lamp) snuff(lamp, 'tap');
       }
     }
 
@@ -501,7 +506,7 @@ export function createWorld(levelDef, opts = {}) {
       w.bTime += realDt;
       w.bHoldFrames += 1;
       if (!w.aiming && w.bTime >= (fix ? F.aimHoldTime : T.aimHoldTime)) {
-        const cands = reachable(level, w.x, center(), range, w.doorsOpen);
+        const cands = aimCands();
         // A second mid-air hold in the same airtime does not aim (that would slow-mo a mash into a hover).
         const airLocked = fix2 && !w.grounded && !w.airPlanting && w.airPlantsLeft <= 0;
         if (!airLocked && !(fix && F.aimNeedsTarget && !cands.length)) { // fix: nothing in reach = no aim, no slow-mo (the release still taps)
@@ -512,9 +517,10 @@ export function createWorld(levelDef, opts = {}) {
       }
     }
     if (w.aiming) {
-      const cands = reachable(level, w.x, center(), range, w.doorsOpen);
+      const cands = aimCands();
       if (w.reticle && !cands.includes(w.reticle)) w.reticle = null;
-      if (fix2) { // the reticle follows the aim: nearest reachable point to the held direction
+      const lettingGo = R.fire || !H.fire; // release uses the last held reticle, not a snap to facing
+      if (fix2 && !lettingGo) { // the reticle follows the aim: nearest reachable point to the held direction
         w.aimDir = aimDirection(H, input.aimStick);
         w.reticle = aimPick(cands, w.x, center(), w.aimDir, F2.aimConeHalf);
       } else if (!w.reticle && cands.length) w.reticle = w.target || cands[0];
@@ -528,7 +534,8 @@ export function createWorld(levelDef, opts = {}) {
       if (w.aiming) {
         const r = w.reticle;
         w.aiming = false; w.reticle = null;
-        if (r && attach(r, !w.grounded, 'aim', w.fireKind ?? undefined)) emit('aimfire');
+        if (isSnuffLamp(r)) { snuff(r, 'aim'); emit('aim-snuff'); }
+        else if (r && attach(r, !w.grounded, 'aim', w.fireKind ?? undefined)) emit('aimfire');
         else emit('aim-cancel');
       } else {
         w.fireBuf = T.fireBuffer; // tap: fire now, or within 100 ms if a point comes in range
@@ -764,7 +771,7 @@ export function createWorld(levelDef, opts = {}) {
     if (w.aimPlantSkip && !w.aiming) return false;
     if (w.airPlanting) return true;
     if (w.airPlantsLeft <= 0) return false;
-    if (!w.aiming && !reachable(level, w.x, center(), lineRange() + T.targetSlack, w.doorsOpen).length) return false;
+    if (!w.aiming && !aimCands().length) return false;
     w.airPlantsLeft -= 1;
     w.airPlanting = true;
     return true;
