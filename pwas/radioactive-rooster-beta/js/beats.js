@@ -1,4 +1,4 @@
-// PLACEHOLDER beats (Push C, 2026-10-24): time cards, the club cutaway and the cold open, so Arlong can feel the pacing
+// PLACEHOLDER beats (Push C, 2026-10-24): time cards, the club cutaway and the cold open, so Azzato can feel the pacing
 // before the real art, wording and timing land. Every beat wears a "PLACEHOLDER" tag.
 //
 // Beats live on document.body (render() rebuilds #app every frame). They never block input: pointer-events are off,
@@ -14,11 +14,11 @@ import { CLUB_SIGN, GOBBLER_DIM, SIGN_VARIANT } from "../data/script.js";
 export const BEAT_MS = { card: 2600, club: 4400, clubWhisk: 5400, coldopen: 5600, potato: 3200, carny: 4200, sign: 4600 };
 // Club sign timings (Hawkeye pass 2026-10-25), synced to Brook's placeholder cues:
 // club: the stogie henchman's smack lands at smack ms; THE COCK sputters for sputter ms (neon-sputter starts with it).
-// sign: neon-lightup (2.6 s) crackles 0.14-0.9 s and snaps on at 0.95 s. GOBBLER is one continuous tube (Arlong
+// sign: neon-lightup (2.6 s) crackles 0.14-0.9 s and snaps on at 0.95 s. GOBBLER is one continuous tube (Azzato
 // 2026-10-26), so the whole word sputters together: lit during each gobbler [on, off] window (each one sits on a crackle
 // in neon-lightup), dark between, then lit for good at snap ms with the glow; neon-hum-full loops from when the cue ends.
 export const SIGN_MS = { smack: 1800, sputter: 500, thecock: 140, gobbler: [[140, 170], [320, 370], [530, 570], [680, 740], [860, 890]], snap: 950, lightup: 2600 };
-// The redrawn sign cut (Brook's sign-cut-v2, liked by Arlong 2026-10-26; follows the club-B3 neon, one red-orange
+// The redrawn sign cut (Brook's sign-cut-v2, liked by Azzato 2026-10-26; follows the club-B3 neon, one red-orange
 // colour): 320x180 layers at 0,0, staged from assets/art-placeholder/club/sign-cut/ by tools/art_files.py. base (every
 // tube dead, GOBBLER a faint ghost), then each part's glow (screen; the fade is in the file's alpha), then each part's
 // lit tube (normal). A part flickers by toggling its glow and lit together; GOBBLER is one layer, so the whole word
@@ -38,7 +38,7 @@ export function preloadSignCut() {
 // until the next; idle from the walk-in, the hit spans the impact at SIGN_MS.smack, settle holds to the end of the beat.
 export const HENCH_FRAMES = [["idle", 0], ["windup", 1480], ["wind", 1580], ["swing", 1720], ["hit", 1750], ["settle", 1850]]; // windup: Brook's arm-fix in-between (2026-10-25)
 // Lit-letter cutouts of Brook's B3 (tools/neon/club_sign_parts.py). Before the reveal only THE COCK ever sputters
-// (Arlong 2026-10-26: GOBBLER stays dark until the sign cut, the smack must not give it away): dark THE COCK (variant A)
+// (Azzato 2026-10-26: GOBBLER stays dark until the sign cut, the smack must not give it away): dark THE COCK (variant A)
 // flashes its lit cutout and dies again; lit THE COCK (variant B) blinks out under a code-side dead mask and comes back.
 const SIGN_LIT_ART = { thecock: "club/sign-thecock-lit" };
 // Stand-in dead THE COCK over the lit plate (until Brook paints a dead THE COCK layer): near-black masked by the lit
@@ -126,7 +126,7 @@ const HATTIE_SIL = `<svg viewBox="0 0 60 90" aria-hidden="true"><g fill="#050507
 // A small gloved hand, two fingers out, that taps the holder (placeholder gesture).
 const GLOVE_FLICK = `<svg viewBox="0 0 20 14" aria-hidden="true"><path d="M2 9 C2 5 5 4 8 5 L16 3.4 C17.6 3.2 17.8 5 16.3 5.3 L11 6.4 L17 6.6 C18.6 6.7 18.5 8.5 16.9 8.4 L10.5 8.3 C9 11 5 12 3 11 Z" fill="#0b0a0e" stroke="#7a1616" stroke-width=".8"/></svg>`;
 
-// smokeVeil (Arlong 2026-10-25): a reusable cigarette-smoke veil that hides Hattie's mask and face until the Pavilion
+// smokeVeil (Azzato 2026-10-25): a reusable cigarette-smoke veil that hides Hattie's mask and face until the Pavilion
 // unmasking (VEIL.flag in js/logic.js, right after the hero choice); only the holder's ember glows through. state "thick" (before the reveal), "whisk" (thick,
 // then .clear() waits for the drift loop to come round to frame 01, which equals clear frame 01 (clear({ now: true }), the
 // Pavilion reveal: starts at once; .finish() ends a clear on the spot), and plays the clear
@@ -297,10 +297,10 @@ function clubNode(beat = {}) {
     stage.append(art("club/hattie-sil", "club-hattie-art") || svg(HATTIE_SIL, "club-hattie"));
     stage.append(el("div", "club-holder-ember"));
   } else node.classList.add("on-art");
-  // Arlong 2026-10-24: she says NOTHING here (her voice would give the twist away). Only a smoke wisp off the holder
+  // Azzato 2026-10-24: she says NOTHING here (her voice would give the twist away). Only a smoke wisp off the holder
   // and a small gloved flick of ash; Gizzard's piano (the club bed) carries the scene.
   stage.append(el("div", "club-smoke"), el("div", "club-smoke s2"), svg(GLOVE_FLICK, "club-gesture"));
-  // Usopp 2026-10-25: a stogie henchman walks up and smacks the sign (the hawk stays lit). Arlong 2026-10-26: he's
+  // Usopp 2026-10-25: a stogie henchman walks up and smacks the sign (the hawk stays lit). Azzato 2026-10-26: he's
   // trying to get it to work, so THE COCK sputters for half a second and stays on; GOBBLER stays dark the whole time. Brook's six smack frames (HENCH_FRAMES); the SVG stand-in only if they're missing.
   if (beat.smack && dark.length) {
     const ids = HENCH_FRAMES.map(([pose]) => `sprite/stogie-sil-smack-l-h72-${pose}`);
@@ -495,7 +495,7 @@ function runOne(beat) {
     const build = BUILD[beat.kind];
     if (!build) { resolve(); return; }
     const node = build(beat);
-    // a line read over the beat (the Pavilion sign cut's narration, Arlong 2026-10-27), in the game's caption box
+    // a line read over the beat (the Pavilion sign cut's narration, Azzato 2026-10-27), in the game's caption box
     if (beat.caption) node.append(el("div", "beat-caption", beat.caption));
     document.body.append(node);
     const timers = SOUND[beat.kind](beat);

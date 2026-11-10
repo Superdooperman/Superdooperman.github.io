@@ -26,7 +26,7 @@ const ui = {
   plateFile: "",
   lineAt: 0, // when the current caption line was shown (cast talk frames run for a beat after it)
   lastAct: null, // { spot, verb } of the last hotspot click (cast `talkOn`)
-  // Hints / easy mode (Arlong 2026-10-19): hover highlighting is OFF by default; the menu turns it on (kept per device).
+  // Hints / easy mode (Azzato 2026-10-19): hover highlighting is OFF by default; the menu turns it on (kept per device).
   hints: (() => { try { return localStorage.getItem("rr-beta-hints") === "1"; } catch { return false; } })(),
   // Push C PLACEHOLDER beats (2026-10-24). Cold open: COLD_OPEN in data/script.js, overridden per device by the Menu
   // toggle (localStorage rr-beta-coldopen) or per visit by ?coldopen=0|1. Colour shift: Menu toggle (rr-beta-nightshift).
@@ -103,7 +103,7 @@ function mount(img, file, fallback = null) {
   img.classList.toggle("px", url.startsWith("art/pixel/"));
 }
 
-// Talk-row portraits (Arlong 2026-10-27: a blank portrait frame on each speaker change). render() rebuilds the talk row
+// Talk-row portraits (Azzato 2026-10-27: a blank portrait frame on each speaker change). render() rebuilds the talk row
 // every time, and each speaker change used to mount a brand-new <img>: until that file was fetched and decoded, the
 // frame showed only its cream background, for a whole fetch the first time a face came up, and again whenever no node
 // held a face any more (its image could leave the memory cache: a refetch through the service worker). Now each portrait
@@ -197,8 +197,8 @@ function showLine(entry) {
     showInsert(entry.insert).then(() => showLine(entry));
     return;
   }
-  // Usopp 2026-10-25: the cut to the club sign (GOBBLER sputters and lights as one tube, Arlong 2026-10-26).
-  // Arlong 2026-10-27: its narration is read DURING the close-up, not after the cut fades: the beat carries the line
+  // Usopp 2026-10-25: the cut to the club sign (GOBBLER sputters and lights as one tube, Azzato 2026-10-26).
+  // Azzato 2026-10-27: its narration is read DURING the close-up, not after the cut fades: the beat carries the line
   // as its own caption (js/beats.js runOne), and the line is shown now underneath, so it's already up when the cut ends.
   if (entry.signCut && !entry.played) {
     entry.played = true;
@@ -222,7 +222,7 @@ function showLine(entry) {
   }
 }
 
-// Arlong 2026-10-25: her smoke-hidden portrait clears at the same moment as the on-screen smoke (Brook's final art).
+// Azzato 2026-10-25: her smoke-hidden portrait clears at the same moment as the on-screen smoke (Brook's final art).
 // A plate with `smoke` (GOBBLER_PLATE) shows the portrait smoke while the Pavilion veil is on screen: the
 // portrait/hattie-smoke-drift loop on stage drift frame % 6 (6 x 180 ms = half the 12-frame stage loop), then
 // portrait/hattie-smoke-clear on the same frame index as pavilion/smoke-clear, stepped by smokeVeil's onFrame on the
@@ -288,7 +288,7 @@ function syncSmokePlate() {
   }
 }
 
-// Hawkeye pass (Arlong/Usopp 2026-10-25): at the Pavilion a smoke veil (js/beats.js smokeVeil, CSS blobs) hangs over her
+// Hawkeye pass (Azzato/Usopp 2026-10-25): at the Pavilion a smoke veil (js/beats.js smokeVeil, CSS blobs) hangs over her
 // mask and face until the hero choice; the veil: "whisk" line clears it. One persistent node, re-added on every render
 // so the drift keeps going; gone once cleared or when the save is already past the unmasking.
 // Brook's pavilion/smoke strips are full 320x180 frames aligned to bg/pavilion (her head at x 195-208, y 53-70), so the
@@ -568,7 +568,7 @@ function playCutscene(name, done) {
   requestAnimationFrame(tick);
 }
 
-/* ---------- Cutscene fx slots (beta v17, Arlong Oct 27: the hot sauce toss) ----------
+/* ---------- Cutscene fx slots (beta v17, Azzato Oct 27: the hot sauce toss) ----------
  * cs.slots: [{ slot, art, t, at | path, frames?, frameMs?, anchor?, ms?, z?, placeholder }] named sprite strips Brook
  * paints. With its art in the manifest a slot plays the strip: one frame is the manifest `size`, `frames` across
  * (slot.frames, else manifest frames), `frameMs` each (slot, else manifest frameMs, else 70), drawn with the
@@ -944,7 +944,7 @@ function render() {
         // Oct 23 item 35: he reaches his mark first, then the action (and its line and cutscene) plays
         walkThen(room, sx, sy, st && st.face, action, lastAct);
       });
-      // Arlong: double-click an edge exit to go straight through, whatever verb is up (no nav words needed)
+      // Azzato: double-click an edge exit to go straight through, whatever verb is up (no nav words needed)
       if (spot.exit) hit.addEventListener("dblclick", () => {
         if (ui.state.mode === "choice" || ui.cutscene) return;
         dispatch({ t: "go", id: spot.id });
@@ -1029,7 +1029,7 @@ function render() {
   cabinet.append(stage);
 
   // Everything under the scene goes in one .controls box: display: contents (no box at all) on desktop and portrait
-  // phones, and on short landscape phones its own scrolling column beside the scene (Arlong 2026-10-27), so the page
+  // phones, and on short landscape phones its own scrolling column beside the scene (Azzato 2026-10-27), so the page
   // never scrolls there. Its scroll position survives the re-render every action does.
   const controls = el("div", "controls");
   cabinet.append(controls);
@@ -1040,7 +1040,7 @@ function render() {
   caption.textContent = lineNow ? (lineNow.rap ? lineNow.text.split(" / ").join("\n") : lineNow.text) : "The night is waiting.";
   if (lineNow && lineNow.thought) caption.classList.add("thought");
   if (lineNow && lineNow.rap) caption.classList.add("rap"); // TODO(audio): start/stop Rocco's boom-bap loop here (sound on hold)
-  // Arlong: make it obvious that clicking the text moves the talk on (Hattie's scene especially)
+  // Azzato: make it obvious that clicking the text moves the talk on (Hattie's scene especially)
   const more = lineNow && ui.queue.length && ui.index < ui.queue.length - 1;
   if (more) {
     caption.classList.add("more");
@@ -1145,7 +1145,7 @@ function render() {
   playBed(state.room, musicMoment(state, ended));
 }
 
-// The Pavilion's music (Arlong 2026-10-26, js/audio.js MOMENT_THEMES). While her smoke veil is up the midway theme
+// The Pavilion's music (Azzato 2026-10-26, js/audio.js MOMENT_THEMES). While her smoke veil is up the midway theme
 // plays on (she's still Hawkeye Hattie in the smoke). Her first reveal: Brook's acid club-theme ("gobbler") starts the
 // instant the stage smoke is gone (the veil: "whisk" line; smokeVeil's "done" frame, the same moment her portrait cuts
 // to portrait/gobbler), never before. It carries her speech and the sign cut to her lit club; the chase-theme takes the
@@ -1198,7 +1198,7 @@ function talkFlap(face, lineNow) {
 // Two-frame walk (side idle / side walk), faces the way he moves, front idle when he enters a room.
 const HERO_SPEED = 70; // logical px per second
 const STEP_MS = 160;
-const FOOTSTEP_MS = 390; // one footfall (Brook's README: 380-400 ms; Arlong Oct 27: 390)
+const FOOTSTEP_MS = 390; // one footfall (Brook's README: 380-400 ms; Azzato Oct 27: 390)
 const hero = { room: null, view: null, x: 0, y: 0, tx: 0, ty: 0, face: "front", walking: false, last: 0, t: 0, stuck: 0, stepClock: 0, stepped: false, raf: 0 };
 
 function heroArea(room) {
@@ -1261,7 +1261,7 @@ const POSE_BEAT_MS = 260;
 function seatFrame(room, cfg, kind) {
   const size = room.hero && room.hero.depth ? `-h${depthHeight(room.hero, cfg.standY || room.hero.at[1])}` : sizeTag(room.hero || {});
   if (!ui.seatFace) return `${cfg.front || cfg.sit + "-r"}${size}`; // no hop either: he is simply sitting there
-  // Beta v17 item 3 (Arlong Oct 27): on the rail he sits in the front-view puffed sit; the side hop (the way he came)
+  // Beta v17 item 3 (Azzato Oct 27): on the rail he sits in the front-view puffed sit; the side hop (the way he came)
   // is only the one beat of getting up there and back down.
   if (kind === "sit" && cfg.front) return `${cfg.front}${size}`;
   return `${cfg[kind]}-${ui.seatFace}${size}`;
@@ -1398,7 +1398,7 @@ function shownState(s, lineNow) {
   return { ...s, flags, ...(pose ? { pose } : {}) };
 }
 
-// Beta v17 item 1 (Arlong Oct 27: stuck behind the fairground cutout; clicks off it played footsteps but he never
+// Beta v17 item 1 (Azzato Oct 27: stuck behind the fairground cutout; clicks off it played footsteps but he never
 // moved). Root cause: the gate cutout sets the legacy squat pose ([left, top, width] in room.poseAt), and only a room
 // change cleared it; while posed the floor click was ignored and a hotspot click walked his hidden sprite (footsteps,
 // nothing on screen). A legacy pose is a held crouch, not a seat: any click that takes him somewhere stands him up
@@ -1442,7 +1442,7 @@ function placeSelf(node, room) {
 // Oct 23 item 41: the stunt-night beats play on the Pavilion as it was (bg/pavilion-aged), the crowd gathering a row
 // at a time, and in it, from the stunt night on, the silhouette of the man who rigged it (the mayor's muscle).
 const FLASH_CROWD = [0, 168, 158, 148, 140, 136];
-// Beta v17 item 6 (Arlong Oct 27: the joined-ticket flashback cut in abruptly, and the past Pavilion jumped over the
+// Beta v17 item 6 (Azzato Oct 27: the joined-ticket flashback cut in abruptly, and the past Pavilion jumped over the
 // room he's standing in). Each line is a fresh render, so the fades are CSS animations keyed to the line's first
 // render with a negative delay (re-renders mid-line pick up where the fade is): the sepia eases in on the first
 // flashback line and out after the last; the past Pavilion dissolves in over the sepia room, and back out to it.
@@ -1564,7 +1564,7 @@ function heroTick(now) {
   if (node) placeHero(node, room);
   // Push C: a footstep every other walk frame while he moves
   hero.stepClock += dt;
-  // Beta v17 (Arlong approved Brook's v2 steps, Oct 27): one single-step file every FOOTSTEP_MS, a relaxed noir stroll.
+  // Beta v17 (Azzato approved Brook's v2 steps, Oct 27): one single-step file every FOOTSTEP_MS, a relaxed noir stroll.
   // Its own clock, apart from STEP_MS (the walk animation frames are unchanged).
   // Carry the overshoot so frame rounding does not stretch the beat (60 fps rounded 390 up to 400).
   if (hero.walking && hero.stepClock >= FOOTSTEP_MS) { hero.stepClock = Math.min(hero.stepClock - FOOTSTEP_MS, FOOTSTEP_MS / 2); hero.stepped = true; playCue("footstep"); }
@@ -1667,7 +1667,7 @@ function finalCover(end) {
   return wrap;
 }
 
-// Silver Age cover (Arlong 2026-10-19): series banner + price/issue corner box, the splash with the issue title and a
+// Silver Age cover (Azzato 2026-10-19): series banner + price/issue corner box, the splash with the issue title and a
 // blurb burst over it, then a strip of inset panels: painted art (or Ben-Day dots), a yellow narration caption, a
 // speech or thought bubble, and an editor's note when Henny speaks out loud.
 function comicCover(end) {
@@ -1813,7 +1813,7 @@ function soundPanel() {
   return box;
 }
 
-// Title (Arlong 2026-10-26): Brook's cover art in three aligned 320x180 layers, the scene (bg/title), then the
+// Title (Azzato 2026-10-26): Brook's cover art in three aligned 320x180 layers, the scene (bg/title), then the
 // "RADIOACTIVE ROOSTER" logo (bg/title-logo) and "THE YOLK OF MIDNIGHT" (bg/title-sub) fading in, then the menu
 // bottom-right over the water (clear of the logo and both faces). The h1 is visually hidden, so the title shows once.
 // Any key or tap shows it all at once; prefers-reduced-motion skips the fade (css). Plays once per visit to the title.
@@ -1933,7 +1933,7 @@ function button(text, className, onClick) {
   return node;
 }
 
-// Beta v17 item 5 (Arlong Oct 27): the inventory Look close-up (the item in his gloves) goes away on any other click
+// Beta v17 item 5 (Azzato Oct 27): the inventory Look close-up (the item in his gloves) goes away on any other click
 // on screen, not only when the caption moves on. Capture phase, and the node is just removed (no re-render), so the
 // click itself still lands on whatever was under it; a new Look makes a new line, so it shows again.
 document.addEventListener("pointerdown", () => {

@@ -29,7 +29,7 @@ export const SPEAKER = {
 
 // Hawkeye follow-up (2026-10-25): until her "I'm the Cock Gobbler" line (UNMASK_LINES, names: true) her lines keep the
 // gobbler speaker (so the voice ids don't change) but show a "Hattie" nameplate (js/logic.js plates, js/main.js).
-// Portrait (Arlong 2026-10-25; Brook's final art): ONE smoke-hidden portrait while the Pavilion smoke is up, and it
+// Portrait (Azzato 2026-10-25; Brook's final art): ONE smoke-hidden portrait while the Pavilion smoke is up, and it
 // clears at the same moment as the on-screen smoke. `smoke: true` = while the Pavilion veil is on screen, js/main.js
 // shows portrait/hattie-smoke (its drift loop, then its whisk-away strip, both on the stage smoke's own tick) instead
 // of `portrait`, and cuts to `portrait` when the stage smoke is done.
@@ -64,10 +64,10 @@ export const NAMES = {
   [SPEAKER.goat]: "Mortgage",
 };
 
-// Henny NEVER speaks out loud (Arlong, 2026-10-16). Every Henny line is a thought bubble.
+// Henny NEVER speaks out loud (Azzato, 2026-10-16). Every Henny line is a thought bubble.
 export const HENNY_THINKS = { speaker: SPEAKER.henny, thought: true };
 
-// The ending card's teaser (Usopp's placeholder, 2026-10-26): commits to nothing until Arlong decides on Issue 2.
+// The ending card's teaser (Usopp's placeholder, 2026-10-26): commits to nothing until Azzato decides on Issue 2.
 // Shown on every ending under the cover, after a "NEXT ISSUE:" label (js/main.js).
 export const NEXT_ISSUE = "The yolk's cracked, the fair's dark, and somebody in Cluck County is still crowing...";
 
@@ -80,7 +80,7 @@ export const ITEMS = {
     take: "Already in the belt pouch. It clicks once, to say it's comfortable.",
     push: "He taps the dial. The needle swings toward him, then away, like it's being polite.",
     combine: "He waves the geiger counter over the {other}. A couple of clicks. Nothing glowing. A relief, and a letdown.",
-    // after the bulb+geiger combine (Arlong 2026-10-19): its own name and icon
+    // after the bulb+geiger combine (Azzato 2026-10-19): its own name and icon
     alt: [{
       when: "geiger_rigged",
       name: "geiger counter with bulb",
@@ -341,10 +341,10 @@ export const ENDINGS = {
   hero: {
     series: "RADIOACTIVE ROOSTER",
     title: "ROOSTER RETURNS!",
-    // Arlong 2026-10-19: a Silver Age (1950s-60s) comic cover. Splash = the glide, red webbing out; the beats below
+    // Azzato 2026-10-19: a Silver Age (1950s-60s) comic cover. Splash = the glide, red webbing out; the beats below
     // are inset panels with painted pixel art (bg/cover-hero-1..4), narration captions, bubbles and editor's notes.
     splash: "bg/cover-hero",
-    // Arlong 2026-10-19: the approved painted cover (lettering + panels baked in) is the whole final page for now
+    // Azzato 2026-10-19: the approved painted cover (lettering + panels baked in) is the whole final page for now
     final: "art/ending/cover-final-hero.webp", // source: rooster-scene-art-v2/cover-final-hero-approved.png
     blurb: "The Yolk is safe. The Hawk has flown.",
     art: "Rooster gliding over the Pavilion, red webbing out, the Yolk in a rubber basket.",
@@ -382,7 +382,7 @@ export const ENDINGS = {
       "Two gloved fingers touch the ticket. The halves fit. \"Nobody's ever said no to me nicely before.\" Beaks bump. Both googly pupils spin. Neither eye was looking. Didn't matter.",
       "A soft, real kiss as the sun clears the water tower. Down below, little hearts pop over Mortgage the goat.",
       "\"Next fair, Big Green. Save me a seat.\" Over her shoulder, softly: \"Bye, B.O.\" He glides beside her a few seconds, red webbing glowing, then lets her go.",
-      { text: "...About time.", say: "Henny", real: true }, // Arlong 2026-10-24: her only real words (voiced)
+      { text: "...About time.", say: "Henny", real: true }, // Azzato 2026-10-24: her only real words (voiced)
     ],
     tone: "smitten",
   },
@@ -537,7 +537,7 @@ export const ROOMS = {
         id: "bucket",
         name: "bucket",
         rect: [261, 136, 38, 38],
-        // Arlong 2026-10-18: "for this instance let him stand behind the bucket". Upstage of it, side-on facing left
+        // Azzato 2026-10-18: "for this instance let him stand behind the bucket". Upstage of it, side-on facing left
         // (his front frame's claws poke out past the rim): the bucket covers his boots and shins cleanly, nothing
         // sticks out below the rim. Exempt from the stand-beside rule (js/walk.js standFor).
         stand: [281, 158], beside: false, standBehind: true, face: "l",
@@ -708,7 +708,7 @@ export const ROOMS = {
     id: "fence",
     name: "Fence line",
     plate: "bg-fence.jpg",
-    // Crossroads pixel bg (Arlong's approved fence.jpg, 2026-10-18). Far scene: the split-rail fence (posts ~23 px, base y ~110,
+    // Crossroads pixel bg (Azzato's approved fence.jpg, 2026-10-18). Far scene: the split-rail fence (posts ~23 px, base y ~110,
     // top rail ~17 px above the ground) sits at his waist-to-chest when he stands at it, so he's ~30 px there.
     hero: { at: [170, 152], from: { hq: { at: [4, 150], walk: [40, 150] } }, height: 60, depth: { horizon: 68, min: 28, max: 80 } }, // from the rooftop he comes in from the left edge (Oct 21 note 5) // ~30 at the fence (y 110), 36 at Henny's crate, ~80 at the bottom edge
     // In front of the fence (base y ~110, ~102-105 at the right end), never through the crate; a slot behind the crate;
@@ -940,7 +940,7 @@ export const ROOMS = {
         talk: "She swoons a little. Conversation isn't the currency here. Autographs might be.",
         take: "She pecks the glove. The glove files a complaint.",
         useItem: {
-          photo: { // he keeps his stack: a fresh one off the top, signed on the spot (Arlong 2026-10-19)
+          photo: { // he keeps his stack: a fresh one off the top, signed on the spot (Azzato 2026-10-19)
             set: ["hen_up"],
             unlessFlag: "hen_up",
             already: "She's already sitting on his face. Once is a compliment. Twice is a residency.",
@@ -1002,8 +1002,8 @@ export const ROOMS = {
       { spot: "peck", sprite: "peck-front", talk: "peck-talk", voice: "peck", at: [237, 139], height: 80 }, // by the hay and his weather vane
     ],
     overlays: [{ art: "fg/barn--ribbon", at: [154, 26], whenNot: "got_ribbon" }], // on the post nail until Mortgage rams it down
-    // Give grub to Mortgage (Arlong 2026-10-18): Rooster the matador (rooster-matador-sprites-v3), up and back right
-    // beside the ribbon post (Arlong 2026-10-19: was too low/forward), holds the grub out, she
+    // Give grub to Mortgage (Azzato 2026-10-18): Rooster the matador (rooster-matador-sprites-v3), up and back right
+    // beside the ribbon post (Azzato 2026-10-19: was too low/forward), holds the grub out, she
     // paws and charges along the floor (walk area, y131-137), he sidesteps downstage with a knee-up flourish, she rams
     // the post (BONK!, shake), sees stars, the ribbon flutters down, he picks it up and she gets the grub, then she
     // ambles back to her spot. Input is locked while it plays (js/main.js playCutscene). Sprites take their size per
@@ -1424,20 +1424,20 @@ export const ROOMS = {
     name: "Midway, 11:40",
     plate: "bg-midway.jpg",
     hero: { at: [180, 152], height: 104, depth: { horizon: 105 } }, // depth: 104 at y 152 (booth counter at his belt), smaller toward the railing
-    walk: [[[20, 151], [84, 149], [88, 141], [252, 141], [255, 148], [296, 177], [20, 177]]], // boardwalk up to the railing posts (bases y 130-145), past the booth's right corner (booth occludes him behind y 147); the Pavilion rope (Arlong's painted rope, Oct 24 item 46: back post foot (256,146), front post foot (303,179)) is off limits, he stops on its near side // booth counter top y 103, booth floor y 147 (~44 px): counter meets his belt
-    // Beta v17 (Arlong Oct 27): once he's been let into the Pavilion (pavilion_in) the rope occluder shows its open
+    walk: [[[20, 151], [84, 149], [88, 141], [252, 141], [255, 148], [296, 177], [20, 177]]], // boardwalk up to the railing posts (bases y 130-145), past the booth's right corner (booth occludes him behind y 147); the Pavilion rope (Azzato's painted rope, Oct 24 item 46: back post foot (256,146), front post foot (303,179)) is off limits, he stops on its near side // booth counter top y 103, booth floor y 147 (~44 px): counter meets his belt
+    // Beta v17 (Azzato Oct 27): once he's been let into the Pavilion (pavilion_in) the rope occluder shows its open
     // cutout fg/midway--rope-open instead (js/main.js occluderFile), when that file is in the art manifest; until
-    // then the closed one. Brook's midway-rope-v2 (approved by Arlong Oct 27; assets/art-placeholder/midway-rope-v2/
+    // then the closed one. Brook's midway-rope-v2 (approved by Azzato Oct 27; assets/art-placeholder/midway-rope-v2/
     // README.md): bg/midway is a CLEAN plate now, the rope is only these cutouts (`own`: not cut from the plate),
     // placed on full 320x180 canvases (tight sprite top-left (252,101)), no scaling in code. Posts' feet (261,149) and
     // (302,177); the walk edge [255,148]-[296,177] hugs the rope line.
-    occluders: [{ id: "booth", base: 147 }, { id: "rope", base: 177, edge: [[261, 149], [302, 177]], own: true, open: { flag: "pavilion_in", id: "rope-open" } }], // + Oct 24 item 46: Arlong's HOT OIL rope as a foreground cutout (tools/sprites/cut_push_a.py rope()), in front of anyone on its far side // the booth front; its counter window is open (the kids stand behind the counter)
+    occluders: [{ id: "booth", base: 147 }, { id: "rope", base: 177, edge: [[261, 149], [302, 177]], own: true, open: { flag: "pavilion_in", id: "rope-open" } }], // + Oct 24 item 46: Azzato's HOT OIL rope as a foreground cutout (tools/sprites/cut_push_a.py rope()), in front of anyone on its far side // the booth front; its counter window is open (the kids stand behind the counter)
     // Oct 23 items 33/42: "fix the clock" plays: he walks round behind Corny to the post, shinnies up it hand over hand
     // (sit v2 frames: rooster-shimmy-a/b, each with its glove on the post, manifest `post`), nudges the minute hand,
     // slides back down and walks back to his mark.
     cutscenes: { shimmy: SHIMMY },
     overlays: [{ art: "fg/midway--cashbox", at: [63, 92], z: 148 }, // over the booth front cutout (z); Corny's cash box on the end of the counter (tools/sprites/cut_next.py)
-      // Club sign (Brook's midway-sign-v1, Arlong OK 2026-10-26): the plate is painted PRE-REVEAL (hawk + THE COCK lit,
+      // Club sign (Brook's midway-sign-v1, Azzato OK 2026-10-26): the plate is painted PRE-REVEAL (hawk + THE COCK lit,
       // GOBBLER a dead ghost). A dead patch shows while its part is dark (THE COCK, variant A only); a whenLit patch shows
       // once its part is lit (GOBBLER's seven letters, after the Pavilion reveal). js/main.js, signParts in js/logic.js
       { art: "fx/clubsign-dark-thecock", at: [216, 48], signPart: "thecock" },
@@ -1496,7 +1496,7 @@ export const ROOMS = {
         id: "cashbox",
         name: "Corny's cash box",
         rect: [68, 92, 16, 14],
-        side: "r", // Arlong Oct 27: from the boardwalk at the counter's end (y141, Corny's depth), not out in front of the booth at y150
+        side: "r", // Azzato Oct 27: from the boardwalk at the counter's end (y141, Corny's depth), not out in front of the booth at y150
         look: { special: "look_cashbox" },
         take: { special: "take_cashbox" },
         use: { special: "take_cashbox" },
@@ -1508,7 +1508,7 @@ export const ROOMS = {
         id: "corny",
         name: "Slick Corny",
         rect: [103, 61, 42, 80],
-        // Arlong Oct 27: talk on Corny's own feet line (he's at y141, h80), at his right, so RR is his size and beside
+        // Azzato Oct 27: talk on Corny's own feet line (he's at y141, h80), at his right, so RR is his size and beside
         // him; the old y150 put RR 9 px in front of him at h100 (25% bigger, standing in front of him). Right side only:
         // his left is the booth's corner (behind the booth front, y<147).
         // core: his body plus the pitch pose's reaching arm, shifted 5 px right of the click rect, so the ring-toss pose's
@@ -1526,7 +1526,7 @@ export const ROOMS = {
         id: "clock",
         name: "midway clock",
         rect: [112, 14, 34, 38],
-        stand: [168, 146], beside: false, face: "l", // Arlong: to the barker's RIGHT, looking up past him; neither hides the other
+        stand: [168, 146], beside: false, face: "l", // Azzato: to the barker's RIGHT, looking up past him; neither hides the other
         look: { special: "look_clock" },
         push: { special: "fix_clock" },
         use: { special: "fix_clock" },
@@ -1598,8 +1598,8 @@ export const ROOMS = {
     id: "pavilion",
     name: "Hot Oil Pavilion",
     plate: "bg-pavilion.jpg",
-    // New pixel bg (Arlong, 2026-10-17). Scene scale measured: height ~= 1.57 * (feetY - 92) (cart counter 109 / wheels 145 = waist; stage edge 114-131 = knee).
-    // Arlong (2026-10-19): he read far too big down by the lock. Now he's Corny's height (88 at y148) give or take, a
+    // New pixel bg (Azzato, 2026-10-17). Scene scale measured: height ~= 1.57 * (feetY - 92) (cart counter 109 / wheels 145 = waist; stage edge 114-131 = knee).
+    // Azzato (2026-10-19): he read far too big down by the lock. Now he's Corny's height (88 at y148) give or take, a
     // touch bigger only because he's nearer the camera: 84 at y153, ~92 at the front rope (y171), ~72 at the stage front.
     hero: { at: [150, 153], height: 84, depth: { horizon: -20 } },
     // Rope barrier: the front rope is padlocked between the left post (x 8-17) and the centre-left post (x 104-116, base y 168).
@@ -1629,7 +1629,7 @@ export const ROOMS = {
       // Pip, front row behind the side rope; she drifts into the crowd for the keys, then pops the padlock (left of her).
       { spot: "pip", sprite: "pip-front", talk: "pip-talk", voice: "pip", at: [122, 140], height: 56,
         cues: { pip_lift: PIP_SNEAK, pip_unlock: PIP_UNLOCK } },
-      // Marge, the corn-dog vendor, at the cart (Arlong 2026-10-19: her own sprite, not the barker); she looks round
+      // Marge, the corn-dog vendor, at the cart (Azzato 2026-10-19: her own sprite, not the barker); she looks round
       // when Rooster reaches for Corny's keys on the cart hook.
       { spot: "vendor", sprite: "vendor-idle-r", at: [238, 148], height: 80, cues: { corny_turn: "vendor-talk-l" } },
       // The prize cage with the glowing Yolk (a prop, tools/sprites/cut_next.py; the plate's painted cage is gone): it
@@ -1641,7 +1641,7 @@ export const ROOMS = {
       { sprite: "cage-egg-a", frames: ["cage-egg-a", "cage-egg-b"], every: 300, at: [88, 72], height: 150, prop: true, when: "cage_jogged", whenNot: "egg_saved",
         cues: { cage_jog: { walk: ["cage-egg-b", "cage-egg-a"], from: [88, 62], to: [88, 72], ms: 500, end: "cage-egg-b" } } },
       { sprite: "cage-empty", at: [88, 72], height: 150, prop: true, when: "egg_saved" },
-      // Steam and red glow rolling off the oil (Arlong: more ominous vat), 4 loop frames over the oil surface.
+      // Steam and red glow rolling off the oil (Azzato: more ominous vat), 4 loop frames over the oil surface.
       { sprite: "vat-steam-a", frames: ["vat-steam-a", "vat-steam-b", "vat-steam-c", "vat-steam-d"], every: 200, at: [56, 76], height: 40, prop: true },
       // The little brown hen in the crowd behind the side rope: only at the finish, where she speaks.
       // Oct 23 item 39: she struts out under the side rope to the front, so the gag reads, and stays there.
@@ -1663,7 +1663,7 @@ export const ROOMS = {
       { art: "fg/pavilion--crowd", at: [0, 132], when: "crowd_3", whenNot: "crowd_won", z: 200, holdCues: ["cage_out", "glide"] },
       { art: "fg/pavilion--crowd", at: [0, 160], when: "crowd_won", z: 200 },
     ],
-    // Finale beats (Arlong 2026-10-19: every finale action animates). Played when their line comes up (js/main.js).
+    // Finale beats (Azzato 2026-10-19: every finale action animates). Played when their line comes up (js/main.js).
     cutscenes: {
             glide: {
         // over the front row: up and left toward the fryer, a long pass right over their heads, back and down
@@ -1674,7 +1674,7 @@ export const ROOMS = {
       },
       // Oct 23 item 40: the hot sauce toss. From wherever he stands he raises Ned's bottle like the matador, lobs it in
       // an arc into the vat, SPLASH, and the spicy oil hits her in the face ({f}: facing the vat, faceTo x).
-      // Arlong 2026-10-27 (his sketch): the bottle lobs OVER the cage into the vat, SPLASH, a blob of oil shoots back
+      // Azzato 2026-10-27 (his sketch): the bottle lobs OVER the cage into the vat, SPLASH, a blob of oil shoots back
       // up and right into her mouth, she recoils, drops the chain on the hit (the line's cage_jog cue: her flinch + the
       // cage drop, held for cs.hit) and coughs fire. The cage + its chain (one sprite) swing from the chain's top: a
       // nudge as the bottle passes over, a jolt on her release, dying out low over the oil. Four sprite slots for Brook
@@ -1886,7 +1886,7 @@ export const ROOMS = {
   },
 };
 
-/* ---------- Push C placeholder beats (2026-10-24). PLACEHOLDER: wording, art and timing await Arlong's sign-off. ---------- */
+/* ---------- Push C placeholder beats (2026-10-24). PLACEHOLDER: wording, art and timing await Azzato's sign-off. ---------- */
 
 // How far into the night each room sits, 0 (dusk) .. 1 (midnight). One driver for the colour shift and the music's
 // tension (js/logic.js nightOf). It only ratchets up: walking back to HQ late doesn't make it dusk again.
@@ -1895,9 +1895,9 @@ export const NIGHT = { hq: 0, fence: 0.15, henhouse: 0.2, barn: 0.25, store: 0.3
 // Time cards (rr-scumm-build-order-2026-10-24): shown once each, the first time the trigger happens.
 // `on`: "start" = after the cold open; { room } = the first time he enters `room`.
 // `then`: beats that follow the card (the club cutaway after THREE HOURS).
-// The club's neon sign (Hawkeye pass, Arlong + Usopp 2026-10-25): three parts, each lit or dark. Before the Pavilion
+// The club's neon sign (Hawkeye pass, Azzato + Usopp 2026-10-25): three parts, each lit or dark. Before the Pavilion
 // reveal only some are lit (SIGN_VARIANT picks which); the stogie henchman's smack in the club cutaway sputters THE COCK
-// for half a second and it stays on (Arlong 2026-10-26: GOBBLER stays dark through it, no giveaway); right after Hattie's "Hawkeye Hattie is dead" speech every part lights (flag CLUB_SIGN.lit)
+// for half a second and it stays on (Azzato 2026-10-26: GOBBLER stays dark through it, no giveaway); right after Hattie's "Hawkeye Hattie is dead" speech every part lights (flag CLUB_SIGN.lit)
 // and stays lit. Variant "B" (default): hawk + THE COCK lit, GOBBLER dead, so players read the club as "The Cock".
 // Variant "A": only the hawk lit (Usopp's first call). Not locked by Usopp yet: flip this one constant.
 export const SIGN_VARIANT = "B";
@@ -1925,6 +1925,6 @@ export const TIME_CARDS = [
 ];
 
 // The cold open: Hattie's henhouse at night, seen only as a glove, an egg's glow and a cigar ember. Never a face.
-// No dialogue until Arlong approves it (BRIEF.md). On by default in dev; set to false here, or ?coldopen=0 /
+// No dialogue until Azzato approves it (BRIEF.md). On by default in dev; set to false here, or ?coldopen=0 /
 // the Menu toggle (localStorage rr-beta-coldopen), to skip it.
 export const COLD_OPEN = true;

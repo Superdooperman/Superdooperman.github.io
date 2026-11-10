@@ -114,7 +114,7 @@ button:focus-visible {
 }
 
 /* hover highlight only with Hints on (menu); keyboard focus always shows */
-/* (no fill: a tinted box over the striped tent/booth read as the tent shifting as you moved across it, Arlong 10-19) */
+/* (no fill: a tinted box over the striped tent/booth read as the tent shifting as you moved across it, Azzato 10-19) */
 .hints .spot:hover,
 .spot:focus-visible {
   background: transparent;
@@ -756,7 +756,7 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 .pav-veil-art .veil-glove { left: 62.5%; top: 34.8%; width: 2.4%; } /* the same spot over her head as the fallback box */
 .beat-club.on-art .club-smoke { display: none; } /* B3 paints its own wisp; Brook's smoke strips do the rest */
 
-/* Club sign (Hawkeye pass 2026-10-25, js/beats.js). The smack (Arlong 2026-10-26): THE COCK sputters ~0.5 s and
+/* Club sign (Hawkeye pass 2026-10-25, js/beats.js). The smack (Azzato 2026-10-26): THE COCK sputters ~0.5 s and
    stays on (variant A: its dark letters flash and die again); GOBBLER never lights before the reveal. */
 .beat-club .club-sign-flash { opacity: 0; mix-blend-mode: screen; pointer-events: none; }
 .beat-club.smacked .club-sign-flash { animation: sign-sputter var(--sputter-ms, 500ms) steps(1, end) forwards; }
@@ -814,7 +814,7 @@ img.px, .art-pixel img.px { image-rendering: pixelated; image-rendering: crisp-e
 
 /* Phone landscape (844x390 and the like): the scene in one column, sized to the screen height, and the caption,
    verbs, exits, pockets and menu in the other, a column that scrolls on its own (.controls). The page itself never
-   scrolls (Arlong 2026-10-27). Which side the controls take is html[data-controls], set before the first paint by
+   scrolls (Azzato 2026-10-27). Which side the controls take is html[data-controls], set before the first paint by
    CONTROLS_DEFAULT in js/boot.js or the saved Menu choice "Controls on: Left / Right". */
 .controls { display: contents; } /* no box of its own outside short landscape: desktop and portrait lay out as before */
 .menu .controls-side { display: none; } /* the side setting only means something in the two-column layout */

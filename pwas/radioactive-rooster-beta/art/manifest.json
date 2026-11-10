@@ -74,7 +74,7 @@
     0
    ],
    "legacy": "bg-fence.jpg",
-   "source": "Arlong's approved rooster-scene-art-v2/fence.jpg, box-downscaled 1280x720 -> 320x180"
+   "source": "Azzato's approved rooster-scene-art-v2/fence.jpg, box-downscaled 1280x720 -> 320x180"
   },
   "bg/henhouse": {
    "kind": "bg",
@@ -87,7 +87,7 @@
     0
    ],
    "legacy": "bg-henhouse.jpg",
-   "source": "Arlong's approved henhouse A (2026-10-18; art/placeholders/bg-henhouse.jpg is its 1280x720 master): no hens or people painted in; hand patch: warm glow on Midnight's empty nest; 4x nearest copy in art/pixel-4x/bg/"
+   "source": "Azzato's approved henhouse A (2026-10-18; art/placeholders/bg-henhouse.jpg is its 1280x720 master): no hens or people painted in; hand patch: warm glow on Midnight's empty nest; 4x nearest copy in art/pixel-4x/bg/"
   },
   "bg/barn": {
    "kind": "bg",
@@ -100,7 +100,7 @@
     0
    ],
    "legacy": "bg-barn.jpg",
-   "source": "Arlong's approved barn C (2026-10-18; art/placeholders/bg-barn.jpg is its 1280x720 master): no people or animals painted in; LANCZOS 1280x720 then BOX 320x180, hand patches (snapped ladder rung, post nail); 4x nearest copy in art/pixel-4x/bg/"
+   "source": "Azzato's approved barn C (2026-10-18; art/placeholders/bg-barn.jpg is its 1280x720 master): no people or animals painted in; LANCZOS 1280x720 then BOX 320x180, hand patches (snapped ladder rung, post nail); 4x nearest copy in art/pixel-4x/bg/"
   },
   "bg/store": {
    "kind": "bg",
@@ -1275,7 +1275,7 @@
     0,
     0
    ],
-   "source": "tools/bg/rope_paint.py (hand-edited from Arlong's pavilion.jpg)"
+   "source": "tools/bg/rope_paint.py (hand-edited from Azzato's pavilion.jpg)"
   },
   "sprite/rooster-front-h60": {
    "kind": "sprite",
@@ -7259,7 +7259,7 @@
     0
    ],
    "base": 177,
-   "source": "Brook 2026-10-27 assets/art-placeholder/midway-rope-v2 (rope-hot-oil-arlong.png re-cut at s=0.0696, closed; tight 60x77 at top-left (252,101); posts' feet (261,149), (302,177)); approved by Arlong Oct 27"
+   "source": "Brook 2026-10-27 assets/art-placeholder/midway-rope-v2 (rope-hot-oil-azzato.png re-cut at s=0.0696, closed; tight 60x77 at top-left (252,101); posts' feet (261,149), (302,177)); approved by Azzato Oct 27"
   },
   "fg/midway--rope-open": {
    "kind": "fg",
@@ -7272,7 +7272,7 @@
     0
    ],
    "base": 177,
-   "source": "Brook 2026-10-27 assets/art-placeholder/midway-rope-v2 (open: rope unhooked from the front post, HOT OIL sign on the planks; same canvas as closed); approved by Arlong Oct 27"
+   "source": "Brook 2026-10-27 assets/art-placeholder/midway-rope-v2 (open: rope unhooked from the front post, HOT OIL sign on the planks; same canvas as closed); approved by Azzato Oct 27"
   },
   "fx/closeup-gloves": {
    "kind": "fx",
@@ -7440,7 +7440,7 @@
     28,
     112
    ],
-   "source": "Brook 2026-10-27 hattie-chain-pose (one-hand chain hold, src-hattie-chain-onehand.jpg; Arlong-approved drop-in, rebuild with assets/art-placeholder/hattie-chain-pose/build_hattie_chain_pose.py). Guarded by tools/sprites/keep_dropins.py: cut_oct21.py won't re-cut it"
+   "source": "Brook 2026-10-27 hattie-chain-pose (one-hand chain hold, src-hattie-chain-onehand.jpg; Azzato-approved drop-in, rebuild with assets/art-placeholder/hattie-chain-pose/build_hattie_chain_pose.py). Guarded by tools/sprites/keep_dropins.py: cut_oct21.py won't re-cut it"
   },
   "sprite/hattie-chain-l-h52": {
    "kind": "sprite",
@@ -7452,7 +7452,7 @@
     28,
     112
    ],
-   "source": "Brook 2026-10-27 hattie-chain-pose (one-hand chain hold, src-hattie-chain-onehand.jpg; Arlong-approved drop-in, rebuild with assets/art-placeholder/hattie-chain-pose/build_hattie_chain_pose.py). Guarded by tools/sprites/keep_dropins.py: cut_oct21.py won't re-cut it"
+   "source": "Brook 2026-10-27 hattie-chain-pose (one-hand chain hold, src-hattie-chain-onehand.jpg; Azzato-approved drop-in, rebuild with assets/art-placeholder/hattie-chain-pose/build_hattie_chain_pose.py). Guarded by tools/sprites/keep_dropins.py: cut_oct21.py won't re-cut it"
   },
   "sprite/hattie-flinch-r-h52": {
    "kind": "sprite",
@@ -7572,7 +7572,7 @@
     18,
     64
    ],
-   "source": "tools/sprites/cut_push_a.py (stogie-guy-sprites-v1.jpg; Arlong item 45, design per reports/gooner-character-legal-check)"
+   "source": "tools/sprites/cut_push_a.py (stogie-guy-sprites-v1.jpg; Azzato item 45, design per reports/gooner-character-legal-check)"
   },
   "sprite/stogie-l-h64": {
    "kind": "sprite",
@@ -7596,7 +7596,7 @@
     23,
     64
    ],
-   "source": "tools/sprites/cut_push_a.py (stogie-guy-sprites-v1.jpg; Arlong item 45, design per reports/gooner-character-legal-check)"
+   "source": "tools/sprites/cut_push_a.py (stogie-guy-sprites-v1.jpg; Azzato item 45, design per reports/gooner-character-legal-check)"
   },
   "sprite/stogie-arms-r-h64": {
    "kind": "sprite",
@@ -7608,7 +7608,7 @@
     18,
     64
    ],
-   "source": "tools/sprites/cut_push_a.py (stogie-guy-sprites-v1.jpg; Arlong item 45, design per reports/gooner-character-legal-check)"
+   "source": "tools/sprites/cut_push_a.py (stogie-guy-sprites-v1.jpg; Azzato item 45, design per reports/gooner-character-legal-check)"
   },
   "sprite/stogie-arms-l-h64": {
    "kind": "sprite",
@@ -8397,7 +8397,7 @@
     67
    ],
    "seat": 45,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l": {
    "kind": "sprite",
@@ -8410,7 +8410,7 @@
     67
    ],
    "seat": 45,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r": {
    "kind": "sprite",
@@ -8423,7 +8423,7 @@
     53
    ],
    "seat": 46,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l": {
    "kind": "sprite",
@@ -8436,7 +8436,7 @@
     53
    ],
    "seat": 46,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r": {
    "kind": "sprite",
@@ -8449,7 +8449,7 @@
     64
    ],
    "seat": 48,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l": {
    "kind": "sprite",
@@ -8462,7 +8462,7 @@
     64
    ],
    "seat": 48,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front": {
    "kind": "sprite",
@@ -8475,7 +8475,7 @@
     61
    ],
    "seat": 49,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-half": {
    "kind": "sprite",
@@ -8488,7 +8488,7 @@
     34
    ],
    "seat": 23,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-half": {
    "kind": "sprite",
@@ -8501,7 +8501,7 @@
     34
    ],
    "seat": 23,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-half": {
    "kind": "sprite",
@@ -8514,7 +8514,7 @@
     26
    ],
    "seat": 23,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-half": {
    "kind": "sprite",
@@ -8527,7 +8527,7 @@
     26
    ],
    "seat": 23,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-half": {
    "kind": "sprite",
@@ -8540,7 +8540,7 @@
     32
    ],
    "seat": 24,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-half": {
    "kind": "sprite",
@@ -8553,7 +8553,7 @@
     32
    ],
    "seat": 24,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-half": {
    "kind": "sprite",
@@ -8566,7 +8566,7 @@
     29
    ],
    "seat": 23,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h28": {
    "kind": "sprite",
@@ -8579,7 +8579,7 @@
     29
    ],
    "seat": 20,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h28": {
    "kind": "sprite",
@@ -8592,7 +8592,7 @@
     29
    ],
    "seat": 20,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h28": {
    "kind": "sprite",
@@ -8605,7 +8605,7 @@
     23
    ],
    "seat": 20,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h28": {
    "kind": "sprite",
@@ -8618,7 +8618,7 @@
     23
    ],
    "seat": 20,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h28": {
    "kind": "sprite",
@@ -8631,7 +8631,7 @@
     28
    ],
    "seat": 21,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h28": {
    "kind": "sprite",
@@ -8644,7 +8644,7 @@
     28
    ],
    "seat": 21,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h28": {
    "kind": "sprite",
@@ -8657,7 +8657,7 @@
     25
    ],
    "seat": 20,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h32": {
    "kind": "sprite",
@@ -8670,7 +8670,7 @@
     34
    ],
    "seat": 23,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h32": {
    "kind": "sprite",
@@ -8683,7 +8683,7 @@
     34
    ],
    "seat": 23,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h32": {
    "kind": "sprite",
@@ -8696,7 +8696,7 @@
     26
    ],
    "seat": 23,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h32": {
    "kind": "sprite",
@@ -8709,7 +8709,7 @@
     26
    ],
    "seat": 23,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h32": {
    "kind": "sprite",
@@ -8722,7 +8722,7 @@
     32
    ],
    "seat": 24,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h32": {
    "kind": "sprite",
@@ -8735,7 +8735,7 @@
     32
    ],
    "seat": 24,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h32": {
    "kind": "sprite",
@@ -8748,7 +8748,7 @@
     29
    ],
    "seat": 23,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h36": {
    "kind": "sprite",
@@ -8761,7 +8761,7 @@
     38
    ],
    "seat": 26,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h36": {
    "kind": "sprite",
@@ -8774,7 +8774,7 @@
     38
    ],
    "seat": 26,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h36": {
    "kind": "sprite",
@@ -8787,7 +8787,7 @@
     30
    ],
    "seat": 26,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h36": {
    "kind": "sprite",
@@ -8800,7 +8800,7 @@
     30
    ],
    "seat": 26,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h36": {
    "kind": "sprite",
@@ -8813,7 +8813,7 @@
     36
    ],
    "seat": 27,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h36": {
    "kind": "sprite",
@@ -8826,7 +8826,7 @@
     36
    ],
    "seat": 27,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h36": {
    "kind": "sprite",
@@ -8839,7 +8839,7 @@
     33
    ],
    "seat": 26,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h40": {
    "kind": "sprite",
@@ -8852,7 +8852,7 @@
     42
    ],
    "seat": 29,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h40": {
    "kind": "sprite",
@@ -8865,7 +8865,7 @@
     42
    ],
    "seat": 29,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h40": {
    "kind": "sprite",
@@ -8878,7 +8878,7 @@
     33
    ],
    "seat": 29,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h40": {
    "kind": "sprite",
@@ -8891,7 +8891,7 @@
     33
    ],
    "seat": 29,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h40": {
    "kind": "sprite",
@@ -8904,7 +8904,7 @@
     40
    ],
    "seat": 30,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h40": {
    "kind": "sprite",
@@ -8917,7 +8917,7 @@
     40
    ],
    "seat": 30,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h40": {
    "kind": "sprite",
@@ -8930,7 +8930,7 @@
     37
    ],
    "seat": 30,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h44": {
    "kind": "sprite",
@@ -8943,7 +8943,7 @@
     46
    ],
    "seat": 31,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h44": {
    "kind": "sprite",
@@ -8956,7 +8956,7 @@
     46
    ],
    "seat": 31,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h44": {
    "kind": "sprite",
@@ -8969,7 +8969,7 @@
     36
    ],
    "seat": 31,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h44": {
    "kind": "sprite",
@@ -8982,7 +8982,7 @@
     36
    ],
    "seat": 31,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h44": {
    "kind": "sprite",
@@ -8995,7 +8995,7 @@
     44
    ],
    "seat": 33,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h44": {
    "kind": "sprite",
@@ -9008,7 +9008,7 @@
     44
    ],
    "seat": 33,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h44": {
    "kind": "sprite",
@@ -9021,7 +9021,7 @@
     41
    ],
    "seat": 33,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h48": {
    "kind": "sprite",
@@ -9034,7 +9034,7 @@
     51
    ],
    "seat": 35,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h48": {
    "kind": "sprite",
@@ -9047,7 +9047,7 @@
     51
    ],
    "seat": 35,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h48": {
    "kind": "sprite",
@@ -9060,7 +9060,7 @@
     39
    ],
    "seat": 34,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h48": {
    "kind": "sprite",
@@ -9073,7 +9073,7 @@
     39
    ],
    "seat": 34,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h48": {
    "kind": "sprite",
@@ -9086,7 +9086,7 @@
     48
    ],
    "seat": 36,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h48": {
    "kind": "sprite",
@@ -9099,7 +9099,7 @@
     48
    ],
    "seat": 36,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h48": {
    "kind": "sprite",
@@ -9112,7 +9112,7 @@
     45
    ],
    "seat": 36,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h52": {
    "kind": "sprite",
@@ -9125,7 +9125,7 @@
     55
    ],
    "seat": 37,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h52": {
    "kind": "sprite",
@@ -9138,7 +9138,7 @@
     55
    ],
    "seat": 37,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h52": {
    "kind": "sprite",
@@ -9151,7 +9151,7 @@
     43
    ],
    "seat": 37,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h52": {
    "kind": "sprite",
@@ -9164,7 +9164,7 @@
     43
    ],
    "seat": 37,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h52": {
    "kind": "sprite",
@@ -9177,7 +9177,7 @@
     52
    ],
    "seat": 39,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h52": {
    "kind": "sprite",
@@ -9190,7 +9190,7 @@
     52
    ],
    "seat": 39,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h52": {
    "kind": "sprite",
@@ -9203,7 +9203,7 @@
     49
    ],
    "seat": 39,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h56": {
    "kind": "sprite",
@@ -9216,7 +9216,7 @@
     59
    ],
    "seat": 40,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h56": {
    "kind": "sprite",
@@ -9229,7 +9229,7 @@
     59
    ],
    "seat": 40,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h56": {
    "kind": "sprite",
@@ -9242,7 +9242,7 @@
     46
    ],
    "seat": 40,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h56": {
    "kind": "sprite",
@@ -9255,7 +9255,7 @@
     46
    ],
    "seat": 40,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h56": {
    "kind": "sprite",
@@ -9268,7 +9268,7 @@
     56
    ],
    "seat": 42,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h56": {
    "kind": "sprite",
@@ -9281,7 +9281,7 @@
     56
    ],
    "seat": 42,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h56": {
    "kind": "sprite",
@@ -9294,7 +9294,7 @@
     53
    ],
    "seat": 42,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h60": {
    "kind": "sprite",
@@ -9307,7 +9307,7 @@
     63
    ],
    "seat": 43,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h60": {
    "kind": "sprite",
@@ -9320,7 +9320,7 @@
     63
    ],
    "seat": 43,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h60": {
    "kind": "sprite",
@@ -9333,7 +9333,7 @@
     49
    ],
    "seat": 43,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h60": {
    "kind": "sprite",
@@ -9346,7 +9346,7 @@
     49
    ],
    "seat": 43,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h60": {
    "kind": "sprite",
@@ -9359,7 +9359,7 @@
     60
    ],
    "seat": 45,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h60": {
    "kind": "sprite",
@@ -9372,7 +9372,7 @@
     60
    ],
    "seat": 45,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h60": {
    "kind": "sprite",
@@ -9385,7 +9385,7 @@
     57
    ],
    "seat": 46,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h64": {
    "kind": "sprite",
@@ -9398,7 +9398,7 @@
     67
    ],
    "seat": 45,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h64": {
    "kind": "sprite",
@@ -9411,7 +9411,7 @@
     67
    ],
    "seat": 45,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h64": {
    "kind": "sprite",
@@ -9424,7 +9424,7 @@
     53
    ],
    "seat": 46,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h64": {
    "kind": "sprite",
@@ -9437,7 +9437,7 @@
     53
    ],
    "seat": 46,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h64": {
    "kind": "sprite",
@@ -9450,7 +9450,7 @@
     64
    ],
    "seat": 48,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h64": {
    "kind": "sprite",
@@ -9463,7 +9463,7 @@
     64
    ],
    "seat": 48,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h64": {
    "kind": "sprite",
@@ -9476,7 +9476,7 @@
     61
    ],
    "seat": 49,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h68": {
    "kind": "sprite",
@@ -9489,7 +9489,7 @@
     72
    ],
    "seat": 49,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h68": {
    "kind": "sprite",
@@ -9502,7 +9502,7 @@
     72
    ],
    "seat": 49,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h68": {
    "kind": "sprite",
@@ -9515,7 +9515,7 @@
     56
    ],
    "seat": 49,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h68": {
    "kind": "sprite",
@@ -9528,7 +9528,7 @@
     56
    ],
    "seat": 49,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h68": {
    "kind": "sprite",
@@ -9541,7 +9541,7 @@
     69
    ],
    "seat": 52,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h68": {
    "kind": "sprite",
@@ -9554,7 +9554,7 @@
     69
    ],
    "seat": 52,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h68": {
    "kind": "sprite",
@@ -9567,7 +9567,7 @@
     65
    ],
    "seat": 52,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h72": {
    "kind": "sprite",
@@ -9580,7 +9580,7 @@
     76
    ],
    "seat": 51,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h72": {
    "kind": "sprite",
@@ -9593,7 +9593,7 @@
     76
    ],
    "seat": 51,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h72": {
    "kind": "sprite",
@@ -9606,7 +9606,7 @@
     59
    ],
    "seat": 51,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h72": {
    "kind": "sprite",
@@ -9619,7 +9619,7 @@
     59
    ],
    "seat": 51,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h72": {
    "kind": "sprite",
@@ -9632,7 +9632,7 @@
     73
    ],
    "seat": 55,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h72": {
    "kind": "sprite",
@@ -9645,7 +9645,7 @@
     73
    ],
    "seat": 55,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h72": {
    "kind": "sprite",
@@ -9658,7 +9658,7 @@
     69
    ],
    "seat": 55,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h76": {
    "kind": "sprite",
@@ -9671,7 +9671,7 @@
     80
    ],
    "seat": 54,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h76": {
    "kind": "sprite",
@@ -9684,7 +9684,7 @@
     80
    ],
    "seat": 54,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h76": {
    "kind": "sprite",
@@ -9697,7 +9697,7 @@
     62
    ],
    "seat": 54,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h76": {
    "kind": "sprite",
@@ -9710,7 +9710,7 @@
     62
    ],
    "seat": 54,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h76": {
    "kind": "sprite",
@@ -9723,7 +9723,7 @@
     77
    ],
    "seat": 58,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h76": {
    "kind": "sprite",
@@ -9736,7 +9736,7 @@
     77
    ],
    "seat": 58,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h76": {
    "kind": "sprite",
@@ -9749,7 +9749,7 @@
     73
    ],
    "seat": 58,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h80": {
    "kind": "sprite",
@@ -9762,7 +9762,7 @@
     84
    ],
    "seat": 57,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h80": {
    "kind": "sprite",
@@ -9775,7 +9775,7 @@
     84
    ],
    "seat": 57,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h80": {
    "kind": "sprite",
@@ -9788,7 +9788,7 @@
     66
    ],
    "seat": 57,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h80": {
    "kind": "sprite",
@@ -9801,7 +9801,7 @@
     66
    ],
    "seat": 57,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h80": {
    "kind": "sprite",
@@ -9814,7 +9814,7 @@
     81
    ],
    "seat": 61,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h80": {
    "kind": "sprite",
@@ -9827,7 +9827,7 @@
     81
    ],
    "seat": 61,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h80": {
    "kind": "sprite",
@@ -9840,7 +9840,7 @@
     77
    ],
    "seat": 62,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h84": {
    "kind": "sprite",
@@ -9853,7 +9853,7 @@
     89
    ],
    "seat": 60,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h84": {
    "kind": "sprite",
@@ -9866,7 +9866,7 @@
     89
    ],
    "seat": 60,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h84": {
    "kind": "sprite",
@@ -9879,7 +9879,7 @@
     69
    ],
    "seat": 60,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h84": {
    "kind": "sprite",
@@ -9892,7 +9892,7 @@
     69
    ],
    "seat": 60,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h84": {
    "kind": "sprite",
@@ -9905,7 +9905,7 @@
     85
    ],
    "seat": 64,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h84": {
    "kind": "sprite",
@@ -9918,7 +9918,7 @@
     85
    ],
    "seat": 64,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h84": {
    "kind": "sprite",
@@ -9931,7 +9931,7 @@
     81
    ],
    "seat": 65,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h88": {
    "kind": "sprite",
@@ -9944,7 +9944,7 @@
     93
    ],
    "seat": 63,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h88": {
    "kind": "sprite",
@@ -9957,7 +9957,7 @@
     93
    ],
    "seat": 63,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h88": {
    "kind": "sprite",
@@ -9970,7 +9970,7 @@
     72
    ],
    "seat": 62,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h88": {
    "kind": "sprite",
@@ -9983,7 +9983,7 @@
     72
    ],
    "seat": 62,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h88": {
    "kind": "sprite",
@@ -9996,7 +9996,7 @@
     89
    ],
    "seat": 67,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h88": {
    "kind": "sprite",
@@ -10009,7 +10009,7 @@
     89
    ],
    "seat": 67,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h88": {
    "kind": "sprite",
@@ -10022,7 +10022,7 @@
     85
    ],
    "seat": 68,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h92": {
    "kind": "sprite",
@@ -10035,7 +10035,7 @@
     97
    ],
    "seat": 65,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h92": {
    "kind": "sprite",
@@ -10048,7 +10048,7 @@
     97
    ],
    "seat": 65,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h92": {
    "kind": "sprite",
@@ -10061,7 +10061,7 @@
     75
    ],
    "seat": 65,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h92": {
    "kind": "sprite",
@@ -10074,7 +10074,7 @@
     75
    ],
    "seat": 65,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h92": {
    "kind": "sprite",
@@ -10087,7 +10087,7 @@
     93
    ],
    "seat": 70,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h92": {
    "kind": "sprite",
@@ -10100,7 +10100,7 @@
     93
    ],
    "seat": 70,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h92": {
    "kind": "sprite",
@@ -10113,7 +10113,7 @@
     89
    ],
    "seat": 71,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h96": {
    "kind": "sprite",
@@ -10126,7 +10126,7 @@
     101
    ],
    "seat": 68,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h96": {
    "kind": "sprite",
@@ -10139,7 +10139,7 @@
     101
    ],
    "seat": 68,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h96": {
    "kind": "sprite",
@@ -10152,7 +10152,7 @@
     79
    ],
    "seat": 69,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h96": {
    "kind": "sprite",
@@ -10165,7 +10165,7 @@
     79
    ],
    "seat": 69,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h96": {
    "kind": "sprite",
@@ -10178,7 +10178,7 @@
     97
    ],
    "seat": 73,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h96": {
    "kind": "sprite",
@@ -10191,7 +10191,7 @@
     97
    ],
    "seat": 73,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h96": {
    "kind": "sprite",
@@ -10204,7 +10204,7 @@
     93
    ],
    "seat": 74,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h100": {
    "kind": "sprite",
@@ -10217,7 +10217,7 @@
     105
    ],
    "seat": 71,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h100": {
    "kind": "sprite",
@@ -10230,7 +10230,7 @@
     105
    ],
    "seat": 71,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h100": {
    "kind": "sprite",
@@ -10243,7 +10243,7 @@
     82
    ],
    "seat": 71,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h100": {
    "kind": "sprite",
@@ -10256,7 +10256,7 @@
     82
    ],
    "seat": 71,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h100": {
    "kind": "sprite",
@@ -10269,7 +10269,7 @@
     101
    ],
    "seat": 76,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h100": {
    "kind": "sprite",
@@ -10282,7 +10282,7 @@
     101
    ],
    "seat": 76,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h100": {
    "kind": "sprite",
@@ -10295,7 +10295,7 @@
     97
    ],
    "seat": 78,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h104": {
    "kind": "sprite",
@@ -10308,7 +10308,7 @@
     110
    ],
    "seat": 74,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h104": {
    "kind": "sprite",
@@ -10321,7 +10321,7 @@
     110
    ],
    "seat": 74,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h104": {
    "kind": "sprite",
@@ -10334,7 +10334,7 @@
     85
    ],
    "seat": 74,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h104": {
    "kind": "sprite",
@@ -10347,7 +10347,7 @@
     85
    ],
    "seat": 74,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h104": {
    "kind": "sprite",
@@ -10360,7 +10360,7 @@
     105
    ],
    "seat": 78,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h104": {
    "kind": "sprite",
@@ -10373,7 +10373,7 @@
     105
    ],
    "seat": 78,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h104": {
    "kind": "sprite",
@@ -10386,7 +10386,7 @@
     101
    ],
    "seat": 81,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h108": {
    "kind": "sprite",
@@ -10399,7 +10399,7 @@
     114
    ],
    "seat": 77,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h108": {
    "kind": "sprite",
@@ -10412,7 +10412,7 @@
     114
    ],
    "seat": 77,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h108": {
    "kind": "sprite",
@@ -10425,7 +10425,7 @@
     89
    ],
    "seat": 77,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h108": {
    "kind": "sprite",
@@ -10438,7 +10438,7 @@
     89
    ],
    "seat": 77,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h108": {
    "kind": "sprite",
@@ -10451,7 +10451,7 @@
     109
    ],
    "seat": 81,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h108": {
    "kind": "sprite",
@@ -10464,7 +10464,7 @@
     109
    ],
    "seat": 81,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h108": {
    "kind": "sprite",
@@ -10477,7 +10477,7 @@
     105
    ],
    "seat": 84,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h112": {
    "kind": "sprite",
@@ -10490,7 +10490,7 @@
     118
    ],
    "seat": 80,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h112": {
    "kind": "sprite",
@@ -10503,7 +10503,7 @@
     118
    ],
    "seat": 80,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h112": {
    "kind": "sprite",
@@ -10516,7 +10516,7 @@
     92
    ],
    "seat": 80,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h112": {
    "kind": "sprite",
@@ -10529,7 +10529,7 @@
     92
    ],
    "seat": 80,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h112": {
    "kind": "sprite",
@@ -10542,7 +10542,7 @@
     113
    ],
    "seat": 84,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h112": {
    "kind": "sprite",
@@ -10555,7 +10555,7 @@
     113
    ],
    "seat": 84,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h112": {
    "kind": "sprite",
@@ -10568,7 +10568,7 @@
     109
    ],
    "seat": 87,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h116": {
    "kind": "sprite",
@@ -10581,7 +10581,7 @@
     122
    ],
    "seat": 82,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h116": {
    "kind": "sprite",
@@ -10594,7 +10594,7 @@
     122
    ],
    "seat": 82,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h116": {
    "kind": "sprite",
@@ -10607,7 +10607,7 @@
     95
    ],
    "seat": 82,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h116": {
    "kind": "sprite",
@@ -10620,7 +10620,7 @@
     95
    ],
    "seat": 82,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h116": {
    "kind": "sprite",
@@ -10633,7 +10633,7 @@
     117
    ],
    "seat": 87,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h116": {
    "kind": "sprite",
@@ -10646,7 +10646,7 @@
     117
    ],
    "seat": 87,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h116": {
    "kind": "sprite",
@@ -10659,7 +10659,7 @@
     113
    ],
    "seat": 90,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-r-h120": {
    "kind": "sprite",
@@ -10672,7 +10672,7 @@
     127
    ],
    "seat": 86,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-l-h120": {
    "kind": "sprite",
@@ -10685,7 +10685,7 @@
     127
    ],
    "seat": 86,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-r-h120": {
    "kind": "sprite",
@@ -10698,7 +10698,7 @@
     98
    ],
    "seat": 85,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sittuck-l-h120": {
    "kind": "sprite",
@@ -10711,7 +10711,7 @@
     98
    ],
    "seat": 85,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-r-h120": {
    "kind": "sprite",
@@ -10724,7 +10724,7 @@
     121
    ],
    "seat": 90,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sithop-l-h120": {
    "kind": "sprite",
@@ -10737,7 +10737,7 @@
     121
    ],
    "seat": 90,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "sprite/rooster-sit-front-h120": {
    "kind": "sprite",
@@ -10750,7 +10750,7 @@
     117
    ],
    "seat": 94,
-   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-arlong.jpg)"
+   "source": "tools/sprites/cut_sit.py (rooster-sit-sprites-v2-azzato.jpg)"
   },
   "fg/midway--clock": {
    "kind": "overlay",
@@ -10826,7 +10826,7 @@
     0,
     0
    ],
-   "source": "PLACEHOLDER (Push C, 2026-10-24): Brook's club interior option B3 (B2 plus Hattie's winged mask from Arlong's character sheet, face fully hidden, red rim light only; plain crate), copied from assets/art-placeholder/club/club-B3-320.png. NOT APPROVED as final; waiting on Arlong. Final art drops in by this id."
+   "source": "PLACEHOLDER (Push C, 2026-10-24): Brook's club interior option B3 (B2 plus Hattie's winged mask from Azzato's character sheet, face fully hidden, red rim light only; plain crate), copied from assets/art-placeholder/club/club-B3-320.png. NOT APPROVED as final; waiting on Azzato. Final art drops in by this id."
   },
   "club/neon-hawk": {
    "kind": "prop",
@@ -10883,7 +10883,7 @@
     1
    ],
    "fps": 12,
-   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Arlong approves Push B). Final art replaces this file by name."
+   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Azzato approves Push B). Final art replaces this file by name."
   },
   "fx/potato-trail": {
    "kind": "fx",
@@ -10901,7 +10901,7 @@
     1
    ],
    "fps": 12,
-   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Arlong approves Push B). Final art replaces this file by name."
+   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Azzato approves Push B). Final art replaces this file by name."
   },
   "sprite/carny-guard-idle": {
    "kind": "sprite",
@@ -10919,7 +10919,7 @@
     1
    ],
    "fps": 2,
-   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Arlong approves Push B). Final art replaces this file by name."
+   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Azzato approves Push B). Final art replaces this file by name."
   },
   "sprite/carny-guard-talk": {
    "kind": "sprite",
@@ -10937,7 +10937,7 @@
     1
    ],
    "fps": 6,
-   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Arlong approves Push B). Final art replaces this file by name."
+   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Azzato approves Push B). Final art replaces this file by name."
   },
   "sprite/carny-guard-run": {
    "kind": "sprite",
@@ -10955,7 +10955,7 @@
     1
    ],
    "fps": 10,
-   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Arlong approves Push B). Final art replaces this file by name."
+   "source": "PLACEHOLDER (Brook, 2026-10-24, assets/art-placeholder/; Push B beat art, display-only preview via js/beats.js until Azzato approves Push B). Final art replaces this file by name."
   },
   "club/hattie-sil": {
    "kind": "prop",
@@ -11071,7 +11071,7 @@
     215,
     57
    ],
-   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Arlong OK)"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Azzato OK)"
   },
   "fx/clubsign-lit-g2": {
    "kind": "overlay",
@@ -11083,7 +11083,7 @@
     220,
     57
    ],
-   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Arlong OK)"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Azzato OK)"
   },
   "fx/clubsign-lit-g3": {
    "kind": "overlay",
@@ -11095,7 +11095,7 @@
     226,
     57
    ],
-   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Arlong OK)"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Azzato OK)"
   },
   "fx/clubsign-lit-g4": {
    "kind": "overlay",
@@ -11107,7 +11107,7 @@
     232,
     57
    ],
-   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Arlong OK)"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Azzato OK)"
   },
   "fx/clubsign-lit-g5": {
    "kind": "overlay",
@@ -11119,7 +11119,7 @@
     238,
     57
    ],
-   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Arlong OK)"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Azzato OK)"
   },
   "fx/clubsign-lit-g6": {
    "kind": "overlay",
@@ -11131,7 +11131,7 @@
     244,
     57
    ],
-   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Arlong OK)"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Azzato OK)"
   },
   "fx/clubsign-lit-g7": {
    "kind": "overlay",
@@ -11143,7 +11143,7 @@
     250,
     57
    ],
-   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Arlong OK)"
+   "source": "Brook 2026-10-26 (assets/art-placeholder/midway-sign-v1/, build_midway_sign_v1.py): GOBBLER's letter lit (tubes + its share of the glow, hard alpha) over the pre-reveal bg/midway; all 7 = the all-lit plate. Wired 2026-10-26 (Azzato OK)"
   },
   "pavilion/smoke-drift": {
    "kind": "fx",
@@ -11317,7 +11317,7 @@
     320,
     180
    ],
-   "source": "Brook's club sign cut sign-cut-v2 (Arlong liked it 2026-10-26), 320x180 at 0,0: dead sign, every tube unlit, GOBBLER a faint ghost (RGB, normal blend). Staged from assets/art-placeholder/club/sign-cut/base.png by tools/art_files.py (js/beats.js signCutArt)"
+   "source": "Brook's club sign cut sign-cut-v2 (Azzato liked it 2026-10-26), 320x180 at 0,0: dead sign, every tube unlit, GOBBLER a faint ghost (RGB, normal blend). Staged from assets/art-placeholder/club/sign-cut/base.png by tools/art_files.py (js/beats.js signCutArt)"
   },
   "signcut/hawk-glow": {
    "kind": "bg",
@@ -11325,7 +11325,7 @@
     320,
     180
    ],
-   "source": "Brook's club sign cut sign-cut-v2 (Arlong liked it 2026-10-26), 320x180 at 0,0: hawk glow, #d63a22 stepped alpha, screen blend, box 181,0-279,78. Staged from assets/art-placeholder/club/sign-cut/hawk-glow.png by tools/art_files.py (js/beats.js signCutArt)"
+   "source": "Brook's club sign cut sign-cut-v2 (Azzato liked it 2026-10-26), 320x180 at 0,0: hawk glow, #d63a22 stepped alpha, screen blend, box 181,0-279,78. Staged from assets/art-placeholder/club/sign-cut/hawk-glow.png by tools/art_files.py (js/beats.js signCutArt)"
   },
   "signcut/hawk-lit": {
    "kind": "bg",
@@ -11333,7 +11333,7 @@
     320,
     180
    ],
-   "source": "Brook's club sign cut sign-cut-v2 (Arlong liked it 2026-10-26), 320x180 at 0,0: hawk lit tube pixels, alpha 0/255, normal blend, box 193,6-267,75. Staged from assets/art-placeholder/club/sign-cut/hawk-lit.png by tools/art_files.py (js/beats.js signCutArt)"
+   "source": "Brook's club sign cut sign-cut-v2 (Azzato liked it 2026-10-26), 320x180 at 0,0: hawk lit tube pixels, alpha 0/255, normal blend, box 193,6-267,75. Staged from assets/art-placeholder/club/sign-cut/hawk-lit.png by tools/art_files.py (js/beats.js signCutArt)"
   },
   "signcut/thecock-glow": {
    "kind": "bg",
@@ -11341,7 +11341,7 @@
     320,
     180
    ],
-   "source": "Brook's club sign cut sign-cut-v2 (Arlong liked it 2026-10-26), 320x180 at 0,0: thecock glow, #d63a22 stepped alpha, screen blend, box 173,61-282,99. Staged from assets/art-placeholder/club/sign-cut/thecock-glow.png by tools/art_files.py (js/beats.js signCutArt)"
+   "source": "Brook's club sign cut sign-cut-v2 (Azzato liked it 2026-10-26), 320x180 at 0,0: thecock glow, #d63a22 stepped alpha, screen blend, box 173,61-282,99. Staged from assets/art-placeholder/club/sign-cut/thecock-glow.png by tools/art_files.py (js/beats.js signCutArt)"
   },
   "signcut/thecock-lit": {
    "kind": "bg",
@@ -11349,7 +11349,7 @@
     320,
     180
    ],
-   "source": "Brook's club sign cut sign-cut-v2 (Arlong liked it 2026-10-26), 320x180 at 0,0: thecock lit tube pixels, alpha 0/255, normal blend, box 185,69-270,97. Staged from assets/art-placeholder/club/sign-cut/thecock-lit.png by tools/art_files.py (js/beats.js signCutArt)"
+   "source": "Brook's club sign cut sign-cut-v2 (Azzato liked it 2026-10-26), 320x180 at 0,0: thecock lit tube pixels, alpha 0/255, normal blend, box 185,69-270,97. Staged from assets/art-placeholder/club/sign-cut/thecock-lit.png by tools/art_files.py (js/beats.js signCutArt)"
   },
   "signcut/gobbler-glow": {
    "kind": "bg",
@@ -11357,7 +11357,7 @@
     320,
     180
    ],
-   "source": "Brook's club sign cut sign-cut-v2 (Arlong liked it 2026-10-26), 320x180 at 0,0: gobbler glow, #d63a22 stepped alpha, screen blend, box 171,87-296,144. Staged from assets/art-placeholder/club/sign-cut/gobbler-glow.png by tools/art_files.py (js/beats.js signCutArt)"
+   "source": "Brook's club sign cut sign-cut-v2 (Azzato liked it 2026-10-26), 320x180 at 0,0: gobbler glow, #d63a22 stepped alpha, screen blend, box 171,87-296,144. Staged from assets/art-placeholder/club/sign-cut/gobbler-glow.png by tools/art_files.py (js/beats.js signCutArt)"
   },
   "signcut/gobbler-lit": {
    "kind": "bg",
@@ -11365,7 +11365,7 @@
     320,
     180
    ],
-   "source": "Brook's club sign cut sign-cut-v2 (Arlong liked it 2026-10-26), 320x180 at 0,0: gobbler lit tube pixels, alpha 0/255, normal blend, box 183,88-285,132. Staged from assets/art-placeholder/club/sign-cut/gobbler-lit.png by tools/art_files.py (js/beats.js signCutArt)"
+   "source": "Brook's club sign cut sign-cut-v2 (Azzato liked it 2026-10-26), 320x180 at 0,0: gobbler lit tube pixels, alpha 0/255, normal blend, box 183,88-285,132. Staged from assets/art-placeholder/club/sign-cut/gobbler-lit.png by tools/art_files.py (js/beats.js signCutArt)"
   },
   "fx/insert-note-clarion": {
    "kind": "fx",
@@ -11377,7 +11377,7 @@
     0,
     0
    ],
-   "source": "Brook 2026-10-27 assets/art-placeholder/insert-note-clarion (full-frame bucket note on the Clarion, text from js/logic.js readNote); approved by Arlong Oct 27"
+   "source": "Brook 2026-10-27 assets/art-placeholder/insert-note-clarion (full-frame bucket note on the Clarion, text from js/logic.js readNote); approved by Azzato Oct 27"
   }
  }
 }

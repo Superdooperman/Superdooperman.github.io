@@ -32,17 +32,17 @@ export const CUES = [
   "potato-cannon", "goop", "ghost-scare", "ring-toss",
   // Brook's placeholder pack (2026-10-24) added four names
   "potato-flight", "potato-impact", "hen-cluck", "goat-bleat",
-  // Henny never speaks in play (Arlong 2026-10-24): chicken gibberish instead, henny-cluck-1..6 picked at random
+  // Henny never speaks in play (Azzato 2026-10-24): chicken gibberish instead, henny-cluck-1..6 picked at random
   "henny-cluck",
-  "smoke-whoosh", // club smoke veil clearing (Arlong 2026-10-25)
-  // club sign (Hawkeye pass 2026-10-25, Brook's synthesized placeholders, approved by Arlong 2026-10-25): the henchman's smack; the
+  "smoke-whoosh", // club smoke veil clearing (Azzato 2026-10-25)
+  // club sign (Hawkeye pass 2026-10-25, Brook's synthesized placeholders, approved by Azzato 2026-10-25): the henchman's smack; the
   // Pavilion light-up; the steady full-on hum it hands off to (a seamless loop: OGG/WAV only, never the MP3)
   "neon-sputter", "neon-lightup", "neon-hum-full",
 ];
 
 // Cues that pick among numbered variants (<cue>-1 .. <cue>-N, never the same one twice running), then fall back to
 // the plain <cue> file, then to another cue's file, then to the synth.
-// footstep-1..4: Brook's v2 muffled single steps (Oct 27, approved by Arlong; assets/music-drafts/cues-oct27/README.md),
+// footstep-1..4: Brook's v2 muffled single steps (Oct 27, approved by Azzato; assets/music-drafts/cues-oct27/README.md),
 // footstep = v2 footstep-1 as the fallback.
 export const VARIANTS = { "henny-cluck": { max: 6, fallback: "hen-cluck" }, footstep: { max: 4, fallback: "footstep" } };
 // Per-cue level on top of the sfx slider (Brook's README knob). 1 = as recorded; e.g. 0.7 is about -3 dB.
@@ -177,7 +177,7 @@ function elVolume(kind, mix) {
   return settings.muted ? 0 : Math.max(0, Math.min(1, settings[kind] * mix));
 }
 
-// Arlong Oct 27 (beta v17, on his phone): the sliders did nothing, and at the start the rooftop bed sounded mixed into
+// Azzato Oct 27 (beta v17, on his phone): the sliders did nothing, and at the start the rooftop bed sounded mixed into
 // the farm's. Root cause: iOS Safari ignores HTMLMediaElement.volume (read-only, always 1), and every <audio> here (the
 // calm/tense beds, cues, voice) was mixed and faded only through .volume. So on iOS both bed layers played at full
 // all the time, an old room's bed played at full until it was removed, and the sliders and mute only reached the
@@ -368,15 +368,15 @@ export function stopLoop(kind) {
   if (stop) { stop(); loops.delete(kind); }
 }
 
-/* ---------- music themes: Brook's single seamless loops (Arlong approved midway + chase, 2026-10-26) ---------- */
+/* ---------- music themes: Brook's single seamless loops (Azzato approved midway + chase, 2026-10-26) ---------- */
 
 // audio/in/theme-<name>.ogg|mp3. A theme beats the calm/tense bed of the same rooms (one layer, so no tension
 // crossfade there). Themes play from a decoded Web Audio buffer (AudioBufferSourceNode.loop over the exact loop) and
 // not <audio loop>, which can leave a gap at the seam (Safari, and the mp3's encoder padding). The ogg first; the mp3
 // where the browser can't play ogg or the ogg fails to decode (older iOS Safari).
-// club-noir: the club cutaway (holdBed("club")) before the unmasking. Brook's lounge groove (Arlong 2026-10-26).
+// club-noir: the club cutaway (holdBed("club")) before the unmasking. Brook's lounge groove (Azzato 2026-10-26).
 export const THEME_ROOMS = { gate: "midway", midway: "midway", pavilion: "midway", club: "club-noir" }; // the carnival rooms + the club
-// Moments that override the room's music (main.js musicMoment; js/beats.js holdBed). Arlong 2026-10-26:
+// Moments that override the room's music (main.js musicMoment; js/beats.js holdBed). Azzato 2026-10-26:
 //   gobbler: Brook's acid club-theme, the Cock Gobbler's own music. (1) Her first reveal: it starts the instant the
 //     Pavilion smoke veil is gone (the veil: "whisk" line, js/logic.js UNMASK_LINES), not before; (2) the Pavilion
 //     finale: from that reveal on (her speech and the cut to her lit club sign ride on it), and on every Pavilion
@@ -387,7 +387,7 @@ export const THEME_ROOMS = { gate: "midway", midway: "midway", pavilion: "midway
 //   hattie-call / ticket (beta v17 item 7, Brook's Oct 27 drafts, assets/music-drafts/cues-oct27/README.md): line-tagged
 //     moments (js/logic.js line({ music })). hattie-call: "Then the phone lights up" through her phone choice and
 //     reply to DeeJay's off-air line; ticket: "The edges fit" through the flashback to "It's Hattie...". Files:
-//     audio/in/theme-hattie-call.ogg|mp3 and audio/in/theme-ticket-memory.ogg|mp3 (staged Oct 27, Arlong liked them);
+//     audio/in/theme-hattie-call.ogg|mp3 and audio/in/theme-ticket-memory.ogg|mp3 (staged Oct 27, Azzato liked them);
 //     a missing file falls back to the room's music (themeFor).
 export const MOMENT_THEMES = { chase: "chase", gobbler: "club-acid", "hattie-call": "hattie-call", ticket: "ticket-memory" };
 // Exact loop lengths in samples at 44.1 kHz (assets/music-drafts/NOTES.md). A decode that comes out longer (mp3
