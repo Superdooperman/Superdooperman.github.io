@@ -4,7 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Superdooper Software</title>
-<meta name="description" content="Games, apps, comics, music, and art from Superdooper Software.">
+<meta name="description" content="Games, apps, comics, music, and art from Superdooper Software. Play Moon Axis, Night Lark, Radioactive Rooster, and more free in your browser.">
+<link rel="canonical" href="https://azzato.live/">
+<meta property="og:title" content="Superdooper Software">
+<meta property="og:description" content="Games, apps, comics, music, and art from Superdooper Software. Play free in your browser.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://azzato.live/">
+<meta property="og:image" content="https://azzato.live/store/boxart/night-lark-cover-gold.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Superdooper Software">
+<meta name="twitter:description" content="Games, apps, comics, music, and art from Superdooper Software. Play free in your browser.">
+<meta name="twitter:image" content="https://azzato.live/store/boxart/night-lark-cover-gold.jpg">
 <meta name="theme-color" content="#0b0d12">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -24,7 +34,7 @@
     --line2:rgba(255,255,255,.14);
     --txt:#f4f6fb;
     --mut:#9aa3b5;
-    --mut2:#6f788a;
+    --mut2:#8a93a5;
     --acc:#e23b36;
     --acc2:#ff5a52;
     --acc-soft:rgba(226,59,54,.16);
@@ -36,7 +46,7 @@
   html{color-scheme:dark}
   body{
     margin:0;font-family:var(--font);background:var(--bg);color:var(--txt);
-    line-height:1.5;min-height:100vh;
+    line-height:1.5;min-height:100vh;overflow-x:clip;
     background-image:
       radial-gradient(900px 420px at 50% -10%, rgba(226,59,54,.18), transparent 60%),
       radial-gradient(700px 360px at 90% 10%, rgba(125,211,252,.06), transparent 55%),
@@ -45,7 +55,9 @@
   a{color:inherit;text-decoration:none}
   img{max-width:100%;display:block}
   button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
-  :focus-visible{outline:2px solid var(--acc2);outline-offset:3px;border-radius:10px}
+  :focus-visible{outline:3px solid var(--acc2);outline-offset:3px;border-radius:10px}
+  a.cover:focus-visible{outline-offset:-4px;border-radius:12px}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   .skip{position:absolute;left:-999px}.skip:focus{left:12px;top:12px;z-index:20;background:#000;padding:8px 12px;border-radius:8px}
 
   .wrap{max-width:1180px;margin:0 auto;padding:0 18px 64px}
@@ -61,9 +73,9 @@
   .brand .wordmark{
     display:flex;flex-direction:column;gap:1px;line-height:1.05;min-width:0;
   }
-  .brand .wordmark strong{
-    font-size:clamp(1.05rem,2.4vw,1.28rem);font-weight:800;letter-spacing:-.02em;
-    white-space:nowrap;
+  .brand .wordmark h1{
+    margin:0;font-size:clamp(1.05rem,2.4vw,1.28rem);font-weight:800;letter-spacing:-.02em;
+    white-space:nowrap;line-height:1.05;
   }
   .brand .wordmark em{
     font-style:normal;font-size:.72rem;font-weight:650;letter-spacing:.14em;
@@ -72,9 +84,15 @@
   .nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .btn{
     display:inline-flex;align-items:center;justify-content:center;gap:8px;
-    padding:10px 16px;border-radius:999px;border:1px solid var(--line2);
+    min-height:44px;padding:10px 16px;border-radius:999px;border:1px solid var(--line2);
     background:rgba(255,255,255,.03);color:var(--txt);font-weight:650;font-size:.92rem;
     transition:border-color .18s, background .18s, transform .18s, box-shadow .18s;
+  }
+  .btn.soon,.btn[aria-disabled="true"]{
+    opacity:.62;cursor:not-allowed;border-style:dashed;color:var(--mut);
+  }
+  .btn.soon:hover,.btn[aria-disabled="true"]:hover{
+    border-color:var(--line2);background:rgba(255,255,255,.03);box-shadow:none;transform:none;filter:none;
   }
   .btn:hover{border-color:rgba(226,59,54,.55);background:rgba(226,59,54,.08);box-shadow:0 0 0 1px rgba(226,59,54,.15)}
   .btn.primary{
@@ -90,12 +108,13 @@
     background:var(--panel);box-shadow:var(--shadow);
     position:relative;isolation:isolate;
   }
-  .hero-track{position:relative;min-height:360px}
+  .hero-track{position:relative;display:grid}
   .slide{
-    position:absolute;inset:0;display:grid;grid-template-columns:1.15fr .85fr;
+    grid-area:1/1;display:grid;grid-template-columns:1.15fr .85fr;
     opacity:0;visibility:hidden;pointer-events:none;
     transform:translateX(28px);
     transition:opacity .55s ease, transform .55s ease, visibility 0s linear .55s;
+    z-index:0;
   }
   .slide.is-active{
     opacity:1;visibility:visible;pointer-events:auto;transform:translateX(0);
@@ -157,18 +176,23 @@
   }
   .hero-controls > *{pointer-events:auto}
   .hero-arrow{
-    width:40px;height:40px;border-radius:999px;border:1px solid var(--line2);
+    width:44px;height:44px;min-width:44px;min-height:44px;border-radius:999px;border:1px solid var(--line2);
     background:rgba(0,0,0,.45);backdrop-filter:blur(8px);
     display:grid;place-items:center;color:#fff;font-size:1.1rem;font-weight:700;
     transition:background .15s, border-color .15s;
   }
   .hero-arrow:hover{background:rgba(226,59,54,.35);border-color:rgba(226,59,54,.55)}
-  .hero-dots{display:flex;gap:8px;align-items:center;padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid var(--line)}
+  .hero-dots{display:flex;gap:2px;align-items:center;padding:2px 6px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid var(--line)}
   .hero-dot{
-    width:9px;height:9px;border-radius:999px;background:rgba(255,255,255,.28);
-    transition:transform .15s, background .15s, width .15s;
+    width:44px;height:44px;min-width:44px;min-height:44px;border-radius:999px;
+    display:grid;place-items:center;background:transparent;
+    transition:transform .15s;
   }
-  .hero-dot[aria-current="true"]{background:var(--acc2);width:22px}
+  .hero-dot::before{
+    content:"";width:9px;height:9px;border-radius:999px;background:rgba(255,255,255,.28);
+    transition:background .15s, width .15s;
+  }
+  .hero-dot[aria-current="true"]::before{background:var(--acc2);width:22px}
   .hero-progress{
     position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.06);z-index:6;
   }
@@ -234,7 +258,7 @@
   .cover .badge.dev{color:#c4b5fd;border-color:rgba(167,139,250,.35)}
   .cover .badge.alt{color:#ffd0cc;border-color:rgba(226,59,54,.45);background:rgba(226,59,54,.22)}
   .body{padding:14px 14px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
-  .name{font-weight:780;font-size:1.02rem;letter-spacing:-.01em;line-height:1.25}
+  .name{margin:0;font-weight:780;font-size:1.02rem;letter-spacing:-.01em;line-height:1.25}
   .desc{margin:0;color:var(--mut);font-size:.86rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:3.9em}
   .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
   .playrow{display:flex;gap:8px;margin-top:10px}
@@ -250,7 +274,7 @@
     display:flex;flex-direction:column;gap:6px;transition:border-color .18s, transform .18s;
   }
   .hub a.tile:hover{border-color:rgba(226,59,54,.4);transform:translateY(-2px)}
-  .hub .tile.soon{opacity:.72}
+  .hub .tile.soon{opacity:.85}
   .hub .emoji{font-size:1.4rem}
   .hub .t-name{font-weight:750}
   .hub .t-desc{color:var(--mut);font-size:.88rem;margin:0}
@@ -269,21 +293,24 @@
     .slide-art::after{
       background:linear-gradient(0deg, rgba(23,27,36,.95) 0%, transparent 55%);
     }
-    .slide-copy{padding:22px 20px 56px}
+    .slide-copy{padding:22px 20px 64px}
     .hub{grid-template-columns:1fr 1fr}
-    .hero-track{min-height:520px}
   }
   @media (max-width:560px){
     .shelf{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
     .hub{grid-template-columns:1fr}
-    .brand .mark{height:34px}
+    .brand{gap:8px;max-width:100%}
+    .brand .mark{height:30px}
+    .brand .wordmark h1{white-space:normal;font-size:clamp(.95rem,4.6vw,1.15rem)}
     .slide h2{font-size:1.55rem}
-    .hero-track{min-height:560px}
+    .hero-dots{gap:0;padding:2px 4px}
+    .nav .btn{padding:10px 12px}
   }
   @media (prefers-reduced-motion:reduce){
     .slide,.slide.is-active,.slide.is-exit{transition:none!important;transform:none!important}
     .hero-progress > i{display:none!important}
     .card,.btn,.hub .tile{transition:none!important}
+    .card:hover,.btn.primary:hover,.hub a.tile:hover{transform:none!important}
   }
 </style>
 </head>
@@ -292,9 +319,9 @@
 <div class="wrap">
   <header class="top">
     <a class="brand" href="/" aria-label="Superdooper Software home">
-      <img class="mark" src="/store/logo-inkblob.svg" alt="">
+      <img class="mark" src="/store/logo-inkblob.svg" alt="" width="160" height="40">
       <span class="wordmark">
-        <strong>Superdooper Software</strong>
+        <h1>Superdooper Software</h1>
         <em>Games · Apps · Arcade</em>
       </span>
     </a>
@@ -335,7 +362,7 @@
           <div class="slide-art">
             <picture>
               <source srcset="/store/boxart/night-lark-cover-gold.webp" type="image/webp">
-              <img src="/store/boxart/night-lark-cover-gold.jpg" alt="Night Lark cover art" width="620" height="1200">
+              <img src="/store/boxart/night-lark-cover-gold.jpg" alt="Night Lark cover art" width="620" height="1200" loading="lazy">
             </picture>
           </div>
           <div class="slide-copy">
@@ -357,7 +384,7 @@
         <!-- 3 Git to da Choppa! -->
         <article class="slide" data-index="2" aria-hidden="true" aria-label="3 of 5">
           <div class="slide-art">
-            <img src="/store/boxart/choppa.jpg" alt="Git to da Choppa! cover art" width="600" height="840">
+            <img src="/store/boxart/choppa.jpg" alt="Git to da Choppa! cover art" width="600" height="840" loading="lazy">
           </div>
           <div class="slide-copy">
             <span class="kicker">Featured · 3 / 5</span>
@@ -377,7 +404,7 @@
         <!-- 4 Radioactive Rooster -->
         <article class="slide" data-index="3" aria-hidden="true" aria-label="4 of 5">
           <div class="slide-art">
-            <img src="/store/boxart/radioactive-rooster-cover.webp" alt="Radioactive Rooster cover art" width="600" height="900">
+            <img src="/store/boxart/radioactive-rooster-cover.webp" alt="Radioactive Rooster cover art" width="600" height="900" loading="lazy">
           </div>
           <div class="slide-copy">
             <span class="kicker">Featured · 4 / 5</span>
@@ -397,7 +424,7 @@
         <!-- 5 Lamprey -->
         <article class="slide" data-index="4" aria-hidden="true" aria-label="5 of 5">
           <div class="slide-art">
-            <img src="/store/boxart/lamprey-cover.webp" alt="Lamprey: In Too Deep cover art" width="600" height="912">
+            <img src="/store/boxart/lamprey-cover.webp" alt="Lamprey: In Too Deep cover art" width="600" height="912" loading="lazy">
           </div>
           <div class="slide-copy">
             <span class="kicker">Featured · 5 / 5</span>
@@ -418,7 +445,7 @@
 
       <div class="hero-controls">
         <button class="hero-arrow" type="button" id="heroPrev" aria-label="Previous featured game">‹</button>
-        <div class="hero-dots" id="heroDots" role="tablist" aria-label="Featured slides"></div>
+        <div class="hero-dots" id="heroDots" aria-label="Featured slides"></div>
         <button class="hero-arrow" type="button" id="heroNext" aria-label="Next featured game">›</button>
       </div>
       <div class="hero-progress" aria-hidden="true"><i id="heroBar"></i></div>
@@ -431,10 +458,10 @@
     <section class="shelf" aria-label="Games shelf">
       <article class="card">
         <a class="cover" href="/pwas/moon-axis/">
-          <img src="/store/boxart/moon-axis-cover.webp" alt="Moon Axis box art" width="600" height="805">
+          <img src="/store/boxart/moon-axis-cover.webp" alt="Moon Axis box art" width="600" height="805" loading="lazy">
         </a>
         <div class="body">
-          <div class="name">Moon Axis</div>
+          <h3 class="name">Moon Axis</h3>
           <p class="desc">Hellcats of the Void. First-person vector shooter with glowing wireframe ships and seven sorties.</p>
           <div class="tags"><span class="chip game">Game</span><span class="chip offline">Offline</span></div>
           <div class="playrow"><a class="btn primary" href="/pwas/moon-axis/">Play</a></div>
@@ -444,10 +471,10 @@
       <article class="card">
         <a class="cover" href="/pwas/moon-axis-unleashed/">
           <span class="badge alt">Unleashed</span>
-          <img src="/store/boxart/moon-axis-unleashed-cover.webp" alt="Moon Axis Unleashed box art" width="600" height="812">
+          <img src="/store/boxart/moon-axis-unleashed-cover.webp" alt="Moon Axis Unleashed box art" width="600" height="812" loading="lazy">
         </a>
         <div class="body">
-          <div class="name">Moon Axis Unleashed</div>
+          <h3 class="name">Moon Axis Unleashed</h3>
           <p class="desc">Separate chase-rail remake of Moon Axis — same story and sorties, different ride.</p>
           <div class="tags"><span class="chip game">Game</span><span class="chip">Remake</span></div>
           <div class="playrow"><a class="btn primary" href="/pwas/moon-axis-unleashed/">Play</a></div>
@@ -459,11 +486,11 @@
           <span class="badge dev">In progress</span>
           <picture>
             <source srcset="/store/boxart/night-lark-cover-gold.webp" type="image/webp">
-            <img src="/store/boxart/night-lark-cover-gold.jpg" alt="Night Lark box art" width="620" height="1200">
+            <img src="/store/boxart/night-lark-cover-gold.jpg" alt="Night Lark box art" width="620" height="1200" loading="lazy">
           </picture>
         </a>
         <div class="body">
-          <div class="name">Night Lark</div>
+          <h3 class="name">Night Lark</h3>
           <p class="desc">A roguelike stealth action game. Plays in your browser and works offline after the first visit.</p>
           <div class="tags"><span class="chip game">Game</span><span class="chip offline">Offline</span></div>
           <div class="playrow"><a class="btn primary" href="/pwas/night-lark/">Play</a></div>
@@ -472,10 +499,10 @@
 
       <article class="card">
         <a class="cover" href="/pwas/radioactive-rooster/">
-          <img src="/store/boxart/radioactive-rooster-cover.webp" alt="Radioactive Rooster box art" width="600" height="900">
+          <img src="/store/boxart/radioactive-rooster-cover.webp" alt="Radioactive Rooster box art" width="600" height="900" loading="lazy">
         </a>
         <div class="body">
-          <div class="name">Radioactive Rooster</div>
+          <h3 class="name">Radioactive Rooster</h3>
           <p class="desc">Yolk of Midnight. A one-sitting point-and-click across Cluck County for the Atomic Egg.</p>
           <div class="tags"><span class="chip game">Game</span></div>
           <div class="playrow"><a class="btn primary" href="/pwas/radioactive-rooster/">Play</a></div>
@@ -484,10 +511,10 @@
 
       <article class="card">
         <a class="cover" href="/pwas/phish-desk/">
-          <img src="/store/boxart/lamprey-cover.webp" alt="Lamprey: In Too Deep box art" width="600" height="912">
+          <img src="/store/boxart/lamprey-cover.webp" alt="Lamprey: In Too Deep box art" width="600" height="912" loading="lazy">
         </a>
         <div class="body">
-          <div class="name">Lamprey: In Too Deep</div>
+          <h3 class="name">Lamprey: In Too Deep</h3>
           <p class="desc">Trust no inbox. Papers, Please-style security desk — stamp PHISH, LEGIT, or ESCALATE.</p>
           <div class="tags"><span class="chip game">Game</span></div>
           <div class="playrow"><a class="btn primary" href="/pwas/phish-desk/">Play</a></div>
@@ -496,10 +523,10 @@
 
       <article class="card">
         <a class="cover" href="/pwas/choppa/">
-          <img src="/store/boxart/choppa.jpg" alt="Git to da Choppa! box art" width="600" height="840">
+          <img src="/store/boxart/choppa.jpg" alt="Git to da Choppa! box art" width="600" height="840" loading="lazy">
         </a>
         <div class="body">
-          <div class="name">Git to da Choppa!</div>
+          <h3 class="name">Git to da Choppa!</h3>
           <p class="desc">Apple II rescue tribute. Fly hostages home — a love letter to the 1982 classic.</p>
           <div class="tags"><span class="chip game">Game</span></div>
           <div class="playrow"><a class="btn primary" href="/pwas/choppa/">Play</a></div>
@@ -508,10 +535,10 @@
 
       <article class="card">
         <a class="cover placeholder" href="/pwas/stick-shift/" style="background:linear-gradient(160deg,#3a1014,#0d1018 70%)">
-          <img src="/store/boxart/stick-shift.svg" alt="Stick Shift Simulator box art" style="width:70%;height:auto;object-fit:contain;margin:auto">
+          <img width="600" height="840" src="/store/boxart/stick-shift.svg" alt="Stick Shift Simulator box art" style="width:70%;height:auto;object-fit:contain;margin:auto" loading="lazy">
         </a>
         <div class="body">
-          <div class="name">Stick Shift Simulator</div>
+          <h3 class="name">Stick Shift Simulator</h3>
           <p class="desc">Manual transmission trainer for a 6-speed H-pattern — clutch bite, stalls, rev-matching.</p>
           <div class="tags"><span class="chip game">Game</span></div>
           <div class="playrow"><a class="btn primary" href="/pwas/stick-shift/">Play</a></div>
@@ -526,10 +553,10 @@
     <section class="shelf" aria-label="Apps shelf">
       <article class="card">
         <a class="cover placeholder" href="/pwas/dazed-map/" style="background:linear-gradient(160deg,#3a2a10,#0d1018 70%)">
-          <img src="/store/boxart/dazed-map.svg" alt="Dazed &amp; Confused box art" style="width:70%;height:auto;object-fit:contain;margin:auto">
+          <img width="600" height="840" src="/store/boxart/dazed-map.svg" alt="Dazed &amp; Confused box art" style="width:70%;height:auto;object-fit:contain;margin:auto" loading="lazy">
         </a>
         <div class="body">
-          <div class="name">Dazed &amp; Confused</div>
+          <h3 class="name">Dazed &amp; Confused</h3>
           <p class="desc">Austin Film Map — interactive filming locations from Linklater’s 1993 classic.</p>
           <div class="tags"><span class="chip app">App</span></div>
           <div class="playrow"><a class="btn primary" href="/pwas/dazed-map/">Open</a></div>
@@ -538,10 +565,10 @@
 
       <article class="card">
         <a class="cover" href="/pwas/TimeTracker.html">
-          <img src="/store/boxart/rooster-timer-cover.webp" alt="Rooster Timer box art" width="600" height="912">
+          <img src="/store/boxart/rooster-timer-cover.webp" alt="Rooster Timer box art" width="600" height="912" loading="lazy">
         </a>
         <div class="body">
-          <div class="name">Rooster Timer</div>
+          <h3 class="name">Rooster Timer</h3>
           <p class="desc">Pomodoro egg timer starring Radioactive Rooster — wobbles, cracks, then crows PAH KAW!</p>
           <div class="tags"><span class="chip app">App</span></div>
           <div class="playrow"><a class="btn primary" href="/pwas/TimeTracker.html">Open</a></div>
@@ -550,10 +577,10 @@
 
       <article class="card">
         <a class="cover" href="/pwas/yolk-box/">
-          <img src="/store/boxart/yolk-box-cover.webp" alt="Midnight's Yolk Box box art" width="600" height="747">
+          <img src="/store/boxart/yolk-box-cover.webp" alt="Midnight's Yolk Box box art" width="600" height="747" loading="lazy">
         </a>
         <div class="body">
-          <div class="name">Midnight's Yolk Box</div>
+          <h3 class="name">Midnight's Yolk Box</h3>
           <p class="desc">Groovebox in your browser — PAH-KAW B0B drums and YOLK E0E bass synth.</p>
           <div class="tags"><span class="chip app">App</span></div>
           <div class="playrow"><a class="btn primary" href="/pwas/yolk-box/">Open</a></div>
@@ -562,10 +589,10 @@
 
       <article class="card">
         <a class="cover placeholder" href="/pwas/video-toolbox.html" style="background:linear-gradient(160deg,#3a1010,#0d1018 70%)">
-          <img src="/store/boxart/video-toolbox.svg" alt="Video Toolbox box art" style="width:70%;height:auto;object-fit:contain;margin:auto">
+          <img width="600" height="840" src="/store/boxart/video-toolbox.svg" alt="Video Toolbox box art" style="width:70%;height:auto;object-fit:contain;margin:auto" loading="lazy">
         </a>
         <div class="body">
-          <div class="name">Video Toolbox</div>
+          <h3 class="name">Video Toolbox</h3>
           <p class="desc">Trim, compress, convert, and caption clips in-browser with ffmpeg — nothing uploaded.</p>
           <div class="tags"><span class="chip app">App</span></div>
           <div class="playrow"><a class="btn primary" href="/pwas/video-toolbox.html">Open</a></div>
@@ -573,6 +600,7 @@
       </article>
     </section>
 
+    <h2 class="sr-only">More from Superdooper Software</h2>
     <section class="hub" aria-label="More Superdooper Software">
       <div class="tile soon" aria-disabled="true">
         <span class="emoji" aria-hidden="true">🐓</span>
@@ -605,7 +633,8 @@
     <div>© Superdooper Software · azzato.live</div>
     <div class="links">
       <a class="btn" href="/pwas/archive/">Tinkerer's Archive</a>
-      <a class="btn" href="#" data-placeholder="tip-jar">Tip jar</a>
+      <!-- OPEN QUESTION: real tip jar URL not decided yet; leave href="#" -->
+      <a class="btn soon" href="#" data-placeholder="tip-jar" role="link" aria-disabled="true" aria-label="Tip jar coming soon" title="Coming soon">Tip jar · soon</a>
     </div>
   </footer>
 </div>
@@ -631,7 +660,6 @@
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'hero-dot';
-    b.setAttribute('role', 'tab');
     b.setAttribute('aria-label', 'Show featured game ' + (i + 1));
     if (i === 0) b.setAttribute('aria-current', 'true');
     b.addEventListener('click', () => go(i, true));
@@ -731,6 +759,11 @@
   window.__heroGo = (i) => go(i, true);
   window.__heroIndex = () => index;
 
+
+  // Tip jar placeholder (URL open question — do not invent)
+  document.querySelectorAll('[data-placeholder="tip-jar"]').forEach((el) => {
+    el.addEventListener('click', (e) => { e.preventDefault(); });
+  });
   if (!reduce) restart(false);
 })();
 </script>
