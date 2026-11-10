@@ -1,4 +1,4 @@
-// Grappleable architecture (Azzato, Oct 28 2026). Anchors come from the ASSEMBLED solid map,
+// Grappleable architecture (Superdooperman, Oct 28 2026). Anchors come from the ASSEMBLED solid map,
 // never from a piece on its own: when pieces are stacked, the upper piece covers the lower
 // one's top, that top is no longer standable, and its corners and edge points disappear
 // (a buried edge isn't a ledge). Only exposed tops count.

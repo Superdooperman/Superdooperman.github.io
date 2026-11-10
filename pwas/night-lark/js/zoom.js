@@ -1,4 +1,4 @@
-// Dynamic camera zoom (feel fix 1, Azzato 6:01 PM): the visible area widens with speed and the
+// Dynamic camera zoom (feel fix 1, Superdooperman 6:01 PM): the visible area widens with speed and the
 // swing chain, Dead Cells style, and eases back in when she slows, the chain breaks, or a guard
 // is near / alert. The art stays 1 art px per logical px; only how many logical px fit on the
 // screen changes. Render only: the sim never reads any of this. All numbers are ZOOM in config.js.

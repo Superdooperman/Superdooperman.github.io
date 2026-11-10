@@ -82,7 +82,7 @@ const countMotes = (def) => def.rows.reduce((n, r) => n + (r.match(/m/g) || []).
 
 /** Every room of a night as played (follow-up Nov 7 2026): THE HARBOR SHAFT first (one
  *  continuous vertical room, js/levels/vertical.js; the same room every night, so the tower's
- *  seeded rooms are unchanged), then the two big rooms (v2-main, Azzato, Nov 9 2026): THE WIDE
+ *  seeded rooms are unchanged), then the two big rooms (v2-main, Superdooperman, Nov 9 2026): THE WIDE
  *  HALL (levels/big-2x2.js) and THE WIDE SHAFT (levels/wide-shaft.js), fixed rooms like the
  *  shaft, then nightRooms(tower). opts.shaft false: without the shaft; opts.big false: without
  *  the big rooms (they follow the shaft, so they default to opts.shaft). */

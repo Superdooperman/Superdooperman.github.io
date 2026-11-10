@@ -1,4 +1,4 @@
-// Seeded climbing route over a tower facade (Azzato, Oct 28 2026): layers b (platforms) and c
+// Seeded climbing route over a tower facade (Superdooperman, Oct 28 2026): layers b (platforms) and c
 // (attachments) are randomized independently of the facade blocks behind them (layer a), so
 // the route never lines up with block seams. Same seed, same room.
 //   - Platforms (iron grating, one-way: grate-*, balconies, corners, open ledges) alternate sides up the tower. The middle lane (ROUTE.lane) never gets a slab:

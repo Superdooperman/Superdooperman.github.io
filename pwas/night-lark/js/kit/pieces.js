@@ -1,4 +1,4 @@
-// LAYER B: platforms and collision (Azzato's tower kit sheet, Oct 28 2026). The only layer
+// LAYER B: platforms and collision (Superdooperman's tower kit sheet, Oct 28 2026). The only layer
 // that makes tiles: '#' stone (solid; its exposed top is a ledge), '=' wood (one-way), 'g' iron
 // grating (one-way, the climb platforms and every balcony/ledge above a floor), '.' nothing. A piece: { id, layer:'b', w, h, rows, props (layer-c railings it carries), note }.
 // Footprint w x h in tiles (16 px). Pieces carry no anchors of their own: anchors come from
@@ -13,13 +13,13 @@ const slab = (id, w, note, ch = '#') => ({ id, layer: 'b', w, h: 1, rows: [row(w
 export const platformShort = () => slab('platform-short', 3, 'stone slab, short (3)');
 export const platformMedium = () => slab('platform-medium', 5, 'stone slab, medium (5)');
 export const platformLong = () => slab('platform-long', 8, 'stone slab, long (8)');
-// Iron grating (Azzato, Nov 9 2026): the ascent platforms, same widths as the slabs. One-way like wood.
+// Iron grating (Superdooperman, Nov 9 2026): the ascent platforms, same widths as the slabs. One-way like wood.
 export const grateShort = () => slab('grate-short', 3, 'iron grating, short (3)', 'g');
 export const grateMedium = () => slab('grate-medium', 5, 'iron grating, medium (5)', 'g');
 export const grateLong = () => slab('grate-long', 8, 'iron grating, long (8)', 'g');
 export const endLeft = () => slab('end-left', 1, 'slab end cap, left (joins a run; collides like any slab tile)');
 export const endRight = () => slab('end-right', 1, 'slab end cap, right');
-// Round 2b (Azzato, Nov 9 2026): stone slabs are ground-floor only; everything standable above a
+// Round 2b (Superdooperman, Nov 9 2026): stone slabs are ground-floor only; everything standable above a
 // floor is grating, so the open ledge is a 2-wide grate stub (one-way, no railing).
 export const openLedge = () => slab('open-ledge', 2, 'bare stub of iron grating, no railing', 'g');
 

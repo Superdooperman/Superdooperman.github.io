@@ -6,14 +6,15 @@
 // when the art resolution does. Palette swap (the Lark's throat accent, Samus-style) is a
 // canvas pixel remap at load: a reserved key-colour ramp is replaced per power-up.
 import { SPRITE_W, SPRITE_H, TILE_PX } from './config.js';
-import { WREN_SHEETS, frameBox, stripCoil } from './wren.js';
+import { WREN_SHEETS, frameBox, stripCoil, rotationKeys, rotateFrameData, artRad, gripAt, SWING_LOOK } from './wren.js';
 
 export const ART_SCALE = 1;
 
 /** Reserved accent key ramp painted into every Lark frame (pure hues no other art uses). */
 export const ACCENT_KEY_RAMP = Object.freeze([[0, 255, 0], [0, 200, 0], [0, 150, 0]]);
-/** The locked palette (STYLE-GUIDE section 3, v1 LOCKED Oct 28 2026). Every placeholder colour
- *  below is one of these; base art must use only these exact values. */
+/** The locked palette (STYLE-GUIDE section 3, nightlark-v3-base.hex). Warm/amber = home;
+ *  cold SW = Company danger. CK0/CK1 = hub-city glow. Every placeholder colour below is one
+ *  of these; base art must use only these exact values. */
 export const PALETTE = Object.freeze({
   WP0: '#170F3D', WP1: '#2E1A64', WP2: '#4C2C94', WP3: '#8058D6', WP4: '#B086EE',
   WL0: '#9283D8', WL1: '#BBA8F0', WL2: '#E2CDFB', WL3: '#FBF3FF',
@@ -24,7 +25,7 @@ export const PALETTE = Object.freeze({
   TB0: '#1C1614', TB1: '#352821', TB2: '#574031', TB3: '#7A5F48',
   FG0: '#182C36', FG1: '#365461', FG2: '#6A8A96', MN0: '#7AA2C8', MN1: '#B5D2EA',
   LG0: '#5C2E0E', LG1: '#A85A18', LG2: '#E3952C', LG3: '#FFC45E', LG4: '#FFE8AE',
-  SW0: '#9DADC2', SW1: '#D8E2EE', SW2: '#FFFFFF',
+  SW0: '#A3ABC7', SW1: '#E8EDF7', SW2: '#FFFFFF',
   AR0: '#4E0B17', AR1: '#991A22', AR2: '#D9322B', AR3: '#FF6B50',
   PC0: '#2B8645', PC1: '#4CC566', PC2: '#93F2A0', PR0: '#0F7F7C', PR1: '#1EC2B6', PR2: '#7DF2E6',
   PL0: '#2A5BC8', PL1: '#4C90FF', PL2: '#A2CEFF',
@@ -32,6 +33,7 @@ export const PALETTE = Object.freeze({
   GD0: '#182124', GD1: '#2D3A3E', GD2: '#4A5C5E', GD3: '#728A87',
   UI0: '#090C13', UI1: '#242B39', UI2: '#556073', UI3: '#A4ADBB', UI4: '#EEF1F5',
   IX0: '#3A9ED6', IX1: '#8FDCFF', FX0: '#6A798B', FX1: '#8EA6BF', FX2: '#8E959E', FX3: '#C3C8CE',
+  CK0: '#313B49', CK1: '#3D4A5C',
 });
 export const hexToRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 const ramp = (...ids) => Object.freeze(ids.map((id) => Object.freeze(hexToRgb(PALETTE[id]))));
@@ -99,6 +101,22 @@ export function accentMap(ramp = DEFAULT_ACCENT_RAMP) {
   return ACCENT_KEY_RAMP.map((k, i) => [k, ramp[Math.min(i, ramp.length - 1)]]);
 }
 
+/** Merge Brook's working manifests into the engine manifest, for a LOCAL look-test build only
+ *  (tools/build-beta.mjs --local-art). base: art/manifest.json ({sprites}); extras: Brook's
+ *  art/in/manifest.json ({sprites}) and art/in/manifest-swing-proposal.json ({entries}), whose
+ *  `file`s are relative to art/in/. A name already in base keeps base's entry; later extras
+ *  never override earlier ones. Every key is copied as-is (frameNames, fps, grip, tailAnchor,
+ *  ownsCloak, ledgeHand...), so nothing is hand-copied. Returns a new object; inputs untouched. */
+export function mergeManifests(base, ...extras) {
+  const out = { ...base, sprites: [...((base && base.sprites) || [])] };
+  const have = new Set(out.sprites.map((s) => s.name));
+  for (const m of extras) for (const s of (m && (m.sprites || m.entries)) || []) {
+    if (!s || !s.name || have.has(s.name)) continue;
+    have.add(s.name); out.sprites.push({ ...s, file: 'in/' + s.file });
+  }
+  return out;
+}
+
 /** Load art/manifest.json entries (browser). Missing files are fine: placeholders stay.
  *  Sheets flagged accentKey get the key ramp remapped to the default accent at load, and the
  *  Wren strips get two derived copies (never written back to the art files): `noCoil` (the
@@ -114,8 +132,55 @@ export async function loadArt(baseUrl = './art/') {
       img.onerror = () => resolve();
       img.src = `${baseUrl}${s.file}`;
     })));
+    const kits = await Promise.all((manifest.kits || []).map(async (f) => {
+      try {
+        const json = await (await fetch(`${baseUrl}${f}`)).json();
+        const dir = f.includes('/') ? f.slice(0, f.lastIndexOf('/') + 1) : '';
+        const img = await new Promise((resolve) => { const im = new Image(); im.onload = () => resolve(im); im.onerror = () => resolve(null); im.src = `${baseUrl}${dir}${json.atlas}`; });
+        return img ? { json, img } : null;
+      } catch { return null; }
+    }));
+    const kit = kitIndex(kits.filter(Boolean));
+    if (kit) sheets.kit = kit;
+    if (manifest.skyline) {
+      try { sheets.skyline = await (await fetch(`${baseUrl}${manifest.skyline}`)).json(); } catch { /* optional */ }
+    }
+    if (manifest.miniTower) {
+      try { sheets.miniTower = await (await fetch(`${baseUrl}${manifest.miniTower}`)).json(); } catch { /* optional */ }
+    }
   } catch { /* no manifest yet: placeholders */ }
   return sheets;
+}
+
+/** Brook's tower kit atlases (art/in/kit-harbor-*.json + .png, ATLAS-SPEC): one lookup of every
+ *  cell by id (and by each alias), { img, x, y, w, h, layer, ...his cell fields }. x, y are the
+ *  art box in the atlas (the 1 px extrusion is outside it). null when nothing loaded: the
+ *  placeholder draws stay (js/kit/draw.js). */
+export function kitIndex(list) {
+  const cells = {};
+  for (const { json, img } of list || []) for (const c of json.cells || []) {
+    const cell = { ...c, img, layer: json.layer };
+    cells[c.id] = cell;
+    for (const al of c.aliases || []) if (!cells[al]) cells[al] = cell;
+  }
+  return Object.keys(cells).length ? { cells } : null;
+}
+
+/** STYLE-GUIDE §4 Hidden / crouch-hide §6.1: value ×0.5 + 50% desaturation, alpha kept.
+ *  Used once at load to build sheet.dim (same pattern as sheet.lit). Engine-layer may go
+ *  off-palette; source PNGs stay on-palette. */
+export function dimHidden(data) {
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] === 0) continue;
+    let r = data[i], g = data[i + 1], b = data[i + 2];
+    const y = 0.299 * r + 0.587 * g + 0.114 * b;
+    r = r + (y - r) * 0.5;
+    g = g + (y - g) * 0.5;
+    b = b + (y - b) * 0.5;
+    data[i] = (r * 0.5 + 0.5) | 0;
+    data[i + 1] = (g * 0.5 + 0.5) | 0;
+    data[i + 2] = (b * 0.5 + 0.5) | 0;
+  }
 }
 
 const COIL_RGB = ['WH0', 'WH1', 'WH2'].map((id) => hexToRgb(PALETTE[id]));
@@ -128,6 +193,14 @@ function prepareSheet(img, spec) {
   const id = bx.getImageData(0, 0, img.width, img.height);
   if (spec.accentKey) { remapColors(id.data, accentMap()); bx.putImageData(id, 0, 0); }
   sheet.img = base;
+  const makeDim = (src) => {
+    const d = mk(); const dx = d.getContext('2d');
+    dx.drawImage(src, 0, 0);
+    const dimId = dx.getImageData(0, 0, img.width, img.height);
+    dimHidden(dimId.data);
+    dx.putImageData(dimId, 0, 0);
+    return d;
+  };
   if (WREN_SHEETS.includes(spec.name)) {
     const nc = mk(); const ndata = new ImageData(stripCoil(id.data, img.width, COIL_RGB), img.width, img.height);
     nc.getContext('2d').putImageData(ndata, 0, 0);
@@ -138,22 +211,86 @@ function prepareSheet(img, spec) {
     const litNc = mk(); const ln = litNc.getContext('2d');
     ln.drawImage(nc, 0, 0); ln.globalCompositeOperation = 'source-in'; ln.fillStyle = PALETTE.LG2; ln.fillRect(0, 0, img.width, img.height);
     sheet.litNoCoil = litNc;
+    sheet.dim = makeDim(base);
+    sheet.dimNoCoil = makeDim(nc);
   }
+  if (!sheet.lit) { // motion strips: a lamp-lit silhouette too, so a lit Wren reads the same in every pose
+    const lit = mk(); const lx = lit.getContext('2d');
+    lx.drawImage(base, 0, 0); lx.globalCompositeOperation = 'source-in'; lx.fillStyle = PALETTE.LG2; lx.fillRect(0, 0, img.width, img.height);
+    sheet.lit = lit;
+  }
+  if (!sheet.dim) { // hide strips + motion: solid hidden look (value×0.5 + 50% desat)
+    sheet.dim = makeDim(base);
+  }
+  if (ROTATE_SHEETS.includes(spec.name) && SWING_LOOK.rotateArt) buildRotCache(sheet, mk);
   return sheet;
+}
+
+/** Sheets the engine may turn by the swing rotation rule (STYLE-GUIDE §5). */
+export const ROTATE_SHEETS = Object.freeze(['lark-swing']);
+/** Load-time cache: every (frame, leftover) the swing can show, turned about the grip with
+ *  nearest-neighbour sampling, as a base copy and a lamp-lit silhouette. */
+function buildRotCache(sheet, mk) {
+  const angles = sheet.angleDeg || SWING_LOOK.baked; if (!gripAt(sheet, 0)) return;
+  const fw = sheet.frameW * ART_SCALE; const fh = sheet.frameH * ART_SCALE;
+  const src = sheet.noCoil || sheet.img;
+  const all = src.getContext ? src.getContext('2d').getImageData(0, 0, src.width, src.height) : null; if (!all) return;
+  sheet.rotCache = new Map();
+  for (const k of rotationKeys(angles)) {
+    const g = gripAt(sheet, k.frame); const one = new Uint8ClampedArray(fw * fh * 4);
+    for (let y = 0; y < fh; y++) one.set(all.data.subarray(((y * all.width) + k.frame * fw) * 4, ((y * all.width) + k.frame * fw + fw) * 4), y * fw * 4);
+    const r = rotateFrameData(one, fw, fh, [g[0] * ART_SCALE, g[1] * ART_SCALE], artRad(k.leftover), SWING_LOOK.rotPad * ART_SCALE);
+    const c = document.createElement('canvas'); c.width = r.w; c.height = r.h;
+    c.getContext('2d').putImageData(new ImageData(r.data, r.w, r.h), 0, 0);
+    const lit = document.createElement('canvas'); lit.width = r.w; lit.height = r.h; const lx = lit.getContext('2d');
+    lx.drawImage(c, 0, 0); lx.globalCompositeOperation = 'source-in'; lx.fillStyle = PALETTE.LG2; lx.fillRect(0, 0, r.w, r.h);
+    sheet.rotCache.set(k.key, { base: c, lit, w: r.w / ART_SCALE, h: r.h / ART_SCALE, grip: [r.grip[0] / ART_SCALE, r.grip[1] / ART_SCALE] });
+  }
+}
+
+/** Source rect of a frame in a strip or grid sheet. */
+export function frameSrc(sheet, frame) {
+  const fw = (sheet.frameW || 16) * ART_SCALE;
+  const fh = (sheet.frameH || 16) * ART_SCALE;
+  const n = Math.max(1, sheet.frames || 1);
+  const i = ((frame % n) + n) % n;
+  const cols = sheet.cols || (sheet.layout === 'grid' ? Math.max(1, sheet.cols || n) : n);
+  return { sx: (i % cols) * fw, sy: Math.floor(i / cols) * fh, fw, fh };
 }
 
 /** Draw one frame of a loaded sheet with its pivot at (x, y) logical px; face < 0 mirrors.
  *  img: which copy of the strip (default the remapped base). */
 export function drawFrame(ctx, sheet, frame, x, y, face = 1, img = sheet.img) {
   const b = frameBox(sheet, x, y, face);
-  const fw = sheet.frameW * ART_SCALE; const fh = sheet.frameH * ART_SCALE;
-  const sx = (frame % sheet.frames) * fw;
+  const { sx, sy, fw, fh } = frameSrc(sheet, frame);
+  const im = img || sheet.img;
+  if (!im) return b;
   if (face < 0) {
     ctx.save(); ctx.translate(b.left + b.w, b.top); ctx.scale(-1, 1);
-    ctx.drawImage(img, sx, 0, fw, fh, 0, 0, b.w, b.h);
+    ctx.drawImage(im, sx, sy, fw, fh, 0, 0, b.w, b.h);
     ctx.restore();
-  } else ctx.drawImage(img, sx, 0, fw, fh, b.left, b.top, b.w, b.h);
+  } else ctx.drawImage(im, sx, sy, fw, fh, b.left, b.top, b.w, b.h);
   return b;
+}
+
+/** Draw one frame with its top-left at (left, top) logical px (a pose that places its own box,
+ *  e.g. the ledge climb); face < 0 mirrors inside the box. */
+export function drawFrameBox(ctx, sheet, frame, left, top, face = 1, img = sheet.img) {
+  const { sx, sy, fw, fh } = frameSrc(sheet, frame);
+  const im = img || sheet.img;
+  if (!im) return;
+  if (face < 0) {
+    ctx.save(); ctx.translate(left + sheet.frameW, top); ctx.scale(-1, 1);
+    ctx.drawImage(im, sx, sy, fw, fh, 0, 0, sheet.frameW, sheet.frameH);
+    ctx.restore();
+  } else ctx.drawImage(im, sx, sy, fw, fh, left, top, sheet.frameW, sheet.frameH);
+}
+
+/** Blit a frame with its top-left at (left, top). */
+export function blitFrame(ctx, sheet, frame, left, top, img = sheet.img) {
+  if (!sheet || !img) return;
+  const { sx, sy, fw, fh } = frameSrc(sheet, frame);
+  ctx.drawImage(img, sx, sy, fw, fh, Math.round(left), Math.round(top), sheet.frameW, sheet.frameH);
 }
 
 /** Draw a sprite frame with feet at (x, y) logical px, or its placeholder rect. */

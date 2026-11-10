@@ -1,12 +1,12 @@
 // Level grid: parsing and tile queries (v1 semantics, in tile units).
 //
-// Ledge materials (Azzato, Oct 28, 2026):
+// Ledge materials (Superdooperman, Oct 28, 2026):
 //   STONE (thick masonry) '#' lit, 's' in shadow (a hide spot): fully solid. The body is blocked
 //     on every side and pushed back out the same frame if it ever overlaps. Blocks sight and the line.
 //   WOOD (thin beams, rafters, awnings) '=' lit, '~' in shadow: ONE-WAY. She lands on it only when
 //     falling onto it from above; from below or the side she passes through; DOWN + A drops her
 //     through. Wood never blocks sight or the line.
-//   GRATING (Azzato, Nov 9 2026; the climb platforms) 'g': iron grating. ONE-WAY for the body and
+//   GRATING (Superdooperman, Nov 9 2026; the climb platforms) 'g': iron grating. ONE-WAY for the body and
 //     DOWN + A exactly like wood, and see-through (its gaps), so it never blocks sight or the line.
 //     Stone slabs are the ground floor's and are never one-way, however thin.
 // Other tiles: 'b' blue hiding stone (full block), 'D' door (full block until the key), 'L' lamp,

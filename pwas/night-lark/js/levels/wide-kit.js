@@ -1,4 +1,4 @@
-// WIDE KIT STRETCH (big rooms prototype, Azzato, Nov 9 2026): two of the existing Harbormaster kit
+// WIDE KIT STRETCH (big rooms prototype, Superdooperman, Nov 9 2026): two of the existing Harbormaster kit
 // towers (levels/tall-shaft.js buildKitTower, js/kit/route.js towerRoute + its dressing pass) side
 // by side with an open 4-col join between them: 28 + 4 + 28 = 60 cols, two of today's screens.
 // No new generator: each half is the kit tower exactly as it builds on its own (seed, attempt,

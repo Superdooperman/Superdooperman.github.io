@@ -3,7 +3,8 @@
 // night over, the reveal (placeholder staging), the end card and the Stash pick.
 // Every string here must be drawable with font.js (test/m4-strings.test.mjs).
 import { VIEW_W, VIEW_H, HUD_H, TILE_PX, TUNING } from './config.js';
-import { PALETTE as P, PLACEHOLDER as C } from './art.js';
+import { PALETTE as P, PLACEHOLDER as C, blitFrame } from './art.js';
+import { drawPowerupIcon } from './draw-sprites.js';
 import { drawText } from './font.js';
 import { render, cameraFor } from './render.js';
 import { promptText } from './prompts.js';
@@ -21,7 +22,9 @@ function box(ctx, x, y, w, h, border, bg = C.overlay) {
 const A = (dev) => promptText('{A}', dev);
 
 /** A power-up icon: a tier-coloured gem, 7x7. */
+let iconSheets = null;
 function icon(ctx, id, x, y) {
+  if (iconSheets && drawPowerupIcon(ctx, iconSheets, id, x, y, 7)) return;
   const p = byId(id); if (!p) return;
   ctx.fillStyle = tierCol(p.tier, 2); ctx.fillRect(x, y, 7, 7);
   ctx.fillStyle = tierCol(p.tier, 1); ctx.fillRect(x + 1, y + 1, 5, 5);
@@ -36,7 +39,8 @@ export function screenStrings() {
     "TONIGHT: THE HARBORMASTER'S TOWER.", 'PREPARING THE TOWER...', 'SMOKE', 'COMMON', 'RARE', 'LEGENDARY',
     'NIGHTS CLEARED:', 'BEST RANK:', 'M: SOUND', 'ARROWS: MOVE', 'SYNERGY:', 'RETURNED TO', 'NIGHT', 'STASH:',
     'COMMON AND RARE ONLY. IT STAYS THROUGH A LOST NIGHT.', 'ARROWS: CHOOSE', 'TAKE IT', 'KEEP IT', 'OR START: A NEW NIGHT',
-    'NEXT', 'BACK', 'PRESS', 'CHOOSE', 'MOTION: FULL', 'MOTION: REDUCED'];
+    'NEXT', 'BACK', 'PRESS', 'CHOOSE', 'MOTION: FULL', 'MOTION: REDUCED', 'TOUCH: AUTO', 'TOUCH: ON', 'TOUCH: OFF',
+    'PULL', 'SWING'];
   for (const p of POWERUPS) out.push(p.name, ...p.text);
   for (const r of RETURNED) out.push(r.name, r.owner, r.line, `TAKE BACK ${r.name}.`);
   for (const pg of REVEAL) out.push(pg.who, ...pg.lines);
@@ -44,6 +48,7 @@ export function screenStrings() {
 }
 
 export function drawGame(ctx, game, sheets = null, opts = {}) {
+  iconSheets = sheets;
   const dev = opts.device || 'key';
   ctx.imageSmoothingEnabled = false;
   const s = game.screen;
@@ -54,7 +59,7 @@ export function drawGame(ctx, game, sheets = null, opts = {}) {
     return;
   }
   fill(ctx, C.sky);
-  if (s === 'title') drawTitle(ctx, game, dev);
+  if (s === 'title') drawTitle(ctx, game, dev, sheets);
   else if (s === 'shelf') drawShelf(ctx, game, dev);
   else if (s === 'card') drawCard(ctx, game, dev);
   else if (s === 'over') drawOver(ctx, game, dev);
@@ -63,12 +68,17 @@ export function drawGame(ctx, game, sheets = null, opts = {}) {
   else if (s === 'stash') drawStash(ctx, game, dev);
 }
 
-function drawTitle(ctx, game, dev) {
-  // a placeholder skyline: the tower against the night
-  ctx.fillStyle = P.NV0; ctx.fillRect(0, 190, VIEW_W, 80);
-  ctx.fillStyle = P.SL1; ctx.fillRect(330, 60, 60, 140); ctx.fillRect(350, 40, 20, 20);
-  ctx.fillStyle = P.LG3; ctx.fillRect(356, 48, 8, 6);
-  center(ctx, 'NIGHT LARK', 40, C.hud, 4);
+function drawTitle(ctx, game, dev, sheets) {
+  const key = sheets && sheets['title-key-art'];
+  const logo = sheets && sheets['title-logo'];
+  if (key && key.img) blitFrame(ctx, key, 0, 0, 0);
+  else {
+    ctx.fillStyle = P.NV0; ctx.fillRect(0, 190, VIEW_W, 80);
+    ctx.fillStyle = P.SL1; ctx.fillRect(330, 60, 60, 140); ctx.fillRect(350, 40, 20, 20);
+    ctx.fillStyle = P.LG3; ctx.fillRect(356, 48, 8, 6);
+  }
+  if (logo && logo.img) blitFrame(ctx, logo, 0, (logo.anchor && logo.anchor[0]) || 20, (logo.anchor && logo.anchor[1]) || 20);
+  else center(ctx, 'NIGHT LARK', 40, C.hud, 4);
   game.menu().forEach((m, i) => {
     const sel = i === game.sel;
     drawText(ctx, `${sel ? '> ' : '  '}${m}`, 140, 110 + i * 22, sel ? P.IX1 : C.hudDim, 2);
@@ -196,8 +206,14 @@ function drawReveal(ctx, game, dev) {
   // the Lark: purple cloak, lavender front, the mask (off once unmasked)
   const unmasked = REVEAL.findIndex((p) => p.unmask) <= game.reveal;
   const lx = pg.stinger ? 120 : VIEW_W / 2 - 24; const ly = 60;
-  ctx.fillStyle = C.lark; ctx.fillRect(lx, ly, 48, 96);
-  ctx.fillStyle = C.larkFront; ctx.fillRect(lx + 12, ly + 36, 24, 52);
+  const portrait = iconSheets && iconSheets['wren-portrait'];
+  if (unmasked && portrait && portrait.img) {
+    // DRAFT: Brook flagged wren-portrait as a best-guess hood-down Wren.
+    blitFrame(ctx, portrait, 0, lx, ly);
+  } else {
+    ctx.fillStyle = C.lark; ctx.fillRect(lx, ly, 48, 96);
+    ctx.fillStyle = C.larkFront; ctx.fillRect(lx + 12, ly + 36, 24, 52);
+  }
   ctx.fillStyle = unmasked ? P.WS2 : C.larkMask; ctx.fillRect(lx + 8, ly + 12, 32, 12);
   ctx.fillStyle = unmasked ? P.WS0 : C.larkGlint; ctx.fillRect(lx + 14, ly + 16, 4, 4); ctx.fillRect(lx + 30, ly + 16, 4, 4);
   if (pg.stinger) { // two watchmen, gaping

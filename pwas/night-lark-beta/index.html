@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en" data-build="beta">
+<html lang="en" data-build="beta" data-storage="nightlark.v2beta" data-commit="2bf1d1f">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; worker-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#090C13">
 <link rel="manifest" href="manifest.webmanifest">
@@ -11,25 +11,38 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>Night Lark (beta)</title>
 <style>
-  html, body { margin: 0; height: 100%; background: #090C13; overflow: hidden; touch-action: none;
+  html, body { margin: 0; height: 100%; background: #090C13; overflow: hidden;
     -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
-  #game { position: absolute; image-rendering: pixelated; image-rendering: crisp-edges; touch-action: none; }
+  #game { position: absolute; image-rendering: pixelated; image-rendering: crisp-edges; touch-action: pinch-zoom; }
+  /* beta pinch zoom: reset fallback, shown by js/page-zoom.js only while the page is zoomed */
+  #reset-zoom { position: fixed; left: 0; top: 0; z-index: 5; transform-origin: 0 0; margin: 8px; padding: 8px 12px;
+    font: bold 12px/1 monospace; color: #EEF1F5; background: rgba(11,17,34,0.85); border: 2px solid rgba(238,241,245,0.6); border-radius: 8px; touch-action: manipulation; }
+  #reset-zoom[hidden] { display: none; }
   #touch[hidden], #rotate[hidden] { display: none; }
   #touch { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
+  /* swing-feel: Dead Cells mobile style. The controls float over the game view (no side
+     margins any more), faint at rest and brighter while pressed, so the play area stays readable. */
   #touch .b { position: absolute; pointer-events: auto; touch-action: none; box-sizing: border-box;
-    border: 2px solid rgba(238,241,245,0.55); background: rgba(11,17,34,0.45); color: #EEF1F5;
-    font: bold 18px/1 monospace; display: flex; align-items: center; justify-content: center; }
-  #touch .b.on, #touch .dpad[data-dirs]:not([data-dirs=""]) { background: rgba(143,220,255,0.35); }
+    border: 2px solid rgba(238,241,245,0.32); background: rgba(11,17,34,0.18); color: rgba(238,241,245,0.7);
+    font: bold 18px/1 monospace; display: flex; align-items: center; justify-content: center;
+    transition: background-color 60ms linear, border-color 60ms linear; }
+  #touch .b.on, #touch .dpad[data-dirs]:not([data-dirs=""]) { background: rgba(143,220,255,0.28); border-color: rgba(238,241,245,0.6); }
   #touch .dpad { width: 144px; height: 144px; border-radius: 50%;
-    left: calc(16px + env(safe-area-inset-left)); bottom: 20px; }
+    left: calc(20px + env(safe-area-inset-left)); bottom: calc(20px + env(safe-area-inset-bottom)); }
   #touch .dpad::before { content: ''; position: absolute; left: 50%; top: 14%; bottom: 14%; width: 30%;
-    transform: translateX(-50%); background: rgba(238,241,245,0.18); }
+    transform: translateX(-50%); background: rgba(238,241,245,0.10); }
   #touch .dpad::after { content: ''; position: absolute; top: 50%; left: 14%; right: 14%; height: 30%;
-    transform: translateY(-50%); background: rgba(238,241,245,0.18); }
+    transform: translateY(-50%); background: rgba(238,241,245,0.10); }
   #touch .ab { width: 64px; height: 64px; border-radius: 50%; }
-  #touch .A { right: calc(16px + env(safe-area-inset-right)); bottom: 28px; }
-  #touch .B { right: calc(92px + env(safe-area-inset-right)); bottom: 72px; }
-  #touch .sys { width: 64px; height: 48px; border-radius: 12px; font-size: 11px; top: 10px; }
+  #touch .A { right: calc(20px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); }
+  #touch .B { right: calc(96px + env(safe-area-inset-right)); bottom: calc(68px + env(safe-area-inset-bottom)); }
+  /* PULL fires the warp-pull grapple (hold to aim, like B). Hidden until the suit power is earned (body.has-pull, main.js). */
+  body:not(.has-pull) #touch .P { display: none; }
+  #touch .P { width: 52px; height: 52px; font-size: 11px; right: calc(164px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); border-radius: 12px; }
+  /* ZIP (yank) shows when yankInput is 'button' (the default, body.yank-button); with ?yank=hold, holding B on the line zips instead */
+  #touch .Z { display: none; width: 52px; height: 52px; font-size: 11px; right: calc(28px + env(safe-area-inset-right)); bottom: calc(104px + env(safe-area-inset-bottom)); }
+  body.yank-button #touch .Z { display: flex; }
+  #touch .sys { width: 64px; height: 48px; border-radius: 12px; font-size: 11px; top: calc(18px + env(safe-area-inset-top)); opacity: 0.8; }
   #touch .start { right: calc(16px + env(safe-area-inset-right)); }
   #touch .select { left: calc(16px + env(safe-area-inset-left)); }
   #rotate { position: fixed; inset: 0; z-index: 3; background: #090C13; color: #EEF1F5;
@@ -46,6 +59,8 @@
 <div id="touch" hidden>
   <div class="b dpad" aria-label="D-pad"></div>
   <div class="b ab B" data-action="fire" aria-label="B">B</div>
+  <div class="b ab Z" data-action="yank" aria-label="Zip">ZIP</div>
+  <div class="b ab P" data-action="pull" aria-label="Pull grapple">PULL</div>
   <div class="b ab A" data-action="jump" aria-label="A">A</div>
   <div class="b sys start" data-action="start" aria-label="Start">START</div>
   <div class="b sys select" data-action="select" aria-label="Select">SELECT</div>

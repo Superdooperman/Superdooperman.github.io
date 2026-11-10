@@ -8,6 +8,7 @@
 //   - the exit hatch on the far right.
 // Prompts teach each thing the first time it shows up (BRIEF "Teach in play").
 import { blankRows, fillRect, putTile } from '../level.js';
+import { dressGenerated } from '../kit/dress.js';
 
 export const WR = Object.freeze({
   cols: 30, rows: 16,
@@ -38,11 +39,11 @@ export function watchRoom() {
   putTile(t, g.spawn.r, g.spawn.c, 'P');
   putTile(t, g.exit.r, g.exit.c, 'E');
   const { c, dir, c0, c1, speed } = g.guard;
-  return {
+  const def = {
     name: 'WATCH ROOM',
     rows: t,
     guards: [{ c, dir, c0, c1, speed, floor: g.floor.top }],
-    searchlights: [{ ...g.searchlight }],
+    searchlights: [{ ...g.searchlight, size: 'small' }],
     autoExit: true,
     prompts: [
       // shown by an event, kept until done: the first time a meter starts filling
@@ -54,4 +55,6 @@ export function watchRoom() {
     ],
     checkpoints: [],
   };
+  dressGenerated(def, 2, { keepAnchors: true });
+  return def;
 }

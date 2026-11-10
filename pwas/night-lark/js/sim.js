@@ -968,8 +968,38 @@ export function createWorld(levelDef, opts = {}) {
       if (w.taut && w.anchor && !w.yank) pumpSwing(w, w.anchor, dir, dt, v2, fix2 ? F2.pumpMul : 1);
     }
     }
-    // the line never drags her into stone: undo the rope move if it would
-    if (bodyBlocked(level, w.x, w.y, w.h, w.doorsOpen)) { w.x = prevX; w.y = preRopeY; w.vx = 0; }
+    // the line never drags her into stone. Full undo used to abandon the length against a
+    // wall, so gravity won every frame (slow slide with no input). Hold her on the circle at
+    // the pre-rope x instead — same still hang as in open air (playtest, Nov 9 2026).
+    if (bodyBlocked(level, w.x, w.y, w.h, w.doorsOpen)) {
+      w.vx = 0;
+      let held = false;
+      if (w.anchor && !w.pull && !w.grounded && w.ropeLen > 0) {
+        // Prefer pre-rope x; if that is already in stone, nudge toward the anchor onto clear air.
+        let xHold = prevX;
+        if (bodyBlocked(level, xHold, preRopeY, w.h, w.doorsOpen)) {
+          const toward = Math.sign(w.anchor.x - xHold) || (w.face || 1);
+          for (let s = 0.05; s <= T.halfWidth + 0.5; s += 0.05) {
+            const x = prevX + toward * s;
+            if (!bodyBlocked(level, x, preRopeY, w.h, w.doorsOpen)) { xHold = x; break; }
+          }
+        }
+        const dx = xHold - w.anchor.x;
+        const rem = w.ropeLen * w.ropeLen - dx * dx;
+        if (rem >= 0) {
+          const cy0 = bodyCenterY({ y: preRopeY, h: w.h });
+          const root = Math.sqrt(rem);
+          const cyBelow = w.anchor.y + root;
+          const cyAbove = w.anchor.y - root;
+          const cy = Math.abs(cyBelow - cy0) <= Math.abs(cyAbove - cy0) ? cyBelow : cyAbove;
+          const yHold = cy + w.h * 0.5;
+          if (!bodyBlocked(level, xHold, yHold, w.h, w.doorsOpen)) {
+            w.x = xHold; w.y = yHold; w.vy = 0; w.taut = true; held = true;
+          }
+        }
+      }
+      if (!held) { w.x = prevX; w.y = preRopeY; }
+    }
     if (w.y >= preRopeY) tryLand(preRopeY, vyBefore);
     if (v2) resolveStrike();
 

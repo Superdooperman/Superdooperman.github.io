@@ -1,0 +1,94 @@
+{
+ "by": "Brook, 2026-11-03 (night-lark batch mini, mini moon towers, draft)",
+ "kind": "mini moon tower (checkpoint)",
+ "states": [
+  "dark",
+  "relit"
+ ],
+ "transitions": {
+  "relight": "dark -> relit: cameras drop (camera frames drop_*), shell crumbles top-down (shell-crumble, particles), rubble settles, crown flicker_a/b -> relit, pool fades in"
+ },
+ "stacks": {
+  "low": {
+   "pieces": [
+    "mini-tower-pole",
+    "mini-tower-transition",
+    "mini-tower-mast",
+    "mini-tower-platform",
+    "mini-tower-neck",
+    "mini-tower-crown"
+   ],
+   "height": 112,
+   "prebaked": "mini-tower-stack"
+  },
+  "tall": {
+   "pieces": [
+    "mini-tower-pole",
+    "mini-tower-pole",
+    "mini-tower-transition",
+    "mini-tower-mast",
+    "mini-tower-mast",
+    "mini-tower-platform",
+    "mini-tower-neck",
+    "mini-tower-crown"
+   ],
+   "height": 144,
+   "prebaked": "mini-tower-stack-tall"
+  }
+ },
+ "shell": {
+  "order_from_top": [
+   "mini-tower-shell-battlement",
+   "mini-tower-shell:top",
+   "mini-tower-shell:mid_*"
+  ],
+  "covers": "pole .. platform; the neck shows through the crenels"
+ },
+ "cameras": {
+  "crownLamps": [
+   0,
+   2
+  ],
+  "frames": {
+   "watch": 0,
+   "alert": 1,
+   "drop": [
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "led": "SW1/SW2 steady; alert AR2/AR3"
+ },
+ "anchors_relative_to_foot": {
+  "checkpoint": [
+   0,
+   0
+  ],
+  "spawn": [
+   36,
+   0
+  ],
+  "poolOrigin": [
+   0,
+   0
+  ]
+ },
+ "checkpoint": {
+  "setOn": "relight",
+  "respawnAt": "spawn",
+  "facing": "away from the tower"
+ },
+ "safePocket": {
+  "pool": "mini-tower-pool",
+  "radius": 80,
+  "note": "inside the pocket Wren counts as hidden from Company light (design to confirm)"
+ },
+ "mapReveal": {
+  "revealRadius": 320,
+  "PLACEHOLDER": true,
+  "unit": "px, around the foot",
+  "note": "reveals this area's map on relight; value to be tuned by design"
+ }
+}

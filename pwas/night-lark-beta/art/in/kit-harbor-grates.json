@@ -1,0 +1,130 @@
+{
+ "atlas": "kit-harbor-grates.png",
+ "size": [
+  392,
+  52
+ ],
+ "area": "harbor",
+ "layer": "b",
+ "cell": [
+  128,
+  48
+ ],
+ "gutter": 2,
+ "extrude": 0,
+ "units": "px, module-local, origin top-left of the art box",
+ "cells": [
+  {
+   "id": "grate-short",
+   "x": 2,
+   "y": 2,
+   "w": 48,
+   "h": 16,
+   "footprint": {
+    "c": 3,
+    "r": 1
+   },
+   "mount": "wall",
+   "grapple": [],
+   "ledgeGrab": [
+    [
+     0,
+     0
+    ],
+    [
+     47,
+     0
+    ]
+   ],
+   "solid": [],
+   "oneWay": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 48,
+     "h": 16
+    }
+   ],
+   "faces": "right",
+   "note": "iron grating (pass-through); brackets y 6-15 art only"
+  },
+  {
+   "id": "grate-medium",
+   "x": 132,
+   "y": 2,
+   "w": 80,
+   "h": 16,
+   "footprint": {
+    "c": 5,
+    "r": 1
+   },
+   "mount": "wall",
+   "grapple": [],
+   "ledgeGrab": [
+    [
+     0,
+     0
+    ],
+    [
+     79,
+     0
+    ]
+   ],
+   "solid": [],
+   "oneWay": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 80,
+     "h": 16
+    }
+   ],
+   "faces": "right",
+   "note": "iron grating (pass-through); brackets y 6-15 art only"
+  },
+  {
+   "id": "grate-long",
+   "x": 262,
+   "y": 2,
+   "w": 128,
+   "h": 16,
+   "footprint": {
+    "c": 8,
+    "r": 1
+   },
+   "mount": "wall",
+   "grapple": [],
+   "ledgeGrab": [
+    [
+     0,
+     0
+    ],
+    [
+     127,
+     0
+    ]
+   ],
+   "solid": [],
+   "oneWay": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 128,
+     "h": 16
+    }
+   ],
+   "faces": "right",
+   "note": "iron grating (pass-through); brackets y 6-15 art only"
+  }
+ ],
+ "frames": 1,
+ "note": "Atlas of grate-short/medium/long in the kit-harbor-platforms cell format (one-way). Standalone PNG+JSON per piece also shipped.",
+ "palette": [
+  "SL0",
+  "SL2",
+  "SL4",
+  "SL5",
+  "WK0"
+ ],
+ "by": "Brook, 2026-11-09 (night-lark batch n9, warm-buff spec v3.3 + grating spec 2026-11-09, draft)"
+}

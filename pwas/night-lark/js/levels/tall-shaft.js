@@ -1,5 +1,5 @@
 // TALL SHAFT (swing-feel prototype, Oct 28 2026), now the outside of a tower built from
-// Azzato's tower kit sheet: three independent layers.
+// Superdooperman's tower kit sheet: three independent layers.
 //   a facade      seamless 4 x 6-tile wall blocks on a fixed 7-block-wide grid (js/kit/facade.js),
 //                 art only: no collision, no grapple points.
 //   b platforms   short/medium/long iron gratings (one-way), balconies, corner balconies, open ledges
@@ -26,7 +26,7 @@ export const TALL_SEED = 1;
  *  tallAttempt() with the solver. Seeds 1..TALL_REROLL_N not listed are attempt 0 with no solve;
  *  any other seed is solved at load (about 8 s a try in node for the dense tower). test/tall-shaft.test.mjs re-checks every entry; regenerate it if the generator changes
  *  (node tools/tall-reroll.mjs). */
-export const TALL_REROLL = Object.freeze({ 5: 1, 13: 1, 19: 1, 28: 2, 39: 1 }); // seeds 1-40; unlisted = attempt 0
+export const TALL_REROLL = Object.freeze({}); // seeds 1-40; unlisted = attempt 0 (regenerated Nov 9 2026)
 export const TALL_REROLL_N = 40;
 export const TALL_MAX_ATTEMPTS = 16;
 /** The table's attempt for a seed, or undefined when the seed is outside the table. */

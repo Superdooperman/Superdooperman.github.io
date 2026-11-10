@@ -3,7 +3,7 @@
 // Gameplay is side view. Without all three strips loaded the renderer keeps the placeholder
 // rect, so a build with the committed (HEAD) art looks exactly as before.
 //
-// Pose rules (Azzato, Oct 28 2026):
+// Pose rules (Superdooperman, Oct 28 2026):
 //  - at rest the strips' own rope coil at her feet is the rope; the engine draws no tail;
 //  - gun draw = cloak-open frames, then the gun-out frame, played quickly while B is down
 //    (the sim fires on release, so the draw never delays a shot);
@@ -18,6 +18,20 @@ export const WREN_DRAW = Object.freeze([['lark-cloak-open', 0], ['lark-cloak-ope
 export const WREN_DRAW_FRAME = 2 / 60; // s per draw frame: the whole draw is 100 ms
 export const WREN_IDLE_FPS = 2; // Brook: 8 fps flickers with only 2 idle frames
 export const WREN_FIRE = Object.freeze(['lark-gun-out', 0]);
+/** Hide pose (Brook gaps-hide, Nov 9 2026; playtest idea): cloak over the face.
+ *  Combined strip `wren-hide` (32x48, pivot 16,47): in (0-3) once → hold (4-5) loop;
+ *  on unhide play out (6-7). Mid-in abort maps in_1→out_1, in_2/in_3→out_0.
+ *  Draw at FULL opacity (hold colours baked darker). Desat is render fallback only. */
+export const HIDE_SHEET = 'wren-hide';
+/** Full-colour hold strip; engine applies STYLE-GUIDE §4 dim (×0.5 value, 50% desat). */
+export const HIDE_HOLD_SHEET = 'wren-hide-hold-full';
+export const HIDE_IN = Object.freeze([0, 1, 2, 3]);
+export const HIDE_HOLD = Object.freeze([4, 5]); // indices on combined strip (fallback)
+export const HIDE_OUT = Object.freeze([6, 7]);
+export const HIDE_IN_MS = Object.freeze([80, 70, 80, 110]);
+export const HIDE_HOLD_MS = Object.freeze([700, 700]);
+export const HIDE_OUT_MS = Object.freeze([60, 60]);
+
 /** Coil rows: pixels of the WH (hemp) ramp at or below this frame row are the rope on her
  *  body; they are dropped from the line-out copy of a frame. Row 9 is her eye, never masked. */
 export const COIL_FROM_ROW = 20;
@@ -33,14 +47,78 @@ export function pointAt(v, frame) {
 }
 export const muzzleAt = (sheet, frame) => pointAt(sheet && sheet.muzzle, frame);
 
-export function createWrenAnim() { return { draw: -1, idle: 0, sinceLine: -1, wasLine: false, fall: 0, walk: 0 }; }
+export function createWrenAnim() { return { draw: -1, idle: 0, sinceLine: -1, wasLine: false, fall: 0, walk: 0, hidePhase: null, hideI: 0, hideT: 0 }; }
 
 /** Grounded and moving (the run strip / stopgap bob shows). */
 export const isRunning = (w) => !!w.grounded && !w.anchor && !w.climb && !w.dodge && !(w.roll > 0) && Math.abs(w.vx) >= WALK.minSpeed;
 
+
+/** Mid-in abort → matching out frame index within HIDE_OUT (Brook): in_1→out_1, in_2/in_3→out_0. */
+export function hideOutStartFromIn(inFrameIndex) {
+  if (inFrameIndex <= 0) return 1; // barely started: snap to last out (hand-at-seam)
+  if (inFrameIndex === 1) return 1; // hand-at-seam → hand-at-seam
+  return 0; // cloak rising / over face → cloak-dropping
+}
+
+/** Advance the hide in/hold/out state machine. Out keeps playing after world.hidden clears. */
+export function stepHideAnim(a, w, dt) {
+  const ms = dt * 1000;
+  if (w.hidden) {
+    if (a.hidePhase === 'out' || !a.hidePhase) { a.hidePhase = 'in'; a.hideI = 0; a.hideT = 0; }
+    if (a.hidePhase === 'in') {
+      a.hideT += ms;
+      while (a.hidePhase === 'in' && a.hideT >= HIDE_IN_MS[a.hideI]) {
+        a.hideT -= HIDE_IN_MS[a.hideI];
+        a.hideI += 1;
+        if (a.hideI >= HIDE_IN.length) { a.hidePhase = 'hold'; a.hideI = 0; a.hideT = 0; }
+      }
+    } else if (a.hidePhase === 'hold') {
+      a.hideT += ms;
+      while (a.hideT >= HIDE_HOLD_MS[a.hideI % HIDE_HOLD.length]) {
+        a.hideT -= HIDE_HOLD_MS[a.hideI % HIDE_HOLD.length];
+        a.hideI += 1;
+      }
+    }
+  } else if (a.hidePhase === 'in' || a.hidePhase === 'hold') {
+    const start = a.hidePhase === 'in' ? hideOutStartFromIn(a.hideI) : 0;
+    a.hidePhase = 'out'; a.hideI = start; a.hideT = 0;
+  } else if (a.hidePhase === 'out') {
+    a.hideT += ms;
+    while (a.hidePhase === 'out' && a.hideT >= HIDE_OUT_MS[a.hideI]) {
+      a.hideT -= HIDE_OUT_MS[a.hideI];
+      a.hideI += 1;
+      if (a.hideI >= HIDE_OUT.length) { a.hidePhase = null; a.hideI = 0; a.hideT = 0; }
+    }
+  }
+}
+
+/** Absolute frame on wren-hide for the current hide phase, or -1 if none. */
+export function hideFrame(a) {
+  if (!a || !a.hidePhase) return -1;
+  if (a.hidePhase === 'in') return HIDE_IN[Math.min(a.hideI, HIDE_IN.length - 1)];
+  if (a.hidePhase === 'hold') return HIDE_HOLD[a.hideI % HIDE_HOLD.length];
+  if (a.hidePhase === 'out') return HIDE_OUT[Math.min(a.hideI, HIDE_OUT.length - 1)];
+  return -1;
+}
+
+/** Pose for the active hide phase. Hold uses hold-full when loaded; dim flag asks render for §4. */
+export function hidePose(a, sheets) {
+  if (!a || !a.hidePhase) return null;
+  if (a.hidePhase === 'hold' && sheets[HIDE_HOLD_SHEET]) {
+    const n = sheets[HIDE_HOLD_SHEET].frames || 2;
+    return { sheet: HIDE_HOLD_SHEET, frame: a.hideI % n, coil: true, muzzle: false, hide: true, hideDim: true };
+  }
+  if (!sheets[HIDE_SHEET]) return null;
+  const f = hideFrame(a);
+  if (f < 0) return null;
+  // in/out also get §4 dim while hidden (and during out settle)
+  return { sheet: HIDE_SHEET, frame: f, coil: true, muzzle: false, hide: true, hideDim: true };
+}
+
 /** One fixed step. draw >= 0 while the draw is running or held (B down, aiming, or a buffered tap). */
 export function stepWrenAnim(a, w, dt) {
   a.idle += dt;
+  stepHideAnim(a, w, dt);
   if (w.anchor) a.sinceLine = -1; else if (a.wasLine) a.sinceLine = 0; else if (a.sinceLine >= 0) a.sinceLine += dt;
   a.wasLine = !!w.anchor;
   a.fall = (!w.anchor && !w.grounded && !w.climb && w.vy > 0) ? (a.fall || 0) + dt : 0;
@@ -63,6 +141,12 @@ export function walkBob(a, w, sheets) {
 export function wrenPose(a, w, sheets) {
   if (sheets && isSwinging(w)) return { swing: swingPose(w, sheets), coil: false, muzzle: false };
   if (sheets && sheets[LEDGE_SHEET] && w.climb) { const p = ledgePose(w, sheets[LEDGE_SHEET]); if (p) return p; }
+  // Hide in/hold/out (Brook wren-hide). Out may still play after world.hidden clears.
+  // Hold prefers wren-hide-hold-full so the engine can dim per STYLE-GUIDE §4 (not baked-dark).
+  if (a && a.hidePhase && sheets) {
+    const p = hidePose(a, sheets);
+    if (p) return p;
+  }
   // Dodge pose only. The dash itself is sim.js; this file never writes velocity or the rope.
   if (sheets && sheets[ROLL_SHEET] && w.dodge && !(a && a.draw >= 0)) {
     const n = sheets[ROLL_SHEET].frames || 4;
@@ -93,7 +177,7 @@ export function wrenPose(a, w, sheets) {
 /** Feel fix 2 (Brook, Nov 3 2026): the standing idle, cloak and rope loop painted in. */
 export const IDLE_BELL = 'lark-idle-bell';
 
-// ---- Frames that paint their own cloak (Azzato via Vegapunk, Oct 28 2026) -----------------------
+// ---- Frames that paint their own cloak (Superdooperman via Vegapunk, Oct 28 2026) -----------------------
 // Brook's motion strips (swing, air, freefall, yank) leave the cloak tail to the engine, except
 // frames whose art already paints the whole cloak (the fall's spread poncho, the dive's
 // streaming poncho, the front-mid swing). A manifest entry may carry `ownsCloak`: one bool for
@@ -102,15 +186,16 @@ export const IDLE_BELL = 'lark-idle-bell';
 // CLOAK_OWNERS is the default. The older strips (idle, cloak-open, gun-out) draw their own
 // cloak as before (no engine cloak).
 // Wren pass 4 (Brook, Oct 28 2026): the values below mirror art/in/manifest-swing-proposal.json;
-// the manifest's own `ownsCloak` always wins. Roll and ledge never own it (engine tail shown).
+// the manifest's own `ownsCloak` always wins. Swing 0/4 keep the engine ribbon (live line is the rope there).
 export const MOTION_SHEETS = Object.freeze(['lark-swing', 'lark-air', 'lark-freefall', 'lark-yank', 'lark-roll', 'lark-ledge']);
 export const CLOAK_OWNERS = Object.freeze({
   'lark-swing': Object.freeze([false, true, true, true, false, true, true, true]), // back-mid, bottom-tuck, front-mid, apex-hang, back-90, front-90 (pass 5)
-  'lark-air': Object.freeze([false, false, true, true]), // release, rise, FALL (poncho halves spread as wings)
+  // tailfix Nov 9 2026 (Brook): air/roll/ledge paint the full poncho + rope — no engine ribbon
+  'lark-air': Object.freeze([true, true, true, true]),
   'lark-freefall': Object.freeze([true, true, true]), // dive-0..2 (poncho streaming up)
   'lark-yank': Object.freeze([true, true]), // snap, launch
-  'lark-roll': Object.freeze([false, false, false, false]),
-  'lark-ledge': Object.freeze([false, false, false, false]),
+  'lark-roll': Object.freeze([true, true, true, true]),
+  'lark-ledge': Object.freeze([true, true, true, true]),
 });
 
 /** Does this frame paint its own cloak? sheet: a loaded sheet (or manifest entry) with a name. */
@@ -383,7 +468,7 @@ export function drawGripFrame(ctx, sheet, frame, img, grip, x, y, rot, face, art
   ctx.restore();
 }
 
-/** Air poses from lark-air [release, rise, fall, spread]. Release is 1 frame (Azzato, Oct 28).
+/** Air poses from lark-air [release, rise, fall, spread]. Release is 1 frame (Superdooperman, Oct 28).
  *  Spread (pass 5, STYLE-GUIDE section 5 table: 2 frames = fall reused + spread, 8 fps
  *  ping-pong): once she has been falling for SPREAD.after s, spread shows first, then fall and
  *  spread alternate. From rest the freefall dive (vy >= FREEFALL_VY 18 t/s) takes over about

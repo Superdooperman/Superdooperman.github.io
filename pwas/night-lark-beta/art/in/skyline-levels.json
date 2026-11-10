@@ -1,0 +1,348 @@
+{
+ "note": "b3d hub-and-spoke skyline placement (Brook, draft). Units: layer px, y down. core.foot = bottom-centre of the core sprite. towers: foot = (x, towerFoot), frame = bg-spoke-tower frame by size+state; relit = which tower ids are relit (from the save). links: draw with a 1 px CK0 catenary (sag 6% of length, CK1 relay node every 48 px) from the tower link anchor to core target (towers sorted by x -> core link targets spread in x order); a relit tower's link is dead: NV2 dashes 3 on/3 off, first 14 px from the tower skipped (the cut stub is in the tower sprite). glow: bg-spoke-glow centred on each relit tower foot, centre row 75% down, optional layer (toggle). searchlight: bg-core-searchlight, pivot (48,159) on core light point, ping-pong 1 fps. cars: bg-core-car specks along core lanes [x0,x1,y] (core-local), 2 per lane, 4-8 px/s, frame 0 = moving right. Draw order per level in \"order\".",
+ "states": {
+  "0": [],
+  "2": [
+   "harbor",
+   "docks"
+  ],
+  "4": [
+   "harbor",
+   "docks",
+   "clocktower",
+   "cathedral"
+  ]
+ },
+ "towerAnchors": {
+  "tall": {
+   "link": [
+    29,
+    24
+   ],
+   "foot": [
+    23,
+    207
+   ],
+   "crown": [
+    23,
+    7
+   ]
+  },
+  "short": {
+   "link": [
+    29,
+    64
+   ],
+   "foot": [
+    23,
+    207
+   ],
+   "crown": [
+    23,
+    47
+   ]
+  }
+ },
+ "cores": {
+  "bg-core-far": {
+   "size": [
+    260,
+    200
+   ],
+   "linkTargets": [
+    [
+     90,
+     140
+    ],
+    [
+     130,
+     120
+    ],
+    [
+     160,
+     136
+    ],
+    [
+     182,
+     146
+    ]
+   ],
+   "lightPoint": [
+    130,
+    6
+   ],
+   "lanes": [
+    [
+     40,
+     220,
+     112
+    ],
+    [
+     30,
+     230,
+     150
+    ],
+    [
+     60,
+     200,
+     86
+    ]
+   ]
+  },
+  "bg-core-side": {
+   "size": [
+    280,
+    160
+   ],
+   "linkTargets": [
+    [
+     104,
+     100
+    ],
+    [
+     150,
+     86
+    ],
+    [
+     180,
+     96
+    ],
+    [
+     208,
+     106
+    ]
+   ],
+   "lightPoint": [
+    150,
+    4
+   ],
+   "lanes": [
+    [
+     30,
+     250,
+     84
+    ],
+    [
+     40,
+     240,
+     112
+    ],
+    [
+     70,
+     210,
+     62
+    ]
+   ]
+  },
+  "bg-core-near": {
+   "size": [
+    560,
+    300
+   ],
+   "linkTargets": [
+    [
+     196,
+     212
+    ],
+    [
+     280,
+     190
+    ],
+    [
+     338,
+     206
+    ],
+    [
+     390,
+     220
+    ]
+   ],
+   "lightPoint": [
+    280,
+    10
+   ],
+   "lanes": [
+    [
+     40,
+     520,
+     150
+    ],
+    [
+     30,
+     530,
+     214
+    ],
+    [
+     90,
+     470,
+     110
+    ],
+    [
+     60,
+     500,
+     250
+    ]
+   ]
+  }
+ },
+ "levels": {
+  "overview": {
+   "use": "world map / title: Core centred and far",
+   "canvas": [
+    960,
+    400
+   ],
+   "core": {
+    "sprite": "bg-core-far",
+    "foot": [
+     480,
+     384
+    ]
+   },
+   "hoods": {
+    "back": 250,
+    "front": 290
+   },
+   "moon": [
+    850,
+    36
+   ],
+   "towers": [
+    {
+     "id": "harbor",
+     "x": 130,
+     "size": "tall"
+    },
+    {
+     "id": "docks",
+     "x": 300,
+     "size": "short"
+    },
+    {
+     "id": "clocktower",
+     "x": 668,
+     "size": "short"
+    },
+    {
+     "id": "cathedral",
+     "x": 836,
+     "size": "tall"
+    }
+   ],
+   "towerFoot": 378,
+   "order": [
+    "sky",
+    "moon",
+    "links",
+    "core",
+    "searchlight",
+    "cars",
+    "hoods-back",
+    "glow",
+    "towers",
+    "hoods-front"
+   ]
+  },
+  "harbor": {
+   "use": "spoke level (harbor): Core off to one side; coords are bg-harbor-far layer px (960x480, scroll 0.15); its skyline stands in for hoods",
+   "canvas": [
+    960,
+    480
+   ],
+   "core": {
+    "sprite": "bg-core-side",
+    "foot": [
+     470,
+     356
+    ]
+   },
+   "hoods": null,
+   "far": "bg-harbor-far",
+   "towers": [
+    {
+     "id": "cathedral",
+     "x": 120,
+     "size": "short"
+    },
+    {
+     "id": "clocktower",
+     "x": 380,
+     "size": "short"
+    },
+    {
+     "id": "docks",
+     "x": 610,
+     "size": "short"
+    }
+   ],
+   "towerFoot": 392,
+   "order": [
+    "links",
+    "core",
+    "searchlight",
+    "cars",
+    "glow",
+    "towers",
+    "far"
+   ],
+   "glowFoot": 330
+  },
+  "late": {
+   "use": "late game: the Core close and big",
+   "canvas": [
+    960,
+    400
+   ],
+   "core": {
+    "sprite": "bg-core-near",
+    "foot": [
+     610,
+     396
+    ]
+   },
+   "hoods": {
+    "back": 250,
+    "front": 290
+   },
+   "moon": [
+    120,
+    30
+   ],
+   "towers": [
+    {
+     "id": "harbor",
+     "x": 70,
+     "size": "tall"
+    },
+    {
+     "id": "docks",
+     "x": 196,
+     "size": "short"
+    },
+    {
+     "id": "clocktower",
+     "x": 290,
+     "size": "tall"
+    },
+    {
+     "id": "cathedral",
+     "x": 930,
+     "size": "short"
+    }
+   ],
+   "towerFoot": 380,
+   "order": [
+    "sky",
+    "moon",
+    "links",
+    "core",
+    "searchlight",
+    "cars",
+    "hoods-back",
+    "glow",
+    "towers",
+    "hoods-front"
+   ]
+  }
+ }
+}

@@ -166,6 +166,23 @@ export function kitIndex(list) {
   return Object.keys(cells).length ? { cells } : null;
 }
 
+/** STYLE-GUIDE §4 Hidden / crouch-hide §6.1: value ×0.5 + 50% desaturation, alpha kept.
+ *  Used once at load to build sheet.dim (same pattern as sheet.lit). Engine-layer may go
+ *  off-palette; source PNGs stay on-palette. */
+export function dimHidden(data) {
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] === 0) continue;
+    let r = data[i], g = data[i + 1], b = data[i + 2];
+    const y = 0.299 * r + 0.587 * g + 0.114 * b;
+    r = r + (y - r) * 0.5;
+    g = g + (y - g) * 0.5;
+    b = b + (y - b) * 0.5;
+    data[i] = (r * 0.5 + 0.5) | 0;
+    data[i + 1] = (g * 0.5 + 0.5) | 0;
+    data[i + 2] = (b * 0.5 + 0.5) | 0;
+  }
+}
+
 const COIL_RGB = ['WH0', 'WH1', 'WH2'].map((id) => hexToRgb(PALETTE[id]));
 function prepareSheet(img, spec) {
   const sheet = { img, ...spec };
@@ -176,6 +193,14 @@ function prepareSheet(img, spec) {
   const id = bx.getImageData(0, 0, img.width, img.height);
   if (spec.accentKey) { remapColors(id.data, accentMap()); bx.putImageData(id, 0, 0); }
   sheet.img = base;
+  const makeDim = (src) => {
+    const d = mk(); const dx = d.getContext('2d');
+    dx.drawImage(src, 0, 0);
+    const dimId = dx.getImageData(0, 0, img.width, img.height);
+    dimHidden(dimId.data);
+    dx.putImageData(dimId, 0, 0);
+    return d;
+  };
   if (WREN_SHEETS.includes(spec.name)) {
     const nc = mk(); const ndata = new ImageData(stripCoil(id.data, img.width, COIL_RGB), img.width, img.height);
     nc.getContext('2d').putImageData(ndata, 0, 0);
@@ -186,11 +211,16 @@ function prepareSheet(img, spec) {
     const litNc = mk(); const ln = litNc.getContext('2d');
     ln.drawImage(nc, 0, 0); ln.globalCompositeOperation = 'source-in'; ln.fillStyle = PALETTE.LG2; ln.fillRect(0, 0, img.width, img.height);
     sheet.litNoCoil = litNc;
+    sheet.dim = makeDim(base);
+    sheet.dimNoCoil = makeDim(nc);
   }
   if (!sheet.lit) { // motion strips: a lamp-lit silhouette too, so a lit Wren reads the same in every pose
     const lit = mk(); const lx = lit.getContext('2d');
     lx.drawImage(base, 0, 0); lx.globalCompositeOperation = 'source-in'; lx.fillStyle = PALETTE.LG2; lx.fillRect(0, 0, img.width, img.height);
     sheet.lit = lit;
+  }
+  if (!sheet.dim) { // hide strips + motion: solid hidden look (value×0.5 + 50% desat)
+    sheet.dim = makeDim(base);
   }
   if (ROTATE_SHEETS.includes(spec.name) && SWING_LOOK.rotateArt) buildRotCache(sheet, mk);
   return sheet;

@@ -16,12 +16,14 @@ import { movesFor } from './moves.js';
 import { validateRoom, buildCoverage } from './validator.js';
 import { parseLevel } from '../level.js';
 import { createRng, hashSeed } from './rng.js';
+import { LIGHT, MINI_TOWER } from '../config.js';
+import { dressGenerated, placeMiniTowers } from '../kit/dress.js';
 
 export const COST = Object.freeze({ guard: 3, sweep: 2, lamp: 1 });
 /** Difficulty budget per room. Floor 1 low (the tutorial tower), the vault high. */
 export const BUDGET = Object.freeze({ 1: 6, 2: 8, 3: 10, perch: 2, vault: 13 });
 export const MAX_GUARDS_FLOOR1 = 2; // BRIEF: "Floor 1: two guards per room at most and lots of dark"
-export const SEARCHLIGHT_FROM_FLOOR = 2; // BRIEF: "Searchlight ... shows up from floor 2"
+export const SEARCHLIGHT_FROM_FLOOR = LIGHT.searchFromFloor; // BRIEF: "Searchlight ... shows up from floor 2" (tuned in config LIGHT)
 export const REROLLS = 6; // socket re-rolls per template before trying another template
 /** Re-rolls after the first FULL_BUDGET_ROLLS spend two points less each time, so a crowded fill
  *  gives way to a lighter one before the generator gives up on a template. */
@@ -41,7 +43,7 @@ const setTile = (rows, c, r, ch) => { rows[r] = rows[r].slice(0, c) + ch + rows[
 
 /** Fill a parsed template's sockets with rng; empty = nothing optional at all (the fallback). */
 export function fillTemplate(pt, rng, budget, floor, empty = false) {
-  const rows = pt.src.map((row) => row.replace(/[gSlh$vo]/g, (ch) => (ch === 'h' ? '#' : ch === 'v' ? '=' : '.')).replace(/a/g, 'a'));
+  const rows = pt.src.map((row) => row.replace(/[gSlh$vo]/g, (ch) => (ch === 'h' ? '#' : ch === 'v' ? '=' : '.')));
   const guards = [];
   const searchlights = [];
   let spent = 0;
@@ -55,7 +57,7 @@ export function fillTemplate(pt, rng, budget, floor, empty = false) {
       const left = budget - spent;
       const can = [];
       if (left >= COST.guard && guardSockets.length && bought.guard < maxGuards) can.push('guard');
-      if (left >= COST.sweep && searchSockets.length && floor >= SEARCHLIGHT_FROM_FLOOR) can.push('sweep');
+      if (left >= COST.sweep && searchSockets.length && floor >= SEARCHLIGHT_FROM_FLOOR && bought.sweep < LIGHT.searchMaxPerBand) can.push('sweep');
       if (left >= COST.lamp && lampSockets.length) can.push('lamp');
       if (!can.length) break;
       const what = rng.pick(can);
@@ -66,9 +68,11 @@ export function fillTemplate(pt, rng, budget, floor, empty = false) {
         guards.push({ c: rng.int(s.c0, s.c1), dir: rng.chance(0.5) ? 1 : -1, c0: s.c0, c1: s.c1, floor: s.floor, speed: rng.int(26, 34) });
       } else if (what === 'sweep') {
         const s = searchSockets.pop();
-        const inward = s.c + 0.5 < pt.cols / 2 ? -1 : 1; // lean the beam toward the middle
-        searchlights.push({ c: s.c, r: s.r, base: Math.PI / 2 + inward * rng.int(0, 35) / 100,
-          amp: rng.int(25, 45) / 100, period: rng.int(40, 60) / 10, phase: rng.int(0, 628) / 100 });
+        // point outward (away from the climb shaft); never sweep the shaft. Size is seeded.
+        const outward = s.c + 0.5 < pt.cols / 2 ? 1 : -1;
+        searchlights.push({ c: s.c, r: s.r, base: Math.PI / 2 + outward * rng.int(20, 50) / 100,
+          amp: rng.int(15, 30) / 100, period: rng.int(40, 60) / 10, phase: rng.int(0, 628) / 100,
+          size: rng.pick(LIGHT.searchSizes.slice()) });
       } else {
         const s = lampSockets.pop();
         setTile(rows, s.c, s.r, 'L');
@@ -121,6 +125,9 @@ export function generateRoom(seed, floor, index, opts = {}) {
         def.gen = { seed, floor, index, kind, template: t.id, flip: pt.flip, entrySide: pt.entrySide, exitSide: pt.exitSide,
           budget, spent: fill.spent, bought: fill.bought, attempts, path: v.path, pathSlots: v.slots,
           fallback: empty, ms: performance.now() - t0, coldMs, warmMs: performance.now() - t0 - coldMs };
+        if (kind === 'normal' || kind === 'vault') {
+          dressGenerated(def, hashSeed(seed, floor, index, 'kit'));
+        }
         return def;
       }
     }
@@ -168,5 +175,10 @@ export function generateTower(seed) {
     }
     floors.push({ floor: f, vault: f === VAULT_FLOOR, rooms });
   }
+  // a few mini moon towers per night (checkpoints). Seeded so a seed is repeatable.
+  const rng = createRng(hashSeed(s, 'mini-towers'));
+  const want = rng.int(MINI_TOWER.perLevelMin, MINI_TOWER.perLevelMax);
+  const normals = floors.flatMap((fl) => fl.rooms.filter((r) => r.gen?.kind === 'normal'));
+  rng.shuffle(normals).slice(0, want).forEach((room) => placeMiniTowers(room, createRng(hashSeed(s, room.gen.floor, room.gen.index, 'mt')), 1));
   return { seed: s, floors };
 }

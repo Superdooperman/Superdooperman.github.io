@@ -11,11 +11,11 @@
 //
 // Rings, lamps, loot and shadow never change the physics, so one graph per template + flip
 // serves every socket fill (edges that need a ring carry its id and are skipped if the ring is
-// not placed). Graphs are cached by template id + flip.
+// not placed). Graphs are cached by feel + template id + flip.
 import { createWorld } from '../sim.js';
-import { TUNING } from '../config.js';
-import { parseLevel, isStandable, isWood, tileAt } from '../level.js';
-import { bodyBlocked } from '../physics.js';
+import { TUNING, SETTINGS } from '../config.js';
+import { parseLevel, isStandable, isOneWay, tileAt } from '../level.js';
+import { bodyBlocked, bodyCenterY } from '../physics.js';
 import { lineOfSight } from '../los.js';
 
 export const FRAME = 1 / 60;
@@ -24,14 +24,29 @@ export const FRAMES_PER_SLOT = 6;
 /** Crouch-walking one tile takes 1/crouchSpeed = 0.31 s; the plan allows 4 slots (0.4 s). */
 /** Start offsets (tiles) every kept probe must also work from (see buildMoves). */
 export const ROBUST_DX = Object.freeze([-0.04, -0.02, 0.02, 0.04]);
+/** Timing slack (frames) on every probe edge. A move's time is not smooth in the start offset:
+ *  where she lands, and so the crouch-walk to the tile's middle after, steps with it. swing-feel's
+ *  whip reels (hold 4) took up to 3 frames longer from offsets between the sampled ones (seed 31
+ *  room 0: 117 frames from +0.0225 against 114 sampled), so the plan ran late on replay. */
+export const TIME_MARGIN_FRAMES = 3;
 export const WALK_SLOTS = Math.ceil(1 / TUNING.crouchSpeed / SLOT);
 
+/** An edge sample: the cell her body centre was in, during time slot `slot`, packed as one int.
+ *  stride is the room's cell count (cols * rows), so any room size round-trips (audit S9: a fixed
+ *  4096 stride silently aliased cells of rooms over 4096 cells into the next slot). */
+export const packSample = (slot, cell, stride) => slot * stride + cell;
+export function unpackSample(v, stride) { const slot = (v / stride) | 0; return [slot, v - slot * stride]; }
+
+/** Abilities a probe world has: none of the optional ones (the pull toggle is never pressed, and
+ *  a proof must not depend on what the player has unlocked). */
+const PROOF_ABILITIES = Object.freeze({ pullGrapple: false });
 const NONE = Object.freeze({});
 const inp = (held = NONE, pressed = NONE, aimAt = null) => ({ held, pressed, released: NONE, aimAt });
 const dirHeld = (d, extra = {}) => (d > 0 ? { right: true, ...extra } : d < 0 ? { left: true, ...extra } : { ...extra });
 
-function probeDef(phys) {
-  return { name: 'probe', rows: phys, guards: [], searchlights: [], autoExit: false, prompts: [], checkpoints: [] };
+function probeDef(phys, extra = {}) {
+  return { name: 'probe', rows: phys, guards: [], searchlights: [], autoExit: false, prompts: [], checkpoints: [],
+    anchors: extra.anchors || 'rings', props: extra.props || [] };
 }
 
 /** The facing a probe starts with, from its descriptor (the `script` a path step carries). */
@@ -71,13 +86,14 @@ export function probeScript(desc, ring = null) {
       return (f) => inp(f < 3 ? { down: true } : NONE, f === 0 ? { jump: true } : NONE);
     case 'reel': {
       const { d1, rel, d2 } = desc;
+      const hold = desc.hold ?? 12; // frames at the top of the reel before letting go
       let topAt = -1;
       return (f, w) => {
         if (f === 0) return inp({ up: true, ...dirHeld(d1) }, NONE, { x: ring.x, y: ring.y });
-        if (!w.anchor && topAt < 0) return null;
+        if (!w.anchor && topAt < 0) { if (w.anchorClimbed) topAt = f; else return null; } // pulled up onto the ledge it hooked
         if (topAt < 0 && w.ropeLen <= T.lineMin + 1e-6) topAt = f;
-        if (topAt < 0 || f < topAt + 12) return inp({ up: true, ...dirHeld(d1) });
-        if (f === topAt + 12) return inp(dirHeld(d2), rel === 'jump' ? { jump: true } : { fire: true });
+        if (topAt < 0 || f < topAt + hold) return inp({ up: true, ...dirHeld(d1) });
+        if (f === topAt + hold) return inp(dirHeld(d2), rel === 'jump' ? { jump: true } : { fire: true });
         return inp(dirHeld(d2));
       };
     }
@@ -106,16 +122,20 @@ export function findNodes(level) {
       const left = c > 0 ? nodeAt[g * cols + c - 1] : -1;
       const seg = left >= 0 ? nodes[left].seg : nodes.length;
       nodeAt[g * cols + c] = nodes.length;
-      nodes.push({ i: nodes.length, c, g, seg, wood: isWood(tileAt(level, c, g)) });
+      nodes.push({ i: nodes.length, c, g, seg, oneWay: isOneWay(tileAt(level, c, g)) });
     }
   }
   return { nodes, nodeAt };
 }
 
 /** Run one probe. script(f, w) returns the input for frame f, or null to stop (failed). */
-function simulate(def, level, nodes, nodeAt, n, face, script, maxF, dx = 0) {
+function simulate(def, level, nodes, nodeAt, n, face, script, maxF, dx = 0, feel = SETTINGS.feel) {
   const T = TUNING;
-  const w = createWorld(def, { feathers: 3 });
+  // Probes plan with the feel the game plays (buildMoves' feel, SETTINGS.feel unless a caller
+  // pins one), so every room is proven under it. Everything else is pinned (audit F2):
+  // ?grapple=pull, ?yank=hold or the abilities in SETTINGS must not change which rooms a seed
+  // proves, because the cache key and the night's seed ignore them.
+  const w = createWorld(def, { feathers: 3, anchors: def.anchors || 'rings', feel, grapple: 'classic', yankInput: 'button', abilities: PROOF_ABILITIES });
   w.x = n.c + 0.5 + dx; w.y = n.g - T.footEps; w.peakY = w.y; w.face = face;
   const cols = level.cols;
   const cells = [];
@@ -157,13 +177,13 @@ function simulate(def, level, nodes, nodeAt, n, face, script, maxF, dx = 0) {
       if (e.type === 'respawn' || e.type === 'pushout') return null;
       if (e.type === 'land') {
         landDrop = Math.max(landDrop, e.drop);
-        if (e.drop >= T.landNoiseDrop) lands.push([w.x, w.y - w.h / 2, f]); // a loud landing, where and when
+        if (e.drop >= T.landNoiseDrop) lands.push([w.x, bodyCenterY(w), f]); // a loud landing, where and when
       }
       if (e.type === 'attach') ring = e.ring.id;
     }
     w.events.length = 0;
-    if (w.grounded && !w.crouch && !w.climb && Math.abs(w.vx) >= T.hearingMinSpeed) steps.push([w.x, w.y - w.h / 2, f]);
-    const cy = w.y - w.h * 0.5;
+    if (w.grounded && !w.crouch && !w.climb && Math.abs(w.vx) >= T.hearingMinSpeed) steps.push([w.x, bodyCenterY(w), f]);
+    const cy = bodyCenterY(w);
     const cc = Math.min(cols - 1, Math.max(0, Math.floor(w.x)));
     const cr = Math.min(level.rows - 1, Math.max(0, Math.floor(cy)));
     cells.push(cr * cols + cc);
@@ -180,7 +200,8 @@ function simulate(def, level, nodes, nodeAt, n, face, script, maxF, dx = 0) {
         if (nodeUnder() !== to) return null;
         const frames = f + 1;
         const samples = new Set();
-        cells.forEach((cell, k) => samples.add(Math.floor(k / FRAMES_PER_SLOT) * 4096 + cell));
+        const stride = cols * level.rows;
+        cells.forEach((cell, k) => samples.add(packSample(Math.floor(k / FRAMES_PER_SLOT), cell, stride)));
         return { to, frames, slots: Math.ceil(frames / FRAMES_PER_SLOT), samples: Int32Array.from(samples),
           landDrop, steps, lands, ring, endX: w.x, endY: w.y };
       }
@@ -189,10 +210,11 @@ function simulate(def, level, nodes, nodeAt, n, face, script, maxF, dx = 0) {
   return null;
 }
 
-/** Build every probe edge for a physics grid (rows of tiles, rings as 'a'). */
-export function buildMoves(phys) {
+/** Build every probe edge for a physics grid (rows of tiles, rings as 'a'). feel: the feel the
+ *  probes play (default SETTINGS.feel, the feel the game plays). */
+export function buildMoves(phys, extra = {}, feel = SETTINGS.feel) {
   const T = TUNING;
-  const def = probeDef(phys);
+  const def = probeDef(phys, extra); // extra: { anchors, props } for kit rooms (grappleable architecture)
   const level = parseLevel(def);
   const { nodes, nodeAt } = findNodes(level);
   const out = nodes.map(() => []);
@@ -212,7 +234,7 @@ export function buildMoves(phys) {
     out[n.i].push({ from: n.i, ...res, script });
   };
   const run = (n, face, script, maxF, desc) => {
-    const r = simulate(def, level, nodes, nodeAt, n, face, script, maxF);
+    const r = simulate(def, level, nodes, nodeAt, n, face, script, maxF, 0, feel);
     if (!r) { simSteps += maxF / 4; return; } // rough cost of a failed probe, for stats
     add(n, desc, r);
   };
@@ -241,7 +263,7 @@ export function buildMoves(phys) {
       }
     }
     // drop through wood
-    if (n.wood) {
+    if (n.oneWay) {
       const desc = { kind: 'drop' };
       run(n, probeFace(desc, n), probeScript(desc), 200, desc);
     }
@@ -272,8 +294,12 @@ export function buildMoves(phys) {
         // reel up (holding toward the ring, or not), then jump off or let go in a direction
         for (const [d1, d2] of [[0, -1], [0, 0], [0, 1], [-1, -1], [1, 1]]) {
           for (const rel of ['jump', 'let']) {
-            const desc = { kind: 'reel', ring: R.id, d1, rel, d2 };
-            run(n, probeFace(desc, n, R), probeScript(desc, R), 300, desc);
+            // swing-feel: a reel keeps angular momentum, so she whips round the ring at the top;
+            // an early release (hold 4) is the move a player makes there
+            for (const hold of [undefined, 4]) {
+              const desc = hold === undefined ? { kind: 'reel', ring: R.id, d1, rel, d2 } : { kind: 'reel', ring: R.id, d1, rel, d2, hold };
+              run(n, probeFace(desc, n, R), probeScript(desc, R), 300, desc);
+            }
           }
         }
         // swing: walk off toward the ring on the line, pump, and jump off / let go at frame k
@@ -305,17 +331,17 @@ export function buildMoves(phys) {
     const samples = new Set(e.samples);
     const steps = e.steps.slice();
     const lands = e.lands.slice();
-    let slots = e.slots, landDrop = e.landDrop;
+    let frames = e.frames, landDrop = e.landDrop;
     for (const dx of ROBUST_DX) {
-      const r = simulate(def, level, nodes, nodeAt, n, face, probeScript(e.script, R), maxF, dx);
+      const r = simulate(def, level, nodes, nodeAt, n, face, probeScript(e.script, R), maxF, dx, feel);
       simSteps += r ? r.frames : maxF / 4;
       if (!r || r.to !== e.to || r.ring !== e.ring) return false;
       for (const v of r.samples) samples.add(v);
       steps.push(...r.steps);
       lands.push(...r.lands);
-      slots = Math.max(slots, r.slots); landDrop = Math.max(landDrop, r.landDrop);
+      frames = Math.max(frames, r.frames); landDrop = Math.max(landDrop, r.landDrop);
     }
-    e.samples = Int32Array.from(samples); e.steps = steps; e.lands = lands; e.slots = slots; e.landDrop = landDrop;
+    e.samples = Int32Array.from(samples); e.steps = steps; e.lands = lands; e.frames = frames; e.slots = Math.ceil((frames + TIME_MARGIN_FRAMES) / FRAMES_PER_SLOT); e.landDrop = landDrop;
     return true;
   };
   for (const list of out) {
@@ -352,13 +378,15 @@ function noiseBoxes(list) {
 }
 
 const cache = new Map();
-/** Cached graph for a parsed template (parseTemplate()). */
-export function movesFor(pt) {
-  const key = `${pt.id}|${pt.flip ? 1 : 0}|${pt.phys.join('')}`;
+/** Cached graph for a parsed template (parseTemplate()). feel: as buildMoves (audit F6: a
+ *  caller that needs another feel passes it instead of changing SETTINGS). */
+export function movesFor(pt, feel = SETTINGS.feel) {
+  const extra = pt.anchors && pt.anchors !== 'rings' ? { anchors: pt.anchors, props: pt.props || [] } : {};
+  const key = `${feel}|${pt.id}|${pt.flip ? 1 : 0}|${pt.phys.join('')}|${extra.anchors || ''}|${JSON.stringify(extra.props || [])}`;
   let m = cache.get(key);
   if (!m) {
     const t0 = performance.now();
-    m = buildMoves(pt.phys);
+    m = buildMoves(pt.phys, extra, feel);
     m.buildMs = performance.now() - t0;
     cache.set(key, m);
   }

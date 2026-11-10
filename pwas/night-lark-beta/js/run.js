@@ -7,6 +7,9 @@ import { parseTemplate } from './gen/template.js';
 import { movesFor } from './gen/moves.js';
 import { validateRoom } from './gen/validator.js';
 import { smokeGain, stashable, byId } from './powerups.js';
+import { shaftRoom } from './levels/vertical.js';
+import { big2x2Room } from './levels/big-2x2.js';
+import { wideShaftRoom } from './levels/wide-shaft.js';
 
 /** The Returned shelf: what the Harbormaster took, one item back per cleared night.
  *  Items 3-5 are invented placeholders (copy review). */
@@ -77,9 +80,21 @@ export function nightRooms(tower) {
 }
 const countMotes = (def) => def.rows.reduce((n, r) => n + (r.match(/m/g) || []).length, 0);
 
-export function createRun(seed, save, tower) {
+/** Every room of a night as played (follow-up Nov 7 2026): THE HARBOR SHAFT first (one
+ *  continuous vertical room, js/levels/vertical.js; the same room every night, so the tower's
+ *  seeded rooms are unchanged), then the two big rooms (v2-main, Superdooperman, Nov 9 2026): THE WIDE
+ *  HALL (levels/big-2x2.js) and THE WIDE SHAFT (levels/wide-shaft.js), fixed rooms like the
+ *  shaft, then nightRooms(tower). opts.shaft false: without the shaft; opts.big false: without
+ *  the big rooms (they follow the shaft, so they default to opts.shaft). */
+export const BIG_ROOMS = Object.freeze([big2x2Room, wideShaftRoom]);
+export function playRooms(tower, { shaft = true, big = shaft } = {}) {
+  return [...(shaft ? [shaftRoom()] : []), ...(big ? BIG_ROOMS.map((make) => make()) : []), ...nightRooms(tower)];
+}
+export const isBig = (def) => def?.gen?.kind === 'big';
+
+export function createRun(seed, save, tower, opts = {}) {
   const stash = save.stash && stashable(save.stash) ? save.stash : null;
-  const rooms = nightRooms(tower);
+  const rooms = playRooms(tower, opts);
   return {
     seed, stash, rooms, index: 0,
     held: stash ? [stash] : [],
@@ -96,6 +111,7 @@ export const currentRoom = (run) => run.rooms[run.index];
 export const isPerch = (def) => def?.gen?.kind === 'perch';
 export const isVault = (def) => def?.gen?.kind === 'vault';
 export const isEscape = (def) => def?.gen?.kind === 'escape';
+export const isShaft = (def) => def?.gen?.kind === 'shaft';
 /** Floor number for the HUD (vault = 4, escape = 4 too). */
 export const floorOf = (def) => def?.gen?.floor ?? 4;
 

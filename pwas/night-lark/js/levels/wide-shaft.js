@@ -1,4 +1,4 @@
-// WIDE SHAFT (big rooms prototype, Azzato, Nov 9 2026): one shaft two screens wide and four tall
+// WIDE SHAFT (big rooms prototype, Superdooperman, Nov 9 2026): one shaft two screens wide and four tall
 // (60 x 64 tiles), one world and one camera. ?room=wideshaft plays it on its own (js/main.js).
 //
 // The continuous-shaft method of levels/vertical.js (THE HARBOR SHAFT), widened, not a new

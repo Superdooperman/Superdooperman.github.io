@@ -4,7 +4,7 @@
 // picking and a few px-valued rules (mini-tower reveal, feel) do too.
 // M2: lamp pools (edge at the hide radius), cones (SW0 fill, edge lerps SW1 -> AR3 with the
 // meter), searchlight beams, the meter over the watcher who sees her, the grace "!", the search
-// "?", the catch bark, the hidden look, the feathers HUD and the NIGHT OVER card.
+// "?", the catch bark, the hidden look (hide pose / desat), the feathers HUD and the NIGHT OVER card.
 import { VIEW_W, VIEW_H, HUD_H, TILE_PX, TUNING, HEALTH, FEELFIX, FEELFIX2, CAUGHT_BARK } from './config.js';
 import { tileAt, isStandable, isWood, isGrating } from './level.js';
 import { promptText } from './prompts.js';
@@ -26,11 +26,22 @@ import { lookOf, zoomInfo } from './zoom.js';
 
 const hempRope = PALETTE.WH1; // Wren's live rope (no-fx path), the art's hemp ramp
 
+/** Hidden look (STYLE-GUIDE §4 / crouch-hide §6.1): solid draw from sheet.dim
+ *  (value ×0.5 + 50% desat, built at load like sheet.lit). Never globalAlpha 0.5.
+ *  Returns the image to blit, or null to keep the caller's default. */
+function hiddenImg(sheet, world, pose, coil) {
+  const want = (pose && pose.hideDim) || (world && world.hidden);
+  if (!want || !sheet) return null;
+  if (coil === false) return sheet.dimNoCoil || sheet.dim || null;
+  return sheet.dim || null;
+}
+
+
 /** Camera in logical px (v1 Tt adapted): look ahead in the facing direction, clamp to the
  *  room, and centre (letterbox) when the room is smaller than the view. M3: the top hud px of
  *  the screen are the HUD strip, so the playfield is the view below it (480x256 for a 30x16
  *  room, which then fills it exactly). Screen y = world px - cam.y. */
-// Fall look-ahead (swing-feel, Azzato 9:13 PM: "the camera looks ahead downward when she falls
+// Fall look-ahead (swing-feel, Superdooperman 9:13 PM: "the camera looks ahead downward when she falls
 // fast"). Render-only state, kept per world and eased once per drawn frame by updateFallLook();
 // cameraFor just reads it, so the sim never sees it. Numbers: starts at FALL_LOOK.from tiles/s
 // of falling, full at .full, shifts the view down by up to .max of the play height.
@@ -260,10 +271,11 @@ function drawPlaceholderLark(ctx, world, cam, sheets, fx) {
   const bw = TUNING.halfWidth * 2 * T; const bh = world.h * T;
   const lx = world.x * T - cam.x; const ly = world.y * T - cam.y;
   const left = Math.round(lx - bw / 2); const top = Math.round(ly - bh);
-  if (world.hidden) ctx.globalAlpha = 0.5; // hidden: value x0.5 (desaturate comes with real art)
+  // Placeholder: no sheet.dim — approximate §4 with a canvas filter; still alpha 1
+  if (world.hidden) { ctx.filter = 'brightness(0.5) saturate(0.5)'; ctx.globalAlpha = 1; }
   drawSprite(ctx, sheets, 'lark', 0, lx, ly, { w: bw, h: bh });
   ctx.fillStyle = C.larkMask; ctx.fillRect(left, top + 1, Math.round(bw), 2);
-  ctx.globalAlpha = 1;
+  ctx.filter = 'none'; ctx.globalAlpha = 1;
   if (world.hidden) {
     ctx.fillStyle = C.ghostRim; ctx.fillRect(left, top - 1, Math.round(bw), 1); // ghost rim, top edge only
     const blink = (world.time % 2.5) < 2 / 60;
@@ -274,7 +286,7 @@ function drawPlaceholderLark(ctx, world, cam, sheets, fx) {
   if (fx) { drawLarkLight(ctx, fx, world, cam, { left, top, w: Math.round(bw), h: Math.round(bh) }); drawParticles(ctx, fx, cam); }
 }
 
-/** Wren from her strips (wren.js picks the pose). Hidden: half alpha. Lit: an LG2 silhouette
+/** Wren from her strips (wren.js picks the pose). Hidden: hide-pose strip or darker+desat (opaque). Lit: an LG2 silhouette
  *  added at ~35% (the sprite-shaped version of the placeholder's lit box). */
 function drawWren(ctx, world, cam, sheets, fx) {
   const pose = wrenPose(fx ? fx.wren : null, world, sheets);
@@ -286,9 +298,9 @@ function drawWren(ctx, world, cam, sheets, fx) {
   // a pose with its own box (the ledge climb: ledgeHand on the lip) is placed by that box
   const draw = (img) => (pose.box ? drawFrameBox(ctx, sheet, pose.frame, Math.round(pose.box.left - cam.x), Math.round(pose.box.top - cam.y), face, img)
     : drawFrame(ctx, sheet, pose.frame, x, y, face, img));
-  if (world.hidden) ctx.globalAlpha = 0.5;
-  draw(pose.coil ? sheet.img : (sheet.noCoil || sheet.img));
-  ctx.globalAlpha = 1;
+  const base = pose.coil ? sheet.img : (sheet.noCoil || sheet.img);
+  const dim = hiddenImg(sheet, world, pose, pose.coil !== false);
+  draw(dim || base);
   if (world.lit && !world.hidden) {
     ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.35;
     draw((pose.coil ? sheet.lit : sheet.litNoCoil) || sheet.img);
@@ -306,9 +318,8 @@ function drawSwingWren(ctx, world, cam, p, fx, cloak = true) {
   const r = p.rotKey && sheet.rotCache ? sheet.rotCache.get(p.rotKey) : null;
   const draw = (variant, im) => (r ? drawRotatedFrame(ctx, { ...r, img: r[variant] || r.base }, x, y, p.face, ART_SCALE)
     : drawGripFrame(ctx, sheet, p.frame, im, p.grip, x, y, p.rot, p.face, ART_SCALE));
-  if (world.hidden) ctx.globalAlpha = 0.5;
-  draw('base', img);
-  ctx.globalAlpha = 1;
+  const dim = hiddenImg(sheet, world, { hideDim: world.hidden }, false);
+  draw('base', dim || img);
   if (world.lit && !world.hidden) {
     ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.35;
     draw('lit', sheet.litNoCoil || sheet.lit || img);

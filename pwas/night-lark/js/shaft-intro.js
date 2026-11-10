@@ -1,4 +1,4 @@
-// The first mini boss on the shaft roof (follow-up Nov 7 2026, Azzato's steering 6:05 PM CST).
+// The first mini boss on the shaft roof (follow-up Nov 7 2026, Superdooperman's steering 6:05 PM CST).
 // NOT a boss fight: no health, no attacks, no combat system. A short scripted scene that runs
 // once, on a save that does not have the warp-pull yet:
 //   1. she climbs the shaft by hand (ledges, jumps, swing; no pull) and lands on the perch roof;

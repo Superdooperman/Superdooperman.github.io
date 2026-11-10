@@ -1,6 +1,7 @@
 // Line of sight and vision cones (ported from v1 Ye / tt). Pure functions, tile units.
 // Rule: hidden or seen is decided here by geometry, never read from pixels.
-import { TUNING } from './config.js';
+import { TUNING, PX1 } from './config.js';
+import { wrapAngle } from './geom.js';
 import { tileAt, isOpaqueTile, isShadow } from './level.js';
 
 /** v1 Ye(): sample the segment every losStep; any opaque tile in between blocks it.
@@ -44,24 +45,30 @@ export function inCone(ex, ey, dir, px, py, range = TUNING.coneRange, half = TUN
   const dx = px - ex;
   const dy = py - ey;
   const d = Math.hypot(dx, dy);
-  if (!(d < range && d > 1 / 16)) return false; // v1: C < 78 && C > 1 (px)
+  if (!(d < range && d > PX1)) return false; // v1: C < 78 && C > 1 (px)
   const ang = Math.atan2(dy, dx);
   const face = dir > 0 ? 0 : Math.PI;
-  const diff = Math.atan2(Math.sin(ang - face), Math.cos(ang - face));
+  const diff = wrapAngle(ang - face);
   return Math.abs(diff) < half;
+}
+
+/** Watchman flashlight lens in tile units. Matches art/manifest.json lightOrigin [28, 19]
+ *  on the 32x48 bottom-centre pivot [16, 47]. Searchlights keep their own (x, y). */
+export function guardEyeOf(g) {
+  const dir = g.dir < 0 ? -1 : 1;
+  return { x: g.x + dir * TUNING.guardFlashTipX, y: g.floorY - TUNING.guardEyeHeight };
 }
 
 /** A guard sees a point if it is in the cone and the line of sight is clear (v1 tt). */
 export function guardSees(level, guard, px, py, doorsOpen = false) {
-  const ex = guard.x;
-  const ey = guard.floorY - TUNING.guardEyeHeight;
+  const { x: ex, y: ey } = guardEyeOf(guard);
   return inCone(ex, ey, guard.dir, px, py) && lineOfSight(level, ex, ey, px, py, doorsOpen);
 }
 
 /** v1 gt(): crouching on a shadow tile ('s' stone or '~' wood) with no lamp within hideLampRadius. */
 export function isHidden(level, x, y, centerY, crouching) {
   if (!crouching) return false;
-  if (!isShadow(tileAt(level, Math.floor(x), Math.floor(y + 1 / 16)))) return false;
+  if (!isShadow(tileAt(level, Math.floor(x), Math.floor(y + PX1)))) return false;
   for (const l of level.lamps) if (Math.hypot(x - l.x, centerY - l.y) < TUNING.hideLampRadius) return false;
   return true;
 }
@@ -77,8 +84,7 @@ export function isLit(level, x, centerY, doorsOpen = false) {
 
 /** Light reveals: a lit Lark is seen from litSightRange by a guard roughly facing her. */
 export function guardSeesLit(level, guard, px, py, doorsOpen = false) {
-  const ex = guard.x;
-  const ey = guard.floorY - TUNING.guardEyeHeight;
+  const { x: ex, y: ey } = guardEyeOf(guard);
   return inCone(ex, ey, guard.dir, px, py, TUNING.litSightRange, TUNING.litHalfAngle) && lineOfSight(level, ex, ey, px, py, doorsOpen);
 }
 
@@ -87,8 +93,8 @@ export function inBeam(s, px, py) {
   const dx = px - s.x;
   const dy = py - s.y;
   const d = Math.hypot(dx, dy);
-  if (!(d < s.range && d > 1 / 16)) return false;
-  const diff = Math.atan2(Math.sin(Math.atan2(dy, dx) - s.angle), Math.cos(Math.atan2(dy, dx) - s.angle));
+  if (!(d < s.range && d > PX1)) return false;
+  const diff = wrapAngle(Math.atan2(dy, dx) - s.angle);
   return Math.abs(diff) < s.half;
 }
 export function searchlightSees(level, s, px, py, doorsOpen = false) {

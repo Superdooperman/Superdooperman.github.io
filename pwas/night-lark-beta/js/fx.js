@@ -4,18 +4,20 @@
 // Its own seeded randomness (mulberry32), so the game's RNG streams are untouched.
 // Reduced motion (prefers-reduced-motion, the title menu MOTION item, or ?fx=off): no shake,
 // no flash, no particles, no flicker, no fog drift, and the cloak and rope hang at rest.
-import { TILE_PX, VIEW_W, VIEW_H, HUD_H, TUNING } from './config.js';
+import { TILE_PX, VIEW_W, VIEW_H, HUD_H, TUNING, FEEL } from './config.js';
 import { PALETTE as P } from './art.js';
 import { mulberry32 } from './gen/rng.js';
+import { bodyCenterY } from './physics.js';
 import { createChain, stepChain, poseChain } from './chain.js';
 import { createWrenAnim, stepWrenAnim } from './wren.js';
+import { backdropRise, RISE_PARALLAX } from './skyline.js';
 
 export const FX = Object.freeze({
   maxParticles: 220,
   cloakPoints: 6, cloakSeg: 0.15, cloakGravity: 26, cloakWind: 3, cloakDrag: 0.93, cloakTrail: 9,
   tailPoints: 5, tailSeg: 0.11, tailGravity: 40, tailWind: 1.5, tailDrag: 0.9, tailTrail: 5,
   ropePoints: 10, ropeGravity: 45, ropeDrag: 0.95,
-  darkness: 0.42, lampBands: [1.3, 1.0, 0.62], lampBandCut: 0.42,
+  darkness: 0.42, lampBands: [1.3, 1.0, 0.62], lampBandCut: 0.42, windowGlow: 30, // px: art-only pool round a lit tower window
   emberRate: 1.6, fogDrift: 4,
   shakeCaught: { amp: 3, dur: 0.32 }, shakeRoll: { amp: 1, dur: 0.12 },
   flashCaught: 0.12,
@@ -30,7 +32,7 @@ export function createFx(opts = {}) {
     stats: { spawned: 0, steps: 0 },
     // Wren sprite poses (wren.js) and, when her strips are loaded, where the live rope starts
     // (the gun muzzle; main.js sets it). null keeps the M5 hand point.
-    wren: createWrenAnim(), ropeOrigin: null,
+    wren: createWrenAnim(), ropeOrigin: null, cloakOrigin: null,
     step, offset, setReduced(v) { if (!!v === fx.reduced) return; fx.reduced = !!v; if (fx.reduced) { fx.parts.length = 0; fx.shake.t = 0; fx.flash = 0; } },
   };
   const R = (a, b) => a + (b - a) * rnd();
@@ -48,8 +50,11 @@ export function createFx(opts = {}) {
   const puff = (i, x, y) => ({ x: x + R(-0.2, 0.2), y, vx: R(-0.5, 0.5), vy: R(-1.2, -0.5), drag: 0.97, life: R(0.6, 1.1), color: i % 2 ? P.FX2 : P.FX3, size: 2 });
   function kick(s) { if (fx.reduced) return; if (s.amp >= fx.shake.amp || fx.shake.t <= 0) { fx.shake.amp = s.amp; fx.shake.dur = s.dur; fx.shake.t = s.dur; } }
 
-  function shoulder(w) { return { x: w.x - w.face * TUNING.halfWidth * 0.5, y: w.y - w.h * 0.82 }; }
-  function hip(w) { return { x: w.x - w.face * TUNING.halfWidth * 0.3, y: w.y - w.h * 0.45 }; }
+  // with Brook's motion strips the engine cloak and ribbon both leave from the frame's own
+  // tailAnchor (fx.cloakOrigin, set by main from the loaded sheets); else shoulder and hip
+  function pin(w) { return fx.cloakOrigin ? fx.cloakOrigin(w, fx.wren) : null; }
+  function shoulder(w) { return pin(w) || { x: w.x - w.face * TUNING.halfWidth * 0.5, y: w.y - w.h * 0.82 }; }
+  function hip(w) { return pin(w) || { x: w.x - w.face * TUNING.halfWidth * 0.3, y: w.y - w.h * 0.45 }; }
   function snap(w) {
     const s = shoulder(w); const h = hip(w);
     fx.cloak = createChain(FX.cloakPoints, w.h * FX.cloakSeg, s.x, s.y);
@@ -72,8 +77,9 @@ export function createFx(opts = {}) {
       else if (e.type === 'roll') { burst(8, w.x, w.y, dust); kick(FX.shakeRoll); }
       else if (e.type === 'jump' && e.from === 'ground') burst(3, w.x, w.y, dust);
       else if (e.type === 'attach' && e.ring) burst(7, e.ring.x, e.ring.y, spark);
-      else if (e.type === 'pickup') burst(6, w.x, w.y - w.h * 0.5, glint);
+      else if (e.type === 'pickup') burst(6, w.x, bodyCenterY(w), glint);
       else if (e.type === 'snuff') burst(6, e.x, e.y, puff);
+      else if (e.type === 'hit' || e.type === 'tie') kick({ amp: FEEL.hitShakeAmp, dur: FEEL.hitShakeDur });
       else if (e.type === 'caught') { kick(FX.shakeCaught); if (!fx.reduced) fx.flash = FX.flashCaught; }
       else if (e.type === 'room-reset' || e.type === 'respawn') { snap(w); fx.parts.length = 0; }
     }
@@ -107,7 +113,7 @@ export function createFx(opts = {}) {
       if (w.grounded) for (const ch of [fx.cloak, fx.tail]) for (const p of ch.pts) if (p.y > w.y - 0.02) p.y = w.y - 0.02; // hem rests on the floor
     }
     if (w.anchor) {
-      const hand = (fx.ropeOrigin && fx.ropeOrigin(w)) || { x: w.x, y: w.y - w.h * 0.5 };
+      const hand = (fx.ropeOrigin && fx.ropeOrigin(w)) || { x: w.x, y: bodyCenterY(w) };
       if (fx.ropeFor !== w.anchor) {
         fx.ropeFor = w.anchor;
         fx.rope = createChain(FX.ropePoints, 1, hand.x, hand.y);
@@ -135,6 +141,9 @@ export function createFx(opts = {}) {
 // ---- drawing (canvas only) ----
 let darkCanvas = null;
 function darkLayer() {
+  // grow only (feel fix 1: the zoom changes the view every frame while it eases; a resize per
+  // frame would reallocate). Only the VIEW_W x VIEW_H corner is cleared, drawn and blitted.
+  if (darkCanvas && (darkCanvas.width < VIEW_W || darkCanvas.height < VIEW_H)) { darkCanvas.width = Math.max(darkCanvas.width, VIEW_W); darkCanvas.height = Math.max(darkCanvas.height, VIEW_H); }
   if (darkCanvas) return darkCanvas;
   if (typeof OffscreenCanvas !== 'undefined') darkCanvas = new OffscreenCanvas(VIEW_W, VIEW_H);
   else if (typeof document !== 'undefined') { darkCanvas = document.createElement('canvas'); darkCanvas.width = VIEW_W; darkCanvas.height = VIEW_H; }
@@ -144,18 +153,24 @@ function darkLayer() {
 /** A far skyline and the moon behind the room (safe light only: MN, NV). Parallax 0.25. */
 export function drawBackdrop(ctx, fx, world, cam) {
   const px = -cam.x * 0.25;
-  ctx.fillStyle = P.MN1; ctx.fillRect(Math.round(392 + px * 0.2), HUD_H + 22, 12, 12);
-  ctx.fillStyle = P.MN0; ctx.fillRect(Math.round(392 + px * 0.2), HUD_H + 30, 4, 4);
+  const dy = Math.round(backdropRise(world, cam) * RISE_PARALLAX.mid); // feel pass 1 (G): y parallax in tall rooms, 0 elsewhere
+  const mx = Math.round(VIEW_W - 88 + px * 0.2);
+  ctx.fillStyle = P.MN1; ctx.fillRect(mx, HUD_H + 22 + dy, 12, 12);
+  ctx.fillStyle = P.MN0; ctx.fillRect(mx, HUD_H + 30 + dy, 4, 4);
   ctx.fillStyle = P.NV2;
-  for (let i = 0; i < 24; i++) {
+  const span = Math.max(600, VIEW_W + 120); const n = Math.ceil((24 * span) / 600);
+  for (let i = 0; i < n; i++) {
     const w = 18 + ((i * 37) % 23); const h = 30 + ((i * 53) % 70);
-    const x = Math.round(((i * 41 + px) % 600 + 600) % 600 - 60);
-    ctx.fillRect(x, VIEW_H - h - 30, w, h + 30);
+    const x = Math.round(((i * 41 + px) % span + span) % span - 60);
+    ctx.fillRect(x, VIEW_H - h - 30 + dy, w, h + 30);
   }
 }
 
 /** Darkness over the room with stepped light pools punched out at the lamps, then additive
  *  lamp glow (LG2), searchlight lens glow (SW1) and a drifting fog band (FG1). */
+/** Lit facade windows (tower kit, js/kit/facade.js dressFacade): centre of each lit block. */
+function litWindows(L) { return (L.facade || []).filter((b) => b.lit).map((b) => ({ x: b.c + b.w / 2, y: b.r + b.h / 2 })); }
+
 export function drawLighting(ctx, fx, world, cam) {
   const T = TILE_PX; const L = world.level; const t = fx.time;
   const dc = darkLayer();
@@ -170,9 +185,10 @@ export function drawLighting(ctx, fx, world, cam) {
       for (const k of FX.lampBands) { d.beginPath(); d.arc(x, y, Math.round(TUNING.hideLampRadius * T * k + flick(l, i)), 0, Math.PI * 2); d.fill(); }
     });
     for (const s of L.searchlights || []) { d.beginPath(); d.arc(s.x * T - cam.x, s.y * T - cam.y, 14, 0, Math.PI * 2); d.fill(); }
+    for (const g of litWindows(L)) { d.beginPath(); d.arc(g.x * T - cam.x, g.y * T - cam.y, FX.windowGlow, 0, Math.PI * 2); d.fill(); }
     for (const it of L.items) if (it.t === 'E') { d.beginPath(); d.arc(it.x * T - cam.x, it.y * T - cam.y, 18, 0, Math.PI * 2); d.fill(); }
     d.globalCompositeOperation = 'source-over'; d.globalAlpha = 1;
-    ctx.drawImage(dc, 0, 0);
+    ctx.drawImage(dc, 0, 0, VIEW_W, VIEW_H, 0, 0, VIEW_W, VIEW_H);
   }
   ctx.globalCompositeOperation = 'lighter';
   L.lamps.forEach((l, i) => {
@@ -182,6 +198,8 @@ export function drawLighting(ctx, fx, world, cam) {
     ctx.globalAlpha = 0.09; ctx.beginPath(); ctx.arc(x, y, Math.round(R * 0.45 + flick(l, i)), 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = P.LG4; ctx.globalAlpha = 0.25; ctx.beginPath(); ctx.arc(x, y + 2, 7, 0, Math.PI * 2); ctx.fill();
   });
+  ctx.fillStyle = P.LG2; ctx.globalAlpha = 0.06; // lit tower windows: art-only glow (no stealth light)
+  for (const g of litWindows(L)) { ctx.beginPath(); ctx.arc(Math.round(g.x * T - cam.x), Math.round(g.y * T - cam.y), FX.windowGlow, 0, Math.PI * 2); ctx.fill(); }
   ctx.fillStyle = P.SW1;
   for (const s of L.searchlights || []) { ctx.globalAlpha = 0.18; ctx.beginPath(); ctx.arc(s.x * T - cam.x, s.y * T - cam.y, 9, 0, Math.PI * 2); ctx.fill(); }
   ctx.globalCompositeOperation = 'source-over';

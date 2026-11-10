@@ -7,18 +7,26 @@
 // for graceTime. If it stops seeing her inside the window she gets away (meter drops to
 // escapeMeter) and it searches her last-seen spot; if it still sees her when the window ends,
 // she is caught.
-import { TUNING } from './config.js';
+import { TUNING, v1px } from './config.js';
 import { isStandable } from './level.js';
-import { guardSees, guardSeesLit, isHidden, isLit, searchlightSees, sweepAngle, lineOfSight, inCone } from './los.js';
+import { wrapAngle } from './geom.js';
+import { guardSees, guardSeesLit, isHidden, isLit, searchlightSees, sweepAngle, lineOfSight, inCone, guardEyeOf } from './los.js';
 
 export const watchersOf = (level) => [...level.guards, ...(level.searchlights || [])];
-export const eyeOf = (o) => (o.kind === 'searchlight' ? { x: o.x, y: o.y } : { x: o.x, y: o.floorY - TUNING.guardEyeHeight });
+export const eyeOf = (o) => (o.kind === 'searchlight' ? { x: o.x, y: o.y } : guardEyeOf(o));
+
+/** The watchman's touch box (stealth's "bumped into him"): within touchRange either side and
+ *  her centre in the 2 rows over his floor. The validator's guardConeCells writes the same box in
+ *  cells (with a margin); feel.js guardBump is the separate i-frame hit box (FEEL.contact*). */
+export function inGuardTouch(o, px, py) {
+  return Math.abs(px - o.x) < TUNING.touchRange && py > o.floorY - 2 && py < o.floorY;
+}
 
 /** Does this watcher see the point? Guards: their cone, or farther if she stands in lamplight. */
 export function watcherSees(level, o, px, py, doorsOpen = false) {
   if (o.kind === 'searchlight') return searchlightSees(level, o, px, py, doorsOpen);
   if (guardSees(level, o, px, py, doorsOpen)) return true;
-  if (Math.abs(px - o.x) < TUNING.touchRange && py > o.floorY - 2 && py < o.floorY) return true; // bumped into him
+  if (inGuardTouch(o, px, py)) return true; // bumped into him
   return isLit(level, px, py, doorsOpen) && guardSeesLit(level, o, px, py, doorsOpen);
 }
 
@@ -26,7 +34,7 @@ export function watcherSees(level, o, px, py, doorsOpen = false) {
 export function patrol(g, dt) {
   const lo = g.c0 + 0.5;
   const hi = g.c1 + 0.5;
-  const v = (g.speed / 16) * dt;
+  const v = v1px(g.speed) * dt; // guard speed is in v1 px/s in every def (audit I2: v1px, not a literal / 16)
   if (g.x < lo - 1e-9) { g.dir = 1; g.x = Math.min(lo, g.x + v); return; }
   if (g.x > hi + 1e-9) { g.dir = -1; g.x = Math.max(hi, g.x - v); return; }
   g.x += g.dir * v;
@@ -49,12 +57,23 @@ function stepGuard(level, g, dt, emit) {
   switch (g.state) {
     case 'tied': return; // M4 Tie-Line: out for the room
     case 'alert': return; // frozen with the "!"
+    case 'stagger': { // feel pass 1: flinch and slide. Same watchman, not a new enemy.
+      if (g.kbT > 0) {
+        const nx = g.x + (g.kbVx || 0) * dt;
+        if (isStandable(level, Math.floor(nx), g.floorY, false)) g.x = nx;
+        else g.kbT = 0;
+        g.kbT -= dt;
+      }
+      g.t -= dt;
+      if (g.t <= 0) g.state = 'patrol';
+      return;
+    }
     case 'listen':
       g.t -= dt;
       if (g.t <= 0) g.state = 'patrol';
       return;
     case 'search': {
-      const there = walkTo(level, g, g.searchX, (g.speed / 16) * T.searchSpeedMul, dt);
+      const there = walkTo(level, g, g.searchX, v1px(g.speed) * T.searchSpeedMul, dt);
       if (!there) return;
       g.t -= dt;
       g.flipT -= dt;
@@ -79,7 +98,7 @@ export function stepSearchlight(s, dt, emit) {
     target = sweepAngle(s, s.sweepT);
   }
   // swing toward the target (the sweep itself is slower than this, so it tracks exactly)
-  const d = Math.atan2(Math.sin(target - s.angle), Math.cos(target - s.angle));
+  const d = wrapAngle(target - s.angle);
   const maxTurn = 3 * dt;
   s.angle += Math.abs(d) <= maxTurn ? d : Math.sign(d) * maxTurn;
 }
@@ -93,13 +112,15 @@ export function noiseRadius(w, landDrop) {
   return 0;
 }
 
-/** Can guard g hear a noise of radius r made at (x,y)? Stone between halves it. Pure. */
+/** Can guard g hear a noise of radius r made at (x,y)? Stone between halves it. Pure.
+ *  Hearing is at his head (body x, standHeight), not the flashlight tip. */
 export function hears(level, g, x, y, r, doorsOpen = false) {
   if (r <= 0) return false;
-  const e = eyeOf(g);
-  const d = Math.hypot(x - e.x, y - e.y);
+  const ex = g.x;
+  const ey = g.floorY - TUNING.standHeight;
+  const d = Math.hypot(x - ex, y - ey);
   if (d >= r) return false;
-  return d < r * TUNING.hearingWallMul || lineOfSight(level, e.x, e.y, x, y, doorsOpen);
+  return d < r * TUNING.hearingWallMul || lineOfSight(level, ex, ey, x, y, doorsOpen);
 }
 
 // ---- M4 power-ups ----
@@ -120,9 +141,10 @@ export function smokeBlocks(smokes, ex, ey, px, py) {
  *  angle x cloakInner) or by touch; searchlights and lamplight work as usual. */
 export function cloakAllows(level, o, px, py) {
   if (o.kind === 'searchlight') return true;
-  if (Math.abs(px - o.x) < TUNING.touchRange && py > o.floorY - 2 && py < o.floorY) return true;
+  if (inGuardTouch(o, px, py)) return true;
   const k = TUNING.cloakInner;
-  return inCone(o.x, o.floorY - TUNING.guardEyeHeight, o.dir, px, py, TUNING.coneRange * k, TUNING.coneHalfAngle * k);
+  const e = eyeOf(o);
+  return inCone(e.x, e.y, o.dir, px, py, TUNING.coneRange * k, TUNING.coneHalfAngle * k);
 }
 
 /** Tie-Line: falling onto a guard's head ties him up. Returns the guard, or null. */
@@ -153,7 +175,7 @@ export function stepStealth(w, level, dt, emit, noise = 0) {
   // hearing: a patrolling or searching guard turns to the sound and stands listening
   if (noise > 0) {
     for (const g of level.guards) {
-      if (g.state === 'alert' || g.state === 'tied') continue;
+      if (g.state === 'alert' || g.state === 'tied' || g.state === 'stagger') continue;
       if (!hears(level, g, w.x, cy, noise, w.doorsOpen)) continue;
       const dir = Math.sign(w.x - g.x) || g.dir;
       if (g.state !== 'listen' || g.dir !== dir) emit('heard', { noise });

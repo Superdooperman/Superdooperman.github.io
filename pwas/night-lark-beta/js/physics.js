@@ -1,11 +1,16 @@
 // Body vs tile collision (ported from v1 Ie / et) plus the v2 push-out fix.
 // The body is an AABB: x is the centre, y is the feet, h the height, all in tiles.
-import { TUNING } from './config.js';
-import { tileAt, isBlockingTile, isSolidTile, isStandable, isWood, isStone } from './level.js';
+import { TUNING, PX1 } from './config.js';
+import { tileAt, isBlockingTile, isSolidTile, isStandable, isOneWay, isStone } from './level.js';
+
+/** The body's centre height: half way up from the feet (y) by its height h. One expression for
+ *  the sim, rope, feel, fx and the generator's probes (x / 2 and x * 0.5 are the same double). */
+export const bodyCenterY = (b) => b.y - b.h * 0.5;
 
 /** v1 Ie(): does the body overlap a blocking tile (stone, 'b' or a closed door)?
  *  Also: with the doors shut, poking above the room over a door column is blocked.
- *  Wood ('=', '~') never blocks: it is one-way and only catches the feet (findLanding). */
+ *  One-way tiles (wood '=', '~' and grating 'g') never block: they only catch the feet
+ *  (findLanding). */
 export function bodyBlocked(level, x, y, h, doorsOpen) {
   const { halfWidth: hw, eps } = TUNING;
   const left = x - hw;
@@ -24,12 +29,13 @@ export function bodyBlocked(level, x, y, h, doorsOpen) {
 /** The top 1 v1 px of an open-topped stone tile is a "lip": feet that dip into it are not
  *  blocked (v1 landed you on any top your feet were within 1 px of, findLanding snaps her up).
  *  Without this, v1's step-up-a-pixel landings at a ledge corner would be blocked. */
-export const LIP = 1 / 16;
+export const LIP = PX1;
 function onLip(level, c, r, bottom, doorsOpen) {
   return bottom < r + LIP && bottom >= r && isStone(tileAt(level, c, r)) && isStandable(level, c, r, doorsOpen);
 }
 
-/** Tiles (col,row) of any solid tile (stone '#'/'s', 'b', closed 'D') the body overlaps. Not wood. */
+/** Tiles (col,row) of any solid tile (stone '#'/'s', 'b', closed 'D') the body overlaps. Never a
+ *  one-way tile. */
 export function solidOverlaps(level, x, y, h, doorsOpen) {
   const { halfWidth: hw, eps } = TUNING;
   const out = [];
@@ -69,47 +75,53 @@ export function pushOut(level, x, y, h, doorsOpen) {
 
 /** v1 et(): land on the highest standable top the feet crossed since prevY.
  *  Stone keeps v1's rule (feet were no more than 1 v1 px below the top last step).
- *  Wood is one-way: only if the feet were AT OR ABOVE the top on the previous step, so coming
- *  up from below or in from the side passes through. `skipRow` is a wooden row she is
- *  dropping through (DOWN + A). Returns the top row's y, or null. Pure. */
+ *  One-way tiles (wood, grating): only if the feet were AT OR ABOVE the top on the previous step,
+ *  so coming up from below or in from the side passes through. `skipRow` is a one-way row she
+ *  is dropping through (DOWN + A). Returns the top row's y, or null. Pure. */
 export function findLanding(level, x, y, prevY, doorsOpen, skipRow = null) {
   const { halfWidth: hw, eps } = TUNING;
   const c0 = Math.floor(x - hw);
   const c1 = Math.floor(x + hw - eps);
   let top = null;
+  // Only rows with y - 1 < r <= y + eps can pass the test below, i.e. floor(y) and (within eps
+  // of a top) floor(y) + 1. Scan one more row each side so float rounding can never matter; the
+  // test itself is unchanged (audit F13: this used to scan every row, tall rooms pay for it).
+  const yr = Math.floor(y);
+  const r0 = Math.max(0, yr - 1);
+  const r1 = Math.min(level.rows - 1, yr + 1);
   for (let c = c0; c <= c1; c++)
-    for (let r = 0; r < level.rows; r++) {
+    for (let r = r0; r <= r1; r++) {
       if (!isStandable(level, c, r, doorsOpen)) continue;
-      const wood = isWood(tileAt(level, c, r));
-      if (wood && r === skipRow) continue;
-      const fromAbove = wood ? prevY <= r + WOOD_PREV_EPS : prevY <= r + 1 / 16;
+      const oneWay = isOneWay(tileAt(level, c, r));
+      if (oneWay && r === skipRow) continue;
+      const fromAbove = oneWay ? prevY <= r + ONE_WAY_PREV_EPS : prevY <= r + PX1;
       if (fromAbove && y >= r - eps && y < r + 1 && (top === null || r < top)) top = r;
     }
   return top;
 }
 
-/** Floating-point slack for "at or above the top" on wood (1e-9 tile, far below a pixel). */
-export const WOOD_PREV_EPS = 1e-9;
+/** Floating-point slack for "at or above the top" on a one-way tile (1e-9 tile, far below a pixel). */
+export const ONE_WAY_PREV_EPS = 1e-9;
 
-/** Columns under the feet: is she standing only on wood (so DOWN + A can drop through)?
- *  Returns the wooden row, or null if any stone/blocking tile is under her feet. */
-export function woodUnderFeet(level, x, y, doorsOpen) {
+/** Columns under the feet: is she standing only on one-way tiles (so DOWN + A can drop through)?
+ *  Returns that row, or null if any stone/blocking tile is under her feet. */
+export function oneWayUnderFeet(level, x, y, doorsOpen) {
   const { halfWidth: hw, eps } = TUNING;
   const r = Math.floor(y + TUNING.footEps * 2);
-  let wood = false;
+  let oneWay = false;
   for (let c = Math.floor(x - hw); c <= Math.floor(x + hw - eps); c++) {
     const ch = tileAt(level, c, r);
     if (isBlockingTile(ch, doorsOpen)) return null;
-    if (isWood(ch) && isStandable(level, c, r, doorsOpen)) wood = true;
+    if (isOneWay(ch) && isStandable(level, c, r, doorsOpen)) oneWay = true;
   }
-  return wood ? r : null;
+  return oneWay ? r : null;
 }
 
 /** Auto ledge climb probe (minimal parkour, no buttons). In the air, a standable top (stone or
  *  wood) just in front of her, with her feet below it by at most climbReach, and room to stand
  *  on it. Returns { row, x, y } (where she ends up standing) or null. */
-export function findLedge(level, x, y, face, doorsOpen, skipRow = null) {
-  const { halfWidth: hw, climbReach, climbProbe, footEps, standHeight, eps } = TUNING;
+export function findLedge(level, x, y, face, doorsOpen, skipRow = null, climbReach = TUNING.climbReach) {
+  const { halfWidth: hw, climbProbe, footEps, standHeight, eps } = TUNING;
   const edge = face > 0 ? x + hw - eps : x - hw;
   const probe = edge + face * climbProbe;
   const cols = new Set([Math.floor(edge), Math.floor(probe)]);
@@ -127,9 +139,9 @@ export function findLedge(level, x, y, face, doorsOpen, skipRow = null) {
       if (solidOverlaps(level, nx, ny, standHeight, doorsOpen).length) continue;
       // the climb path (straight up at her x, then over) must not go through stone
       if (bodyBlocked(level, x, y, y - ny + standHeight, doorsOpen)) continue;
-      if (!best || r < best.row) best = { row: r, x: nx, y: ny };
+      if (!best || r < best.row) best = { row: r, x: nx, y: ny, col: c, face: face > 0 ? 1 : -1 }; // col/face: the lip she climbs (art alignment)
     }
   }
   return best;
 }
-const climbMinBelow = 1 / 16; // feet must be at least 1 v1 px below the top (else it is a landing)
+const climbMinBelow = PX1; // feet must be at least 1 v1 px below the top (else it is a landing)

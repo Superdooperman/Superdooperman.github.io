@@ -1,4 +1,4 @@
-// BIG 2x2 ROOM (big rooms prototype, Azzato, Nov 9 2026): one normal room two screens wide and two
+// BIG 2x2 ROOM (big rooms prototype, Superdooperman, Nov 9 2026): one normal room two screens wide and two
 // tall (60 x 32 tiles; today's authored rooms are ~30 x 16), so playtesters can feel a roomier
 // space. ?room=big2x2 plays it on its own (js/main.js).
 //

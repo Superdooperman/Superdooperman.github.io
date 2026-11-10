@@ -86,7 +86,7 @@
         true,
         true
       ],
-      "note": "v5 (Nov 3, 2026, approved by Azzato). Faces right, 48x48 cells (384x48 strip), pivot [32,47] (was 32x48 / [16,47]: 16 px of padding on the left for the cloak and rope trailing behind). Jog/run loop for 100 px/s at 16 fps, 6.25 px/frame; frames 3 and 7 are flight frames. The flapping scalloped cloak AND the rope-loop tail are painted into every frame (the rope hangs from the belt between the far-side lining and the near dark panel), so the engine must NOT draw its own cloak swing or rope tail on lark-run (no tailAnchor). Throat in key greens (48 px). Playback stays tied to her actual speed: 16 fps at exactly 100 px/s, scale fps by |vx|/100.",
+      "note": "v5 (Nov 3, 2026, approved by Superdooperman). Faces right, 48x48 cells (384x48 strip), pivot [32,47] (was 32x48 / [16,47]: 16 px of padding on the left for the cloak and rope trailing behind). Jog/run loop for 100 px/s at 16 fps, 6.25 px/frame; frames 3 and 7 are flight frames. The flapping scalloped cloak AND the rope-loop tail are painted into every frame (the rope hangs from the belt between the far-side lining and the near dark panel), so the engine must NOT draw its own cloak swing or rope tail on lark-run (no tailAnchor). Throat in key greens (48 px). Playback stays tied to her actual speed: 16 fps at exactly 100 px/s, scale fps by |vx|/100.",
       "ropePainted": true,
       "ownsTail": [
         true,
@@ -248,7 +248,7 @@
         "cloak-lifting",
         "arm-out-gun"
       ],
-      "note": "Faces right. Start of the grapple-fire animation. Pass 3 = Azzato's draw-over: frames 00-01 have the rope coiled at the feet, and in frame 02 the rope runs from the gun down through the lifted cloak. Lining is WL1 with WL0 shade, against the black WK1 bodysuit. muzzle = front face of the gun body on frame 02; his hook prongs went 2 px past the frame and are clipped. OPEN: rope drawn on the body vs the engine's trailing rope. Play once and hold frame 02 until the shot. fps 12 is a suggestion. Oct 28 2026 10:45 PM CT: Brook's 8x scale-down of the drawover moved the figure -1/-2/-4 px in frames 0/1/2 (measured: exact alpha match at those shifts) and un-clipped the hook, so tailAnchor is per frame and muzzle (gun front face, frame 2) is [27,21] (was [31,21])."
+      "note": "Faces right. Start of the grapple-fire animation. Pass 3 = Superdooperman's draw-over: frames 00-01 have the rope coiled at the feet, and in frame 02 the rope runs from the gun down through the lifted cloak. Lining is WL1 with WL0 shade, against the black WK1 bodysuit. muzzle = front face of the gun body on frame 02; his hook prongs went 2 px past the frame and are clipped. OPEN: rope drawn on the body vs the engine's trailing rope. Play once and hold frame 02 until the shot. fps 12 is a suggestion. Oct 28 2026 10:45 PM CT: Brook's 8x scale-down of the drawover moved the figure -1/-2/-4 px in frames 0/1/2 (measured: exact alpha match at those shifts) and un-clipped the hook, so tailAnchor is per frame and muzzle (gun front face, frame 2) is [27,21] (was [31,21])."
     },
     {
       "name": "lark-gun-out",
@@ -280,7 +280,7 @@
           22
         ]
       ],
-      "note": "Faces right. The two gun-out poses at 48x48 with Azzato's full, unclipped grapple hook. Frame 00 = turnaround side view; frame 01 = cloak-open frame 02. Each is the pass-3 32x48 frame padded 8 px left and right, so its (16,47) pivot lands on (24,47), and with the 2 hook-prong columns restored at x40-41. Same palette, throat key greens and WL1/WL0 lining as pass 3. muzzle is per frame [x,y] in 48x48 coordinates: the hook tip column (x41) on the barrel's centre row, between the two prongs. tailAnchor = the 32-px [11,40] + 8 x. The 32-px turnaround and cloak-open strips are unchanged; Vegapunk decides how this strip replaces or overlays them."
+      "note": "Faces right. The two gun-out poses at 48x48 with Superdooperman's full, unclipped grapple hook. Frame 00 = turnaround side view; frame 01 = cloak-open frame 02. Each is the pass-3 32x48 frame padded 8 px left and right, so its (16,47) pivot lands on (24,47), and with the 2 hook-prong columns restored at x40-41. Same palette, throat key greens and WL1/WL0 lining as pass 3. muzzle is per frame [x,y] in 48x48 coordinates: the hook tip column (x41) on the barrel's centre row, between the two prongs. tailAnchor = the 32-px [11,40] + 8 x. The 32-px turnaround and cloak-open strips are unchanged; Vegapunk decides how this strip replaces or overlays them."
     },
     {
       "name": "lark-idle-bell",
@@ -315,7 +315,7 @@
       "ropePainted": true,
       "engineCloak": false,
       "engineTail": false,
-      "note": "Standing bell-belly idle (Azzato approved Nov 3): cloak breathes/sways, scalloped hem, rope loop hangs nearly straight from the belt under the hem and sways with the cloak. Painted in, so no engine cloak or rope tail. Throat key greens (24 px). lark-idle.png is unchanged and still exists."
+      "note": "Standing bell-belly idle (Superdooperman approved Nov 3): cloak breathes/sways, scalloped hem, rope loop hangs nearly straight from the belt under the hem and sways with the cloak. Painted in, so no engine cloak or rope tail. Throat key greens (24 px). lark-idle.png is unchanged and still exists."
     },
     {
       "name": "lark-swing",
@@ -474,12 +474,12 @@
         ]
       ],
       "ownsCloak": [
-        false,
-        false,
+        true,
+        true,
         true,
         true
       ],
-      "note": "release (straight line, cloak tight), rise (legs trailing, cloak dragged down), fall (poncho halves thrown up as wings, legs reaching down), spread (pass 5: optional held/dramatic version of fall, wings wider and flung higher, lavender back-half lining behind the legs). Release stays 1 frame; no tumble. Bottom-aligned to the pivot row. tailAnchor = one pixel past the back-most hem point of the painted poncho (auto-measured)."
+      "note": "release (straight line, cloak tight), rise (legs trailing, cloak dragged down), fall (poncho halves thrown up as wings, legs reaching down), spread (pass 5: optional held/dramatic version of fall, wings wider and flung higher, lavender back-half lining behind the legs). Release stays 1 frame; no tumble. Bottom-aligned to the pivot row. tailAnchor = one pixel past the back-most hem point of the painted poncho (auto-measured). ownsCloak all true (tailfix Nov 9: painted poncho+rope; no engine ribbon)."
     },
     {
       "name": "lark-freefall",
@@ -614,12 +614,12 @@
         ]
       ],
       "ownsCloak": [
-        false,
-        false,
-        false,
-        false
+        true,
+        true,
+        true,
+        true
       ],
-      "note": "Landing roll: land-tuck, ball (~-110 deg), ball (~-220 deg), kneel-rise. Bottom-aligned to the pivot row; poncho wrapped, engine tail allowed. tailAnchor = one pixel past the back-most hem point of the painted poncho (auto-measured)."
+      "note": "Landing roll: land-tuck, ball (~-110 deg), ball (~-220 deg), kneel-rise. Bottom-aligned to the pivot row; poncho wrapped, engine tail allowed. tailAnchor = one pixel past the back-most hem point of the painted poncho (auto-measured). ownsCloak all true (tailfix Nov 9: painted poncho+rope; no engine ribbon)."
     },
     {
       "name": "lark-ledge",
@@ -680,12 +680,236 @@
         ]
       ],
       "ownsCloak": [
-        false,
-        false,
-        false,
-        false
+        true,
+        true,
+        true,
+        true
       ],
-      "note": "Ledge grab + pull-up: reach, hang, pull-up (knee hooked on lip), crouch-top. ledgeHand[i] = the frame pixel that should sit on the ledge lip corner (hand for 0-2, front toe for 3); align the frame so that pixel lands on the lip. Frames are bbox-centred, not pivot-locked. tailAnchor = one pixel past the back-most hem point of the painted poncho (auto-measured)."
+      "note": "Ledge grab + pull-up: reach, hang, pull-up (knee hooked on lip), crouch-top. ledgeHand[i] = the frame pixel that should sit on the ledge lip corner (hand for 0-2, front toe for 3); align the frame so that pixel lands on the lip. Frames are bbox-centred, not pivot-locked. tailAnchor = one pixel past the back-most hem point of the painted poncho (auto-measured). ownsCloak all true (tailfix Nov 9: painted poncho+rope; no engine ribbon)."
+    },
+    {
+      "name": "wren-hide",
+      "file": "in/wren-hide.png",
+      "frameW": 32,
+      "frameH": 48,
+      "frames": 8,
+      "fps": 0,
+      "frameMs": [
+        80,
+        70,
+        80,
+        110,
+        700,
+        700,
+        60,
+        60
+      ],
+      "pivot": [
+        16,
+        47
+      ],
+      "accentKey": true,
+      "tailAnchor": [
+        7,
+        43
+      ],
+      "frameNames": [
+        "in_00",
+        "in_01",
+        "in_02",
+        "in_03",
+        "hold_00",
+        "hold_01",
+        "out_00",
+        "out_01"
+      ],
+      "anims": {
+        "in": {
+          "frames": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "frameMs": [
+            80,
+            70,
+            80,
+            110
+          ],
+          "loop": false
+        },
+        "hold": {
+          "frames": [
+            4,
+            5
+          ],
+          "frameMs": [
+            700,
+            700
+          ],
+          "loop": true
+        },
+        "out": {
+          "frames": [
+            6,
+            7
+          ],
+          "frameMs": [
+            60,
+            60
+          ],
+          "loop": false
+        }
+      },
+      "ownsCloak": true,
+      "anchors": {
+        "eyeGlint": [
+          22,
+          25
+        ]
+      },
+      "note": "Hide pose (Brook gaps-hide + tailfix, Nov 9 2026): cloak over face, rope tail painted. Draw at FULL opacity. Hold uses wren-hide-hold-full + engine dim (\u00d70.5 value, 50% desat) per STYLE-GUIDE \u00a74. in once \u2192 hold loop; on unhide play out (mid-in \u2192 matching out)."
+    },
+    {
+      "name": "wren-hide-in",
+      "file": "in/wren-hide-in.png",
+      "frameW": 32,
+      "frameH": 48,
+      "frames": 4,
+      "fps": 11.76,
+      "frameMs": [
+        80,
+        70,
+        80,
+        110
+      ],
+      "loop": false,
+      "pivot": [
+        16,
+        47
+      ],
+      "accentKey": true,
+      "tailAnchor": [
+        7,
+        43
+      ],
+      "frameNames": [
+        "crouch",
+        "hand-at-seam",
+        "cloak-rising",
+        "cloak-over-face"
+      ],
+      "ownsCloak": true,
+      "anchors": {
+        "eyeGlint": [
+          22,
+          25
+        ]
+      },
+      "note": "Hide enter (once). Prefer combined wren-hide in the engine."
+    },
+    {
+      "name": "wren-hide-hold",
+      "file": "in/wren-hide-hold.png",
+      "frameW": 32,
+      "frameH": 48,
+      "frames": 2,
+      "fps": 1.43,
+      "frameMs": [
+        700,
+        700
+      ],
+      "loop": true,
+      "pivot": [
+        16,
+        47
+      ],
+      "accentKey": true,
+      "tailAnchor": [
+        7,
+        43
+      ],
+      "frameNames": [
+        "hidden",
+        "hidden-breath"
+      ],
+      "ownsCloak": true,
+      "anchors": {
+        "eyeGlint": [
+          22,
+          25
+        ]
+      },
+      "note": "Hide hold loop; values baked one step darker. Draw at full opacity."
+    },
+    {
+      "name": "wren-hide-hold-full",
+      "file": "in/wren-hide-hold-full.png",
+      "frameW": 32,
+      "frameH": 48,
+      "frames": 2,
+      "fps": 1.43,
+      "frameMs": [
+        700,
+        700
+      ],
+      "loop": true,
+      "pivot": [
+        16,
+        47
+      ],
+      "accentKey": true,
+      "tailAnchor": [
+        7,
+        43
+      ],
+      "frameNames": [
+        "hidden",
+        "hidden-breath"
+      ],
+      "ownsCloak": true,
+      "anchors": {
+        "eyeGlint": [
+          22,
+          25
+        ]
+      },
+      "note": "Full-colour hide hold. Engine applies STYLE-GUIDE \u00a74 dim (\u00d70.5 value, 50% desat) at alpha 1. Prefer over baked-dark wren-hide-hold."
+    },
+    {
+      "name": "wren-hide-out",
+      "file": "in/wren-hide-out.png",
+      "frameW": 32,
+      "frameH": 48,
+      "frames": 2,
+      "fps": 16.67,
+      "frameMs": [
+        60,
+        60
+      ],
+      "loop": false,
+      "pivot": [
+        16,
+        47
+      ],
+      "accentKey": true,
+      "tailAnchor": [
+        7,
+        43
+      ],
+      "frameNames": [
+        "cloak-dropping",
+        "hand-at-seam"
+      ],
+      "ownsCloak": true,
+      "anchors": {
+        "eyeGlint": [
+          22,
+          25
+        ]
+      },
+      "note": "Hide exit (once)."
     },
     {
       "name": "bg-harbor-moon",
@@ -981,7 +1205,7 @@
           1
         ]
       },
-      "note": "SG 8.10 / style pass 14. Lark feather, 45 deg, neutral UI: full = UI4 lit side + UI3 shade side + UI2 shaft; lost = UI2 outline only. Ink sits in rows 1-12 so the 16x16 cell at y=0 fits the 14 px band (Q14). Lavender only if Azzato rules the feathers are 'of Wren' (OPEN Q13): swap UI4->WL1, UI3->WL0 in sprites.py.",
+      "note": "SG 8.10 / style pass 14. Lark feather, 45 deg, neutral UI: full = UI4 lit side + UI3 shade side + UI2 shaft; lost = UI2 outline only. Ink sits in rows 1-12 so the 16x16 cell at y=0 fits the 14 px band (Q14). Lavender only if Superdooperman rules the feathers are 'of Wren' (OPEN Q13): swap UI4->WL1, UI3->WL0 in sprites.py.",
       "layer": "UI"
     },
     {
@@ -2336,7 +2560,7 @@
         "unmasked"
       ],
       "draft": true,
-      "bestGuess": "Face after Azzato's sketch (centre figure). Eye colour, lip tone and exact skin tone are not specified anywhere -> Azzato to confirm.",
+      "bestGuess": "Face after Superdooperman's sketch (centre figure). Eye colour, lip tone and exact skin tone are not specified anywhere -> Superdooperman to confirm.",
       "note": "Hood-down Wren, face and silhouette only: centre-parted shoulder-length light hair (WH), skin WS, heavy-lidded dark eyes with the Lark's pale WL3 glint, dark lips, turned-up WK collar, WL2 throat patch (no WK0 ring), hood bunched at her left shoulder with the folded tuft, purple poncho with the pale WL front, moonlight from upper right (MN1 rim). Card NV1/NV2 with a faint moon disc, UI0 1 px frame.",
       "layer": "UI (end card / Unmasked option / title)"
     },
@@ -2352,13 +2576,31 @@
         47
       ],
       "anims": {
-        "walk": [0, 5],
-        "turn": [6, 6],
-        "alert": [7, 7],
-        "search": [8, 9],
-        "tied": [10, 10]
+        "walk": [
+          0,
+          5
+        ],
+        "turn": [
+          6,
+          6
+        ],
+        "alert": [
+          7,
+          7
+        ],
+        "search": [
+          8,
+          9
+        ],
+        "tied": [
+          10,
+          10
+        ]
       },
-      "lightOrigin": [28, 19],
+      "lightOrigin": [
+        28,
+        19
+      ],
       "note": "Same frames/size/pivot as guard-watchman.png; flashlight lens remapped to v3 SW1. Original kept."
     },
     {
@@ -2489,7 +2731,7 @@
         16,
         12
       ],
-      "note": "Q14 option B (32x32 prop), drawn so Azzato can compare with option A searchlight-head (16x16, kept). GD drum + yoke, SW lens. Placement: battlements from floor 2 up and the lantern room only, max 1 per band, never sweeps the shaft. Beam is engine-drawn.",
+      "note": "Q14 option B (32x32 prop), drawn so Superdooperman can compare with option A searchlight-head (16x16, kept). GD drum + yoke, SW lens. Placement: battlements from floor 2 up and the lantern room only, max 1 per band, never sweeps the shaft. Beam is engine-drawn.",
       "layer": "C"
     },
     {
@@ -2564,7 +2806,7 @@
           3
         ]
       },
-      "note": "Central pole + finial, spreader arms with stays, two tiers of bell shades with hanging globes (5 seen, the 6th is behind the pole) after Azzato's Austin moonlight-tower photos. dark = HA1 globes with a GD2 glint; relit = LG3 globe, LG4 core, LG2 lower half, LG1 spill under the shade.",
+      "note": "Central pole + finial, spreader arms with stays, two tiers of bell shades with hanging globes (5 seen, the 6th is behind the pole) after Superdooperman's Austin moonlight-tower photos. dark = HA1 globes with a GD2 glint; relit = LG3 globe, LG4 core, LG2 lower half, LG1 spill under the shade.",
       "layer": "C (above the battlements)"
     },
     {
