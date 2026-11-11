@@ -23,6 +23,10 @@ export const WR = Object.freeze({
   shelter: { c0: 24, c1: 25 }, // shadow floor under the sweep
   spawn: { c: 2, r: 11 },
   exit: { c: 28, r: 11 },
+  // set pieces (js/setpiece.js): a cracked gargoyle over the left end of his beat (ZIP it onto
+  // him: out for the room, and the rubble ends his patrol) and a chandelier over the right end
+  // (drop it: its light goes out and he is dazed)
+  setpieces: [{ type: 'gargoyle', c: 13, r: 6 }, { type: 'chandelier', c: 22, r: 8 }],
 });
 
 export function watchRoom() {
@@ -54,6 +58,7 @@ export function watchRoom() {
       { id: 'searchlight', text: 'SEARCHLIGHT: WAIT FOR THE GAP', c0: 22, c1: 26, r0: 0, r1: 12, doneOn: 'leave' },
     ],
     checkpoints: [],
+    setpieces: g.setpieces.map((p) => ({ ...p })),
   };
   dressGenerated(def, 2, { keepAnchors: true });
   return def;

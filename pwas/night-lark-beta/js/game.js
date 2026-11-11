@@ -9,6 +9,7 @@ import { TUNING, SETTINGS } from './config.js';
 import { createWorld as defaultCreateWorld } from './sim.js';
 import { generateTower } from './gen/generator.js';
 import { loadSave, writeSave } from './save.js';
+import { setpieceSfx } from './audio.js';
 import { perchOffer, worldOpts, activeSynergies } from './powerups.js';
 import {
   createRun, currentRoom, isPerch, isVault, floorOf, absorbWorld, takePowerup, stashChoices,
@@ -117,6 +118,7 @@ export function createGame(opts = {}) {
         g.sfx.push('powerup');
       } else if (e.type === 'boss-intro') g.sfx.push('alert'); // (render.js draws his plate and line)
       else if (e.type === 'snuff' || e.type === 'smoke') g.sfx.push(e.type);
+      else if (setpieceSfx(e)) g.sfx.push(setpieceSfx(e)); // set pieces: crack, crash / smash, knockout
       else if (e.type === 'room-done') {
         absorbWorld(g.run, w);
         w.events.length = 0;

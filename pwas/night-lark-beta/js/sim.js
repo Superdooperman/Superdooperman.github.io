@@ -28,13 +28,17 @@ import { chooseTarget, reachable, stepReticle, pickAt, aimPick, aimCandidates, i
 import { canCancelAttack, attackLimit, guardBump, attackReaches } from './feel.js';
 import { stepMiniTowers, warmLightBuff } from './mini-tower.js';
 import { createIntro, introCheck, stepIntro, introActive } from './shaft-intro.js';
+import { attachSetpieces, stepSetpieces, yankSetpiece, dropSetpiece, isYankable, isSetpieceLamp, setpieceOf } from './setpiece.js';
 
 const NO_INPUT = Object.freeze({ held: {}, pressed: {}, released: {} });
+/** The hint while hooked to a yankable set piece ({Y}: the ZIP button, prompts.js). */
+export const YANK_PROMPT = Object.freeze({ id: 'setpiece-yank', text: '{Y}: YANK IT DOWN' });
 
 export function createWorld(levelDef, opts = {}) {
   const T = TUNING;
   const anchorOpt = { anchors: opts.anchors ?? SETTINGS.anchors ?? undefined };
   const level = parseLevel(levelDef, anchorOpt);
+  attachSetpieces(level, levelDef); // set pieces (setpiece.js): their grips and lights join the room's
   const v2 = (opts.controls ?? 'v2') === 'v2';
   const parkour = opts.parkour ?? true;
   const yankInput = () => opts.yankInput ?? SETTINGS.yankInput; // 'hold' (B held on the line) or 'button'
@@ -128,14 +132,21 @@ export function createWorld(levelDef, opts = {}) {
 
   /** Lamp Snuffer: put a lamp out for the rest of the room (in line range, clear line). */
   function snuff(lamp, how) {
+    if (lamp.setpiece) { // a chandelier's candles: the snuff line jerks it loose (setpiece.js)
+      if (w.anchor === lamp.setpiece.anchor) release('setpiece');
+      emit('snuff', { x: lamp.x, y: lamp.y, how, setpiece: lamp.setpiece.id });
+      dropSetpiece(level, lamp.setpiece, 'snuff', emit);
+      return;
+    }
     level.lamps = level.lamps.filter((l) => l !== lamp);
     w.snuffed.add(lampKey(lamp));
     emit('snuff', { x: lamp.x, y: lamp.y, how });
   }
-  function lampInReach(px, py) {
+  function lampInReach(px, py, any = true) { // any: every lamp (Lamp Snuffer), else only set-piece lights
     let best = null;
     let bd = Infinity;
     for (const l of level.lamps) {
+      if (!any && !isSetpieceLamp(l)) continue;
       const d = Math.hypot(w.x - l.x, center() - l.y);
       if (d > lineRange() + T.targetSlack || !lineOfSight(level, w.x, center(), l.x, l.y, w.doorsOpen)) continue;
       const k = px === undefined ? d : Math.hypot(px - l.x, py - l.y);
@@ -226,6 +237,7 @@ export function createWorld(levelDef, opts = {}) {
     const age = w.targetAge;
     w.target = null; w.targetAge = 0;
     emit('attach', { ring, how });
+    if (isYankable(ring)) emit('setpiece-hook', { id: ring.setpiece.id, piece: ring.setpiece.type });
     if (fix) {
       w.tautT = 0; w.arc = 0; w.swingAng = null; w.relStat = null;
       if (inAir) {
@@ -458,7 +470,7 @@ export function createWorld(levelDef, opts = {}) {
     // tap or click directly on a point
     if (input.aimAt) {
       const pick = pickAt(reachable(level, w.x, center(), range, w.doorsOpen), input.aimAt.x, input.aimAt.y);
-      const lamp = w.snuffer ? lampInReach(input.aimAt.x, input.aimAt.y) : null;
+      const lamp = lampInReach(input.aimAt.x, input.aimAt.y, w.snuffer); // without the Snuffer: a set piece's candles only
       const lampCloser = lamp && (!pick || Math.hypot(input.aimAt.x - lamp.x, input.aimAt.y - lamp.y) < Math.hypot(input.aimAt.x - pick.x, input.aimAt.y - pick.y));
       if (lampCloser) {
         snuff(lamp, 'tap');
@@ -485,7 +497,7 @@ export function createWorld(levelDef, opts = {}) {
         if (w.yank) { endYank('launch'); } else if (!zipped) P = { ...P, fire: true }; // a tap: the old press
       }
     }
-    if (!holdYank && P.yank && w.anchor && !w.grounded) startYank();
+    if (!holdYank && P.yank && w.anchor && (!w.grounded || isYankable(w.anchor))) startYank(); // a set piece can be torn down from the ground
     if (P.fire) {
       let refired = false;
       if (w.anchor && !w.grounded && w.refires > 0) {
@@ -558,11 +570,30 @@ export function createWorld(levelDef, opts = {}) {
 
   /** Yank / zip: the line snaps taut and pulls her hard at the anchor (once per hook, cooldown). */
   function startYank() {
+    if (w.anchor && isYankable(w.anchor)) return tearOff();
     if (!w.anchor || w.yank || w.pull || w.yanks >= SWING.yankPerAttach || w.yankCd > 0) return false;
     w.yanks += 1; w.yank = { t: 0, sp: Math.max(SWING.yankSpeed, Math.hypot(w.vx, w.vy)) }; w.yankCd = SWING.yankCooldown; // a zip never slows her
     w.stats.yanks = (w.stats.yanks || 0) + 1;
     emit('yank', { ring: w.anchor });
     return true;
+  }
+  /** ZIP on a yankable set piece (setpiece.js): the yank goes into the piece, not into a zip. At
+   *  its last hp it drops: the line goes with it, she keeps her speed and the line coyote (a jump
+   *  straight after still counts as off the line), with a short hit-stop for the crack. */
+  function tearOff() {
+    const sp = setpieceOf(w.anchor);
+    if (w.yankCd > 0) return false;
+    w.yankCd = SWING.yankCooldown;
+    w.stats.tears = (w.stats.tears || 0) + 1;
+    const r = yankSetpiece(level, sp, emit);
+    if (r === 'drop') {
+      const air = !w.grounded;
+      release('setpiece');
+      w.lineFall = false; // she chose to let it go: a fall from here is not a missed swing
+      if (air) { w.lineCoyote = T.lineCoyote; w.ledgeAssist = SWING.ledgeAssistTime; }
+      startHitStop('hit');
+    }
+    return !!r;
   }
   /** End a zip: the line lets go and she keeps the zip's speed, so she flies on past the anchor. */
   function endYank(why) {
@@ -683,8 +714,11 @@ export function createWorld(levelDef, opts = {}) {
     for (const g of level.guards) {
       if (!attackReaches(w, g)) continue;
       w.atk.landed = true;
+      // A set-piece stun (dazed) already lasts several seconds; the strike may still knock him
+      // and play the hit, but must not cut that timer down to FEEL.staggerTime (~0.32 s).
+      const stunLeft = g.dazed ? g.t : 0;
       g.state = 'stagger';
-      g.t = FEEL.staggerTime;
+      g.t = Math.max(stunLeft, FEEL.staggerTime);
       g.kbT = FEEL.knockbackTime;
       g.kbVx = (w.face < 0 ? -1 : 1) * FEEL.knockbackSpeed;
       emit('hit', { x: g.x, y: g.floorY, kind: 'strike' });
@@ -697,7 +731,7 @@ export function createWorld(levelDef, opts = {}) {
   function resolveBump() {
     if (!v2) return;
     for (const g of level.guards) {
-      const on = g.state !== 'tied' && guardBump(w, g);
+      const on = g.state !== 'tied' && g.state !== 'down' && guardBump(w, g);
       if (!on || w.invuln > 0) { g._bump = false; continue; }
       if (g._bump) continue;
       g._bump = true;
@@ -1085,6 +1119,8 @@ export function createWorld(levelDef, opts = {}) {
       else if (p.shown && !p.sticky) p.shown = false;
       if (p.shown && !cur) cur = p;
     }
+    // hooked to a yankable set piece: say what ZIP does here (over a room prompt, while on the line)
+    if (v2 && w.anchor && isYankable(w.anchor)) cur = YANK_PROMPT;
     w.prompt = cur;
   }
 
@@ -1110,6 +1146,7 @@ export function createWorld(levelDef, opts = {}) {
     const fresh = parseLevel(levelDef, anchorOpt);
     fresh.prompts.forEach((p, i) => { if (level.prompts[i]?.done) p.done = true; });
     Object.assign(level, fresh);
+    attachSetpieces(level, levelDef); // set pieces are back up with the room (and their lights)
     w.doorsOpen = false; w.hasSpark = roomStart.hasSpark; w.motes = new Set(roomStart.motes);
     w.meter = 0; w.alert = null; w.meterSrc = null; w.hidden = false; w.lit = false; w.caughtBy = null;
     if (!levelDef.tall) w.checkpoint = null;
@@ -1182,6 +1219,7 @@ export function createWorld(levelDef, opts = {}) {
       const on = w.stillT >= w.cloakTime;
       if (on !== w.cloaked) { w.cloaked = on; emit(on ? 'cloak' : 'uncloak'); }
     }
+    if (level.setpieces.length && w.phase === 'play') stepSetpieces(w, level, phys, emit); // falling set pieces, hits, rubble
     if (w.tieLine && w.phase === 'play') {
       const g = tieCheck(w, level);
       if (g) { w.vy = T.tieBounce; w.ties += 1; emit('tie', { x: g.x }); startHitStop('takedown'); }

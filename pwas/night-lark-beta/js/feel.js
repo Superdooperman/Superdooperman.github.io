@@ -39,11 +39,11 @@ export function guardBump(w, g) {
 }
 
 /** True when the active strike reaches this guard. One landing per swing is the sim's job.
- *  Tied and alert are skipped, the same skip as tieCheck: a swing must not overwrite the
- *  "!" beat or a guard who is already tied. */
+ *  Tied, knocked-out, and alert are skipped, the same skip as tieCheck: a swing must not
+ *  overwrite the "!" beat or a guard who is already tied or out for the room. */
 export function attackReaches(w, g) {
   if (!w?.atk || w.atk.phase !== 'active' || !g || g.kind !== 'guard') return false;
-  if (g.state === 'tied' || g.state === 'alert') return false;
+  if (g.state === 'tied' || g.state === 'down' || g.state === 'alert') return false;
   const dx = (g.x - w.x) * (w.face < 0 ? -1 : 1);
   if (dx < FEEL.attackBehind || dx > FEEL.attackReach) return false;
   return Math.abs(w.y - g.floorY) <= FEEL.attackVert;

@@ -12,9 +12,20 @@ const SFX = {
   clear: [[523, 0.1], [659, 0.1], [784, 0.1], [1047, 0.3]], powerup: [[659, 0.06], [988, 0.12]],
   select: [[660, 0.04]], pause: [[440, 0.04]], over: [[196, 0.3]], tie: [[300, 0.06], [200, 0.1]],
   snuff: [[150, 0.1]], smoke: [[120, 0.15]],
+  // set pieces (setpiece.js): the crack as it lets go, the crash or smash as it lands, a knockout
+  crack: [[180, 0.03], [95, 0.06]], snap: [[1200, 0.02], [600, 0.04]],
+  crash: [[110, 0.06], [70, 0.1], [45, 0.22]], smash: [[1568, 0.03], [2093, 0.03], [1175, 0.05], [80, 0.15]],
+  ko: [[392, 0.05], [196, 0.12]],
 };
+/** The sound a sim event makes, for the set pieces (each type names its own in setpiece.js fx). */
+export function setpieceSfx(e) {
+  if (e.type === 'setpiece-drop' || e.type === 'setpiece-land') return e.sound && SFX[e.sound] ? e.sound : null;
+  if (e.type === 'setpiece-tug') return 'crack';
+  if (e.type === 'guard-down' || e.type === 'guard-stun') return 'ko';
+  return null;
+}
 
-export function createAudio({ volume = 0.5, mute = false } = {}) {
+export function createAudio({ volume = 0.5, mute = false, music = true } = {}) { // music false: blips only (the dev room shell)
   const a = { ctx: null, gain: null, mute, volume, started: false, next: 0, i: 0, timer: 0 };
   function tone(freq, t, dur, vol, type = 'square') {
     const o = a.ctx.createOscillator(); const g = a.ctx.createGain();
@@ -41,7 +52,7 @@ export function createAudio({ volume = 0.5, mute = false } = {}) {
       a.ctx = new AC(); a.gain = a.ctx.createGain(); a.gain.connect(a.ctx.destination);
       a.gain.gain.value = a.mute ? 0 : a.volume;
       a.next = a.ctx.currentTime + 0.05; a.started = true;
-      a.timer = setInterval(schedule, 50);
+      if (music) a.timer = setInterval(schedule, 50);
     } catch { a.ctx = null; }
   };
   a.setMute = (m) => { a.mute = !!m; try { if (a.gain) a.gain.gain.value = a.mute ? 0 : a.volume; } catch { /* ignore */ } };

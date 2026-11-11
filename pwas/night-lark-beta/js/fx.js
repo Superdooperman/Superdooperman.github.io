@@ -48,6 +48,9 @@ export function createFx(opts = {}) {
   const spark = (i, x, y) => { const a = R(0, Math.PI * 2); const s = R(1.5, 4); return { x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, drag: 0.88, life: R(0.15, 0.35), color: i % 2 ? P.WL3 : P.WL2, add: true }; };
   const glint = (i, x, y) => ({ x: x + R(-0.4, 0.4), y: y + R(-0.6, 0), vx: R(-0.4, 0.4), vy: R(-2, -0.8), drag: 0.95, life: R(0.3, 0.6), color: i % 2 ? P.SL5 : P.UI4, add: true });
   const puff = (i, x, y) => ({ x: x + R(-0.2, 0.2), y, vx: R(-0.5, 0.5), vy: R(-1.2, -0.5), drag: 0.97, life: R(0.6, 1.1), color: i % 2 ? P.FX2 : P.FX3, size: 2 });
+  // set pieces (setpiece.js): stone chunks and grit, glass / wax shards
+  const stone = (i, x, y) => ({ x: x + R(-0.9, 0.9), y: y - R(0, 0.4), vx: R(-5, 5), vy: R(-7, -2), g: 30, drag: 0.97, life: R(0.45, 0.9), color: [P.SL3, P.SL2, P.SL4, P.FX1][i % 4], size: i % 3 ? 2 : 3 });
+  const glass = (i, x, y) => ({ x: x + R(-1.2, 1.2), y: y - R(0, 0.3), vx: R(-6, 6), vy: R(-6, -1.5), g: 28, drag: 0.96, life: R(0.35, 0.8), color: [P.WH2, P.SL5, P.PX3, P.FX3][i % 4], size: i % 4 ? 1 : 2 });
   function kick(s) { if (fx.reduced) return; if (s.amp >= fx.shake.amp || fx.shake.t <= 0) { fx.shake.amp = s.amp; fx.shake.dur = s.dur; fx.shake.t = s.dur; } }
 
   // with Brook's motion strips the engine cloak and ribbon both leave from the frame's own
@@ -79,9 +82,20 @@ export function createFx(opts = {}) {
       else if (e.type === 'attach' && e.ring) burst(7, e.ring.x, e.ring.y, spark);
       else if (e.type === 'pickup') burst(6, w.x, bodyCenterY(w), glint);
       else if (e.type === 'snuff') burst(6, e.x, e.y, puff);
+      else if (e.type === 'setpiece-drop') { burst(6, e.x, e.y, dust); if (e.shake) kick(e.shake); }
+      else if (e.type === 'light-out') burst(5, e.x, e.y - 0.2, puff);
+      else if (e.type === 'setpiece-land') {
+        burst(e.burst === 'glass' ? 22 : 18, e.x, e.y, e.burst === 'glass' ? glass : stone);
+        burst(10, e.x, e.y, dust);
+        if (e.shake) kick(e.shake);
+        if (!fx.reduced && e.burst === 'stone') fx.flash = Math.max(fx.flash, FX.flashCaught * 0.4);
+      } else if (e.type === 'guard-down' || e.type === 'guard-stun') { burst(4, e.x, e.y - 1.6, glint); kick({ amp: FEEL.hitShakeAmp, dur: FEEL.hitShakeDur }); }
       else if (e.type === 'hit' || e.type === 'tie') kick({ amp: FEEL.hitShakeAmp, dur: FEEL.hitShakeDur });
       else if (e.type === 'caught') { kick(FX.shakeCaught); if (!fx.reduced) fx.flash = FX.flashCaught; }
       else if (e.type === 'room-reset' || e.type === 'respawn') { snap(w); fx.parts.length = 0; }
+    }
+    if (!fx.reduced) for (const sp of w.level.setpieces || []) { // grit off a falling set piece
+      if (sp.state === 'falling' && rnd() < 0.6) spawn({ x: sp.x + R(0, sp.type === 'chandelier' ? 3 : 2), y: sp.y, vx: R(-0.3, 0.3), vy: R(-1, 0), drag: 0.9, life: R(0.2, 0.4), color: P.FX0 });
     }
     if (!fx.reduced) for (const l of w.level.lamps || []) {
       if (rnd() < FX.emberRate * dt) spawn({ x: l.x + R(-0.15, 0.15), y: l.y + 0.1, vx: R(-0.2, 0.2), vy: R(-1, -0.5), drag: 0.99, life: R(0.9, 1.6), color: rnd() < 0.5 ? P.LG2 : P.LG3, add: true, wob: R(0, 6) });

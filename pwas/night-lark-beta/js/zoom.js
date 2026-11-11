@@ -27,7 +27,7 @@ export function zoomInfo(world) { const s = world && state.get(world); return s 
 export function guardPull(w, cfg = ZOOM) {
   if (w.alert || w.meter > 0 || w.phase === 'caught') return true;
   for (const g of (w.level && w.level.guards) || []) {
-    if (g.state === 'tied') continue;
+    if (g.state === 'tied' || g.state === 'down') continue;
     const dx = g.x - w.x; const dy = (g.floorY ?? g.y ?? w.y) - w.y;
     if (dx * dx + dy * dy <= cfg.guardNear * cfg.guardNear) return true;
   }

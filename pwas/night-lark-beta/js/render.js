@@ -13,7 +13,7 @@ import { hasWren, wrenPose, ropeOriginFor, drawGripFrame, drawRotatedFrame, engi
 import { eyeOf } from './stealth.js';
 import { drawText } from './font.js';
 import { beamPolygon } from './los.js';
-import { drawFacade, drawPieces, drawProps, drawArchAnchor, drawGrating } from './kit/draw.js';
+import { drawFacade, drawPieces, drawProps, drawArchAnchor, drawGrating, drawSetpieces, drawGlimmerSight, drawDazed } from './kit/draw.js';
 import { drawBackdrop, drawLighting, drawCloak, drawRope, drawLarkLight, drawParticles, drawFlash } from './fx.js';
 import { drawSkyline, drawFrontParallax } from './skyline.js';
 import {
@@ -214,6 +214,7 @@ export function render(ctx, world, sheets = null, opts = {}) {
   if (fx) drawLighting(ctx, fx, world, cam); // darkness + light pools; rings, items, guards stay crisp on top
   const target = world.anchor ? null : (world.controls === 'v2' ? world.target : world.bestRing());
   drawProps(ctx, L, cam, T, kit); // tower kit layer c
+  drawSetpieces(ctx, L, cam, T, { time: world.time, reduced: !!opts.reducedMotion, hot: world.anchor || target, kit }); // set pieces (setpiece.js)
   if (sheets) drawMiniTowers(ctx, sheets, L, cam, T);
   for (const r of L.rings) {
     if (drawGrappleMarker(ctx, sheets, r, cam, T, r === target)) continue;
@@ -260,6 +261,7 @@ export function render(ctx, world, sheets = null, opts = {}) {
   if (wren) { drawWren(ctx, world, cam, sheets, fx); if (fx) drawParticles(ctx, fx, cam); }
   // The Lark: placeholder body sized from the physics box (v1 tuning for now).
   if (!wren) drawPlaceholderLark(ctx, world, cam, sheets, fx);
+  drawGlimmerSight(ctx, world.glimmer, cam, T, { time: world.time, reduced: !!opts.reducedMotion }); // warm buff: yankables through walls
   drawMeter(ctx, world, cam);
   if (fx) drawFlash(ctx, fx);
   if (sheets) drawFrontParallax(ctx, sheets, world, cam);
@@ -415,14 +417,24 @@ function drawWatchers(ctx, world, cam, sheets) {
     const ex = e.x * T - cam.x + stagger;
     const ey = e.y * T - cam.y;
     const f = g.dir > 0 ? 0 : Math.PI; const A = TUNING.coneHalfAngle;
-    if (g.state !== 'tied') fan(ex, ey, f - A, f + A, TUNING.coneRange * T, g); // M4 Tie-Line: no cone
-    if (!drawGuardSprite(ctx, sheets, g, cam, T, world.time)) {
+    const out = g.state === 'tied' || g.state === 'down' || g.dazed; // tied, knocked out or dazed: blind
+    if (!out) fan(ex, ey, f - A, f + A, TUNING.coneRange * T, g); // M4 Tie-Line: no cone
+    if (g.state === 'down' && !(sheets && (sheets['guard-watchman-v2'] || sheets['guard-watchman']))) { // knocked out: flat on the floor
+      const fy = Math.round(g.floorY * T - cam.y);
+      ctx.fillStyle = C.guard; ctx.fillRect(Math.round(bodyX - 10), fy - 6, 20, 6);
+      ctx.fillStyle = C.guardCap; ctx.fillRect(Math.round(bodyX + (g.dir < 0 ? -12 : 8)), fy - 4, 4, 4);
+    } else if (!drawGuardSprite(ctx, sheets, g, cam, T, world.time)) {
       drawSprite(ctx, sheets, 'guard', 0, bodyX, g.floorY * T - cam.y);
       ctx.fillStyle = C.guardCap; ctx.fillRect(Math.round(bodyX - 5), Math.round(g.floorY * T - cam.y) - 16, 10, 2);
       ctx.fillStyle = C.guardDark; ctx.fillRect(Math.round(ex) - 1, Math.round(ey) - 1, 2, 2);
     }
     const head = { x: bodyX, y: g.floorY * T - cam.y - 20 };
     if (g.state === 'search' || g.state === 'listen') drawText(ctx, '?', head.x - 1, head.y - 6, C.hud, 1);
+    if (g.state === 'down' || g.dazed) { // specks over his head (Brook's watchman is 48 px tall, the placeholder 24)
+      const tall = !!(sheets && (sheets['guard-watchman-v2'] || sheets['guard-watchman']));
+      const fy = g.floorY * T - cam.y;
+      drawDazed(ctx, head.x, g.state === 'down' ? fy - 14 : fy - (tall ? 50 : 28), world.reducedMotion ? null : world.time);
+    }
     if (g.state === 'tied' && !(sheets && (sheets['guard-watchman-v2'] || sheets['guard-watchman']))) {
       ctx.fillStyle = C.rope;
       for (const dy of [7, 11, 15]) ctx.fillRect(Math.round(bodyX - 6), Math.round(g.floorY * T - cam.y) - dy, 12, 1);

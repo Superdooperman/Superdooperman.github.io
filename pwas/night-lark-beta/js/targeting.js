@@ -28,10 +28,13 @@ export function reachableLamps(level, x, cy, range, doorsOpen) {
 /** A parsed lamp (level.js sets lamp: true). */
 export const isSnuffLamp = (p) => !!(p && p.lamp);
 
-/** Rings, plus lamps when the Lamp Snuffer is held, so hold-B aim can land on a lamp. */
+/** Rings, plus lamps when the Lamp Snuffer is held, so hold-B aim can land on a lamp. A set
+ *  piece's own light (a chandelier's candles, setpiece.js) is always aimable: putting it out
+ *  drops the piece, with or without the power-up. */
 export function aimCandidates(level, x, cy, range, doorsOpen, snuffer) {
   const rings = reachable(level, x, cy, range, doorsOpen);
-  return snuffer ? rings.concat(reachableLamps(level, x, cy, range, doorsOpen)) : rings;
+  const lamps = reachableLamps(level, x, cy, range, doorsOpen).filter((l) => snuffer || l.setpiece);
+  return lamps.length ? rings.concat(lamps) : rings;
 }
 
 /** Lower is better. face: -1/+1. dir: {x,y} held D-pad (0s for none). */
@@ -125,8 +128,11 @@ export function pickAt(cands, px, py) {
  *  centre). Inside the cone (half-angle coneHalf) the smallest angle wins, ties to the nearer
  *  point; a real ledge or prop (any kind but 'ring') beats a ring in the cone, so in a room with
  *  ledges the aim lands on stone, and a ring-only room still aims at its rings. An empty cone
- *  gives the point nearest the aim at any angle. Lamps (only offered with the Lamp Snuffer) win only
- *  as the closest-angle point in the cone, so an aim straight at a lamp picks it over the lantern it hangs from. Null with no candidates. */
+ *  gives the point nearest the aim at any angle. Lamps (only offered with the Lamp Snuffer, except
+ *  a set piece's own light, which is always aimable) and chandelier candles win only as the
+ *  closest-angle point in the cone, so an aim straight at a lamp or the candles picks it over the
+ *  lantern or grip it hangs from, but a lamp, candle, or set-piece grip off to the side never
+ *  steals a ring or ledge aim. Null with no candidates. */
 export function aimPick(cands, x, cy, dir, coneHalf) {
   if (!cands.length) return null;
   const ang = (r) => {
@@ -138,8 +144,9 @@ export function aimPick(cands, x, cy, dir, coneHalf) {
   const best = (list) => list.reduce((b, c) => (!b || better(c, b) ? c : b), null);
   const cone = scored.filter((c) => c.a <= coneHalf);
   const top = best(cone);
-  // Lamp Snuffer: a lamp wins only when it is the closest-angle point in the cone, so aiming at it
-  // beats its own lantern prop but a lamp off to the side never steals a ring or ledge aim.
-  const pick = (top && top.r.lamp ? top : null) || best(cone.filter((c) => c.solid)) || top || best(scored);
+  // Lamps, chandelier candles, and set-piece grips win only as the closest-angle point in the cone,
+  // so aiming at one picks it, but a lamp, candle, or grip off to the side never steals a ring or
+  // ledge aim (set-piece grips are kind:prop, so they must stay out of the solid pass).
+  const pick = (top && (top.r.lamp || top.r.setpiece) ? top : null) || best(cone.filter((c) => c.solid && !c.r.setpiece)) || top || best(scored);
   return pick.r;
 }

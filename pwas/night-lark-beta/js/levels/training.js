@@ -24,6 +24,9 @@ export const TRAIN = Object.freeze({
   climbHooks: [[55.5, 17], [55.5, 12], [55.5, 7]],
   highChain: { row: 3, cols: [43, 36, 29, 22, 15], types: ['gargoyle', 'beam-rope', 'small-hook', 'grapple-hook', 'flagpole-short'] },
   top: { c0: 2, slab: 7 },
+  // set pieces (js/setpiece.js), two toys on the floor run: a cracked gargoyle near the start
+  // (ZIP it down) and a chandelier under the balcony (swing on it, ZIP it or aim at its candles)
+  setpieces: [{ type: 'gargoyle', c: 14, r: 21 }, { type: 'chandelier', c: 44, r: 21 }],
   spawn: { c: 2, r: 25 },
   exit: { c: 4, r: 6 },
 });
@@ -68,6 +71,7 @@ export function trainingRoom() {
     searchlights: [],
     prompts: [],
     checkpoints: [{ c0: 0, c1: cols - 1, x: T.spawn.c + 0.5, top: T.floorTop }],
+    setpieces: T.setpieces.map((p) => ({ ...p })),
   };
 }
 

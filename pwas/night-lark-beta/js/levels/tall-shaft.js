@@ -17,6 +17,8 @@
 //   - Freefall: the middle lane (c11-16, 6 wide) has no slab from the top to the floor.
 import { blankRows, fillRect, putTile } from '../level.js';
 import { towerRoute } from '../kit/route.js';
+import { PROP_TYPES } from '../kit/props.js';
+import { boxClear } from '../setpiece.js';
 
 import { validateRoom } from '../gen/validator.js';
 import { movesFor } from '../gen/moves.js';
@@ -58,6 +60,36 @@ export function tallShaft({ fallCost = 'height', seed = TALL_SEED, attempt } = {
 
 function buildTall(seed, attempt, fallCost = 'height') { return buildKitTower(seed, attempt, { fallCost }); }
 
+/** The shaft's set piece (js/setpiece.js): one cracked gargoyle on the wall over a climb platform
+ *  (the watchman's, if there is one), 4-7 rows up, with open air straight down to that platform, so
+ *  a yank drops it on him and its rubble plugs that column of the climb. Seeded by the route only
+ *  (no RNG): same seed, same spot. The solver never sees it (it is not a kit prop), so every seed
+ *  validates exactly as before. */
+export function tallSetpieces(def) {
+  const rows = def.rows;
+  const open = (c, r) => rows[r]?.[c] === '.';
+  const boxes = (def.props || []).map((p) => ({ c0: p.c, c1: p.c + (p.w ?? PROP_TYPES[p.type]?.w ?? 1) - 1, r0: p.r, r1: p.r + (PROP_TYPES[p.type]?.h ?? 1) - 1 }));
+  const free = (c, r) => !boxes.some((b) => c + 1 >= b.c0 && c <= b.c1 && r >= b.r0 && r <= b.r1);
+  const g = def.guards[0];
+  const mid = def.steps.slice(1, -1);
+  const order = [...(g ? mid.filter((s) => s.top === g.floor && s.c0 <= g.c && g.c <= s.c1) : []), ...mid.slice(Math.floor(mid.length / 3)), ...mid];
+  for (const s of order) {
+    if (s.c1 - s.c0 < 3) continue;
+    const centre = g && s.top === g.floor ? g.c : Math.floor((s.c0 + s.c1) / 2);
+    const cols = [];
+    for (let c = s.c0; c < s.c1; c++) cols.push(c);
+    cols.sort((a, b) => Math.abs(a + 1 - centre) - Math.abs(b + 1 - centre));
+    for (const c of cols) for (let k = 4; k <= 7; k++) {
+      const r = s.top - k;
+      if (r < 1 || !boxClear(rows, 'gargoyle', c, r) || !free(c, r)) continue;
+      let clear = true;
+      for (let rr = r + 1; rr < s.top && clear; rr++) clear = open(c, rr) && open(c + 1, rr);
+      if (clear && rows[s.top][c] !== '.' && rows[s.top][c + 1] !== '.') return [{ type: 'gargoyle', c, r, flip: c + 1 > def.rows[0].length / 2 }];
+    }
+  }
+  return [];
+}
+
 /** The kit tower room for a seed and attempt. Defaults are the tall-shaft prototype (legacy feel,
  *  ROUTE.towerRows). Feel pass 1 (G) builds its vertical rooms with this too: opts.feel,
  *  opts.towerRows (taller), opts.name. Nothing here is new generation: the same seeded route,
@@ -75,7 +107,7 @@ export function buildKitTower(seed, attempt, { fallCost = 'height', feel = 'lega
   const def = A.def();
   const mids = R.steps.slice(0, -1).filter((_, k) => k % 2 === 1);
   const guardOn = R.steps.slice(1, -1).find((s) => s.c1 - s.c0 >= 7 && !s.stacked);
-  return {
+  const room = {
     name: name ?? (attempt ? `TALL SHAFT #${seed}.${attempt}` : `TALL SHAFT #${seed}`),
     ...def,
     facade: R.facade,
@@ -95,6 +127,8 @@ export function buildKitTower(seed, attempt, { fallCost = 'height', feel = 'lega
       ...mids.map((s) => ({ c0: s.c0, c1: s.c1, x: (s.c0 + s.c1 + 1) / 2, top: s.top })),
     ],
   };
+  room.setpieces = tallSetpieces(room); // one cracked gargoyle over a climb platform (js/setpiece.js)
+  return room;
 }
 
 // ---- the ring version (before the kit), kept for comparison: ?room=tall&anchors=rings -------

@@ -2,6 +2,7 @@
 // warm safe pocket (still a lamp: ALL light exposes Wren) and reveals that area's map.
 // Values live in MINI_TOWER (config.js) so they stay easy to tune.
 import { MINI_TOWER as MT, TILE_PX, TUNING } from './config.js';
+import { sightCues } from './setpiece.js';
 
 export const miniTowerFoot = (t) => ({ x: t.c + 1.5, y: t.r + 1 }); // tiles, bottom-centre of the 48 px stack
 export const miniTowerPool = (t) => {
@@ -35,7 +36,11 @@ function relight(w, t) {
   w.events.push({ type: 'mini-relight', id: t.id, reveal: t.reveal });
 }
 
-/** TODO(Superdooperman): warm-light buff is NOT decided. Hook so a later pass can apply an effect. */
+/** Warm-light buff (STYLE-GUIDE v3.3: Rekindle + Glimmer Sight). Still a stub for Rekindle and for
+ *  when the buff turns on (TODO(Superdooperman)). Glimmer Sight's yankable half is wired: while
+ *  w.warmBuff is on, w.glimmer lists the set pieces to cue through walls (setpiece.js sightCues:
+ *  480 px, occluded only, nearest 8); render.js draws them. Off: w.glimmer is null. */
 export function warmLightBuff(w) {
-  if (!w.warmBuff) return; // stub: no effect
+  if (!w.warmBuff) { w.glimmer = null; return; }
+  w.glimmer = sightCues(w.level, w.x, w.center ? w.center() : w.y - 0.5, w.doorsOpen);
 }

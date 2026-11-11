@@ -250,3 +250,137 @@ export function drawArchAnchor(ctx, a, cam, T, isTarget) {
     ctx.fillStyle = K.target; ctx.fillRect(x, y, 1, 1);
   }
 }
+
+// ---- set pieces (js/setpiece.js): PLACEHOLDER art until Brook's set-piece sheets (ART-NEEDS) ----
+// Whole px, locked palette only. A yankable reads apart from the plain kit gargoyle by its tell: a
+// 1 px WK0 hairline gap at the wall join with a jog in it, SL0 cracked-mortar ticks round the join,
+// SL4 chipped edges and, now and then, a speck of FX1 grit falling. Hooked or targeted, it shivers.
+// A chandelier is wider than a lantern (48 px), four candles, and hangs off true on a loose chain.
+const SPK = Object.freeze({ gap: P.WK0, crack: P.SL0, chip: P.SL4, grit: P.FX1, wax: P.PX3, waxDark: P.PX2, flame: P.LG3, flameCore: P.LG4, wick: P.WK0, shard: P.WH2, glass: P.SL5 });
+
+/** The yank tell on the wall round a gargoyle's mount: WK0 cracks running out of the join into the
+ *  mortar, SL4 broken edges; the 2 px open gap with a jog at the join (lit edge); grit trickling. */
+function gargoyleTell(ctx, y, fl, t) {
+  ctx.fillStyle = SPK.gap;
+  ctx.fillRect(fl(0, 1), y - 6, 1, 4); ctx.fillRect(fl(1, 1), y - 3, 1, 3); ctx.fillRect(fl(-2, 2), y - 7, 2, 1); ctx.fillRect(fl(2, 2), y - 1, 2, 1); // up
+  ctx.fillRect(fl(1, 1), y + 14, 1, 3); ctx.fillRect(fl(0, 1), y + 17, 1, 4); ctx.fillRect(fl(-3, 3), y + 20, 3, 1); ctx.fillRect(fl(2, 3), y + 16, 3, 1); // down
+  ctx.fillRect(fl(3, 2), y + 2, 2, 6); ctx.fillRect(fl(4, 2), y + 7, 2, 4); ctx.fillRect(fl(3, 2), y + 10, 2, 5); // the join
+  ctx.fillStyle = SPK.chip; ctx.fillRect(fl(-1, 1), y - 6, 1, 3); ctx.fillRect(fl(2, 1), y + 17, 1, 3); ctx.fillRect(fl(-3, 1), y + 19, 1, 1);
+  ctx.fillRect(fl(5, 1), y + 3, 1, 4); ctx.fillRect(fl(6, 1), y + 7, 1, 3); ctx.fillRect(fl(5, 1), y + 10, 1, 4);
+  if (t !== null) { // grit trickling from the join (none in reduced motion)
+    const k = Math.floor(t * 12) % 16;
+    if (k < 10) { ctx.fillStyle = SPK.grit; ctx.fillRect(fl(4, 2), y + 15 + k * 2, 2, 2); }
+  }
+}
+
+function gargoyleBody(ctx, x, y, fl, t, mounted = true) {
+  ctx.fillStyle = K.stoneDark; ctx.fillRect(fl(0, 22), y + 3, 22, 11);
+  ctx.fillStyle = K.stone; ctx.fillRect(fl(5, 17), y + 3, 17, 2); ctx.fillRect(fl(18, 12), y + 5, 12, 5);
+  ctx.fillStyle = SPK.chip; ctx.fillRect(fl(6, 14), y + 3, 14, 1); ctx.fillRect(fl(20, 9), y + 5, 9, 1); // lit top edges (it stands proud)
+  ctx.fillStyle = SPK.gap; ctx.fillRect(fl(27, 2), y + 8, 2, 1); ctx.fillRect(fl(16, 2), y + 6, 2, 2); // the mouth (the spout), an eye
+  // a crack across the body
+  ctx.fillStyle = SPK.crack; ctx.fillRect(fl(11, 1), y + 4, 1, 3); ctx.fillRect(fl(12, 1), y + 7, 1, 3); ctx.fillRect(fl(11, 1), y + 10, 1, 4);
+  if (mounted) gargoyleTell(ctx, y, fl, t);
+}
+
+function gargoyleWreck(ctx, x, y, fl) {
+  ctx.fillStyle = K.stoneDark; ctx.fillRect(fl(0, 32), y + 9, 32, 7); ctx.fillRect(fl(2, 12), y + 5, 12, 4);
+  ctx.fillStyle = K.stone; ctx.fillRect(fl(12, 12), y + 3, 12, 6); ctx.fillRect(fl(24, 6), y + 8, 6, 4);
+  ctx.fillStyle = SPK.chip; ctx.fillRect(fl(12, 12), y + 3, 12, 1); ctx.fillRect(fl(2, 12), y + 5, 12, 1); ctx.fillRect(fl(24, 6), y + 8, 6, 1);
+  ctx.fillStyle = SPK.crack; ctx.fillRect(fl(16, 1), y + 4, 1, 5); ctx.fillRect(fl(7, 1), y + 9, 1, 7); ctx.fillRect(fl(22, 1), y + 11, 1, 5); ctx.fillRect(fl(0, 32), y + 15, 32, 1);
+  ctx.fillStyle = SPK.gap; ctx.fillRect(fl(13, 2), y + 6, 2, 1); // the snout's mouth, on its side
+  ctx.fillStyle = K.stone; ctx.fillRect(fl(30, 2), y + 14, 2, 2); ctx.fillRect(fl(-2, 2), y + 14, 2, 2); // chips past the ends
+}
+
+function chainLinks(ctx, x, y0, y1, loose) {
+  ctx.fillStyle = K.iron;
+  for (let yy = y0; yy < y1 - 1; yy += 4) ctx.fillRect(x + (loose && y1 - yy <= 10 ? 1 : 0), yy, 2, 3); // loose: the bottom links hang a px off true
+}
+
+function chandelierBody(ctx, x, y, lit, t, tilt = 1) {
+  const cx = x + 23;
+  ctx.fillStyle = K.iron;
+  ctx.fillRect(cx - 2, y + 2, 6, 1); ctx.fillRect(cx - 2, y + 6, 6, 1); ctx.fillRect(cx - 2, y + 2, 1, 5); ctx.fillRect(cx + 3, y + 2, 1, 5); // the top ring
+  ctx.fillRect(cx, y + 7, 2, 13); // the stem
+  ctx.fillRect(x + 4, y + 18 + tilt, 20, 2); ctx.fillRect(x + 24, y + 18, 20, 2); // the wide arm (the left half hangs low: loose)
+  ctx.fillRect(x + 3, y + 14 + tilt, 2, 5); ctx.fillRect(x + 43, y + 14, 2, 5); // its curled ends
+  ctx.fillStyle = K.verdigris; ctx.fillRect(cx - 1, y + 20, 4, 3); ctx.fillRect(cx, y + 23, 2, 2); // the finial
+  for (const [cxp, dy] of [[4, tilt], [15, tilt], [32, 0], [43, 0]]) { // four candles
+    const px = x + cxp - 1; const cy = y + 13 + dy;
+    ctx.fillStyle = K.iron; ctx.fillRect(px - 1, cy + 3, 5, 2); // the cup
+    ctx.fillStyle = SPK.wax; ctx.fillRect(px, cy - 1, 3, 4); ctx.fillStyle = SPK.waxDark; ctx.fillRect(px + 2, cy, 1, 3);
+    if (lit) {
+      const tall = t === null ? 1 : (Math.floor(t * 9 + cxp) % 3 ? 1 : 0);
+      ctx.fillStyle = SPK.flame; ctx.fillRect(px + 1, cy - 3 - tall, 1, 2 + tall); ctx.fillStyle = SPK.flameCore; ctx.fillRect(px + 1, cy - 2, 1, 1);
+    } else { ctx.fillStyle = SPK.wick; ctx.fillRect(px + 1, cy - 2, 1, 1); }
+  }
+}
+
+function chandelierWreck(ctx, x, y) {
+  const b = y + 31; // its floor line (bottom of the 32 px box)
+  ctx.fillStyle = K.iron;
+  ctx.fillRect(x + 2, b - 2, 18, 2); ctx.fillRect(x + 20, b - 4, 2, 3); ctx.fillRect(x + 22, b - 5, 6, 2); ctx.fillRect(x + 28, b - 3, 16, 2); // the arm, bent
+  ctx.fillRect(x + 1, b - 5, 2, 4); ctx.fillRect(x + 44, b - 6, 2, 4);
+  ctx.fillRect(x + 30, b - 9, 6, 1); ctx.fillRect(x + 30, b - 5, 6, 1); ctx.fillRect(x + 30, b - 9, 1, 5); ctx.fillRect(x + 35, b - 9, 1, 5); // the ring, rolled off
+  ctx.fillStyle = K.verdigris; ctx.fillRect(x + 23, b - 7, 4, 2);
+  ctx.fillStyle = SPK.wax; ctx.fillRect(x + 6, b - 1, 4, 1); ctx.fillRect(x + 13, b - 4, 1, 3); ctx.fillRect(x + 38, b - 1, 4, 1); ctx.fillRect(x - 3, b, 3, 1); // candles, scattered
+  ctx.fillStyle = SPK.shard; for (const [dx, dy] of [[11, -1], [17, 0], [26, -1], [33, 0], [47, 0], [-5, 0], [41, -2]]) ctx.fillRect(x + dx, b + dy, 1, 1);
+  ctx.fillStyle = SPK.glass; for (const [dx, dy] of [[9, 0], [24, 0], [45, -1], [-2, -1]]) ctx.fillRect(x + dx, b + dy, 1, 1);
+}
+
+/** Set pieces: intact (with the tell), falling, or the wreck. opts.time (s), opts.reduced, opts.hot:
+ *  the anchor hooked or targeted (it shivers), opts.kit: Brook's kit atlas (a gargoyle then blits the
+ *  kit's own 'gargoyle' cell, so it matches the room's other gargoyles, with the tell drawn over it).
+ *  Called after the kit props (layer c). */
+export function drawSetpieces(ctx, level, cam, T, opts = {}) {
+  const t = opts.reduced ? null : (opts.time ?? 0);
+  for (const sp of level.setpieces || []) {
+    if (sp.state === 'gone') continue;
+    const hot = sp.state === 'intact' && opts.hot && opts.hot === sp.anchor;
+    const jig = hot && t !== null ? (Math.floor(t * 24) % 2 ? 1 : -1) : 0;
+    const x0 = Math.round(sp.x * T - cam.x); const x = x0 + jig; const y = Math.round(sp.y * T - cam.y);
+    const w = sp.type === 'chandelier' ? 3 * T : 2 * T;
+    const fl = (px, pw) => (sp.flip ? x + w - px - pw : x + px);
+    if (sp.type === 'gargoyle') {
+      const cell = opts.kit && opts.kit.cells && opts.kit.cells.gargoyle;
+      if (sp.state === 'landed') gargoyleWreck(ctx, x, y, fl);
+      else if (cell) { blitCell(ctx, cell, x, y, sp.flip); if (sp.state === 'intact') gargoyleTell(ctx, y, fl, t); }
+      else gargoyleBody(ctx, x, y, fl, sp.state === 'intact' ? t : null, sp.state === 'intact');
+    } else if (sp.type === 'chandelier') {
+      const top = Math.round((sp.chainTop ?? 0) * T - cam.y);
+      if (sp.state === 'intact') { chainLinks(ctx, x + 23, top, y + 2, true); chandelierBody(ctx, x, y, true, t); continue; }
+      chainLinks(ctx, x0 + 23, top, top + 8, false); // the snapped end still hangs up there
+      if (sp.state === 'falling') { chainLinks(ctx, x + 23, y - 6, y + 2, false); chandelierBody(ctx, x, y, false, t, 2); }
+      else chandelierWreck(ctx, x, y);
+    }
+  }
+}
+
+/** Glimmer Sight, yankable half (STYLE-GUIDE v3.3.1 section 4 (3)): for each cue (setpiece.js
+ *  sightCues) a 1 px LG2 dashed outline (2 on, 2 off) on the art box inset 1 px, no fill, and a
+ *  3x3 LG3 pip at the grip. Pulse 2.0 s, outline alpha 40%..85%; reduced motion: mid alpha. */
+export function drawGlimmerSight(ctx, cues, cam, T, opts = {}) {
+  if (!cues || !cues.length) return 0;
+  const a = opts.reduced ? 0.62 : 0.625 + 0.225 * Math.sin((2 * Math.PI * (opts.time ?? 0)) / 2.0);
+  for (const c of cues) {
+    const x0 = Math.round(c.box.x * T - cam.x) + 1; const y0 = Math.round(c.box.y * T - cam.y) + 1;
+    const w = c.box.w * T - 2; const h = c.box.h * T - 2;
+    ctx.globalAlpha = a; ctx.fillStyle = P.LG2;
+    for (let i = 0; i < w; i += 4) { const n = Math.min(2, w - i); ctx.fillRect(x0 + i, y0, n, 1); ctx.fillRect(x0 + i, y0 + h - 1, n, 1); }
+    for (let i = 0; i < h; i += 4) { const n = Math.min(2, h - i); ctx.fillRect(x0, y0 + i, 1, n); ctx.fillRect(x0 + w - 1, y0 + i, 1, n); }
+    ctx.globalAlpha = 1; ctx.fillStyle = P.LG3;
+    ctx.fillRect(Math.round(c.pip.x * T - cam.x) - 1, Math.round(c.pip.y * T - cam.y) - 1, 3, 3);
+  }
+  ctx.globalAlpha = 1;
+  return cues.length;
+}
+
+/** Knocked out (or dazed by a stun): three specks circling over his head (UI4 / SL5). t null: still. */
+export function drawDazed(ctx, x, y, t) {
+  const k = t === null ? 0 : t * 5;
+  for (let i = 0; i < 3; i++) {
+    const a = k + (i * 2 * Math.PI) / 3;
+    ctx.fillStyle = i % 2 ? P.SL5 : P.UI4;
+    ctx.fillRect(Math.round(x + Math.cos(a) * 7) - 1, Math.round(y + Math.sin(a) * 2) - 1, 2, 2);
+  }
+}

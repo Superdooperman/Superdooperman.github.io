@@ -113,7 +113,7 @@ export function drawPickupSprite(ctx, sheets, it, cam, T, time) {
 }
 
 export function guardFrame(g, time) {
-  if (g.state === 'tied') return GUARD_ANIMS.tied;
+  if (g.state === 'tied' || g.state === 'down') return GUARD_ANIMS.tied; // knocked out (set pieces): the slumped frame until Brook's KO frame
   if (g.state === 'alert') return GUARD_ANIMS.alert;
   if (g.state === 'search' || g.state === 'listen') return GUARD_ANIMS.search[Math.floor((time || 0) * 4) % 2];
   if (g.state === 'stagger') return GUARD_ANIMS.alert;
@@ -126,6 +126,12 @@ export function drawGuardSprite(ctx, sheets, g, cam, T, time) {
   const face = g.dir < 0 ? -1 : 1;
   const x = g.x * T - cam.x;
   const y = g.floorY * T - cam.y;
+  if (g.state === 'down') { // knocked out by a set piece: his walk frame turned flat on the floor (a quarter turn is pixel exact)
+    ctx.save(); ctx.translate(Math.round(x - face * 22), Math.round(y - 9)); ctx.rotate(face * Math.PI / 2);
+    drawFrame(ctx, sheet, 0, 0, 0, face);
+    ctx.restore();
+    return true;
+  }
   drawFrame(ctx, sheet, guardFrame(g, time), x, y, face);
   return true;
 }

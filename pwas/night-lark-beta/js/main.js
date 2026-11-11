@@ -35,7 +35,7 @@ import { promptText } from './prompts.js';
 import { generateTower } from './gen/generator.js';
 import { createGame } from './game.js';
 import { drawGame } from './screens.js';
-import { createAudio } from './audio.js';
+import { createAudio, setpieceSfx } from './audio.js';
 import { isPortrait } from './shell.js';
 import { createFx } from './fx.js';
 import { registerServiceWorker } from './pwa.js';
@@ -200,9 +200,15 @@ canvas.addEventListener('pointerdown', (e) => {
 bindTouchTail();
 
 bindPadRefresh(touch);
+// set pieces: their crack / crash / smash and the knockout blip (no music on the dev rooms, as before)
+const shellAudio = createAudio({ music: false });
+addEventListener('keydown', () => shellAudio.start());
+canvas.addEventListener('pointerdown', () => shellAudio.start());
+const warmBuff = params.has('warm'); // ?warm=1: the warm-light buff on (Glimmer Sight cues for yankables)
 const loop = createLoop({
   step(dt) {
     if (shell.world) shell.world.reducedMotion = fx.reduced;
+    if (shell.world && warmBuff) shell.world.warmBuff = true;
     const inp = input.sample();
     touch.notePad(input.padUsed);
     const ran = shell.step(dt, inp);
@@ -210,6 +216,7 @@ const loop = createLoop({
     if (ran) fx.step(dt, shell.world, shell.events);
     for (const e of shell.events) {
       if (e.type === 'attach' && input.device === 'touch' && navigator.vibrate) navigator.vibrate(12);
+      const sfx = setpieceSfx(e); if (sfx) shellAudio.sfx(sfx);
     }
     shell.events.length = 0;
     return ran;
@@ -240,9 +247,13 @@ if (params.has('probe')) {
       // M2 stealth
       feathers: w.feathers, meter: w.meter, alert: !!w.alert, hidden: w.hidden, lit: w.lit,
       alerts: w.alerts, escapes: w.escapes, catches: w.catches, overT: w.overT, nights: shell.nights,
-      guards: w.level.guards.map((g) => ({ x: g.x, dir: g.dir, state: g.state, sees: g.sees })),
+      guards: w.level.guards.map((g) => ({ x: g.x, floorY: g.floorY, dir: g.dir, state: g.state, sees: g.sees, dazed: !!g.dazed })),
       searchlights: (w.level.searchlights || []).map((s) => ({ angle: s.angle, state: s.state, sees: s.sees })),
       items: w.level.items.length,
+      // set pieces (setpiece.js): ids, state, where, the grip, light, rubble; Glimmer Sight cues
+      setpieces: (w.level.setpieces || []).map((sp) => ({ id: sp.id, type: sp.type, state: sp.state, x: sp.x, y: sp.y, grip: sp.state === 'intact' ? { x: sp.anchor.x, y: sp.anchor.y } : null,
+        lit: !!sp.lamp && w.level.lamps.includes(sp.lamp), lamp: sp.lamp ? { x: sp.lamp.x, y: sp.lamp.y } : null, hits: sp.hits.length, wreck: sp.wreck.length, how: sp.how })),
+      lamps: w.level.lamps.length, glimmer: (w.glimmer || []).map((c) => c.id), warmBuff: !!w.warmBuff,
     }));
   };
 }

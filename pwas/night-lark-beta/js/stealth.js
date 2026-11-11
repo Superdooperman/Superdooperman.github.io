@@ -11,6 +11,7 @@ import { TUNING, v1px } from './config.js';
 import { isStandable } from './level.js';
 import { wrapAngle } from './geom.js';
 import { guardSees, guardSeesLit, isHidden, isLit, searchlightSees, sweepAngle, lineOfSight, inCone, guardEyeOf } from './los.js';
+import { guardOut } from './setpiece.js';
 
 export const watchersOf = (level) => [...level.guards, ...(level.searchlights || [])];
 export const eyeOf = (o) => (o.kind === 'searchlight' ? { x: o.x, y: o.y } : guardEyeOf(o));
@@ -56,6 +57,7 @@ function stepGuard(level, g, dt, emit) {
   const T = TUNING;
   switch (g.state) {
     case 'tied': return; // M4 Tie-Line: out for the room
+    case 'down': return; // set pieces (setpiece.js): knocked out for the room
     case 'alert': return; // frozen with the "!"
     case 'stagger': { // feel pass 1: flinch and slide. Same watchman, not a new enemy.
       if (g.kbT > 0) {
@@ -65,7 +67,7 @@ function stepGuard(level, g, dt, emit) {
         g.kbT -= dt;
       }
       g.t -= dt;
-      if (g.t <= 0) g.state = 'patrol';
+      if (g.t <= 0) { g.state = 'patrol'; g.dazed = false; } // a set piece's stun (dazed) ends with it
       return;
     }
     case 'listen':
@@ -151,7 +153,7 @@ export function cloakAllows(level, o, px, py) {
 export function tieCheck(w, level) {
   if (w.grounded || w.vy <= 0 || w.anchor) return null;
   for (const g of level.guards) {
-    if (g.state === 'tied' || g.state === 'alert') continue;
+    if (g.state === 'tied' || g.state === 'down' || g.state === 'alert') continue;
     const head = g.floorY - TUNING.standHeight; // a watchman is about as tall as she is
     if (Math.abs(w.x - g.x) < TUNING.tieReachX && w.y >= head - 0.3 && w.y <= head + 0.45 && w.peakY < head - 0.3) {
       g.state = 'tied'; g.sees = false;
@@ -175,7 +177,7 @@ export function stepStealth(w, level, dt, emit, noise = 0) {
   // hearing: a patrolling or searching guard turns to the sound and stands listening
   if (noise > 0) {
     for (const g of level.guards) {
-      if (g.state === 'alert' || g.state === 'tied' || g.state === 'stagger') continue;
+      if (g.state === 'alert' || g.state === 'stagger' || guardOut(g)) continue;
       if (!hears(level, g, w.x, cy, noise, w.doorsOpen)) continue;
       const dir = Math.sign(w.x - g.x) || g.dir;
       if (g.state !== 'listen' || g.dir !== dir) emit('heard', { noise });
@@ -187,7 +189,7 @@ export function stepStealth(w, level, dt, emit, noise = 0) {
   let closest = null;
   let cd = Infinity;
   for (const o of watchersOf(level)) {
-    o.sees = !hidden && o.state !== 'tied' && watcherSees(level, o, w.x, cy, w.doorsOpen);
+    o.sees = !hidden && !guardOut(o) && watcherSees(level, o, w.x, cy, w.doorsOpen); // tied, knocked out or dazed: blind
     if (o.sees && w.smokes?.length) { const e = eyeOf(o); if (smokeBlocks(w.smokes, e.x, e.y, w.x, cy)) o.sees = false; }
     if (o.sees && w.cloaked && !cloakAllows(level, o, w.x, cy)) o.sees = false;
     if (!o.sees) continue;

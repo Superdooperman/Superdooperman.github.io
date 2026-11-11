@@ -9,12 +9,14 @@
 //   GRATING (Superdooperman, Nov 9 2026; the climb platforms) 'g': iron grating. ONE-WAY for the body and
 //     DOWN + A exactly like wood, and see-through (its gaps), so it never blocks sight or the line.
 //     Stone slabs are the ground floor's and are never one-way, however thin.
+//   RUBBLE 'r' (set pieces, Nov 9 2026): a fallen gargoyle's wreck, written at runtime only
+//     (js/setpiece.js). Stone for every rule (body, sight, the line, standable); drawn by the set piece.
 // Other tiles: 'b' blue hiding stone (full block), 'D' door (full block until the key), 'L' lamp,
 //   'a' ring, 'P' spawn, 'n' note, 'k' key, 'm' mote, '*' spark, 'E' exit, '.' empty.
 import { TUNING } from './config.js';
 import { archAnchors } from './anchors.js';
 
-export const isStone = (ch) => ch === '#' || ch === 's';
+export const isStone = (ch) => ch === '#' || ch === 's' || ch === 'r';
 export const isWood = (ch) => ch === '=' || ch === '~';
 export const isGrating = (ch) => ch === 'g';
 /** The materials the body passes from below and from the side, and can drop through. */
