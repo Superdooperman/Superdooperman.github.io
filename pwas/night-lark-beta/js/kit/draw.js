@@ -9,6 +9,7 @@
 import { PALETTE as P } from '../art.js';
 import { tileAt, isGrating } from '../level.js';
 import { PROP_TYPES, propGrip, propW } from './props.js';
+import { SETPIECE_TYPES } from '../setpiece.js';
 
 export const KIT_COLORS = Object.freeze({
   wall: P.SL1, mortar: P.SL0, wallHi: P.SL2,
@@ -252,25 +253,37 @@ export function drawArchAnchor(ctx, a, cam, T, isTarget) {
 }
 
 // ---- set pieces (js/setpiece.js): PLACEHOLDER art until Brook's set-piece sheets (ART-NEEDS) ----
-// Whole px, locked palette only. A yankable reads apart from the plain kit gargoyle by its tell: a
-// 1 px WK0 hairline gap at the wall join with a jog in it, SL0 cracked-mortar ticks round the join,
-// SL4 chipped edges and, now and then, a speck of FX1 grit falling. Hooked or targeted, it shivers.
-// A chandelier is wider than a lantern (48 px), four candles, and hangs off true on a loose chain.
+// Whole px, locked palette only. A yankable reads apart from the plain kit gargoyle by its tell:
+// a 2 px WK0 gap at the wall join, SL0 cracks in the mortar and across the body (drawn over the
+// kit cell too), SL4 chips, FX1 grit, and a short WH2/FX1 glint at the join so it does not
+// blend into ordinary kit gargoyles. Hooked or targeted, it shivers.
+// A chandelier is a 64 x 48 (4 x 3 tile) fixture, the same box as the small mini-tower crown
+// plus its glow: heavy iron arms, a ring of five lamps, hanging from a visible ceiling chain.
+// The chain and body swing as a pendulum (sp.theta).
 const SPK = Object.freeze({ gap: P.WK0, crack: P.SL0, chip: P.SL4, grit: P.FX1, wax: P.PX3, waxDark: P.PX2, flame: P.LG3, flameCore: P.LG4, wick: P.WK0, shard: P.WH2, glass: P.SL5 });
 
 /** The yank tell on the wall round a gargoyle's mount: WK0 cracks running out of the join into the
  *  mortar, SL4 broken edges; the 2 px open gap with a jog at the join (lit edge); grit trickling. */
 function gargoyleTell(ctx, y, fl, t) {
   ctx.fillStyle = SPK.gap;
-  ctx.fillRect(fl(0, 1), y - 6, 1, 4); ctx.fillRect(fl(1, 1), y - 3, 1, 3); ctx.fillRect(fl(-2, 2), y - 7, 2, 1); ctx.fillRect(fl(2, 2), y - 1, 2, 1); // up
-  ctx.fillRect(fl(1, 1), y + 14, 1, 3); ctx.fillRect(fl(0, 1), y + 17, 1, 4); ctx.fillRect(fl(-3, 3), y + 20, 3, 1); ctx.fillRect(fl(2, 3), y + 16, 3, 1); // down
-  ctx.fillRect(fl(3, 2), y + 2, 2, 6); ctx.fillRect(fl(4, 2), y + 7, 2, 4); ctx.fillRect(fl(3, 2), y + 10, 2, 5); // the join
-  ctx.fillStyle = SPK.chip; ctx.fillRect(fl(-1, 1), y - 6, 1, 3); ctx.fillRect(fl(2, 1), y + 17, 1, 3); ctx.fillRect(fl(-3, 1), y + 19, 1, 1);
-  ctx.fillRect(fl(5, 1), y + 3, 1, 4); ctx.fillRect(fl(6, 1), y + 7, 1, 3); ctx.fillRect(fl(5, 1), y + 10, 1, 4);
+  ctx.fillRect(fl(0, 2), y - 8, 2, 6); ctx.fillRect(fl(1, 2), y - 3, 2, 4); ctx.fillRect(fl(-3, 3), y - 9, 3, 2); ctx.fillRect(fl(2, 3), y - 1, 3, 2); // up
+  ctx.fillRect(fl(1, 2), y + 14, 2, 4); ctx.fillRect(fl(0, 2), y + 17, 2, 5); ctx.fillRect(fl(-3, 4), y + 21, 4, 2); ctx.fillRect(fl(2, 4), y + 16, 4, 2); // down
+  ctx.fillRect(fl(3, 3), y + 1, 3, 7); ctx.fillRect(fl(5, 2), y + 7, 2, 5); ctx.fillRect(fl(3, 3), y + 10, 3, 6); // the join, a 2-3 px open gap
+  ctx.fillStyle = SPK.chip; ctx.fillRect(fl(-1, 2), y - 8, 2, 4); ctx.fillRect(fl(2, 2), y + 17, 2, 4); ctx.fillRect(fl(-3, 2), y + 20, 2, 2);
+  ctx.fillRect(fl(6, 2), y + 3, 2, 5); ctx.fillRect(fl(7, 2), y + 7, 2, 4); ctx.fillRect(fl(6, 2), y + 10, 2, 5);
   if (t !== null) { // grit trickling from the join (none in reduced motion)
     const k = Math.floor(t * 12) % 16;
-    if (k < 10) { ctx.fillStyle = SPK.grit; ctx.fillRect(fl(4, 2), y + 15 + k * 2, 2, 2); }
+    if (k < 10) { ctx.fillStyle = SPK.grit; ctx.fillRect(fl(5, 2), y + 16 + k * 2, 2, 2); }
+    // a short glint at the cracked join so the tell reads at a glance
+    const g = Math.floor(t * 6) % 8;
+    if (g < 3) { ctx.fillStyle = P.WH2; ctx.fillRect(fl(4, 2), y + 4, 2, 2); ctx.fillStyle = P.FX1; ctx.fillRect(fl(5, 1), y + 5, 1, 1); }
   }
+}
+
+/** Body crack drawn over the kit cell as well as the placeholder, so a kit-blit yankable still reads. */
+function gargoyleBodyCrack(ctx, y, fl) {
+  ctx.fillStyle = SPK.crack;
+  ctx.fillRect(fl(11, 2), y + 4, 2, 3); ctx.fillRect(fl(12, 2), y + 7, 2, 3); ctx.fillRect(fl(11, 2), y + 10, 2, 4);
 }
 
 function gargoyleBody(ctx, x, y, fl, t, mounted = true) {
@@ -278,8 +291,7 @@ function gargoyleBody(ctx, x, y, fl, t, mounted = true) {
   ctx.fillStyle = K.stone; ctx.fillRect(fl(5, 17), y + 3, 17, 2); ctx.fillRect(fl(18, 12), y + 5, 12, 5);
   ctx.fillStyle = SPK.chip; ctx.fillRect(fl(6, 14), y + 3, 14, 1); ctx.fillRect(fl(20, 9), y + 5, 9, 1); // lit top edges (it stands proud)
   ctx.fillStyle = SPK.gap; ctx.fillRect(fl(27, 2), y + 8, 2, 1); ctx.fillRect(fl(16, 2), y + 6, 2, 2); // the mouth (the spout), an eye
-  // a crack across the body
-  ctx.fillStyle = SPK.crack; ctx.fillRect(fl(11, 1), y + 4, 1, 3); ctx.fillRect(fl(12, 1), y + 7, 1, 3); ctx.fillRect(fl(11, 1), y + 10, 1, 4);
+  gargoyleBodyCrack(ctx, y, fl);
   if (mounted) gargoyleTell(ctx, y, fl, t);
 }
 
@@ -292,40 +304,67 @@ function gargoyleWreck(ctx, x, y, fl) {
   ctx.fillStyle = K.stone; ctx.fillRect(fl(30, 2), y + 14, 2, 2); ctx.fillRect(fl(-2, 2), y + 14, 2, 2); // chips past the ends
 }
 
+/** A visible ceiling chain (4-5 px iron links with an HA2 edge), along a straight segment. */
+function chainRod(ctx, x0, y0, x1, y1) {
+  const dx = x1 - x0, dy = y1 - y0, d = Math.hypot(dx, dy) || 1;
+  const nx = dx / d, ny = dy / d;
+  for (let s = 0; s < d - 1; s += 6) {
+    const lx = Math.round(x0 + nx * s) - 2;
+    const ly = Math.round(y0 + ny * s);
+    ctx.fillStyle = K.iron; ctx.fillRect(lx, ly, 5, 5);
+    ctx.fillStyle = K.verdigris; ctx.fillRect(lx + 3, ly + 1, 1, 3);
+  }
+}
 function chainLinks(ctx, x, y0, y1, loose) {
-  ctx.fillStyle = K.iron;
-  for (let yy = y0; yy < y1 - 1; yy += 4) ctx.fillRect(x + (loose && y1 - yy <= 10 ? 1 : 0), yy, 2, 3); // loose: the bottom links hang a px off true
+  chainRod(ctx, x, y0, x + (loose ? 1 : 0), y1);
 }
 
-function chandelierBody(ctx, x, y, lit, t, tilt = 1) {
-  const cx = x + 23;
+function chandelierBody(ctx, x, y, lit, t, tilt = 0) {
+  // 64 x 48 placeholder, filled like the small mini-tower crown: a central pole and finial,
+  // two spreader arms, five hanging lamps (3 upper, 2 lower). Locked palette only.
+  const cx = x + 32;
   ctx.fillStyle = K.iron;
-  ctx.fillRect(cx - 2, y + 2, 6, 1); ctx.fillRect(cx - 2, y + 6, 6, 1); ctx.fillRect(cx - 2, y + 2, 1, 5); ctx.fillRect(cx + 3, y + 2, 1, 5); // the top ring
-  ctx.fillRect(cx, y + 7, 2, 13); // the stem
-  ctx.fillRect(x + 4, y + 18 + tilt, 20, 2); ctx.fillRect(x + 24, y + 18, 20, 2); // the wide arm (the left half hangs low: loose)
-  ctx.fillRect(x + 3, y + 14 + tilt, 2, 5); ctx.fillRect(x + 43, y + 14, 2, 5); // its curled ends
-  ctx.fillStyle = K.verdigris; ctx.fillRect(cx - 1, y + 20, 4, 3); ctx.fillRect(cx, y + 23, 2, 2); // the finial
-  for (const [cxp, dy] of [[4, tilt], [15, tilt], [32, 0], [43, 0]]) { // four candles
-    const px = x + cxp - 1; const cy = y + 13 + dy;
-    ctx.fillStyle = K.iron; ctx.fillRect(px - 1, cy + 3, 5, 2); // the cup
-    ctx.fillStyle = SPK.wax; ctx.fillRect(px, cy - 1, 3, 4); ctx.fillStyle = SPK.waxDark; ctx.fillRect(px + 2, cy, 1, 3);
+  ctx.fillRect(cx - 3, y + 2, 6, 3); ctx.fillRect(cx - 4, y + 5, 8, 2); // the top ring (the grip)
+  ctx.fillRect(cx - 2, y + 7, 4, 16); // the stem
+  ctx.fillRect(x + 4, y + 16 + tilt, 56, 4); // the upper arm, 56 px — as wide as the crown
+  ctx.fillRect(x + 12, y + 28, 40, 3); // the lower arm
+  ctx.fillRect(x + 2, y + 12 + tilt, 4, 8); ctx.fillRect(x + 58, y + 12, 4, 8); // curled ends
+  ctx.fillRect(x + 12, y + 26, 3, 5); ctx.fillRect(x + 49, y + 26, 3, 5);
+  ctx.fillStyle = K.verdigris;
+  ctx.fillRect(cx - 3, y + 22, 6, 4); ctx.fillRect(cx - 2, y + 26, 4, 3); // the finial
+  ctx.fillRect(x + 6, y + 17 + tilt, 8, 2); ctx.fillRect(x + 50, y + 17, 8, 2); // arm stays
+  // five lamps, crown-like: [offsetX, offsetY from box top]
+  const lamps = [[8, 14 + tilt], [32, 10], [56, 14], [18, 30], [46, 30]];
+  for (const [cxp, cy0] of lamps) {
+    const px = x + cxp; const cy = y + cy0;
+    ctx.fillStyle = K.iron; ctx.fillRect(px - 5, cy, 10, 2); ctx.fillRect(px - 4, cy + 2, 8, 3); // shade
+    ctx.fillRect(px - 1, cy + 5, 2, 3); // hanger
+    ctx.fillStyle = lit ? SPK.flameCore : SPK.waxDark;
+    ctx.fillRect(px - 3, cy + 7, 6, 6); // the globe
     if (lit) {
-      const tall = t === null ? 1 : (Math.floor(t * 9 + cxp) % 3 ? 1 : 0);
-      ctx.fillStyle = SPK.flame; ctx.fillRect(px + 1, cy - 3 - tall, 1, 2 + tall); ctx.fillStyle = SPK.flameCore; ctx.fillRect(px + 1, cy - 2, 1, 1);
-    } else { ctx.fillStyle = SPK.wick; ctx.fillRect(px + 1, cy - 2, 1, 1); }
+      const pulse = t === null ? 0 : (Math.floor(t * 9 + cxp) % 3 ? 0 : 1);
+      ctx.fillStyle = SPK.flame; ctx.fillRect(px - 2, cy + 8 - pulse, 4, 4 + pulse);
+      ctx.fillStyle = SPK.flameCore; ctx.fillRect(px - 1, cy + 9, 2, 2);
+    } else {
+      ctx.fillStyle = SPK.wick; ctx.fillRect(px - 1, cy + 9, 2, 2);
+    }
+  }
+  if (lit && t !== null) {
+    const g = Math.floor(t * 5) % 10;
+    if (g < 3) { ctx.fillStyle = P.WH2; ctx.fillRect(x + 31, y + 12, 2, 2); ctx.fillRect(x + 55, y + 16, 2, 2); }
   }
 }
 
 function chandelierWreck(ctx, x, y) {
-  const b = y + 31; // its floor line (bottom of the 32 px box)
+  const b = y + 47; // floor line of the 48 px box
   ctx.fillStyle = K.iron;
-  ctx.fillRect(x + 2, b - 2, 18, 2); ctx.fillRect(x + 20, b - 4, 2, 3); ctx.fillRect(x + 22, b - 5, 6, 2); ctx.fillRect(x + 28, b - 3, 16, 2); // the arm, bent
-  ctx.fillRect(x + 1, b - 5, 2, 4); ctx.fillRect(x + 44, b - 6, 2, 4);
-  ctx.fillRect(x + 30, b - 9, 6, 1); ctx.fillRect(x + 30, b - 5, 6, 1); ctx.fillRect(x + 30, b - 9, 1, 5); ctx.fillRect(x + 35, b - 9, 1, 5); // the ring, rolled off
-  ctx.fillStyle = K.verdigris; ctx.fillRect(x + 23, b - 7, 4, 2);
-  ctx.fillStyle = SPK.wax; ctx.fillRect(x + 6, b - 1, 4, 1); ctx.fillRect(x + 13, b - 4, 1, 3); ctx.fillRect(x + 38, b - 1, 4, 1); ctx.fillRect(x - 3, b, 3, 1); // candles, scattered
-  ctx.fillStyle = SPK.shard; for (const [dx, dy] of [[11, -1], [17, 0], [26, -1], [33, 0], [47, 0], [-5, 0], [41, -2]]) ctx.fillRect(x + dx, b + dy, 1, 1);
-  ctx.fillStyle = SPK.glass; for (const [dx, dy] of [[9, 0], [24, 0], [45, -1], [-2, -1]]) ctx.fillRect(x + dx, b + dy, 1, 1);
+  ctx.fillRect(x + 2, b - 3, 26, 3); ctx.fillRect(x + 26, b - 6, 3, 4); ctx.fillRect(x + 28, b - 8, 10, 3); ctx.fillRect(x + 36, b - 4, 24, 3); // the arm, bent
+  ctx.fillRect(x + 1, b - 7, 4, 6); ctx.fillRect(x + 58, b - 8, 4, 6);
+  ctx.fillRect(x + 38, b - 14, 8, 2); ctx.fillRect(x + 38, b - 8, 8, 2); ctx.fillRect(x + 38, b - 14, 2, 8); ctx.fillRect(x + 44, b - 14, 2, 8); // the ring, rolled off
+  ctx.fillStyle = K.verdigris; ctx.fillRect(x + 30, b - 10, 6, 3);
+  ctx.fillStyle = SPK.wax; ctx.fillRect(x + 8, b - 2, 6, 2); ctx.fillRect(x + 18, b - 6, 3, 5); ctx.fillRect(x + 50, b - 2, 6, 2); ctx.fillRect(x - 4, b, 4, 2);
+  ctx.fillStyle = SPK.shard; for (const [dx, dy] of [[14, -2], [22, 0], [34, -2], [42, 0], [60, 0], [-6, 0], [54, -3]]) ctx.fillRect(x + dx, b + dy, 2, 2);
+  ctx.fillStyle = SPK.glass; for (const [dx, dy] of [[11, 0], [30, 0], [58, -1], [-3, -1]]) ctx.fillRect(x + dx, b + dy, 2, 1);
 }
 
 /** Set pieces: intact (with the tell), falling, or the wreck. opts.time (s), opts.reduced, opts.hot:
@@ -339,18 +378,32 @@ export function drawSetpieces(ctx, level, cam, T, opts = {}) {
     const hot = sp.state === 'intact' && opts.hot && opts.hot === sp.anchor;
     const jig = hot && t !== null ? (Math.floor(t * 24) % 2 ? 1 : -1) : 0;
     const x0 = Math.round(sp.x * T - cam.x); const x = x0 + jig; const y = Math.round(sp.y * T - cam.y);
-    const w = sp.type === 'chandelier' ? 3 * T : 2 * T;
+    const typ = SETPIECE_TYPES[sp.type];
+    const w = (typ ? typ.w : 2) * T;
     const fl = (px, pw) => (sp.flip ? x + w - px - pw : x + px);
     if (sp.type === 'gargoyle') {
       const cell = opts.kit && opts.kit.cells && opts.kit.cells.gargoyle;
       if (sp.state === 'landed') gargoyleWreck(ctx, x, y, fl);
-      else if (cell) { blitCell(ctx, cell, x, y, sp.flip); if (sp.state === 'intact') gargoyleTell(ctx, y, fl, t); }
-      else gargoyleBody(ctx, x, y, fl, sp.state === 'intact' ? t : null, sp.state === 'intact');
+      else if (cell) {
+        blitCell(ctx, cell, x, y, sp.flip);
+        if (sp.state === 'intact') { gargoyleBodyCrack(ctx, y, fl); gargoyleTell(ctx, y, fl, t); }
+      } else gargoyleBody(ctx, x, y, fl, sp.state === 'intact' ? t : null, sp.state === 'intact');
     } else if (sp.type === 'chandelier') {
-      const top = Math.round((sp.chainTop ?? 0) * T - cam.y);
-      if (sp.state === 'intact') { chainLinks(ctx, x + 23, top, y + 2, true); chandelierBody(ctx, x, y, true, t); continue; }
-      chainLinks(ctx, x0 + 23, top, top + 8, false); // the snapped end still hangs up there
-      if (sp.state === 'falling') { chainLinks(ctx, x + 23, y - 6, y + 2, false); chandelierBody(ctx, x, y, false, t, 2); }
+      const gx = typ.grip[0] * T; const gy = typ.grip[1] * T;
+      const gripX = sp.anchor ? Math.round(sp.anchor.x * T - cam.x) : x + gx;
+      const gripY = sp.anchor ? Math.round(sp.anchor.y * T - cam.y) : y + gy;
+      const topX = sp.pivot ? Math.round(sp.pivot.x * T - cam.x) : gripX;
+      const topY = Math.round((sp.chainTop ?? 0) * T - cam.y);
+      if (sp.state === 'intact') {
+        chainRod(ctx, topX, topY, gripX, gripY);
+        ctx.save();
+        if (sp.theta) { ctx.translate(gripX, gripY); ctx.rotate(sp.theta); ctx.translate(-gripX, -gripY); }
+        chandelierBody(ctx, x, y, true, t);
+        ctx.restore();
+        continue;
+      }
+      chainRod(ctx, topX, topY, topX, topY + 10); // the snapped end still hangs up there
+      if (sp.state === 'falling') { chainRod(ctx, x + w / 2, y - 8, x + w / 2, y + 2); chandelierBody(ctx, x, y, false, t, 2); }
       else chandelierWreck(ctx, x, y);
     }
   }

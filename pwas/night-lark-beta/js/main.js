@@ -28,13 +28,14 @@ import { render, cameraFor, withLerp } from './render.js';
 import { loadArt } from './art.js';
 import { hasWren, ropeOriginFor, cloakOriginFor } from './wren.js';
 import { createShell } from './shell.js';
-import { bindTouch } from './touch.js';
+import { bindTouch, touchQueryForcesShow, recoverTouchSetting } from './touch.js';
+import { loadSave, writeSave } from './save.js';
 import { VIEW_W, VIEW_H, TILE_PX, SETTINGS, ZOOM } from './config.js';
 import { createPresenter, stepZoom } from './zoom.js';
 import { promptText } from './prompts.js';
 import { generateTower } from './gen/generator.js';
 import { createGame } from './game.js';
-import { drawGame } from './screens.js';
+import { drawGame, titleMenuIndexAt, pauseActionAt } from './screens.js';
 import { createAudio, setpieceSfx } from './audio.js';
 import { isPortrait } from './shell.js';
 import { createFx } from './fx.js';
@@ -154,6 +155,16 @@ loadArt().then((s) => {
   if (hasWren(s)) fx.cloakOrigin = cloakOriginFor(s); // engine tail pinned at each frame's tailAnchor (pass 4)
 });
 
+// ?touch / ?touch=on is the escape hatch: always show the pad, and if the save was OFF
+// (the phone lockout), reset it to AUTO before either boot reads it.
+const forceTouch = touchQueryForcesShow(params);
+{
+  const storage = scopedStorage();
+  const save = loadSave(storage);
+  if (forceTouch && recoverTouchSetting(save.settings, { forceShow: true })) writeSave(storage, save);
+  if (forceTouch) SETTINGS.touch = save.settings.touch || 'auto';
+}
+
 if (params.has('room')) bootShell(); else bootGame();
 
 function bootShell() {
@@ -186,9 +197,17 @@ onViewport();
 document.addEventListener('visibilitychange', () => { if (document.hidden && !shell.paused) shell.paused = true; });
 
 const touch = bindTouch(input, document.getElementById('touch'), {
-  forceShow: params.has('touch'),
+  forceShow: forceTouch,
   getMode: () => SETTINGS.touch,
   hasPad: () => input.pads.size > 0,
+  onRecover: () => {
+    const storage = scopedStorage();
+    const save = loadSave(storage);
+    if (recoverTouchSetting(save.settings, { sawTouch: true, padConnected: input.pads.size > 0, forceShow: forceTouch })) {
+      writeSave(storage, save);
+      SETTINGS.touch = 'auto';
+    }
+  },
 });
 
 // Tap or click a grapple point to fire at it (BRIEF: "Tap a point to fire at it").
@@ -262,7 +281,16 @@ if (params.has('probe')) {
 function bootGame() {
   const seedParam = Number(params.get('seed'));
   const storage = scopedStorage();
-  const game = createGame({ storage, needsRender: true, systemReducedMotion: reducedMotion, seed: Number.isInteger(seedParam) && seedParam > 0 ? seedParam : undefined });
+  let touch = null;
+  const game = createGame({
+    storage, needsRender: true, systemReducedMotion: reducedMotion,
+    seed: Number.isInteger(seedParam) && seedParam > 0 ? seedParam : undefined,
+    touchEnv: () => ({
+      coarse: typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches,
+      sawTouch: !!(touch && touch.sawTouch),
+      padConnected: input.pads.size > 0,
+    }),
+  });
   const audio = createAudio(game.save.settings);
   let portrait = false;
   const rotate = document.getElementById('rotate');
@@ -272,10 +300,11 @@ function bootGame() {
   onViewport();
   document.addEventListener('visibilitychange', () => { if (document.hidden) game.pause(); });
   SETTINGS.touch = game.save.settings.touch || 'auto';
-  const touch = bindTouch(input, document.getElementById('touch'), {
-    forceShow: params.has('touch'),
+  touch = bindTouch(input, document.getElementById('touch'), {
+    forceShow: forceTouch,
     getMode: () => game.save.settings.touch || SETTINGS.touch,
     hasPad: () => input.pads.size > 0,
+    onRecover: () => game.recoverTouchOff({ sawTouch: true, padConnected: input.pads.size > 0, forceShow: forceTouch }),
   });
   bindPadRefresh(touch);
   const wake = () => audio.start();
@@ -285,6 +314,17 @@ function bootGame() {
   });
   canvas.addEventListener('pointerdown', (e) => {
     wake();
+    // Title and pause stay tappable on the canvas even if the on-screen pad is hidden.
+    if (game.screen === 'title' || game.screen === 'pause') {
+      const v = toView(e);
+      if (game.screen === 'title') {
+        const i = titleMenuIndexAt(v.y, game.menu().length);
+        if (i >= 0) { game.pickMenu(i); touch.show(); return; }
+      } else {
+        const act = pauseActionAt(v.x, v.y);
+        if (act) { game.tapPause(act); touch.show(); return; }
+      }
+    }
     const point = () => {
       if (!(game.world && game.screen === 'play')) return null;
       return pointerToWorld(game.world, e);

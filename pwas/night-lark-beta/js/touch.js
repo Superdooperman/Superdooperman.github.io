@@ -27,11 +27,57 @@ export function dpadDirs(dx, dy, r) {
   return out;
 }
 
-export function bindTouch(input, root, { forceShow = false, getMode = () => 'auto', hasPad = () => false } = {}) {
+/** A phone or tablet with no gamepad: (pointer: coarse) or a touch has been seen, and no pad. */
+export function isTouchOnly({ coarse = false, sawTouch = false, padConnected = false } = {}) {
+  return !padConnected && !!(coarse || sawTouch);
+}
+
+export const TOUCH_MODES = Object.freeze(['auto', 'on', 'off']);
+
+/** Cycle AUTO -> ON -> OFF -> AUTO. On a touch-only device, skip OFF (AUTO -> ON -> AUTO)
+ *  so the title menu can never hide the only way back to the setting. */
+export function cycleTouchMode(cur, env = {}) {
+  const order = isTouchOnly(env) ? ['auto', 'on'] : ['auto', 'on', 'off'];
+  const c = TOUCH_MODES.includes(cur) ? cur : 'auto';
+  if (!order.includes(c)) return 'auto';
+  return order[(order.indexOf(c) + 1) % order.length];
+}
+
+/** Saved OFF should become AUTO (and be persisted by the caller) when ?touch is on, or
+ *  when a touch arrives and no gamepad is connected. */
+export function shouldRecoverTouchOff(saved, { forceShow = false, sawTouch = false, padConnected = false } = {}) {
+  if (saved !== 'off') return false;
+  if (forceShow) return true;
+  return !!sawTouch && !padConnected;
+}
+
+/** Mode used for showing the on-screen pad. forceShow and a recovering touch never yield 'off'. */
+export function effectiveTouchMode(saved, opts = {}) {
+  const s = TOUCH_MODES.includes(saved) ? saved : 'auto';
+  return shouldRecoverTouchOff(s, opts) ? 'auto' : s;
+}
+
+/** ?touch or ?touch=on (also ?touch=1) forces the pad on. ?touch=off is not an escape hatch. */
+export function touchQueryForcesShow(params) {
+  if (!params || typeof params.has !== 'function' || !params.has('touch')) return false;
+  const v = params.get('touch');
+  return v === '' || v === 'on' || v === '1';
+}
+
+/** If settings.touch is OFF and should recover, set it to AUTO and return true. Caller persists. */
+export function recoverTouchSetting(settings, opts = {}) {
+  if (!settings || !shouldRecoverTouchOff(settings.touch, opts)) return false;
+  settings.touch = 'auto';
+  return true;
+}
+
+export function bindTouch(input, root, { forceShow = false, getMode = () => 'auto', hasPad = () => false, onRecover = null } = {}) {
   const api = {
     shown: false,
     lastTouch: 0,
+    sawTouch: false,
     show() {
+      // mode() already maps a recovering OFF to AUTO, so this only hides a real OFF
       if (mode() === 'off') { hide(); return; }
       if (!api.shown) { api.shown = true; root.hidden = false; }
     },
@@ -40,9 +86,17 @@ export function bindTouch(input, root, { forceShow = false, getMode = () => 'aut
     /** Call after each input sample. `used` is true when that sample read the pad. */
     notePad(used) { if (autoHidesOnPadUse(mode(), hasPad(), used)) hide(); },
   };
-  function mode() { return getMode() || 'auto'; }
+  function env() {
+    return { forceShow, sawTouch: api.sawTouch, padConnected: !!hasPad() };
+  }
+  function mode() { return effectiveTouchMode(getMode() || 'auto', env()); }
   function hide() { if (api.shown || !root.hidden) { api.shown = false; root.hidden = true; } }
+  function recoverIfNeeded() {
+    if (!shouldRecoverTouchOff(getMode() || 'auto', env())) return;
+    onRecover && onRecover('auto');
+  }
   function apply() {
+    recoverIfNeeded();
     const m = mode();
     if (m === 'on' || forceShow) { api.show(); return; }
     if (m === 'off') { hide(); return; }
@@ -53,6 +107,8 @@ export function bindTouch(input, root, { forceShow = false, getMode = () => 'aut
   apply();
   addEventListener('touchstart', () => {
     api.lastTouch = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    api.sawTouch = true;
+    recoverIfNeeded();
     if (mode() !== 'off') api.show();
   }, { passive: true, capture: true });
 

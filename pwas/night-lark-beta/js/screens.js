@@ -21,6 +21,26 @@ function box(ctx, x, y, w, h, border, bg = C.overlay) {
 }
 const A = (dev) => promptText('{A}', dev);
 
+/** Title menu rows (drawTitle): scale-2 lines starting at y = 110, 22 px apart. */
+export const TITLE_MENU_Y0 = 110;
+export const TITLE_MENU_ROW = 22;
+
+export function titleMenuIndexAt(y, count, y0 = TITLE_MENU_Y0, row = TITLE_MENU_ROW) {
+  const n = count | 0;
+  if (!n) return -1;
+  const i = Math.floor((y - y0) / row);
+  return i >= 0 && i < n ? i : -1;
+}
+
+/** Pause hint is centered at VIEW_H - 16. The bottom band: left half resumes, right half quits. */
+export const PAUSE_HINT_BAND = 28;
+
+export function pauseActionAt(x, y, viewW = VIEW_W, viewH = VIEW_H) {
+  if (y < viewH - PAUSE_HINT_BAND) return null;
+  return x < viewW / 2 ? 'resume' : 'quit';
+}
+
+
 /** A power-up icon: a tier-coloured gem, 7x7. */
 let iconSheets = null;
 function icon(ctx, id, x, y) {

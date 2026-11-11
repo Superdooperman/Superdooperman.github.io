@@ -24,9 +24,10 @@ export const TRAIN = Object.freeze({
   climbHooks: [[55.5, 17], [55.5, 12], [55.5, 7]],
   highChain: { row: 3, cols: [43, 36, 29, 22, 15], types: ['gargoyle', 'beam-rope', 'small-hook', 'grapple-hook', 'flagpole-short'] },
   top: { c0: 2, slab: 7 },
-  // set pieces (js/setpiece.js), two toys on the floor run: a cracked gargoyle near the start
-  // (ZIP it down) and a chandelier under the balcony (swing on it, ZIP it or aim at its candles)
-  setpieces: [{ type: 'gargoyle', c: 14, r: 21 }, { type: 'chandelier', c: 44, r: 21 }],
+  // set pieces (js/setpiece.js): a cracked gargoyle near the start (ZIP or PULL it down) and a
+  // crown-sized chandelier on a long ceiling chain in the open floor run (visible from spawn),
+  // so she can swing on the moving fixture, then ZIP / PULL it or snuff the candles.
+  setpieces: [{ type: 'gargoyle', c: 14, r: 21 }, { type: 'chandelier', c: 21, r: 16 }],
   spawn: { c: 2, r: 25 },
   exit: { c: 4, r: 6 },
 });

@@ -28,11 +28,11 @@ import { chooseTarget, reachable, stepReticle, pickAt, aimPick, aimCandidates, i
 import { canCancelAttack, attackLimit, guardBump, attackReaches } from './feel.js';
 import { stepMiniTowers, warmLightBuff } from './mini-tower.js';
 import { createIntro, introCheck, stepIntro, introActive } from './shaft-intro.js';
-import { attachSetpieces, stepSetpieces, yankSetpiece, dropSetpiece, isYankable, isSetpieceLamp, setpieceOf } from './setpiece.js';
+import { attachSetpieces, stepSetpieces, stepHangingSetpieces, yankSetpiece, dropSetpiece, isYankable, isSetpieceLamp, setpieceOf } from './setpiece.js';
 
 const NO_INPUT = Object.freeze({ held: {}, pressed: {}, released: {} });
 /** The hint while hooked to a yankable set piece ({Y}: the ZIP button, prompts.js). */
-export const YANK_PROMPT = Object.freeze({ id: 'setpiece-yank', text: '{Y}: YANK IT DOWN' });
+export const YANK_PROMPT = Object.freeze({ id: 'setpiece-yank', text: '{Y} / {P}: YANK IT DOWN' });
 
 export function createWorld(levelDef, opts = {}) {
   const T = TUNING;
@@ -436,6 +436,12 @@ export function createWorld(levelDef, opts = {}) {
     // SWING (fire) and PULL share one B state machine (audit F3): the button view below says
     // what "fire" means this step, and the kind goes to attach. With only B pressed this is the
     // old input, bit for bit.
+    // A cracked / hanging set piece: PULL tears it off, the same as ZIP. Do this before
+    // swing-to-pull chain so a ride on a yankable is a yank, not a re-hook.
+    if (v2 && input.pressed.pull && w.anchor && isYankable(w.anchor)) {
+      startYank();
+      input = { ...input, pressed: { ...input.pressed, pull: false } };
+    }
     if (v2 && input.pressed.pull && chainToPull(input)) input = { ...input, pressed: { ...input.pressed, pull: false } };
     const btn = grappleButton(input);
     const H = btn.H;
@@ -1210,6 +1216,8 @@ export function createWorld(levelDef, opts = {}) {
     const phys = w.aiming && (!fix || w.reticle) ? n * T.aimTimeScale : n; // manual aim: half speed (fix: only with a target)
     w.time += phys;
     const ev0 = w.events.length;
+    // Hanging chandeliers swing first so this step's rope tracks the moving grip.
+    if (level.setpieces.length && w.phase === 'play') stepHangingSetpieces(w, level, phys);
     stepLark(input, phys, n);
     if (fix) trackFix(n);
     if (w.smokes.length) { for (const s of w.smokes) s.t -= phys; w.smokes = w.smokes.filter((s) => s.t > 0); }

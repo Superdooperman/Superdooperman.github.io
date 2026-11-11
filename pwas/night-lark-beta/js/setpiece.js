@@ -11,7 +11,8 @@
 //     state 'intact' | 'falling' | 'landed' | 'gone', vy, anchor, lamp, hits, wreck }.
 //
 // How one comes down (the type's rules):
-//   yank   ZIP (V / K, pad RB, phone ZIP) while hooked to it: hp goes down by one; at 0 it drops.
+//   yank   ZIP (V / K, pad RB, phone ZIP) or PULL (C / L, pad X, touch PULL) while hooked: hp
+//          goes down by one; at 0 it drops.
 //   snuff  (lit types) aim at the candles and let go, or tap them: it drops (no power-up needed).
 // The fall: gravity, a straight drop through open air and one-way rails it is not set to land on;
 // lands on the first ground its footprint meets. Effects (each a type field): screen shake, a
@@ -22,6 +23,7 @@
 import { TUNING } from './config.js';
 import { tileAt, isGround, isBlockingTile } from './level.js';
 import { lineOfSight } from './los.js';
+import { bodyCenterY } from './physics.js';
 
 /** The types. w/h: art box (tiles). grip: hook point from the box top-left (tiles, unflipped).
  *  lampAt: the light (lit types). yank.hp: ZIPs to tear it off. snuff: aim/tap at the light drops
@@ -40,16 +42,95 @@ export const SETPIECE_TYPES = Object.freeze({
     note: 'a gargoyle with cracked mortar at its wall join: grapple it, ZIP to tear it off',
   }),
   chandelier: Object.freeze({
-    w: 3, h: 2, grip: [1.5, 0.25], mount: 'under',
-    yank: { hp: 1 }, snuff: true, lampAt: [1.5, 1.25],
+    // 4 x 3 tiles (64 x 48 px): the same box as the small mini-tower crown plus its glow
+    // (mini-tower-crown 48 x 32 frame, crown-glow 64 x 48). Placeholder art fills that box
+    // like the crown (heavy iron arms, a ring of lamps) until Brook draws the sheet.
+    w: 4, h: 3, grip: [2, 5 / 16], mount: 'under',
+    yank: { hp: 1 }, snuff: true, lampAt: [2, 1.6],
     fall: { g: 52, max: 24 },
-    hit: { direct: 'stun', graze: 'stun', grazeR: 1.6, stunTime: 5 },
+    hit: { direct: 'stun', graze: 'stun', grazeR: 2, stunTime: 5 },
     wreck: { solid: false, h: 1 },
     fx: { dropShake: { amp: 1, dur: 0.12 }, landShake: { amp: 3, dur: 0.32 }, burst: 'glass', dropSound: 'snap', landSound: 'smash' },
-    note: 'a wide iron chandelier, four candles, a loose chain: swing on it, ZIP or snuff the candles to drop it',
+    note: 'a crown-sized iron chandelier on a ceiling chain: it swings as a pendulum, her rope rides the moving grip, ZIP or PULL tears it down, or snuff the candles',
   }),
 });
 export const SETPIECE_KINDS = Object.freeze(Object.keys(SETPIECE_TYPES));
+
+/** Hanging set pieces (chandeliers) are a damped, angle-capped pendulum from the ceiling
+ *  attach (chainTop). Wren's rope is a second pendulum on that moving grip: her weight and
+ *  momentum swing the fixture, and the grip moves under her. Not a free chaotic double
+ *  pendulum — damped, mass-heavy fixture, hard angle and rate caps, so it stays playable. */
+export const PENDULUM = Object.freeze({
+  g: 52, // tiles/s^2, same as the chandelier's fall gravity
+  damp: 2.4, // 1/s, while idle
+  rideDamp: 1.15, // lighter damping while she is on it, so she can pump it
+  maxTheta: 38 * Math.PI / 180,
+  maxOmega: 3.2, // rad/s
+  mass: 3.2,
+  wrenMass: 1,
+  couple: 6, // 1/s: how hard her orbit around the pivot drags the fixture
+  minLen: 2, // tiles; shorter hangs stay still
+  settleTheta: 0.01,
+  settleOmega: 0.04,
+});
+
+/** Move the box, grip and lamp to the hanging pose at sp.theta (y-down, 0 = straight down). */
+export function applyHangPose(sp) {
+  const t = SETPIECE_TYPES[sp.type];
+  if (!t || t.mount !== 'under' || sp.state !== 'intact' || !sp.pivot || !(sp.hangLen > 0)) return;
+  const gx = sp.flip ? t.w - t.grip[0] - 1 / 16 : t.grip[0];
+  const gy = t.grip[1];
+  const th = sp.theta || 0;
+  const ax = sp.pivot.x + sp.hangLen * Math.sin(th);
+  const ay = sp.pivot.y + sp.hangLen * Math.cos(th);
+  if (sp.anchor) { sp.anchor.x = ax; sp.anchor.y = ay; }
+  sp.x = ax - gx; sp.y = ay - gy;
+  if (sp.lamp && t.lampAt) {
+    const lx = sp.flip ? t.w - t.lampAt[0] : t.lampAt[0];
+    sp.lamp.x = sp.x + lx;
+    sp.lamp.y = sp.y + t.lampAt[1];
+  }
+}
+
+/** One pendulum step. w may be null (tests). */
+export function stepHang(w, sp, dt) {
+  const t = SETPIECE_TYPES[sp.type];
+  if (!t || t.mount !== 'under' || sp.state !== 'intact') return;
+  if (!(sp.hangLen >= PENDULUM.minLen) || !sp.pivot) return;
+  const P = PENDULUM;
+  const L = sp.hangLen;
+  const riding = !!(w && w.anchor === sp.anchor && !w.grounded);
+  let theta = sp.theta || 0;
+  let omega = sp.omega || 0;
+  const I = P.mass * L * L;
+  let tau = -P.mass * P.g * L * Math.sin(theta);
+  let Ieff = I;
+  if (riding) {
+    const rx = w.x - sp.pivot.x;
+    const ry = bodyCenterY(w) - sp.pivot.y;
+    const r2 = rx * rx + ry * ry || 1e-6;
+    tau += P.wrenMass * P.g * rx;
+    Ieff += P.wrenMass * r2;
+    const wrenOmega = (w.vx * ry - w.vy * rx) / r2;
+    tau += (wrenOmega - omega) * P.couple * Ieff;
+  }
+  const damp = riding ? P.rideDamp : P.damp;
+  omega += (tau / Ieff - damp * omega) * dt;
+  if (omega > P.maxOmega) omega = P.maxOmega;
+  if (omega < -P.maxOmega) omega = -P.maxOmega;
+  theta += omega * dt;
+  if (theta > P.maxTheta) { theta = P.maxTheta; if (omega > 0) omega *= 0.2; }
+  if (theta < -P.maxTheta) { theta = -P.maxTheta; if (omega < 0) omega *= 0.2; }
+  if (!riding && Math.abs(theta) < P.settleTheta && Math.abs(omega) < P.settleOmega) { theta = 0; omega = 0; }
+  sp.theta = theta; sp.omega = omega;
+  applyHangPose(sp);
+}
+
+/** Intact hanging pieces: run before the rope solve so her line tracks the moving grip. */
+export function stepHangingSetpieces(w, level, dt) {
+  for (const sp of level.setpieces || []) stepHang(w, sp, dt);
+}
+
 
 /** Guard states a set piece leaves him in. 'down' is out for the room (skipped like 'tied'). */
 export const DOWN = 'down';
@@ -84,6 +165,10 @@ export function attachSetpieces(level, def) {
       let top = p.r - 1; const cc = Math.floor(g.x);
       while (top >= 0 && !isBlockingTile(tileAt(level, cc, top), false) && !isGround(tileAt(level, cc, top))) top--;
       sp.chainTop = top + 1;
+      sp.pivot = { x: g.x, y: sp.chainTop };
+      sp.hangLen = Math.max(0, g.y - sp.chainTop);
+      sp.theta = 0; sp.omega = 0;
+      applyHangPose(sp);
     }
     level.setpieces.push(sp);
   });

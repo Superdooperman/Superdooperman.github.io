@@ -18,7 +18,7 @@
 import { blankRows, fillRect, putTile } from '../level.js';
 import { towerRoute } from '../kit/route.js';
 import { PROP_TYPES } from '../kit/props.js';
-import { boxClear } from '../setpiece.js';
+import { boxClear, SETPIECE_TYPES } from '../setpiece.js';
 
 import { validateRoom } from '../gen/validator.js';
 import { movesFor } from '../gen/moves.js';
@@ -90,6 +90,54 @@ export function tallSetpieces(def) {
   return [];
 }
 
+
+/** A crown-sized chandelier hanging under a mid/upper climb platform on a 5-9 tile chain,
+ *  in open air, not on top of the shaft's gargoyle. Seeded by the route only (no extra RNG).
+ *  Returns [] only if no hang fits; every seed 1-20 is expected to place one. */
+export function tallChandelier(def, taken = []) {
+  const rows = def.rows;
+  const cols = rows[0].length;
+  const W = SETPIECE_TYPES.chandelier.w;
+  const H = SETPIECE_TYPES.chandelier.h;
+  const boxes = [
+    ...(def.props || []).map((p) => ({ c0: p.c, c1: p.c + (p.w ?? PROP_TYPES[p.type]?.w ?? 1) - 1, r0: p.r, r1: p.r + (PROP_TYPES[p.type]?.h ?? 1) - 1 })),
+    ...taken.map((p) => {
+      const t = SETPIECE_TYPES[p.type];
+      return { c0: p.c, c1: p.c + t.w - 1, r0: p.r, r1: p.r + t.h - 1 };
+    }),
+  ];
+  const blocked = (c, r) => boxes.some((b) => c + W - 1 >= b.c0 && c <= b.c1 && r + H - 1 >= b.r0 && r <= b.r1);
+  const open = (c, r) => rows[r]?.[c] === '.';
+  const solid = (c, r) => { const ch = rows[r]?.[c]; return !!ch && ch !== '.'; };
+  const tries = [];
+  const steps = (def.steps || []).slice(1);
+  for (const s of steps) {
+    const top = s.top;
+    for (let k = 5; k <= 9; k++) {
+      const r = top + k;
+      if (r + H >= rows.length - 2) continue;
+      for (let c = 1; c <= cols - W - 1; c++) {
+        const cc = c + Math.floor(W / 2);
+        // the chain wants a solid tile at the platform row above its column
+        if (!solid(cc, top)) continue;
+        if (!boxClear(rows, 'chandelier', c, r) || blocked(c, r)) continue;
+        let clear = true;
+        for (let rr = top + 1; rr < r && clear; rr++) clear = open(cc, rr);
+        if (!clear) continue;
+        const mid = Math.abs(cc - cols / 2);
+        const belowOpen = open(cc, r + H) && open(cc, Math.min(rows.length - 1, r + H + 2));
+        // prefer mid-height hangs, more open air below, nearer the shaft centre
+        const midH = Math.abs((top + r) / 2 - rows.length * 0.45);
+        tries.push({ type: 'chandelier', c, r, score: (belowOpen ? 24 : 0) - mid - midH - Math.abs(k - 6) });
+      }
+    }
+  }
+  tries.sort((a, b) => b.score - a.score || a.r - b.r || a.c - b.c);
+  if (!tries.length) return [];
+  const best = tries[0];
+  return [{ type: 'chandelier', c: best.c, r: best.r }];
+}
+
 /** The kit tower room for a seed and attempt. Defaults are the tall-shaft prototype (legacy feel,
  *  ROUTE.towerRows). Feel pass 1 (G) builds its vertical rooms with this too: opts.feel,
  *  opts.towerRows (taller), opts.name. Nothing here is new generation: the same seeded route,
@@ -127,7 +175,8 @@ export function buildKitTower(seed, attempt, { fallCost = 'height', feel = 'lega
       ...mids.map((s) => ({ c0: s.c0, c1: s.c1, x: (s.c0 + s.c1 + 1) / 2, top: s.top })),
     ],
   };
-  room.setpieces = tallSetpieces(room); // one cracked gargoyle over a climb platform (js/setpiece.js)
+  const gargoyles = tallSetpieces(room); // one cracked gargoyle over a climb platform
+  room.setpieces = [...gargoyles, ...tallChandelier(room, gargoyles)];
   return room;
 }
 

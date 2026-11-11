@@ -3,13 +3,16 @@
 // and AGAIN. A pure state machine (no DOM): main.js feeds it input and draws game.screen with
 // screens.js; tests drive it directly.
 //
-// opts: { storage, generate(seed) -> tower, createWorld, seed, needsRender }
+// opts: { storage, generate(seed) -> tower, createWorld, seed, needsRender, touchEnv }
 //   needsRender: the start card must be drawn once before the (blocking, ~2 s) generation runs.
+//   touchEnv: { coarse, sawTouch, padConnected } or a function returning that. Used when cycling
+//   TOUCH so a touch-only device cannot land on OFF.
 import { TUNING, SETTINGS } from './config.js';
 import { createWorld as defaultCreateWorld } from './sim.js';
 import { generateTower } from './gen/generator.js';
 import { loadSave, writeSave } from './save.js';
 import { setpieceSfx } from './audio.js';
+import { cycleTouchMode, recoverTouchSetting } from './touch.js';
 import { perchOffer, worldOpts, activeSynergies } from './powerups.js';
 import {
   createRun, currentRoom, isPerch, isVault, floorOf, absorbWorld, takePowerup, stashChoices,
@@ -47,7 +50,7 @@ export function createGame(opts = {}) {
         `MOTION: ${g.reducedMotion() ? 'REDUCED' : 'FULL'}`, `TOUCH: ${touch}`];
     },
     stashOptions() { return g.run ? [...stashChoices(g.run), null] : [null]; },
-    step, setMute, noteRendered() { g.cardRendered = true; },
+    step, setMute, recoverTouchOff, pickMenu, tapPause, noteRendered() { g.cardRendered = true; },
     /** M5: effects off? The saved MOTION choice, or the system's prefers-reduced-motion on 'auto'. */
     reducedMotion() { const m = g.save.settings.motion; return m === 'reduced' || (m !== 'full' && !!opts.systemReducedMotion); },
     pause() { if (g.screen === 'play') go('pause'); },
@@ -139,6 +142,33 @@ export function createGame(opts = {}) {
     w.events.length = 0;
   }
 
+  function touchEnv() {
+    const env = typeof opts.touchEnv === 'function' ? opts.touchEnv() : (opts.touchEnv || {});
+    return env || {};
+  }
+  /** Saved OFF + a touch (no pad) or ?touch: persist AUTO and tell the shell to show the pad. */
+  function recoverTouchOff(recoverOpts = {}) {
+    if (!recoverTouchSetting(g.save.settings, recoverOpts)) return false;
+    persist();
+    g.events.push({ type: 'touch-setting', touch: 'auto' });
+    return true;
+  }
+  /** Title canvas tap: first tap on a row selects it; a tap on the already-selected row activates it. */
+  function pickMenu(i) {
+    if (g.screen !== 'title') return null;
+    const m = g.menu();
+    if (i < 0 || i >= m.length) return null;
+    if (i !== g.sel) { g.sel = i; return 'select'; }
+    step(0, { held: {}, pressed: { jump: true }, released: {}, aimAt: null });
+    return 'activate';
+  }
+  function tapPause(action) {
+    if (g.screen !== 'pause') return false;
+    if (action === 'resume') { go('play'); g.sfx.push('pause'); return true; }
+    if (action === 'quit') { g.save.nights += 1; persist(); go('title'); return true; }
+    return false;
+  }
+
   function step(dt, input) {
     g.steps += 1;
     g.t += dt;
@@ -157,9 +187,7 @@ export function createGame(opts = {}) {
           else if (it === 'UNMASKED') { g.reveal = 0; g.revealFromMenu = true; go('reveal'); }
           else if (it.startsWith('MOTION')) { g.save.settings.motion = g.reducedMotion() ? 'full' : 'reduced'; persist(); }
           else if (it.startsWith('TOUCH')) {
-            const order = ['auto', 'on', 'off'];
-            const cur = g.save.settings.touch || 'auto';
-            g.save.settings.touch = order[(order.indexOf(cur) + 1) % order.length];
+            g.save.settings.touch = cycleTouchMode(g.save.settings.touch || 'auto', touchEnv());
             persist();
             g.events.push({ type: 'touch-setting', touch: g.save.settings.touch });
           }

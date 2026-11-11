@@ -23,10 +23,10 @@ export const WR = Object.freeze({
   shelter: { c0: 24, c1: 25 }, // shadow floor under the sweep
   spawn: { c: 2, r: 11 },
   exit: { c: 28, r: 11 },
-  // set pieces (js/setpiece.js): a cracked gargoyle over the left end of his beat (ZIP it onto
-  // him: out for the room, and the rubble ends his patrol) and a chandelier over the right end
-  // (drop it: its light goes out and he is dazed)
-  setpieces: [{ type: 'gargoyle', c: 13, r: 6 }, { type: 'chandelier', c: 22, r: 8 }],
+  // set pieces (js/setpiece.js): a cracked gargoyle over the left end of his beat (ZIP or PULL
+  // it onto him) and a crown-sized chandelier over the right end, hanging from the ceiling on a
+  // long chain (it swings; drop it: its light goes out and he is dazed)
+  setpieces: [{ type: 'gargoyle', c: 13, r: 6 }, { type: 'chandelier', c: 21, r: 7 }],
 });
 
 export function watchRoom() {
